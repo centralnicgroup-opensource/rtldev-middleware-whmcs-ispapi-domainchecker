@@ -1,0 +1,39 @@
+ISPAPI DomainCheck Addon for WHMCS
+______________________________________________________________________________
+
+Changelog
+______________________________________________________________________________
+
+v 7.0.0 - 2016-10-10
+ - compatible with WHMCS 7.0 or higher
+ - compatible with PHP7
+ - user interface redesign
+ - new README.pdf
+
+v 6.0.6 - 2016-09-16
+ - workarround for user that do not have mb_detect_encoding function in PHP
+
+v 6.0.5 - 2016-03-14
+ - fixed issue: wrong currency used when customer was logged in
+
+v 6.0.4 - 2016-03-01
+ - fix for premium pricing issue
+
+v 6.0.3 - 2015-10-05
+ - fixed issue: some users were having a blank page when using the domainchecker
+
+v 6.0.2 - 2015-08-20
+ - security vulnerabilities fixed
+
+v 6.0.1 - 2015-07-23
+ - domainchecker now responsive
+ - premium domains not displayed in the renewal list (will be renewed over the product)
+
+v 6.0.0 - 2015-07-10
+ - compatible with WHMCS 6.0.0 or higher (not compatible with 5.x.x)
+ - user interface redesign
+
+
+______________________________________________________________________________
+(c)2015 HEXONET GmbH, Talstrasse 27, DE-66424 Homburg - support@hexonet.net
+http://www.hexonet.net/files/whmcs/ispapi/
