@@ -213,7 +213,13 @@ $( document ).ready(function() {
 							$( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>").addClass("domcheckererror");
 							var res = element.id.replace('.', ' ');
 							var transfer = res.split(" ");
-							$( "#" + id + " td.period").html("<a class='btn btn-default btn-sm' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> ");
+
+                            var backorder_button = "";
+                            if(element.backorder == "1"){
+                                backorder_button = "<a class='btn btn-default btn-sm' class='backorder_button'>BACKORDER</a>";
+                            }
+
+							$( "#" + id + " td.period").html("<a class='btn btn-default btn-sm' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
 						}
 					}
 

@@ -441,8 +441,23 @@ class DomainCheck
     				//get the price for this domain
     				$tld = $this->getDomainExtension($item);
     				$price = $this->getTLDprice($tld);
+					$backorder = 0;
 
     			}else{
+
+					#tulsi
+					#check if the TLD is set available in the backorder module
+					#in the result array we will add a backorder key.
+					#if not available -> set backorder key to 0
+					#if available and not a premium domain then -> set backorder key to 1
+					#for this example I will use backorder=1
+					#this has to be done also in the no_ispapi_domain_list (for the checks which are done over WHOIS)
+					if($_SESSION["ispapi_backorder"]==1){
+						$backorder = 1;
+					}else{
+						$backorder = 0;
+					}
+
 
     				if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
     						//get the NAMEMEDIA price
@@ -463,7 +478,7 @@ class DomainCheck
     				$price = "";
     			}
 
-    			array_push($response, array("id" => $item, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price));
+    			array_push($response, array("id" => $item, "backorder" => $backorder, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price));
 
     			// Feedback for the template
     			if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){
@@ -503,10 +518,16 @@ class DomainCheck
 	    		//get the price for this domain
 	    		$tld = $this->getDomainExtension($item);
 	    		$price = $this->getTLDprice($tld);
+				$backorder = 0;
     		}else{
     			$code = "211";
+				if($_SESSION["ispapi_backorder"]==1){
+					$backorder = 1;
+				}else{
+					$backorder = 0;
+				}
     		}
-    		array_push($response, array("id" => $item, "checkover" => "whois", "availability" => $check["result"], "code" => $code, "class" => "", "premiumchannel" => "", "price" => $price));
+    		array_push($response, array("id" => $item, "backorder" => $backorder, "checkover" => "whois", "availability" => $check["result"], "code" => $code, "class" => "", "premiumchannel" => "", "price" => $price));
     	}
 
 

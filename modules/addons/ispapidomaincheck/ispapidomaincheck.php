@@ -285,6 +285,11 @@ function ispapidomaincheck_clientarea($vars) {
 		}
 	}
 
+	#tulsi
+	#check here if the backorder module is installed and save the result in a session
+	#for this example we will say it EXISTS
+	$_SESSION["ispapi_backorder"] = 1;
+
 	//for the domain.php file
 	$_SESSION["ispapi_registrar"] = $registrar;
 
