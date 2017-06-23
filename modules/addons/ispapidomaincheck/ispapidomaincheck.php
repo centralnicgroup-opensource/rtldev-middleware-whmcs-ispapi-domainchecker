@@ -2,8 +2,8 @@
 <?php
 
 $module_version = "7.0.0";
-echo "in domain checker";
-echo "<pre>"; print_r($_SESSION); echo "</pre>";
+//echo "in domain checker";
+//echo "<pre>"; print_r($_SESSION); echo "</pre>";
 
 //if (!defined("WHMCS"))
 //	die("This file cannot be accessed directly");
@@ -323,7 +323,7 @@ function ispapidomaincheck_clientarea($vars) {
 
 // require_once(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/call.php");
 // $backordermodulepath = "modules/addons/ispapibackorder/backend/call.php";
-$backordermodulepath = "modules/addons/ispapibackorder";
+$backordermodulepath = "modules/addons/ispapibackorder/";
 
 	//get the module name
 	//$parts = Explode("/", __FILE__);
