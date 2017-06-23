@@ -1,4 +1,6 @@
 {literal}
+
+
 <script>
 jQuery.extend(jQuery, {
   /**
@@ -216,10 +218,41 @@ $( document ).ready(function() {
 
                             var backorder_button = "";
                             if(element.backorder == "1"){
-                                backorder_button = "<a class='btn btn-default btn-sm' class='backorder_button'>BACKORDER</a>";
+                                backorder_button = "<a id='backorderbutton' class='btn btn-default btn-sm'>BACKORDER</a>";
                             }
 
 							$( "#" + id + " td.period").html("<a class='btn btn-default btn-sm' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
+
+
+
+
+
+$('#backorderbutton').click(function() {
+    var type = "FULL";
+    $.ajax({
+            type: "POST",
+            async: true,
+            dataType: "json",
+            url: "{/literal}{$backordermodulepath}{literal}backend/call.php",
+            data: {
+                COMMAND: "CreateBackorder",
+                DOMAIN: element.id,
+                TYPE: type
+            },
+            success: function(data) {
+                alert(1);
+                //$(this).btn-success("active");
+                //console.log(data);
+                //if (data['CODE']=="200") {}
+           },
+           error: function(data){
+               alert("error");
+           }
+    });
+});
+
+
+
 						}
 					}
 

@@ -1,4 +1,7 @@
+
+
 <?php
+
 //require_once(dirname(__FILE__)."/FirePHP.class.php");
 require_once(dirname(__FILE__)."/../../../init.php");
 require_once(dirname(__FILE__)."/../../../includes/domainfunctions.php");
@@ -11,6 +14,7 @@ if(file_exists(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
 //###########################################################################################
 if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])){
+
 	$result = select_query("tbldomainpricing","extension,autoreg");
 	$modulelist = array();
 	$registrar = array();
@@ -28,6 +32,7 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 		}
 	}
 	//for the domain.php file
+
 	$_SESSION["ispapi_registrar"] = $registrar;
 }
 //###########################################################################################
