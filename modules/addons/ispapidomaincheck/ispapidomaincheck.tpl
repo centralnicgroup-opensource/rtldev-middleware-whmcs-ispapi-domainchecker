@@ -218,39 +218,52 @@ $( document ).ready(function() {
 
                             var backorder_button = "";
                             if(element.backorder == "1"){
-                                backorder_button = "<a id='backorderbutton' class='btn btn-default btn-sm'>BACKORDER</a>";
+                                 backorder_button = "<a  id='createnewbackorderbutton' class='btn btn-default btn-sm'>BACKORDER</a>";
                             }
 
 							$( "#" + id + " td.period").html("<a class='btn btn-default btn-sm' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
 
 
 
+    $(document).ready(function () {
+        $('#createnewbackorderbutton').click(function() {
+                var command = "CreateBackorder";
+                <!-- alert(command); -->
+                if ($('#createnewbackorderbutton').hasClass("active"))
+                    command = "DeleteBackorder";
 
+                $.ajax({
+                    type: "POST",
+                    async: true,
+                    dataType: "json",
+                    url: "{/literal}{$backordermodulepath}{literal}backend/call.php",
+                    data: {
+                        COMMAND: command,
+                        DOMAIN: element.id,
+                        TYPE: "FULL"
+                    },
+                    success: function(data) {
+                        if(command=="CreateBackorder" && data.CODE==200){
+                            $('#createnewbackorderbutton').addClass("active btn-success");
+                            
+                            <!-- noty({text: "Backorder successfully created."}); -->
+                        }
 
-$('#backorderbutton').click(function() {
-    var type = "FULL";
-    $.ajax({
-            type: "POST",
-            async: true,
-            dataType: "json",
-            url: "{/literal}{$backordermodulepath}{literal}backend/call.php",
-            data: {
-                COMMAND: "CreateBackorder",
-                DOMAIN: element.id,
-                TYPE: type
-            },
-            success: function(data) {
-                alert(1);
-                //$(this).btn-success("active");
-                //console.log(data);
-                //if (data['CODE']=="200") {}
-           },
-           error: function(data){
-               alert("error");
-           }
-    });
-});
+                        else if(command=="DeleteBackorder" && data.CODE==200){
+                            $('#createnewbackorderbutton').removeClass("active btn-success");
 
+                            <!-- noty({text: "Backorder successfully deleted."}); -->
+                        }
+                        else{
+                            <!-- noty({text: data.DESCRIPTION, type: "error"}); -->
+                        }
+                    },
+                    error: function(data) {
+                        <!-- noty({text: "An error occured.", type: "error"}); -->
+                    }
+                });
+            });
+        });
 
 
 						}
@@ -652,6 +665,8 @@ $('#backorderbutton').click(function() {
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
 <form method="post" action="index.php?m=ispapicheckdomain" class="form-horizontal" id="searchform">
+    <script type="text/javascript" src="js/noty/packaged/jquery.noty.packaged.min.js"></script>
+    <!-- <script src="modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script> -->
 	<input type="hidden" name="tldgroup" value="">
 	<input type="hidden" name="searched_domain" value="">
 
