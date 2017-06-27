@@ -9,6 +9,12 @@ require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
 if(file_exists(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php")){
 	require_once(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php");
 }
+if(file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")){
+require_once dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php";
+}
+
+
+
 
 //WORKARROUND: Get a list of all Hexonet registrar modules and include the registrar files
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
@@ -437,7 +443,33 @@ class DomainCheck
     		$check = ispapi_call($command, $ispapi_config);
 
     		$index = 0;
+//tulsi - get list of domains that are available to backorder
+$queryBackorderList = array(
+		"COMMAND" => "QueryBackorderList",
+
+);
+$queryBackorderListResult = backorder_api_call($queryBackorderList);
+$_SESSION["queryBackorderList"] =$queryBackorderListResult;
+
+//tulsi
+//CHECK IF TLD IN THE PRICELIST
+$currencyid=NULL;
+$result = select_query('tblclients','currency',array("id" => 1 ));
+$data = mysql_fetch_assoc($result);
+if ( $data ) {
+	$currencyid= $data["currency"];
+}
+
+$tlds = "";
+$result = select_query('backorder_pricing','extension',array("currency_id" => $currencyid ));
+while ($data = mysql_fetch_array($result)) {
+	$tlds .= "|.".$data["extension"];
+}
+$tld_list = substr($tlds, 1);
+
+
     		foreach($item["domain"] as $item){
+
 
     			$tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
 
@@ -446,7 +478,11 @@ class DomainCheck
     				//get the price for this domain
     				$tld = $this->getDomainExtension($item);
     				$price = $this->getTLDprice($tld);
+
 					$backorder = 0;
+					$backorderset = 0;
+					$priceset = 0;
+
 
     			}else{
 
@@ -459,7 +495,20 @@ class DomainCheck
 					#this has to be done also in the no_ispapi_domain_list (for the checks which are done over WHOIS)
 					if($_SESSION["ispapi_backorder"]==1){
 						$backorder = 1;
+						if(in_array($item, $queryBackorderListResult["PROPERTY"]["DOMAIN"])){
+							$backorderset = 1;
+						}else{
+							$backorderset = 0;
+						}
+
+						if(preg_match('/^([a-z0-9](\-*[a-z0-9])*)\\'.$tld_list.'$/i', $item)){
+							$priceset = 1;
+						}else {
+							$priceset = 0;
+						}
+
 					}else{
+						$backorderset = 0;
 						$backorder = 0;
 					}
 
@@ -483,7 +532,9 @@ class DomainCheck
     				$price = "";
     			}
 
-    			array_push($response, array("id" => $item, "backorder" => $backorder, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price));
+
+
+    			array_push($response, array("id" => $item, "backorder" => $backorder, "backorderset" => $backorderset, "priceset" => $priceset, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price));
 
     			// Feedback for the template
     			if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){
@@ -854,6 +905,7 @@ if(isset($_REQUEST["currency"])){
 		$result = mysql_query("SELECT currency FROM tblclients WHERE id=".$ca->getUserID());
 		$data = mysql_fetch_array($result);
 		$_SESSION["currency"] = $data["currency"];
+		$_SESSION["userid"] = $ca->getUserID();
 	}
 }
 

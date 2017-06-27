@@ -217,53 +217,57 @@ $( document ).ready(function() {
 							var transfer = res.split(" ");
 
                             var backorder_button = "";
-                            if(element.backorder == "1"){
-                                 backorder_button = "<a  id='createnewbackorderbutton' class='btn btn-default btn-sm'>BACKORDER</a>";
+                            var backorderset_button = "";
+                            if(element.backorder== "1" && element.backorderset == "0" && element.priceset == 1){
+                                 backorder_button = "<a class='setbackorder btn btn-default btn-sm' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
+
                             }
+
+                            if(element.backorderset == "1" && element.backorder== "1" && element.priceset == 1){
+                                 backorder_button = "<a class='setbackorder btn btn-success btn-sm active' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
+                            }
+
 
 							$( "#" + id + " td.period").html("<a class='btn btn-default btn-sm' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
 
 
+<!-- $(document).on('click', '.setbackorder', function (e) { -->
+    $('.setbackorder').unbind().click(function() {
+    var button = $(this);
+    <!-- alert(button); -->
+    <!-- alert($(this).attr("value")); -->
+    var command = "CreateBackorder";
+    if ($(this).hasClass("active"))
+        command = "DeleteBackorder";
 
-    $(document).ready(function () {
-        $('#createnewbackorderbutton').click(function() {
-                var command = "CreateBackorder";
-                <!-- alert(command); -->
-                if ($('#createnewbackorderbutton').hasClass("active"))
-                    command = "DeleteBackorder";
-
-                $.ajax({
-                    type: "POST",
-                    async: true,
-                    dataType: "json",
-                    url: "{/literal}{$backordermodulepath}{literal}backend/call.php",
-                    data: {
-                        COMMAND: command,
-                        DOMAIN: element.id,
-                        TYPE: "FULL"
-                    },
-                    success: function(data) {
-                        if(command=="CreateBackorder" && data.CODE==200){
-                            $('#createnewbackorderbutton').addClass("active btn-success");
-                            
-                            <!-- noty({text: "Backorder successfully created."}); -->
-                        }
-
-                        else if(command=="DeleteBackorder" && data.CODE==200){
-                            $('#createnewbackorderbutton').removeClass("active btn-success");
-
-                            <!-- noty({text: "Backorder successfully deleted."}); -->
-                        }
-                        else{
-                            <!-- noty({text: data.DESCRIPTION, type: "error"}); -->
-                        }
-                    },
-                    error: function(data) {
-                        <!-- noty({text: "An error occured.", type: "error"}); -->
-                    }
-                });
-            });
-        });
+    $.ajax({
+        type: "POST",
+        async: true,
+        dataType: "json",
+        url: "{/literal}{$backordermodulepath}{literal}backend/call.php",
+        data: {
+            COMMAND: command,
+            DOMAIN:$(this).attr("value"),
+            TYPE: "FULL"
+        },
+        success: function(data) {
+            if(command=="CreateBackorder" && data.CODE==200){
+                button.addClass("active btn-success");
+                <!-- noty({text: "{/literal}{$LANG.notybackordersuccessfullycreated}{literal}"}); -->
+            }
+            else if(command=="DeleteBackorder" && data.CODE==200){
+                button.removeClass("active btn-success");
+                <!-- noty({text: "{/literal}{$LANG.notybackordersuccessfullydeleted}{literal}"}); -->
+            }
+            else{
+                <!-- noty({text: data['DESCRIPTION'], type: "error"}); -->
+            }
+        },
+        error: function(data) {
+            <!-- noty({text: "{/literal}{$LANG.notyerroroccured}{literal}", type: "error"}); -->
+        }
+    });
+});
 
 
 						}

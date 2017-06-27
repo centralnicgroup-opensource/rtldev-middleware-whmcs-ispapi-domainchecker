@@ -2,8 +2,8 @@
 <?php
 
 $module_version = "7.0.0";
-//echo "in domain checker";
-//echo "<pre>"; print_r($_SESSION); echo "</pre>";
+
+// echo "<pre>"; print_r($_SESSION); echo "</pre>";
 
 //if (!defined("WHMCS"))
 //	die("This file cannot be accessed directly");
