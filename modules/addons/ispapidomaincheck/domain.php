@@ -14,8 +14,6 @@ require_once dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend
 }
 
 
-
-
 //WORKARROUND: Get a list of all Hexonet registrar modules and include the registrar files
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
 //###########################################################################################

@@ -212,18 +212,24 @@ $( document ).ready(function() {
 							$( "#" + id + " td.period").html(price);
 							$( "#" + id + " td.availability").html('<span class="label label-info">'+element.premiumchannel+' PREMIUM</span>').addClass("domcheckersuccess");
 						}else{
-							$( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>").addClass("domcheckererror");
+
+                            $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>").addClass("domcheckererror");
+
 							var res = element.id.replace('.', ' ');
 							var transfer = res.split(" ");
 
                             var backorder_button = "";
                             var backorderset_button = "";
                             if(element.backorder== "1" && element.backorderset == "0" && element.priceset == 1){
+                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" +" - <span class='label label-info'>Backorder available</span>").addClass("domcheckererror");
+
                                  backorder_button = "<a class='setbackorder btn btn-default btn-sm' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
 
                             }
 
                             if(element.backorderset == "1" && element.backorder== "1" && element.priceset == 1){
+                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" +" - <span class='label label-info'>Backorder available</span>").addClass("domcheckererror");
+
                                  backorder_button = "<a class='setbackorder btn btn-success btn-sm active' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
                             }
 
@@ -253,18 +259,21 @@ $( document ).ready(function() {
         success: function(data) {
             if(command=="CreateBackorder" && data.CODE==200){
                 button.addClass("active btn-success");
-                <!-- noty({text: "{/literal}{$LANG.notybackordersuccessfullycreated}{literal}"}); -->
+                noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
             }
             else if(command=="DeleteBackorder" && data.CODE==200){
                 button.removeClass("active btn-success");
-                <!-- noty({text: "{/literal}{$LANG.notybackordersuccessfullydeleted}{literal}"}); -->
+                button.addClass("btn-default");
+                noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
             }
             else{
-                <!-- noty({text: data['DESCRIPTION'], type: "error"}); -->
+                noty({text: 'AUTHORIZATION FAILED', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                <!-- noty({text: data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000); -->
+
             }
         },
         error: function(data) {
-            <!-- noty({text: "{/literal}{$LANG.notyerroroccured}{literal}", type: "error"}); -->
+            noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
         }
     });
 });
@@ -669,8 +678,10 @@ $( document ).ready(function() {
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
 <form method="post" action="index.php?m=ispapicheckdomain" class="form-horizontal" id="searchform">
-    <script type="text/javascript" src="js/noty/packaged/jquery.noty.packaged.min.js"></script>
-    <!-- <script src="modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script> -->
+
+    <script src="../modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
+
+
 	<input type="hidden" name="tldgroup" value="">
 	<input type="hidden" name="searched_domain" value="">
 
