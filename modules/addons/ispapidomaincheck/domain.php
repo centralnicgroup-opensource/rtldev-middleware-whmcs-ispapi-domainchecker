@@ -374,6 +374,35 @@ class DomainCheck
     	$this->response = json_encode($response_array);
     }
 
+	// private function updateCache($cache){
+	//
+	// 	$backorder_mod_installed = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
+	//
+	// 	$newcache = array();
+	// 	//here update $cache with new backorder values for every domains
+	// 	$queryBackorderList = array(
+	// 			"COMMAND" => "QueryBackorderList"
+	// 	);
+	// 	$queryBackorderListResult = backorder_api_call($queryBackorderList);
+	//
+	// 	foreach($cache["data"] as $item){
+	// 		$tmp = $item;
+	//
+	// 		if($backorder_mod_installed){
+	// 			if(!in_array($item["id"], $queryBackorderListResult["PROPERTY"]["DOMAIN"])){
+	// 				$tmp["backorderset"] = 0;
+	// 			}
+	// 		}else{
+	// 				$tmp["backorder"] = 0;
+	// 		}
+	//
+	// 		$newcache["data"][] = $tmp;
+	// 	}
+	//
+	// 	return $newcache;
+	//
+	// }
+
     /*
      * Start the domain check procedure.
      * Handle the check domain with the configured ispapi registrar account configured in WHMCS
@@ -385,7 +414,9 @@ class DomainCheck
     	if($this->cached_data){
     		$cache = $this->getCache("response");
     		if(!empty($cache["data"])){
-    			$this->response = json_encode($cache);
+    			//$this->response = json_encode($this->updateCache($cache));
+				$cache["data"] = $this->handleBackorderButton($cache["data"]);
+				$this->response = json_encode($cache);
     			return;
     		}
     	}
@@ -441,29 +472,29 @@ class DomainCheck
     		$check = ispapi_call($command, $ispapi_config);
 
     		$index = 0;
-//tulsi - get list of domains that are available to backorder
-$queryBackorderList = array(
-		"COMMAND" => "QueryBackorderList",
-
-);
-$queryBackorderListResult = backorder_api_call($queryBackorderList);
-$_SESSION["queryBackorderList"] =$queryBackorderListResult;
-
-//tulsi
-//CHECK IF TLD IN THE PRICELIST
-$currencyid=NULL;
-$result = select_query('tblclients','currency',array("id" => 1 ));
-$data = mysql_fetch_assoc($result);
-if ( $data ) {
-	$currencyid= $data["currency"];
-}
-
-$tlds = "";
-$result = select_query('backorder_pricing','extension',array("currency_id" => $currencyid ));
-while ($data = mysql_fetch_array($result)) {
-	$tlds .= "|.".$data["extension"];
-}
-$tld_list = substr($tlds, 1);
+// //tulsi - get list of domains that are available to backorder
+// $queryBackorderList = array(
+// 		"COMMAND" => "QueryBackorderList",
+//
+// );
+// $queryBackorderListResult = backorder_api_call($queryBackorderList);
+// $_SESSION["queryBackorderList"] =$queryBackorderListResult;
+//
+// //tulsi
+// //CHECK IF TLD IN THE PRICELIST
+// $currencyid=NULL;
+// $result = select_query('tblclients','currency',array("id" => 1 ));
+// $data = mysql_fetch_assoc($result);
+// if ( $data ) {
+// 	$currencyid= $data["currency"];
+// }
+//
+// $tlds = "";
+// $result = select_query('backorder_pricing','extension',array("currency_id" => $currencyid ));
+// while ($data = mysql_fetch_array($result)) {
+// 	$tlds .= "|.".$data["extension"];
+// }
+// $tld_list = substr($tlds, 1);
 
 
     		foreach($item["domain"] as $item){
@@ -477,38 +508,38 @@ $tld_list = substr($tlds, 1);
     				$tld = $this->getDomainExtension($item);
     				$price = $this->getTLDprice($tld);
 
-					$backorder = 0;
-					$backorderset = 0;
-					$priceset = 0;
+					// $backorder = 0;
+					// $backorderset = 0;
+					// $priceset = 0;
 
 
     			}else{
 
-					#tulsi
-					#check if the TLD is set available in the backorder module
-					#in the result array we will add a backorder key.
-					#if not available -> set backorder key to 0
-					#if available and not a premium domain then -> set backorder key to 1
-					#for this example I will use backorder=1
-					#this has to be done also in the no_ispapi_domain_list (for the checks which are done over WHOIS)
-					if($_SESSION["ispapi_backorder"]==1){
-						$backorder = 1;
-						if(in_array($item, $queryBackorderListResult["PROPERTY"]["DOMAIN"])){
-							$backorderset = 1;
-						}else{
-							$backorderset = 0;
-						}
-
-						if(preg_match('/^([a-z0-9](\-*[a-z0-9])*)\\'.$tld_list.'$/i', $item)){
-							$priceset = 1;
-						}else {
-							$priceset = 0;
-						}
-
-					}else{
-						$backorderset = 0;
-						$backorder = 0;
-					}
+					// #tulsi
+					// #check if the TLD is set available in the backorder module
+					// #in the result array we will add a backorder key.
+					// #if not available -> set backorder key to 0
+					// #if available and not a premium domain then -> set backorder key to 1
+					// #for this example I will use backorder=1
+					// #this has to be done also in the no_ispapi_domain_list (for the checks which are done over WHOIS)
+					// if($_SESSION["ispapi_backorder"]==1){
+					// 	$backorder = 1;
+					// 	if(in_array($item, $queryBackorderListResult["PROPERTY"]["DOMAIN"])){
+					// 		$backorderset = 1;
+					// 	}else{
+					// 		$backorderset = 0;
+					// 	}
+					//
+					// 	if(preg_match('/^([a-z0-9](\-*[a-z0-9])*)\\'.$tld_list.'$/i', $item)){
+					// 		$priceset = 1;
+					// 	}else {
+					// 		$priceset = 0;
+					// 	}
+					//
+					// }else{
+					// 	$backorderset = 0;
+					// 	$backorder = 0;
+					// }
 
 
     				if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
@@ -532,7 +563,7 @@ $tld_list = substr($tlds, 1);
 
 
 
-    			array_push($response, array("id" => $item, "backorder" => $backorder, "backorderset" => $backorderset, "priceset" => $priceset, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price));
+    			array_push($response, array("id" => $item, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price));
 
     			// Feedback for the template
     			if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){
@@ -581,8 +612,11 @@ $tld_list = substr($tlds, 1);
 					$backorder = 0;
 				}
     		}
-    		array_push($response, array("id" => $item, "backorder" => $backorder, "checkover" => "whois", "availability" => $check["result"], "code" => $code, "class" => "", "premiumchannel" => "", "price" => $price));
+    		array_push($response, array("id" => $item, "checkover" => "whois", "availability" => $check["result"], "code" => $code, "class" => "", "premiumchannel" => "", "price" => $price));
     	}
+
+
+		$response = $this->handleBackorderButton($response);
 
 
     	$response_array = array("data" => $response, "feedback" => $feedback);
@@ -593,6 +627,56 @@ $tld_list = substr($tlds, 1);
     	$this->response = json_encode($response_array);
     }
 
+	private function handleBackorderButton($response){
+		$backorder_mod_installed = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
+		if(!$backorder_mod_installed){
+			return $response;
+		}
+		$newresponse = array();
+
+		//tulsi - get list of domains that are available to backorder
+		$queryBackorderList = array(
+				"COMMAND" => "QueryBackorderList",
+
+		);
+		$queryBackorderListResult = backorder_api_call($queryBackorderList);
+		$_SESSION["queryBackorderList"] =$queryBackorderListResult;
+
+		//tulsi
+		//CHECK IF TLD IN THE PRICELIST
+		$currencyid=NULL;
+		$result = select_query('tblclients','currency',array("id" => 1 ));
+		$data = mysql_fetch_assoc($result);
+		if ( $data ) {
+			$currencyid= $data["currency"];
+		}
+
+		$tlds = "";
+		$result = select_query('backorder_pricing','extension',array("currency_id" => $currencyid ));
+		while ($data = mysql_fetch_array($result)) {
+			$tlds .= "|.".$data["extension"];
+		}
+		$tld_list = substr($tlds, 1);
+
+		foreach($response as $item){
+			$tmp = $item;
+
+			$tmp["backorder"] = 0;
+			$tmp["priceset"] = 0;
+			$tmp["backorderset"] = 0;
+
+			if($item["code"]==211){
+				$tmp["backorder"] = 1;
+				//check if pricing set for this tld
+				$tmp["priceset"] = (preg_match('/^([a-z0-9](\-*[a-z0-9])*)\\'.$tld_list.'$/i', $item["id"])) ? 1 : 0;
+				//check if backorder set in the backorder module
+				$tmp["backorderset"] = (in_array($item["id"], $queryBackorderListResult["PROPERTY"]["DOMAIN"])) ? 1 : 0;
+			}
+			$newresponse[] = $tmp;
+		}
+
+		return $newresponse;
+	}
 
     /*
      * Returns the price for a given tld for registration

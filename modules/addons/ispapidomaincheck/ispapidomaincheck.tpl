@@ -221,67 +221,61 @@ $( document ).ready(function() {
                             var backorder_button = "";
                             var backorderset_button = "";
                             if(element.backorder== "1" && element.backorderset == "0" && element.priceset == 1){
-                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" +" - <span class='label label-info'>Backorder available</span>").addClass("domcheckererror");
+                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" +"  <span class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
 
-                                 backorder_button = "<a class='setbackorder btn btn-default btn-sm' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
+                                 backorder_button = "<a class='setbackorder btn btn-sm btn-default' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
 
                             }
 
                             if(element.backorderset == "1" && element.backorder== "1" && element.priceset == 1){
-                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" +" - <span class='label label-info'>Backorder available</span>").addClass("domcheckererror");
+                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" +"  <span class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
 
-                                 backorder_button = "<a class='setbackorder btn btn-success btn-sm active' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
+                                 backorder_button = "<a class='setbackorder btn btn-sm active' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
                             }
 
 
-							$( "#" + id + " td.period").html("<a class='btn btn-default btn-sm' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
+							$( "#" + id + " td.period").html("<a class='btn btn-sm btn-default' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
 
-
-<!-- $(document).on('click', '.setbackorder', function (e) { -->
-    $('.setbackorder').unbind().click(function() {
-    var button = $(this);
-    <!-- alert(button); -->
-    <!-- alert($(this).attr("value")); -->
-    var command = "CreateBackorder";
-    if ($(this).hasClass("active"))
-        command = "DeleteBackorder";
-
-    $.ajax({
-        type: "POST",
-        async: true,
-        dataType: "json",
-        url: "{/literal}{$backordermodulepath}{literal}backend/call.php",
-        data: {
-            COMMAND: command,
-            DOMAIN:$(this).attr("value"),
-            TYPE: "FULL"
-        },
-        success: function(data) {
-            if(command=="CreateBackorder" && data.CODE==200){
-                button.addClass("active btn-success");
-                noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-            }
-            else if(command=="DeleteBackorder" && data.CODE==200){
-                button.removeClass("active btn-success");
-                button.addClass("btn-default");
-                noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-            }
-            else{
-                noty({text: 'AUTHORIZATION FAILED', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                <!-- noty({text: data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000); -->
-
-            }
-        },
-        error: function(data) {
-            noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-        }
-    });
-});
 
 
 						}
 					}
 
+                    $('.setbackorder').unbind().click(function() {
+                    var button = $(this);
+                    var command = "CreateBackorder";
+                    if ($(this).hasClass("active"))
+                        command = "DeleteBackorder";
+
+                        $.ajax({
+                            type: "POST",
+                            async: true,
+                            dataType: "json",
+                            url: "{/literal}{$backordermodulepath}{literal}backend/call.php",
+                            data: {
+                                COMMAND: command,
+                                DOMAIN:$(this).attr("value"),
+                                TYPE: "FULL"
+                            },
+                            success: function(data) {
+                                if(command=="CreateBackorder" && data.CODE==200){
+                                    button.addClass("active").removeClass("btn-default");;
+                                    noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                                }
+                                else if(command=="DeleteBackorder" && data.CODE==200){
+                                    button.addClass("btn-default").removeClass("active");;
+                                    noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                                }
+                                else{
+                                    noty({text: 'Login Required', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                                    <!-- noty({text: data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000); -->
+                                }
+                            },
+                            error: function(data) {
+                                noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                            }
+                        });
+                    });
 				});
 
 				$(".viewWhois").unbind();
@@ -309,6 +303,7 @@ $( document ).ready(function() {
 	}
 
 	$("#searchbutton").click(function() {
+
 		count++;
 
 		if("{/literal}{$smarty.get.search}{literal}" && count==1){
@@ -398,7 +393,6 @@ $( document ).ready(function() {
 				$("#resultsarea, #loading").hide();
 			}
 		});
-
 	});
 
 	function startChecking(domainlist){
@@ -544,7 +538,14 @@ $( document ).ready(function() {
 });
 </script>
 <style>
-
+.setbackorder.active{
+    color:white;
+    background-color:#0059b3;
+}
+.label-backorder{
+    color:white;
+    background-color:#0059b3;
+}
 	#filter {
 		background-color:#e6e6e6;
 		-webkit-border-radius: 3px;

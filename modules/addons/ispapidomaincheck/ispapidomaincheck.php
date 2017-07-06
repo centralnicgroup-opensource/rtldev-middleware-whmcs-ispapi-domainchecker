@@ -3,7 +3,9 @@
 
 $module_version = "7.0.0";
 
-// echo "<pre>"; print_r($_SESSION); echo "</pre>";
+// echo "<pre>"; print_r($_SESSION["cache"]); echo "</pre>";
+// echo "<pre>"; print_r($_SESSION["queryBackorderList"]); echo "</pre>";
+
 
 //if (!defined("WHMCS"))
 //	die("This file cannot be accessed directly");
