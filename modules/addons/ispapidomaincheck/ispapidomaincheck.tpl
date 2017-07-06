@@ -219,17 +219,13 @@ $( document ).ready(function() {
 							var transfer = res.split(" ");
 
                             var backorder_button = "";
-                            var backorderset_button = "";
-                            if(element.backorder== "1" && element.backorderset == "0" && element.priceset == 1){
-                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" +"  <span class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
 
+                            if(element.backorder_installed == "1" && element.backordered == "0" && element.backorder_available == 1){
+                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span style='border-left:1px solid white;' class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
                                  backorder_button = "<a class='setbackorder btn btn-sm btn-default' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
-
                             }
-
-                            if(element.backorderset == "1" && element.backorder== "1" && element.priceset == 1){
-                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" +"  <span class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
-
+                            if(element.backorder_installed == "1" && element.backordered == "1" && element.backorder_available == 1){
+                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span style='border-left:1px solid white;' class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
                                  backorder_button = "<a class='setbackorder btn btn-sm active' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
                             }
 
@@ -251,7 +247,7 @@ $( document ).ready(function() {
                             type: "POST",
                             async: true,
                             dataType: "json",
-                            url: "{/literal}{$backordermodulepath}{literal}backend/call.php",
+                            url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
                             data: {
                                 COMMAND: command,
                                 DOMAIN:$(this).attr("value"),
@@ -538,14 +534,16 @@ $( document ).ready(function() {
 });
 </script>
 <style>
-.setbackorder.active{
-    color:white;
-    background-color:#0059b3;
-}
-.label-backorder{
-    color:white;
-    background-color:#0059b3;
-}
+    .setbackorder.active{
+        color:white;
+        background-color:#0059b3;
+    }
+
+    .label-backorder{
+        color:white;
+        background-color:#0059b3;
+    }
+
 	#filter {
 		background-color:#e6e6e6;
 		-webkit-border-radius: 3px;
@@ -645,7 +643,6 @@ $( document ).ready(function() {
 
 
 	@media (max-width:991px) {
-
 		div.well2 {
 			margin-left:auto;
 			margin-right:auto;
@@ -666,23 +663,18 @@ $( document ).ready(function() {
 		    background-color:#f26522;
             color:#ffffff;
 		}
-
-
 	}
-
-
-
 
 </style>
 {/literal}
 
+{if $backorder_module_installed}
+    <script src="../modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
+{/if}
+
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
 <form method="post" action="index.php?m=ispapicheckdomain" class="form-horizontal" id="searchform">
-
-    <script src="../modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
-
-
 	<input type="hidden" name="tldgroup" value="">
 	<input type="hidden" name="searched_domain" value="">
 

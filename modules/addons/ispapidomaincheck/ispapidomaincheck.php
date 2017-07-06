@@ -1,11 +1,6 @@
-
 <?php
 
-$module_version = "7.0.0";
-
-// echo "<pre>"; print_r($_SESSION["cache"]); echo "</pre>";
-// echo "<pre>"; print_r($_SESSION["queryBackorderList"]); echo "</pre>";
-
+$module_version = "7.1.0";
 
 //if (!defined("WHMCS"))
 //	die("This file cannot be accessed directly");
@@ -290,17 +285,6 @@ function ispapidomaincheck_clientarea($vars) {
 		}
 	}
 
-	#tulsi
-	#check here if the backorder module is installed and save the result in a session
-	#for this example we will say it EXISTS
-	if(file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/ispapibackorder.php")){
-		$_SESSION["ispapi_backorder"] = 1;
-	}
-	else{
-		$_SESSION["ispapi_backorder"] = 0;
-	}
-
-
 	//for the domain.php file
 	$_SESSION["ispapi_registrar"] = $registrar;
 
@@ -322,19 +306,17 @@ function ispapidomaincheck_clientarea($vars) {
 		unset($_SESSION["cache"]);
 	}
 
-
-// require_once(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/call.php");
-// $backordermodulepath = "modules/addons/ispapibackorder/backend/call.php";
-$backordermodulepath = "modules/addons/ispapibackorder/";
-
 	//get the module name
 	//$parts = Explode("/", __FILE__);
 	//$parts = Explode(".", $parts[count($parts) - 1]);
 	//$modulename = $parts[0];
 	$modulename = "ispapidomaincheck";
-
 	$path_to_domain_file = "modules/addons/".$modulename."/domain.php";
 	$modulepath = "modules/addons/".$modulename."/";
+
+	//check if backordermodule is installed and set the backorder module path
+	$backordermoduleinstalled = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
+	$backordermodulepath = "modules/addons/ispapibackorder/";
 
 	//get all categories with subgategories for the template
 	$categories = array();
@@ -374,7 +356,8 @@ $backordermodulepath = "modules/addons/ispapibackorder/";
 					'show_aftermarket_premium_domains' => $show_aftermarket_premium_domains,
 					'modulename' => $modulename,
 					'modulepath' => $modulepath,
-					'backordermodulepath' => $backordermodulepath,
+					'backorder_module_installed' => $backordermoduleinstalled,
+					'backorder_module_path' => $backordermodulepath,
 					'path_to_domain_file' => $path_to_domain_file,
 					'domain' => $domain,
 					'tldpricelist' => $tldpricelist,
