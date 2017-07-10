@@ -4,6 +4,10 @@ ______________________________________________________________________________
 Changelog
 ______________________________________________________________________________
 
+v 7.1.0 - 2016-10-10
+ - added backorder button in the search results (only when ISPAPI Backorder Module is installed)
+ - design optimization
+
 v 7.0.0 - 2016-10-10
  - compatible with WHMCS 7.0 or higher
  - compatible with PHP7
