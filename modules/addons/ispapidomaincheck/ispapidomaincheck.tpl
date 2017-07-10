@@ -1,4 +1,6 @@
 {literal}
+
+
 <script>
 jQuery.extend(jQuery, {
   /**
@@ -210,13 +212,60 @@ $( document ).ready(function() {
 							$( "#" + id + " td.period").html(price);
 							$( "#" + id + " td.availability").html('<span class="label label-info">'+element.premiumchannel+' PREMIUM</span>').addClass("domcheckersuccess");
 						}else{
-							$( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>").addClass("domcheckererror");
+
+                            $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>").addClass("domcheckererror");
+
 							var res = element.id.replace('.', ' ');
 							var transfer = res.split(" ");
-							$( "#" + id + " td.period").html("<a class='btn btn-default btn-sm' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> ");
+
+                            var backorder_button = "";
+                            if(element.backorder_installed == "1" && element.backorder_available == 1){
+                                var backorder_button_class = ((element.backordered=="1") ? "active": "btn-default");
+                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span style='border-left:1px solid white;' class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
+                                 backorder_button = "<a class='setbackorder btn btn-sm "+backorder_button_class+"' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
+                            }
+
+							$( "#" + id + " td.period").html("<a class='btn btn-sm btn-default' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
 						}
 					}
 
+                    $('.setbackorder').unbind().click(function() {
+                        var button = $(this);
+                        var command = "CreateBackorder";
+                        if ($(this).hasClass("active"))
+                            command = "DeleteBackorder";
+
+                        $.ajax({
+                            type: "POST",
+                            async: true,
+                            dataType: "json",
+                            url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
+                            data: {
+                                COMMAND: command,
+                                DOMAIN:$(this).attr("value"),
+                                TYPE: "FULL"
+                            },
+                            success: function(data) {
+                                if(command=="CreateBackorder" && data.CODE==200){
+                                    button.addClass("active").removeClass("btn-default");;
+                                    noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                                }
+                                else if(command=="DeleteBackorder" && data.CODE==200){
+                                    button.addClass("btn-default").removeClass("active");;
+                                    noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                                }
+                                else if(data.CODE==531){
+                                    noty({text: 'Login Required', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                                }
+                                else{
+                                    noty({text: 'An error occured: ' + data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                                }
+                            },
+                            error: function(data) {
+                                noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                            }
+                        });
+                    });
 				});
 
 				$(".viewWhois").unbind();
@@ -244,6 +293,7 @@ $( document ).ready(function() {
 	}
 
 	$("#searchbutton").click(function() {
+
 		count++;
 
 		if("{/literal}{$smarty.get.search}{literal}" && count==1){
@@ -333,7 +383,6 @@ $( document ).ready(function() {
 				$("#resultsarea, #loading").hide();
 			}
 		});
-
 	});
 
 	function startChecking(domainlist){
@@ -479,6 +528,15 @@ $( document ).ready(function() {
 });
 </script>
 <style>
+    .setbackorder.active{
+        color:white;
+        background-color:#0059b3;
+    }
+
+    .label-backorder{
+        color:white;
+        background-color:#0059b3;
+    }
 
 	#filter {
 		background-color:#e6e6e6;
@@ -577,8 +635,11 @@ $( document ).ready(function() {
 		clear:both;
 	}
 
-
 	@media (max-width:991px) {
+
+        #searchfield {
+            width:600px;
+        }
 
 		div.well2 {
 			margin-left:auto;
@@ -600,15 +661,32 @@ $( document ).ready(function() {
 		    background-color:#f26522;
             color:#ffffff;
 		}
-
-
 	}
 
+    @media (min-width:1200px) {
+        #searchfield {
+            width:750px;
+        }
+    }
 
+    @media (max-width:1200px) {
+        #searchfield {
+            width:600px;
+        }
+    }
 
+    @media (max-width:767px){
+        #searchfield {
+            width:250px;
+        }
+    }
 
 </style>
 {/literal}
+
+{if $backorder_module_installed}
+    <script src="../modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
+{/if}
 
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
@@ -642,10 +720,10 @@ $( document ).ready(function() {
 				<div class="row">
 					<div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
 						<div class="input-group input-group-lg input-group-box">
-							<input id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
-							<span class="input-group-btn">
-								<button id="searchbutton" class="btn btn-primary" style="background-color:#f26522;border:none;" type="button">{$LANG.checkavailability}</button>
-							</span>
+							<input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
+							<!--<span class="input-group-btn">-->
+								<button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go<!--{$LANG.checkavailability}--></button>
+							<!--</span>-->
 						</div>
 					</div>
 				</div>

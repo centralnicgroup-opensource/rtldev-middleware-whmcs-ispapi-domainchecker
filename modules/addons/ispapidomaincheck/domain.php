@@ -3,9 +3,15 @@
 require_once(dirname(__FILE__)."/../../../init.php");
 require_once(dirname(__FILE__)."/../../../includes/domainfunctions.php");
 require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
+//include ISPAPI registrar module if installed
 if(file_exists(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php")){
 	require_once(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php");
 }
+//include ISPAPI backorder module if installed
+if(file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")){
+	require_once dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php";
+}
+
 
 //WORKARROUND: Get a list of all Hexonet registrar modules and include the registrar files
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
@@ -28,6 +34,7 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 		}
 	}
 	//for the domain.php file
+
 	$_SESSION["ispapi_registrar"] = $registrar;
 }
 //###########################################################################################
@@ -376,7 +383,9 @@ class DomainCheck
     	if($this->cached_data){
     		$cache = $this->getCache("response");
     		if(!empty($cache["data"])){
-    			$this->response = json_encode($cache);
+    			//call handleBackorderButton to get the cache updated for backorder related informations
+				$cache["data"] = $this->handleBackorderButton($cache["data"]);
+				$this->response = json_encode($cache);
     			return;
     		}
     	}
@@ -441,7 +450,6 @@ class DomainCheck
     				//get the price for this domain
     				$tld = $this->getDomainExtension($item);
     				$price = $this->getTLDprice($tld);
-
     			}else{
 
     				if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
@@ -509,6 +517,23 @@ class DomainCheck
     		array_push($response, array("id" => $item, "checkover" => "whois", "availability" => $check["result"], "code" => $code, "class" => "", "premiumchannel" => "", "price" => $price));
     	}
 
+		//Handle the displaying of the backorder button in the search response
+		$response = $this->handleBackorderButton($response);
+		//Handle backorder feedback
+		$backorder_feedback = "";
+		if(isset($_SESSION["domain"])){
+			foreach($response as $item){
+				if($_SESSION["domain"]==$item["id"] && $item["backorder_available"] && $item["backordered"] == 0 ){
+					$backorder_feedback = "<p><b>You can backorder this domain name.</b></p>";
+				}
+				if($_SESSION["domain"]==$item["id"] && $item["backorder_available"] && $item["backordered"] == 1 ){
+					$backorder_feedback = "<p><b>You backordered this domain name.</b></p>";
+				}
+			}
+		}
+		if(!empty($backorder_feedback)){
+			$feedback["message"] .= " ".$backorder_feedback;
+		}
 
     	$response_array = array("data" => $response, "feedback" => $feedback);
 
@@ -518,6 +543,45 @@ class DomainCheck
     	$this->response = json_encode($response_array);
     }
 
+	private function handleBackorderButton($response){
+		//Check if backorder module is installed
+		$backorder_mod_installed = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
+		if(!$backorder_mod_installed)
+			return $response;
+
+		$newresponse = array();
+
+		//Get all domains that have already been backordered by the user. If not logged in, array will be empty, this is perfect.
+		$queryBackorderList = array(
+				"COMMAND" => "QueryBackorderList"
+		);
+		$ownbackorders = backorder_api_call($queryBackorderList);
+
+		//Get the list of all TLDs available in the backorder module
+		$tlds = "";
+		$result = select_query('backorder_pricing','extension',array("currency_id" => $_SESSION["currency"] ));
+		while ($data = mysql_fetch_array($result)) {
+			$tlds .= "|.".$data["extension"];
+		}
+		$tld_list = substr($tlds, 1);
+
+		//Iterate all responses and add the backorder information
+		foreach($response as $item){
+			$tmp = $item;
+			$tmp["backorder_installed"] = $tmp["backorder_available"] = $tmp["backordered"] = 0;
+			if($item["code"]==211){
+				//In this case, backorder module is installed so, set to 1
+				$tmp["backorder_installed"] = 1;
+				//Check if pricing set for this TLD
+				$tmp["backorder_available"] = (preg_match('/^([a-z0-9](\-*[a-z0-9])*)\\'.$tld_list.'$/i', $item["id"])) ? 1 : 0;
+				//Check if backorder set in the backorder module
+				$tmp["backordered"] = (in_array($item["id"], $ownbackorders["PROPERTY"]["DOMAIN"])) ? 1 : 0;
+			}
+			$newresponse[] = $tmp;
+		}
+
+		return $newresponse;
+	}
 
     /*
      * Returns the price for a given tld for registration
@@ -527,7 +591,6 @@ class DomainCheck
      *
      */
 	private function getTLDprice($tld) {
-
 		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
 		$cur = mysql_fetch_array($result);
 
@@ -828,6 +891,7 @@ if(isset($_REQUEST["currency"])){
 		$result = mysql_query("SELECT currency FROM tblclients WHERE id=".$ca->getUserID());
 		$data = mysql_fetch_array($result);
 		$_SESSION["currency"] = $data["currency"];
+		$_SESSION["userid"] = $ca->getUserID();
 	}
 }
 

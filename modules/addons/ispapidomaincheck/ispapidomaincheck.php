@@ -1,6 +1,6 @@
 <?php
 
-$module_version = "7.0.0";
+$module_version = "7.1.0";
 
 //if (!defined("WHMCS"))
 //	die("This file cannot be accessed directly");
@@ -311,9 +311,12 @@ function ispapidomaincheck_clientarea($vars) {
 	//$parts = Explode(".", $parts[count($parts) - 1]);
 	//$modulename = $parts[0];
 	$modulename = "ispapidomaincheck";
-
 	$path_to_domain_file = "modules/addons/".$modulename."/domain.php";
 	$modulepath = "modules/addons/".$modulename."/";
+
+	//check if backordermodule is installed and set the backorder module path
+	$backordermoduleinstalled = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
+	$backordermodulepath = "modules/addons/ispapibackorder/";
 
 	//get all categories with subgategories for the template
 	$categories = array();
@@ -353,6 +356,8 @@ function ispapidomaincheck_clientarea($vars) {
 					'show_aftermarket_premium_domains' => $show_aftermarket_premium_domains,
 					'modulename' => $modulename,
 					'modulepath' => $modulepath,
+					'backorder_module_installed' => $backordermoduleinstalled,
+					'backorder_module_path' => $backordermodulepath,
 					'path_to_domain_file' => $path_to_domain_file,
 					'domain' => $domain,
 					'tldpricelist' => $tldpricelist,
