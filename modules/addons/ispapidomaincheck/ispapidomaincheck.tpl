@@ -635,8 +635,12 @@ $( document ).ready(function() {
 		clear:both;
 	}
 
-
 	@media (max-width:991px) {
+
+        #searchfield {
+            width:600px;
+        }
+
 		div.well2 {
 			margin-left:auto;
 			margin-right:auto;
@@ -658,6 +662,24 @@ $( document ).ready(function() {
             color:#ffffff;
 		}
 	}
+
+    @media (min-width:1200px) {
+        #searchfield {
+            width:750px;
+        }
+    }
+
+    @media (max-width:1200px) {
+        #searchfield {
+            width:600px;
+        }
+    }
+
+    @media (max-width:767px){
+        #searchfield {
+            width:250px;
+        }
+    }
 
 </style>
 {/literal}
@@ -698,7 +720,7 @@ $( document ).ready(function() {
 				<div class="row">
 					<div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
 						<div class="input-group input-group-lg input-group-box">
-							<input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;width:750px;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
+							<input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
 							<!--<span class="input-group-btn">-->
 								<button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go<!--{$LANG.checkavailability}--></button>
 							<!--</span>-->
