@@ -520,20 +520,20 @@ class DomainCheck
 		//Handle the displaying of the backorder button in the search response
 		$response = $this->handleBackorderButton($response);
 		//Handle backorder feedback
-		$backorder_feedback = "";
-		if(isset($_SESSION["domain"])){
-			foreach($response as $item){
-				if($_SESSION["domain"]==$item["id"] && $item["backorder_available"] && $item["backordered"] == 0 ){
-					$backorder_feedback = "<p><b>You can backorder this domain name.</b></p>";
-				}
-				if($_SESSION["domain"]==$item["id"] && $item["backorder_available"] && $item["backordered"] == 1 ){
-					$backorder_feedback = "<p><b>You backordered this domain name.</b></p>";
-				}
-			}
-		}
-		if(!empty($backorder_feedback)){
-			$feedback["message"] .= " ".$backorder_feedback;
-		}
+		// $backorder_feedback = "";
+		// if(isset($_SESSION["domain"])){
+		// 	foreach($response as $item){
+		// 		if($_SESSION["domain"]==$item["id"] && $item["backorder_available"] && $item["backordered"] == 0 ){
+		// 			$backorder_feedback = "<p><b>You can backorder this domain name.</b></p>";
+		// 		}
+		// 		if($_SESSION["domain"]==$item["id"] && $item["backorder_available"] && $item["backordered"] == 1 ){
+		// 			$backorder_feedback = "<p><b>You backordered this domain name.</b></p>";
+		// 		}
+		// 	}
+		// }
+		// if(!empty($backorder_feedback)){
+		// 	$feedback["message"] .= " ".$backorder_feedback;
+		// }
 
     	$response_array = array("data" => $response, "feedback" => $feedback);
 
