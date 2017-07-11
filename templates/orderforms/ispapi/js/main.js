@@ -6,6 +6,8 @@ jQuery(document).ready(function(){
             jQuery("#signupfrm").fadeToggle('fast',function(){
                 jQuery("#securityQuestion").fadeToggle('fast');
                 jQuery("#loginfrm").hide().removeClass('hidden').fadeToggle('fast');
+                jQuery("#btnCompleteOrder").attr('formnovalidate', true);
+                jQuery("#btnUpdateOnly").attr('formnovalidate', true);
             });
             jQuery("#custtype").val("existing");
         }
@@ -17,6 +19,8 @@ jQuery(document).ready(function(){
             jQuery("#loginfrm").fadeToggle('fast',function(){
                 jQuery("#securityQuestion").fadeToggle('fast');
                 jQuery("#signupfrm").hide().removeClass('hidden').fadeToggle('fast');
+                jQuery("#btnCompleteOrder").removeAttr('formnovalidate');
+                jQuery("#btnUpdateOnly").removeAttr('formnovalidate');
             });
             jQuery("#custtype").val("new");
         }

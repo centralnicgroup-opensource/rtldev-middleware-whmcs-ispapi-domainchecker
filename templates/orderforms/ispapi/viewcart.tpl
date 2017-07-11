@@ -1,7 +1,9 @@
 <link rel="stylesheet" type="text/css" href="templates/orderforms/{$carttpl}/style.css" />
 <script language="javascript">
-    var statesTab=10;
+    // Define state tab index value
+    var statesTab = 10;
 {if in_array('state', $clientsProfileOptionalFields)}
+    // Do not enforce state input client side
     var stateNotRequired = true;
 {/if}
 </script>
@@ -23,6 +25,25 @@ function emptyCart(type,num) {
         window.location = 'cart.php?a=empty';
     }
 }
+
+jQuery(document).ready(function() {
+    var preparePromoCode = function(ctx) {
+        jQuery(ctx).parents('form').attr('novalidate', 'novalidate');
+        jQuery('#validatepromo').val('1');
+    };
+
+    jQuery('#validatePromoCode').click(function() {
+        preparePromoCode(this);
+        jQuery('#btnCompleteOrder').click();
+    });
+
+    jQuery('#inputPromoCode').keydown(function(evt) {
+        if (evt.keyCode == 13) {
+            preparePromoCode(this);
+            // Enter in a form will submit the form
+        }
+    });
+});
 </script>{/literal}
 <script>
 window.langPasswordStrength = "{$LANG.pwstrength}";
@@ -214,7 +235,7 @@ window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
 
     {if $cartitems!=0}
 
-        <form method="post" action="{$smarty.server.PHP_SELF}?a=checkout" id="mainfrm">
+        <form method="post" action="{$smarty.server.PHP_SELF}?a=checkout" id="frmCheckout">
             <input type="hidden" name="submit" value="true" />
             <input type="hidden" name="custtype" id="custtype" value="{$custtype}" />
 
@@ -231,7 +252,7 @@ window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
 
                     <div class="form-group">
                         <label for="inputEmail">{$LANG.clientareaemail}</label>
-                        <input type="email" name="loginemail" class="form-control" id="inputEmail" placeholder="{$LANG.enteremail}"{if $loggedin} disabled{/if} />
+                        <input type="text" name="loginemail" class="form-control" id="inputEmail" placeholder="{$LANG.enteremail}"{if $loggedin} disabled{/if} />
                     </div>
                     <div class="form-group">
                         <label for="inputPassword">{$LANG.clientareapassword}</label>
@@ -472,7 +493,7 @@ window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
             {if $taxenabled && !$loggedin}
                 <div class="carttaxwarning">
                     {$LANG.carttaxupdateselections}
-                    <input type="submit" value="{$LANG.carttaxupdateselectionsupdate}" name="updateonly" class="btn btn-info btn-sm" />
+                    <input type="submit" value="{$LANG.carttaxupdateselectionsupdate}" name="updateonly" id="btnUpdateOnly" class="btn btn-info btn-sm" />
                 </div>
             {/if}
 
@@ -555,9 +576,10 @@ window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
                         {else}
                             <div class="col-xs-10 col-xs-offset-1">
                                 <div class="input-group">
-                                    <input type="text" name="promocode" id="inputPromoCode" class="form-control" placeholder="Enter promo code if you have one">
+                                    <input type="text" name="promocode" id="inputPromoCode" class="form-control" placeholder="{lang key="orderPromoCodePlaceholder"}">
                                     <span class="input-group-btn">
-                                        <button type="submit" name="validatepromo" formnovalidate class="btn btn-warning" value="{$LANG.orderpromovalidatebutton}">
+                                        <input type="hidden" name="validatepromo" id="validatepromo" value="0" />
+                                        <button type="button" id="validatePromoCode" class="btn btn-warning">
                                             {$LANG.orderpromovalidatebutton}
                                         </button>
                                     </span>
@@ -570,7 +592,7 @@ window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
                     {if $shownotesfield}
                         <div class="signupfields padded">
                             <h2>{$LANG.ordernotes}</h2>
-                            <textarea name="notes" rows="3" class="form-control" placeholder="{$LANG.ordernotesdescription}">{$notes}</textarea>
+                            <textarea name="notes" rows="3" class="form-control" placeholder="{$LANG.ordernotesdescription}">{$orderNotes}</textarea>
                         </div>
                     {/if}
 
@@ -587,6 +609,7 @@ window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
                         {/foreach}
 
                         <br /><br />
+                        <div class="alert alert-danger text-center gateway-errors hidden"></div>
 
                         <div id="ccinputform" class="signupfields{if $selectedgatewaytype neq "CC"} hidden{/if}">
                             <table width="100%" cellspacing="0" cellpadding="0" class="configtable textleft">
@@ -670,7 +693,7 @@ window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
                                     <td class="fieldlabel">{$LANG.creditcardcvvnumber}</td>
                                     <td class="fieldarea">
                                         <input type="text" name="cccvv" id="cccvv" value="{$cccvv}" size="5" autocomplete="off" />
-                                        <a href="#" onclick="window.open('images/ccv.gif','','width=280,height=200,scrollbars=no,top=100,left=100');return false">{$LANG.creditcardcvvwhere}</a>
+                                        <a href="#" onclick="window.open('{$BASE_PATH_IMG}/ccv.gif','','width=280,height=200,scrollbars=no,top=100,left=100');return false">{$LANG.creditcardcvvwhere}</a>
                                     </td>
                                 </tr>
                                 {if $shownostore}
@@ -705,7 +728,7 @@ window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
             {/if}
 
             <div align="center">
-                <button type="submit" id="btnCompleteOrder"{if $cartitems==0} disabled{/if} onclick="this.value='{$LANG.pleasewait}'" class="btn btn-primary btn-lg">
+                <button type="submit" id="btnCompleteOrder"{if $cartitems==0} disabled{/if} onclick="this.value='{$LANG.pleasewait}'" class="btn btn-primary btn-lg" {if $custtype eq "existing" && !$loggedin}formnovalidate{/if}>
                     {$LANG.checkout}
                     &nbsp;<i class="fa fa-arrow-circle-right"></i>
                 </button>

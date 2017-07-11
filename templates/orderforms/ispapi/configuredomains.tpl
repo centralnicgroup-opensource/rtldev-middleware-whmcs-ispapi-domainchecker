@@ -14,10 +14,10 @@
         <br />
     {/if}
 
-	{php}
-
+    <!-- ISPAPI CHANGES -->
+    <!-- ####################################################### -->
+    {php}
 	$has_premium_in_the_cart = false;
-
 	foreach($_SESSION["cart"][products] as $item){
 		$result = select_query('tblproducts', 'name,description', array('id' => $item["pid"]));
 		$data = mysql_fetch_array($result);
@@ -25,16 +25,13 @@
 			$has_premium_in_the_cart = true;
 		}
 	}
-
 	if($has_premium_in_the_cart){
-
 	{/php}
 		<div class="alert alert-info text-center">
 			<strong>PREMIUM domains will be configured later in the checkout process!</strong>
 		</div>
 	{php}}{/php}
-
-
+    <!-- ####################################################### -->
 
     <form method="post" action="{$smarty.server.PHP_SELF}?a=confdomains">
         <input type="hidden" name="update" value="true" />

@@ -37,7 +37,7 @@
                         <div class="domain-checker-fieldcontainer">
                             <div class="row">
                                 <div class="col-md-7">
-                                <input type="text" class="form-control input-lg" placeholder="{if $domain eq "register"}{$LANG.findyourdomain}{else}{$LANG.exampledomain}{/if}" value="{$sld}" id="inputDomain" />
+                                <input type="text" class="form-control input-lg" placeholder="{if $domain eq "register"}{$LANG.findyourdomain}{else}{$LANG.exampledomain}{/if}" value="{$sld}" id="inputDomain" autocapitalize="none" />
                                 </div>
                                 <div class="col-md-2">
                                     <select name="tld" id="inputTld" class="form-control input-lg">
