@@ -10,23 +10,23 @@
 
     <p>{$LANG.domainrenewdesc}</p>
 
+    <!-- ISPAPI CHANGES -->
+    <!-- ####################################################### -->
     {php}
-
-	$newlist = array();
-	foreach ($template->getVariable('renewals')->value as $item) {
-	    $result = full_query("select g.name from tblproductgroups g, tblproducts p, tblhosting h where p.id = h.packageid and p.gid = g.id and h.domain = '".$item['domain']."'");
-		$data = mysql_fetch_array($result);
-		if(isset($data)){
-			if($data["name"]!="PREMIUM DOMAIN"){
-				array_push($newlist, $item);
-			}
-		}
-	}
-
-	// assign new list without premium domains to renewals variable
-	$template->assign('renewals', $newlist);
-
+    $newlist = array();
+    foreach ($template->getVariable('renewals')->value as $item) {
+        $result = full_query("select g.name from tblproductgroups g, tblproducts p, tblhosting h where p.id = h.packageid and p.gid = g.id and h.domain = '".$item['domain']."'");
+        $data = mysql_fetch_array($result);
+        if(isset($data)){
+            if($data["name"]!="PREMIUM DOMAIN"){
+                array_push($newlist, $item);
+            }
+        }
+    }
+    // assign new list without premium domains to renewals variable
+    $template->assign('renewals', $newlist);
     {/php}
+    <!-- ####################################################### -->
 
     <form method="post" action="cart.php?a=add&renewals=true">
 
@@ -44,7 +44,7 @@
                 {foreach from=$renewals item=renewal}
                     <tr>
                         <td>
-                            {if !$renewal.pastgraceperiod}
+                            {if !$renewal.pastgraceperiod && !$renewal.beforerenewlimit}
                                 <input type="checkbox" name="renewalids[]" value="{$renewal.id}" />
                             {/if}
                         </td>

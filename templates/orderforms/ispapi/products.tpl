@@ -53,6 +53,10 @@
                             {elseif $product.pricing.minprice.cycle eq "triennially"}
                                 {$LANG.orderpaymenttermtriennially}
                             {/if}
+                            <br>
+                            {if $product.pricing.minprice.setupFee}
+                                <small>{$product.pricing.minprice.setupFee->toPrefixed()} {$LANG.ordersetupfee}</small>
+                            {/if}
                         {/if}
                     </div>
 

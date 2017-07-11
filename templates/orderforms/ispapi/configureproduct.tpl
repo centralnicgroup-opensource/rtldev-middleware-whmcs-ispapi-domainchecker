@@ -1,3 +1,4 @@
+<div id="prodconfigcontainer">
 <script type="text/javascript" src="{$BASE_PATH_JS}/jquery-ui.min.js"></script>
 <script type="text/javascript" src="templates/orderforms/{$carttpl}/js/main.js"></script>
 <link rel="stylesheet" type="text/css" href="templates/orderforms/{$carttpl}/style.css" />
@@ -25,12 +26,66 @@
 <h3>{$LANG.cartchoosecycle}</h3>
 <div class="billingcycle">
 <table width="100%" cellspacing="0" cellpadding="0" class="configtable">
-{if $pricing.monthly}<tr><td class="radiofield"><input type="radio" name="billingcycle" id="cycle1" value="monthly"{if $billingcycle eq "monthly"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" /></td><td class="fieldarea"><label for="cycle1" class="radio-inline">{$pricing.monthly}</label></td></tr>{/if}
-{if $pricing.quarterly}<tr><td class="radiofield"><input type="radio" name="billingcycle" id="cycle2" value="quarterly"{if $billingcycle eq "quarterly"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" /></td><td class="fieldarea"><label for="cycle2" class="radio-inline">{$pricing.quarterly}</label></td></tr>{/if}
-{if $pricing.semiannually}<tr><td class="radiofield"><input type="radio" name="billingcycle" id="cycle3" value="semiannually"{if $billingcycle eq "semiannually"} checked{/if}{if $configurableoptions} onclick="updateConfigurableOptions({$i}, this.value)"{/if} /></td><td class="fieldarea"><label for="cycle3" class="radio-inline">{$pricing.semiannually}</label></td></tr>{/if}
-{if $pricing.annually}<tr><td class="radiofield"><input type="radio" name="billingcycle" id="cycle4" value="annually"{if $billingcycle eq "annually"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" /></td><td class="fieldarea"><label for="cycle4" class="radio-inline">{$pricing.annually}</label></td></tr>{/if}
-{if $pricing.biennially}<tr><td class="radiofield"><input type="radio" name="billingcycle" id="cycle5" value="biennially"{if $billingcycle eq "biennially"} checked{/if}{if $configurableoptions} onclick="updateConfigurableOptions({$i}, this.value)"{/if} /></td><td class="fieldarea"><label for="cycle5" class="radio-inline">{$pricing.biennially}</label></td></tr>{/if}
-{if $pricing.triennially}<tr><td class="radiofield"><input type="radio" name="billingcycle" id="cycle6" value="triennially"{if $billingcycle eq "triennially"} checked{/if}{if $configurableoptions} onclick="updateConfigurableOptions({$i}, this.value)"{/if} /></td><td class="fieldarea"><label for="cycle6" class="radio-inline">{$pricing.triennially}</label></td></tr>{/if}
+    {if $pricing.monthly}
+        <tr>
+            <td class="radiofield">
+                <input type="radio" name="billingcycle" id="cycle1" value="monthly"{if $billingcycle eq "monthly"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" />
+            </td>
+            <td class="fieldarea">
+                <label for="cycle1" class="radio-inline">{$pricing.monthly}</label>
+            </td>
+        </tr>
+    {/if}
+    {if $pricing.quarterly}
+        <tr>
+            <td class="radiofield">
+                <input type="radio" name="billingcycle" id="cycle2" value="quarterly"{if $billingcycle eq "quarterly"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" />
+            </td>
+            <td class="fieldarea">
+                <label for="cycle2" class="radio-inline">{$pricing.quarterly}</label>
+            </td>
+        </tr>
+    {/if}
+    {if $pricing.semiannually}
+        <tr>
+            <td class="radiofield">
+                <input type="radio" name="billingcycle" id="cycle3" value="semiannually"{if $billingcycle eq "semiannually"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" />
+            </td>
+            <td class="fieldarea">
+                <label for="cycle3" class="radio-inline">{$pricing.semiannually}</label>
+            </td>
+        </tr>
+    {/if}
+    {if $pricing.annually}
+        <tr>
+            <td class="radiofield">
+                <input type="radio" name="billingcycle" id="cycle4" value="annually"{if $billingcycle eq "annually"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" />
+            </td>
+            <td class="fieldarea">
+                <label for="cycle4" class="radio-inline">{$pricing.annually}</label>
+            </td>
+        </tr>
+    {/if}
+    {if $pricing.biennially}
+        <tr>
+            <td class="radiofield">
+                <input type="radio" name="billingcycle" id="cycle5" value="biennially"{if $billingcycle eq "biennially"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" />
+            </td>
+            <td class="fieldarea">
+                <label for="cycle5" class="radio-inline">{$pricing.biennially}</label>
+            </td>
+        </tr>
+    {/if}
+    {if $pricing.triennially}
+        <tr>
+            <td class="radiofield">
+                <input type="radio" name="billingcycle" id="cycle6" value="triennially"{if $billingcycle eq "triennially"} checked{/if} onclick="{if $configurableoptions}updateConfigurableOptions({$i}, this.value){else}recalctotals(){/if}" />
+            </td>
+            <td class="fieldarea">
+                <label for="cycle6" class="radio-inline">{$pricing.triennially}</label>
+            </td>
+        </tr>
+    {/if}
 </table>
 </div>
 {/if}
@@ -148,4 +203,5 @@
 
 </form>
 
+</div>
 </div>

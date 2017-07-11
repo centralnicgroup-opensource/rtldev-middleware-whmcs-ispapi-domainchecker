@@ -38,19 +38,19 @@
                 </label>
                 <div class="domainreginput hidden clearfix" id="domainregister">
                     <div class="row">
-                    <div class="col-sm-6 col-xs-8 col-sm-offset-2 col-xs-2">
-                        <div class="input-group">
-                            <span class="input-group-addon">www.</span>
-                            <input type="text" id="registersld" value="{$sld}" class="form-control" />
+                        <div class="col-sm-6 col-xs-8 col-sm-offset-2">
+                            <div class="input-group">
+                                <span class="input-group-addon">www.</span>
+                                <input type="text" id="registersld" value="{$sld}" class="form-control" autocapitalize="none" />
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-sm-2 col-xs-4">
-                        <select id="registertld" class="form-control">
-                        {foreach from=$registertlds item=listtld}
-                            <option value="{$listtld}"{if $listtld eq $tld} selected="selected"{/if}>{$listtld}</option>
-                        {/foreach}
-                        </select>
-                    </div>
+                        <div class="col-sm-2 col-xs-4">
+                            <select id="registertld" class="form-control">
+                            {foreach from=$registertlds item=listtld}
+                                <option value="{$listtld}"{if $listtld eq $tld} selected="selected"{/if}>{$listtld}</option>
+                            {/foreach}
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -62,19 +62,19 @@
                 </label>
                 <div class="domainreginput hidden clearfix" id="domaintransfer">
                     <div class="row">
-                    <div class="col-sm-6 col-xs-8 col-sm-offset-2 col-xs-2">
-                        <div class="input-group">
-                            <span class="input-group-addon">www.</span>
-                            <input type="text" id="transfersld" value="{$sld}" class="form-control" />
+                        <div class="col-sm-6 col-xs-8 col-sm-offset-2">
+                            <div class="input-group">
+                                <span class="input-group-addon">www.</span>
+                                <input type="text" id="transfersld" value="{$sld}" class="form-control" autocapitalize="none" />
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-sm-2 col-xs-4">
-                        <select id="transfertld" class="form-control">
-                        {foreach from=$transfertlds item=listtld}
-                            <option value="{$listtld}"{if $listtld eq $tld} selected="selected"{/if}>{$listtld}</option>
-                        {/foreach}
-                        </select>
-                    </div>
+                        <div class="col-sm-2 col-xs-4">
+                            <select id="transfertld" class="form-control">
+                            {foreach from=$transfertlds item=listtld}
+                                <option value="{$listtld}"{if $listtld eq $tld} selected="selected"{/if}>{$listtld}</option>
+                            {/foreach}
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -92,10 +92,10 @@
                                     <p class="form-control-static">www.</p>
                                 </div>
                                 <div class="col-xs-7">
-                                    <input type="text" id="owndomainsld" value="{$sld}" placeholder="yourdomain" class="form-control" />
+                                    <input type="text" id="owndomainsld" value="{$sld}" placeholder="yourdomain" class="form-control" autocapitalize="none" />
                                 </div>
                                 <div class="col-xs-3">
-                                    <input type="text" id="owndomaintld" value="{$tld|substr:1}" placeholder="com" class="form-control" />
+                                    <input type="text" id="owndomaintld" value="{$tld|substr:1}" placeholder="com" class="form-control" autocapitalize="none" />
                                 </div>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                     <input type="radio" name="domainoption" value="subdomain" id="selsubdomain" />{$LANG.cartsubdomainchoice|sprintf2:$companyname}
                 </label>
                 <div class="domainreginput hidden" id="domainsubdomain">
-                    http:// <input type="text" id="subdomainsld" size="30" value="{$sld}" /> <select id="subdomaintld">{foreach from=$subdomains key=subid item=subdomain}<option value="{$subid}">{$subdomain}</option>{/foreach}</select>
+                    http:// <input type="text" id="subdomainsld" size="30" value="{$sld}" autocapitalize="none" /> <select id="subdomaintld">{foreach from=$subdomains key=subid item=subdomain}<option value="{$subid}">{$subdomain}</option>{/foreach}</select>
                 </div>
             </div>
     {/if}
