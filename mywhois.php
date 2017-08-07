@@ -12,9 +12,9 @@ function WHMCS_LookupDomain($domain){
 
 //get the sld and tld
 if (strpos( $_REQUEST["domain"], "." )) {
-	$domainparts = explode( ".", $_REQUEST["domain"], 2 );
+	$domainparts = explode( ".", strtolower($_REQUEST["domain"]), 2 );
 	$sld = $domainparts[0];
-	$tld = "." . $domainparts[1];
+	$tld = ".".$domainparts[1];
 }else{
 	die("Domain is incorrect");
 }
@@ -43,13 +43,10 @@ if(!$registrar){
 	);
 	$response = ispapi_call($command, $ispapi_config);
 
-	//Fallback: HEXONET's QueryDomainWhoisInfo -> SHELL Whois -> WHMCS'S LookupDomain (special for .CH)
-	if ( ($response["CODE"] != 200) || preg_match("/you have exceeded this limit/i", urldecode($response["PROPERTY"]["WHOISDATA"][0])) ) {
+	//Fallback: HEXONET's QueryDomainWhoisInfo -> WHMCS's LookupDomain (special for .CH and .LI)
+	if ( in_array($tld, array(".ch", ".li")) && ($response["CODE"] != 200) || preg_match("/you have exceeded this limit/i", urldecode($response["PROPERTY"]["WHOISDATA"][0])) ) {
 		$registrar=false;
-		$whois = nl2br(shell_exec("whois ".$_REQUEST["domain"]));
-		if( ($whois == NULL) || preg_match("/you have exceeded this limit/i", $whois) ){
-			$whois = WHMCS_LookupDomain($_REQUEST["domain"]);
-		}
+		$whois = WHMCS_LookupDomain($_REQUEST["domain"]);
 	}
 }
 
