@@ -5,7 +5,7 @@ Changelog
 ______________________________________________________________________________
 
 v 7.2.0 - 2017-08-07
- - added whois fallback when HEXONET's QueryDomainWhoisInfo API command is limited (special case for .CH)
+ - added whois fallback to WHMCS's DomainLookup when HEXONET's QueryDomainWhoisInfo API command is limited (special case for .CH and .LI)
 
 v 7.1.0 - 2017-07-10
  - added backorder button in the search results (only when ISPAPI Backorder Module is installed)
