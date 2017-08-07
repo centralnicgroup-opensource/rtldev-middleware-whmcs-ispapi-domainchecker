@@ -4,6 +4,12 @@ require(dirname(__FILE__)."/includes/functions.php");
 require(dirname(__FILE__)."/includes/clientareafunctions.php");
 require(dirname(__FILE__)."/includes/registrarfunctions.php");
 
+function WHMCS_LookupDomain($domain){
+	$values["domain"] = $domain;
+	$check = localAPI("domainwhois", $values, $_SESSION["adminuser"]);
+	return urldecode($check["whois"]);
+}
+
 //get the sld and tld
 if (strpos( $_REQUEST["domain"], "." )) {
 	$domainparts = explode( ".", $_REQUEST["domain"], 2 );
@@ -12,7 +18,6 @@ if (strpos( $_REQUEST["domain"], "." )) {
 }else{
 	die("Domain is incorrect");
 }
-
 
 //get the registrar
 $result = select_query("tbldomainpricing","extension,autoreg", array("extension" => $tld));
@@ -27,14 +32,9 @@ while($data = mysql_fetch_array($result)){
 	}
 }
 
-//if ISPAPI registrar use API Whois, else WHOIS
+//if ISPAPI registrar use HEXONET's QueryDomainWhoisInfo, else WHMCS'S LookupDomain
 if(!$registrar){
-	//require("includes/whoisfunctions.php");
-	//$result = lookupDomain($sld, $tld);
-	$command = "domainwhois";
-	$values["domain"] = $_REQUEST["domain"];
-	$check = localAPI($command, $values, $_SESSION["adminuser"]);
-	$whois = urldecode($check["whois"]);
+	$whois = WHMCS_LookupDomain($_REQUEST["domain"]);
 }else{
 	$ispapi_config = ispapi_config(getregistrarconfigoptions($registrar));
 	$command = array(
@@ -42,6 +42,15 @@ if(!$registrar){
 			"DOMAIN" => $_REQUEST["domain"]
 	);
 	$response = ispapi_call($command, $ispapi_config);
+
+	//Fallback: HEXONET's QueryDomainWhoisInfo -> SHELL Whois -> WHMCS'S LookupDomain (special for .CH)
+	if ( ($response["CODE"] != 200) || preg_match("/you have exceeded this limit/i", urldecode($response["PROPERTY"]["WHOISDATA"][0])) ) {
+		$registrar=false;
+		$whois = nl2br(shell_exec("whois ".$_REQUEST["domain"]));
+		if( ($whois == NULL) || preg_match("/you have exceeded this limit/i", $whois) ){
+			$whois = WHMCS_LookupDomain($_REQUEST["domain"]);
+		}
+	}
 }
 
 ?>
