@@ -56,11 +56,11 @@ function ispapidomaincheck_activate() {
 	$result = full_query($query);
 
 	//insert example ammount, markup created_at and updated_at
-	// $result = mysql_query("SELECT * FROM ispapi_tblregistrypremiumpricing");
-	// $data = mysql_fetch_array($result);
-	// if(empty($data)){
-	// 	insert_query("ispapi_tblregistrypremiumpricing",array("id" => 4));
-	// }
+	$result = mysql_query("SELECT * FROM ispapi_tblregistrypremiumpricing");
+	$data = mysql_fetch_array($result);
+	if(empty($data)){
+		insert_query( "ispapi_tblregistrypremiumpricing", array("to_amount" => "-1", "markup" => "60", "created_at" => date("Y-m-d H:i:s"), "updated_at" => date("Y-m-d H:i:s")));
+	}
 	############################################ E T
 
 	//IF NOT EXISTS Create ispapi_tblsettings table
@@ -651,7 +651,8 @@ function ispapidomaincheck_premiumdomainscontent($modulelink){
 	while ($data = mysql_fetch_array($result)) {
 		array_push($amounts_and_markups, $data);
 	}
-	$amounts_and_markups = removeElementWithValue($amounts_and_markups, "id", "4");
+	//to not to display it on the table
+	$amounts_and_markups = removeElementWithValue($amounts_and_markups, "to_amount", "-1");
 
 	$highest_amount = max(array_column($amounts_and_markups, 'to_amount'));
 	if(!$highest_amount){
@@ -661,10 +662,8 @@ function ispapidomaincheck_premiumdomainscontent($modulelink){
 	$_POST['highest_amount'] = $highest_amount;
 
 	if(isset($_POST['highest_amount'])){
-		insert_query( "ispapi_tblregistrypremiumpricing", array( "to_amount" => "-1", "markup" => "60", "id" => "4", "created_at" => date("Y-m-d H:i:s"), "updated_at" => date("Y-m-d H:i:s")));
+		insert_query( "ispapi_tblregistrypremiumpricing", array( "to_amount" => "-1", "markup" => "60", "created_at" => date("Y-m-d H:i:s"), "updated_at" => date("Y-m-d H:i:s")));
 	}
-	//remove element from array where to_amount = -1 -- in order to not to display it in the table
-	$amounts_and_markups = removeElementWithValue($amounts_and_markups, "id", "4");
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="table-responsive">';
@@ -687,24 +686,20 @@ function ispapidomaincheck_premiumdomainscontent($modulelink){
 				echo '</div>';
 			echo '</td>';
 			echo '<td width="320"><a href="'.$modulelink."&delete=".$value["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td>';
-			echo '<input name="PREMIUM['.$value['id'].'][CREATED_AT]" value="'.date("Y-m-d H:i:s").'" type=hidden>';
-			echo '<input name="PREMIUM['.$value['id'].'][UPDATED_AT]" value="'.date("Y-m-d H:i:s").'" type=hidden>';
 		echo '</tr>';
 	}
 	//
 	echo '<tr>';
 		echo '<td width="320"> ';
 			echo '<input class="form-control max-amount" disabled = "disabled" value=">='.$highest_amount.'" type="text">';
-			echo '<input name="to[4][AMOUNT]" value="-1" type=hidden>';
+			echo '<input name="to[AMOUNT]" value="-1" type=hidden>';
 		echo '</td>';
 		echo '<td width="320">';
 			echo '<div class="input-group">';
-				echo '<input class="form-control" name="to[4][MARKUP]" value="60" placeholder="%" type="text">';
+				echo '<input class="form-control" name="to[MARKUP]" value="60" placeholder="%" type="text">';
 				echo '<div class="input-group-addon">%</div>';
 			echo '</div>';
 		echo '</td>';
-		echo '<input name="to[4][CREATED_AT]" value="'.date("Y-m-d H:i:s").'" type=hidden>';
-		echo '<input name="to[4][UPDATED_AT]" value="'.date("Y-m-d H:i:s").'" type=hidden>';
 	echo '</tr>';
 
 	echo '<tr>';
@@ -717,8 +712,6 @@ function ispapidomaincheck_premiumdomainscontent($modulelink){
 				echo '<div class="input-group-addon">%</div>';
 			echo '</div>';
 		echo '</td>';
-		echo '<input name="ADDPREMIUM[CREATED_AT]" value="'.date("Y-m-d H:i:s").'" type=hidden>';
-		echo '<input name="ADDPREMIUM[UPDATED_AT]" value="'.date("Y-m-d H:i:s").'" type=hidden>';
 	echo '</tr>';
 
 	echo '</tbody>';
