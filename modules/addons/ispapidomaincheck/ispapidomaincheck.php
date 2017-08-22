@@ -1,5 +1,5 @@
 <?php
-
+use WHMCS\Database\Capsule;
 $module_version = "7.2.0";
 
 //if (!defined("WHMCS"))
@@ -50,7 +50,7 @@ function ispapidomaincheck_activate() {
 		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "SALES (-20%)", "tlds" => "guru diamonds"));
 	}
 
-	############################################ T
+	############################################
 	//IF NOT EXISTS Create ispapi_tblregistrypremiumpricing table
 	$query = "CREATE TABLE IF NOT EXISTS ispapi_tblregistrypremiumpricing (id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, to_amount DECIMAL(10,2) NOT NULL UNIQUE DEFAULT '0.00', markup DECIMAL(8,5) NOT NULL DEFAULT '0.00000', created_at TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00', updated_at TIMESTAMP NOT NULL);";
 	$result = full_query($query);
@@ -61,7 +61,7 @@ function ispapidomaincheck_activate() {
 	if(empty($data)){
 		insert_query( "ispapi_tblregistrypremiumpricing", array("to_amount" => "-1", "markup" => "60", "created_at" => date("Y-m-d H:i:s"), "updated_at" => date("Y-m-d H:i:s")));
 	}
-	############################################ E T
+	############################################
 
 	//IF NOT EXISTS Create ispapi_tblsettings table
 	$query = "CREATE TABLE IF NOT EXISTS ispapi_tblsettings (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, aftermarket_premium INT(10), registry_premium INT(10));";
@@ -623,23 +623,30 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 }
 
 ############################################################
-function ispapidomaincheck_premiumdomainscontent($modulelink){
+function ispapidomaincheck_premiumdomainscontent( $modulelink ) {
+
 	echo '<div id="tab2box" class="tabbox tab-content">';
 
 	//Delete
-	if(isset($_REQUEST["delete"])){
+	if( isset($_REQUEST["delete"]) ) {
 		mysql_query("DELETE FROM ispapi_tblregistrypremiumpricing WHERE id='".mysql_real_escape_string($_REQUEST["delete"])."'");
 		echo '<div class="infobox"><strong><span class="title">Deletion Successfully!</span></strong><br>Your price has been deleted.</div>';
 	}
 
 	//Save
-	if(isset($_REQUEST["savepremiumdomains"])){
-		foreach($_POST["PREMIUM"] as $id => $price_and_markup_value){
-			update_query( "ispapi_tblregistrypremiumpricing", array( "to_amount" => $price_and_markup_value["AMOUNT"], "markup" => $price_and_markup_value["MARKUP"], "updated_at" => date("Y-m-d H:i:s")), array( "id" => $id));
+	if( isset($_REQUEST["savepremiumdomains"]) ) {
+		if( !empty($_POST["PREMIUM"]) ) {
+			foreach($_POST["PREMIUM"] as $id => $price_and_markup_value){
+				update_query( "ispapi_tblregistrypremiumpricing", array( "to_amount" => $price_and_markup_value["AMOUNT"], "markup" => $price_and_markup_value["MARKUP"], "updated_at" => date("Y-m-d H:i:s")), array( "id" => $id));
+			}
 		}
 
-		if(!empty($_POST["ADDPREMIUM"]["AMOUNT"]) || !empty($_POST["ADDPREMIUM"]["MARKUP"])){
+		if( !empty($_POST["ADDPREMIUM"]["AMOUNT"]) || !empty($_POST["ADDPREMIUM"]["MARKUP"]) ) {
 			insert_query( "ispapi_tblregistrypremiumpricing", array("to_amount" => $_POST["ADDPREMIUM"]["AMOUNT"], "markup" => $_POST["ADDPREMIUM"]["MARKUP"], "created_at" => date("Y-m-d H:i:s"), "updated_at" => date("Y-m-d H:i:s")));
+		}
+
+		if( !empty($_POST["to"]) ) {
+				update_query( "ispapi_tblregistrypremiumpricing", array("markup" => $_POST["to"]["MARKUP"], "updated_at" => date("Y-m-d H:i:s")), array( "to_amount" => $_POST["to"]["AMOUNT"],));
 		}
 
 		echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
@@ -648,85 +655,87 @@ function ispapidomaincheck_premiumdomainscontent($modulelink){
 	//data from table - ispapi_tblregistrypremiumpricing
 	$amounts_and_markups = array();
 	$result = mysql_query("SELECT * FROM ispapi_tblregistrypremiumpricing");
-	while ($data = mysql_fetch_array($result)) {
+	while ( $data = mysql_fetch_array($result) ) {
 		array_push($amounts_and_markups, $data);
 	}
-	//to not to display it on the table
-	$amounts_and_markups = removeElementWithValue($amounts_and_markups, "to_amount", "-1");
+	//sort
+	usort($amounts_and_markups, 'sortByAmount');
 
 	$highest_amount = max(array_column($amounts_and_markups, 'to_amount'));
-	if(!$highest_amount){
+	if( $highest_amount == -1.00 || $$highest_amount ) {
 		$highest_amount = 0;
 	}
-
 	$_POST['highest_amount'] = $highest_amount;
 
-	if(isset($_POST['highest_amount'])){
-		insert_query( "ispapi_tblregistrypremiumpricing", array( "to_amount" => "-1", "markup" => "60", "created_at" => date("Y-m-d H:i:s"), "updated_at" => date("Y-m-d H:i:s")));
+	echo '<form action="'.$modulelink.'" method="post">
+	<div class="table-responsive">
+	<table class="table">
+	<tbody>
+	<tr>
+	<th> Price <</th>
+	<th> Markup %</th>
+	<th></th>
+	</tr>';
+	if( $amounts_and_markups ) {
+		$new_amounts_and_markups = removeElementWithValue($amounts_and_markups, "to_amount", "-1");
+		foreach ( $new_amounts_and_markups as $key => $value ) {
+
+			echo '<tr>
+			<td width="320">
+			<input class="form-control to-amount" name="PREMIUM['.$value['id'].'][AMOUNT]" value="'.$value['to_amount'].'" data-toggle="tooltip" data-placement="top" data-trigger="manual" title="The pricing level must be unique" type="text">
+			</td>
+			<td width="320">
+			<div class="input-group">
+			<input class="form-control" name="PREMIUM['.$value['id'].'][MARKUP]" value="'.$value['markup'].'" placeholder="%" type="text">
+			<div class="input-group-addon">%</div>
+			</div>
+			</td>
+			<td width="320"><a href="'.$modulelink."&delete=".$value["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td>';
+		}
 	}
-
-	echo '<form action="'.$modulelink.'" method="post">';
-	echo '<div class="table-responsive">';
-	echo '<table class="table">';
-	echo '<tbody>';
-	echo '<tr>';
-		echo '<th> Price <</th>';
-		echo '<th> Markup %</th>';
-		echo '<th></th>';
 	echo '</tr>';
-	foreach ($amounts_and_markups as $key => $value) {
-		echo '<tr>';
-			echo '<td width="320"> ';
-				echo '<input class="form-control to-amount" name="PREMIUM['.$value['id'].'][AMOUNT]" value="'.$value['to_amount'].'" data-toggle="tooltip" data-placement="top" data-trigger="manual" title="The pricing level must be unique" type="text">';
-			echo '</td>';
-			echo '<td width="320">';
-				echo '<div class="input-group">';
-					echo '<input class="form-control" name="PREMIUM['.$value['id'].'][MARKUP]" value="'.$value['markup'].'" placeholder="%" type="text">';
-					echo '<div class="input-group-addon">%</div>';
-				echo '</div>';
-			echo '</td>';
-			echo '<td width="320"><a href="'.$modulelink."&delete=".$value["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td>';
-		echo '</tr>';
+	foreach( $amounts_and_markups as $key => $value ) {
+
+		if( in_array('-1',$value) ) {
+			echo '<tr>
+			<td width="320">
+			<input class="form-control max-amount" disabled = "disabled" value=">='.$highest_amount.'" type="text">
+			<input name="to[AMOUNT]" value="-1" type=hidden>
+			</td>
+			<td width="320">
+			<div class="input-group">
+			<input class="form-control" name="to[MARKUP]" value="'.$value['markup'].'" placeholder="%" type="text">
+			<div class="input-group-addon">%</div>
+			</div>
+			</td>';
+		}
 	}
-	//
-	echo '<tr>';
-		echo '<td width="320"> ';
-			echo '<input class="form-control max-amount" disabled = "disabled" value=">='.$highest_amount.'" type="text">';
-			echo '<input name="to[AMOUNT]" value="-1" type=hidden>';
-		echo '</td>';
-		echo '<td width="320">';
-			echo '<div class="input-group">';
-				echo '<input class="form-control" name="to[MARKUP]" value="60" placeholder="%" type="text">';
-				echo '<div class="input-group-addon">%</div>';
-			echo '</div>';
-		echo '</td>';
-	echo '</tr>';
+	echo '</tr>
+	<tr>
+	<td width="320">
+	<input class="form-control to-amount" name="ADDPREMIUM[AMOUNT]" value="" data-toggle="tooltip" data-placement="top" data-trigger="manual" title="The pricing level must be unique" type="text">
+	</td>
+	<td width="320">
+	<div class="input-group">
+	<input class="form-control" name="ADDPREMIUM[MARKUP]" value="" placeholder="%" type="text">
+	<div class="input-group-addon">%</div>
+	</div>
+	</td>
+	</tr>
+	</tbody>
+	</table>
+	<p align="center"><input class="btn" name="savepremiumdomains" type="submit" value="Save Changes"></p>
+	</div>
+	</form>
+	</div>';
 
-	echo '<tr>';
-		echo '<td width="320"> ';
-			echo '<input class="form-control to-amount" name="ADDPREMIUM[AMOUNT]" value="" data-toggle="tooltip" data-placement="top" data-trigger="manual" title="The pricing level must be unique" type="text">';
-		echo '</td>';
-		echo '<td width="320">';
-			echo '<div class="input-group">';
-				echo '<input class="form-control" name="ADDPREMIUM[MARKUP]" value="" placeholder="%" type="text">';
-				echo '<div class="input-group-addon">%</div>';
-			echo '</div>';
-		echo '</td>';
-	echo '</tr>';
-
-	echo '</tbody>';
-
-	echo '</table>';
-	echo '<p align="center"><input class="btn" name="savepremiumdomains" type="submit" value="Save Changes"></p>';
-	echo '</form>';
-	echo '</div>';
-
-//testing the function
-// $newprice = getPriceWithMarkup('1000');
-
+	//testing the function
+	// $newprice = getPriceWithMarkup('1');
+	// echo "----> ".$newprice;
 }
-//helper function
-function removeElementWithValue($array, $key, $value){
+//helper functions
+function removeElementWithValue( $array, $key, $value ) {
+
      foreach($array as $subKey => $subArray){
           if($subArray[$key] == $value){
                unset($array[$subKey]);
@@ -734,15 +743,23 @@ function removeElementWithValue($array, $key, $value){
      }
      return $array;
 }
-//
-function getPriceWithMarkup($price){
-	$query = mysql_query("SELECT * FROM ispapi_tblregistrypremiumpricing WHERE to_amount = $price");
+
+function sortByAmount( $a, $b ) {
+
+	return $a['to_amount'] - $b['to_amount'];
+}
+
+function getPriceWithMarkup( $price ) {
+
+	$pdo = Capsule::connection()->getPdo();
 	$new_price = 0;
-	while($data = mysql_fetch_array($query)){
-		$new_price = ($data['to_amount'] / 100) * $data['markup'];
-		$new_price += $price;
-		// return $new_price; //return here if there are more than one markup for same price
-	}
+	$stmt = $pdo->prepare("SELECT * FROM ispapi_tblregistrypremiumpricing WHERE (to_amount > $price) OR ((to_amount = -1) AND ($price >= (SELECT max(to_amount) FROM ispapi_tblregistrypremiumpricing))) ORDER BY to_amount ASC LIMIT 1");
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	$new_price = ($price / 100) * $rows[0]['markup'];
+	$new_price += $price;
+
 	return $new_price;
 }
 
