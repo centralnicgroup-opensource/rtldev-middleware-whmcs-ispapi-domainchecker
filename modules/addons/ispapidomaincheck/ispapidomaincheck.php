@@ -171,7 +171,10 @@ function ispapidomaincheck_deactivate() {
  * <#WHMCS_URL#>/mydomainchecker.php
  */
 function ispapidomaincheck_clientarea($vars) {
-	//for transfer
+	// echo "<pre>" ; print_r($_REQUEST); echo "</pre>";
+	// echo "<pre> session " ; print_r($_SESSION); echo "</pre>";
+	// echo "<pre> post " ; print_r($_POST); echo "</pre>";
+	// //for transfer
 	//###############
 	if (isset($_REQUEST["transfer"])) {
 		if ($_REQUEST["domain"] != $_LANG["domaincheckerdomainexample"]) {
@@ -309,6 +312,7 @@ function ispapidomaincheck_clientarea($vars) {
 	}
 
 	//set the domain with the post data if filled
+	// echo "<pre>"; print_r($_POST["domain"]); echo "</pre>";
 	if(isset($_POST["domain"]))
 		$domain = $_POST["domain"];
 	else
@@ -354,7 +358,9 @@ function ispapidomaincheck_clientarea($vars) {
 	}
 
 	$prices = ispapi_domainchecker_get_domainprices ($_SESSION["currency"]);
+	// echo "<pre> prices "; print_r($prices); echo "</pre>";
 	$tldpricelist = ispapi_domainchecker_tldpricelist( $prices, $_SESSION["currency"] );
+	// echo "<pre> tldpricelist "; print_r($tldpricelist); echo "</pre>";
 
 	$_SESSION["adminuser"] = $vars["username"];
 
@@ -749,19 +755,19 @@ function sortByAmount( $a, $b ) {
 	return $a['to_amount'] - $b['to_amount'];
 }
 
-function getPriceWithMarkup( $price ) {
-
-	$pdo = Capsule::connection()->getPdo();
-	$new_price = 0;
-	$stmt = $pdo->prepare("SELECT * FROM ispapi_tblregistrypremiumpricing WHERE (to_amount > $price) OR ((to_amount = -1) AND ($price >= (SELECT max(to_amount) FROM ispapi_tblregistrypremiumpricing))) ORDER BY to_amount ASC LIMIT 1");
-    $stmt->execute();
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-	$new_price = ($price / 100) * $rows[0]['markup'];
-	$new_price += $price;
-
-	return $new_price;
-}
+// function getPriceWithMarkup( $price ) {
+//
+// 	$pdo = Capsule::connection()->getPdo();
+// 	$new_price = 0;
+// 	$stmt = $pdo->prepare("SELECT * FROM ispapi_tblregistrypremiumpricing WHERE (to_amount > $price) OR ((to_amount = -1) AND ($price >= (SELECT max(to_amount) FROM ispapi_tblregistrypremiumpricing))) ORDER BY to_amount ASC LIMIT 1");
+//     $stmt->execute();
+//     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//
+// 	$new_price = ($price / 100) * $rows[0]['markup'];
+// 	$new_price += $price;
+//
+// 	return $new_price;
+// }
 
 //domain pricing helpers
 //#######################################
