@@ -171,9 +171,6 @@ function ispapidomaincheck_deactivate() {
  * <#WHMCS_URL#>/mydomainchecker.php
  */
 function ispapidomaincheck_clientarea($vars) {
-	// echo "<pre>" ; print_r($_REQUEST); echo "</pre>";
-	// echo "<pre> session " ; print_r($_SESSION); echo "</pre>";
-	// echo "<pre> post " ; print_r($_POST); echo "</pre>";
 	// //for transfer
 	//###############
 	if (isset($_REQUEST["transfer"])) {
@@ -312,7 +309,6 @@ function ispapidomaincheck_clientarea($vars) {
 	}
 
 	//set the domain with the post data if filled
-	// echo "<pre>"; print_r($_POST["domain"]); echo "</pre>";
 	if(isset($_POST["domain"]))
 		$domain = $_POST["domain"];
 	else
@@ -358,9 +354,8 @@ function ispapidomaincheck_clientarea($vars) {
 	}
 
 	$prices = ispapi_domainchecker_get_domainprices ($_SESSION["currency"]);
-	// echo "<pre> prices "; print_r($prices); echo "</pre>";
+
 	$tldpricelist = ispapi_domainchecker_tldpricelist( $prices, $_SESSION["currency"] );
-	// echo "<pre> tldpricelist "; print_r($tldpricelist); echo "</pre>";
 
 	$_SESSION["adminuser"] = $vars["username"];
 

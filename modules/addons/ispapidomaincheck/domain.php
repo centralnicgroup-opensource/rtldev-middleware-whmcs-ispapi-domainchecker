@@ -1,4 +1,6 @@
 <?php
+// session_set_cookie_params(600,"/");
+// session_start();
 //require_once(dirname(__FILE__)."/FirePHP.class.php");
 require_once(dirname(__FILE__)."/../../../init.php");
 require_once(dirname(__FILE__)."/../../../includes/domainfunctions.php");
@@ -13,7 +15,6 @@ if(file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backe
 }
 
 use WHMCS\Database\Capsule;
-// echo "<pre>"; print_r($_SESSION); echo "</pre>";
 
 //WORKARROUND: Get a list of all Hexonet registrar modules and include the registrar files
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
@@ -319,7 +320,7 @@ class DomainCheck
      * Get a list of premium domain suggestions
      */
     private function getPremiumDomainSuggestions(){
-		// echo "<pre>"; print_r($_SESSION); echo "</pre>";
+
     	if(!isset($_SESSION["domainlist"]))
     		return;
 
@@ -352,7 +353,6 @@ class DomainCheck
     		$registrarconfigoptions = getregistrarconfigoptions($list["registrar"]);
     		$ispapi_config = ispapi_config($registrarconfigoptions);
     		$suggestionList = ispapi_call($command, $ispapi_config);
-			// echo "<pre> suggestionList "; print_r($suggestionList); echo "</pre>";
 
     		if($suggestionList["CODE"]=="200"){
     			if(isset($suggestionList["PROPERTY"]["DOMAIN"])){
@@ -382,8 +382,6 @@ class DomainCheck
      * return a JSON list of all domains with the availability
      */
     private function startDomainCheck(){
-
-
 
     	//return the cached data only if $this->cached_data = 1
     	if($this->cached_data){
@@ -416,21 +414,9 @@ class DomainCheck
     		}
     	}
 
+
     	//for ispapi_domain_list (domains that use our registrar module)
     	$extendeddomainlist = $this->getExtendedDomainlist($ispapi_domain_list);
-		// echo "<pre> extendeddomainlist "; print_r($extendeddomainlist); echo "</pre>";
-
-		//
-		// $command =  $command = array(
-		//   "command" => "StatusUser"
-		// );
-		// $registrarconfigoptions = getregistrarconfigoptions($extendeddomainlist["ispapi"]["registrar"]);
-		// $ispapi_config = ispapi_config($registrarconfigoptions);
-		//
-		// $registry_premium_classes = ispapi_call($command, $ispapi_config);
-
-		// echo "<pre> default_costs "; print_r($registry_premium_classes); echo "</pre>";
-		//
 
     	$showpremium = false;
 
@@ -444,12 +430,23 @@ class DomainCheck
     	// 	$premiumchannels = "";
     	// }
 
-		$premiumchannels = "*"; //tulsi
+		$premiumchannels = "*";
+
+		if ( $_SESSION['timeout']  == "" ||  $_SESSION['timeout'] < time()) {
+			$command = array(
+				"COMMAND" => "statususer",
+			);
+			$registrarconfigoptions = getregistrarconfigoptions($extendeddomainlist['ispapi']['registrar']);
+			$ispapi_config = ispapi_config($registrarconfigoptions);
+			$registry_premium_domains_prices = ispapi_call($command, $ispapi_config);
+			$_SESSION['registry_premium_domains_prices'] = $registry_premium_domains_prices;
+			$_SESSION['timeout'] = 600 + time();
+		}
+
 		$default_currency = mysql_fetch_array(select_query("tblcurrencies","*",array("default" => 1 ),"","","1"));//tulsi
-		
+
     	$response = array();
     	foreach($extendeddomainlist as $item){
-			// echo "<pre> item "; print_r($item); echo "</pre>";
     		//IDN convert before sending to checkdomain
     		$converted_domains = $this->convertIDN($item["domain"], $item["registrar"]);
 
@@ -458,67 +455,50 @@ class DomainCheck
     				"PREMIUMCHANNELS" => $premiumchannels,
     				"DOMAIN" => $converted_domains
     		);
-			// echo "<pre> command "; print_r($command); echo "</pre>";
 
     		$registrarconfigoptions = getregistrarconfigoptions($item["registrar"]);
     		$ispapi_config = ispapi_config($registrarconfigoptions);
     		$check = ispapi_call($command, $ispapi_config);
 
-			// echo "<pre> check "; print_r($check); echo "</pre>";
-
-
-
-
     		$index = 0;
     		foreach($item["domain"] as $item){
-				//
-				// if($check["PROPERTY"]["CLASS"]){
-				// 	$price = $check["PROPERTY"]["CLASS"]
-				// }
-				//
-				// echo "<pre> item domain  "; print_r($item); echo "</pre>";
 
     			$tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
 				$price = array();
-				//T
-				// echo "<pre> tmp  "; print_r($tmp); echo "</pre>";
-
-
-					// ET
 
 	    			if($tmp[0] == "210"){
 	    				//get the price for this domain
 	    				$tld = $this->getDomainExtension($item);
 
 	    				$price = $this->getTLDprice($tld);
-						// echo "<pre> if price  "; print_r($price); echo "</pre>";
-	    			}else{
-						// echo "<pre> default currency "; print_r($default_currency); echo "</pre>";
-						//T
+
+	    			}else{//Handling registry premium domains
+
 						if( in_array( '[PREMIUM]', $tmp ) ) {
-							// echo "has bla";
+
 							$price = $check["PROPERTY"]["PRICE"][$index];
-							// echo " price first ".$price;
+
+							if($price == ""){
+
+								$premium_class = $check["PROPERTY"]["CLASS"][$index];
+								$pattern_for_premium_class_annual = "/".$premium_class."_ANNUAL$/";
+								$match_premium_class = preg_grep($pattern_for_premium_class_annual, $_SESSION['registry_premium_domains_prices']["PROPERTY"]["RELATIONTYPE"]);
+						        $match_premium_class_keys= array_keys($match_premium_class);
+								$key = $match_premium_class_keys[0];
+						        $premium_price= $_SESSION['registry_premium_domains_prices']["PROPERTY"]["RELATIONVALUE"][$key];
+
+								$price = $premium_price;
+							}
+
 							$price = $this->getPriceWithMarkup($price);
 
-
-							// $cur = $check["PROPERTY"]["CURRENCY"][$index];
-
-							// echo " currency is ".$cur;
 							$price = $this->formatPrice($price, $default_currency);
 
-							// print_r($price);
-
-
-
 							$price = (array)$price;
-							$price["domainregister"][1] = $price;
-							// $price["domainregister"] = $price;
 
-							// echo " price second ";
-							// print_r($price);
+							$price["domainregister"][1] = $price[0];
+							unset($price[0]);
 						}
-						//ET
 
 	    				// if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
 	    				// 		//get the NAMEMEDIA price
@@ -528,17 +508,15 @@ class DomainCheck
 	    				// 		//override class
 	    				// 		$check["PROPERTY"]["CLASS"][$index] = "PREMIUM_NAMEMEDIA";
 						// }else{
-						// 	// echo " in else ";
+
 						// 	if(isset($check["PROPERTY"]["CLASS"][$index]) && !empty($check["PROPERTY"]["CLASS"][$index])) {
 						// 		//get the premium price
 	    				// 		$price = $this->getPremiumClassPrice($check["PROPERTY"]["CLASS"][$index], $item);
-						//
-						// 		// echo "<pre> price is "; print_r($price); echo "</pre>";
+
 						// 	}
 						// }
-						// echo "<pre> else price  "; print_r($price); echo "</pre>";
 	    			}
-// echo " new price is ".$price;
+
 
 				//if no price configured or price = 0 display as taken...
     			if($price["domainregister"][1] == -1){
@@ -703,6 +681,7 @@ class DomainCheck
      *
      */
 
+	 //Handling registry premium domains
 	 private function getPriceWithMarkup( $price ) {
 
 	 	$pdo = Capsule::connection()->getPdo();
