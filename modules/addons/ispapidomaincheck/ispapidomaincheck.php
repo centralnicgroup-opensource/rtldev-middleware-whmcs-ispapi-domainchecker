@@ -1,6 +1,7 @@
 <?php
 
 $module_version = "7.2.0";
+use WHMCS\Database\Capsule;
 
 //if (!defined("WHMCS"))
 //	die("This file cannot be accessed directly");
@@ -27,112 +28,156 @@ function ispapidomaincheck_config() {
  * This function will be called with the activation of the add-on module.
  */
 function ispapidomaincheck_activate() {
+	// echo "ispapidomaincheck_activate\n";
+	try{
+        $pdo = Capsule::connection()->getPdo();
 
-	//IF NOT EXISTS Create ispapi_tblcategories table
-	$query = "CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, parent INT(10), name TEXT, tlds TEXT);";
-	$result = full_query($query);
+			//IF NOT EXISTS Create ispapi_tblcategories table
+			$stmt = $pdo->prepare("CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, parent INT(10), name TEXT, tlds TEXT);");
+			$stmt->execute();
 
-	//Insert example categories if table empty (just the first time)
-	$result = mysql_query("SELECT * FROM ispapi_tblcategories");
-	$data = mysql_fetch_array($result);
-	if(empty($data)){
-		$id = insert_query("ispapi_tblcategories",array("name" => "new TLDs"));
-		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "Popular", "tlds" => "camera diamonds domains email guru land sexy tattoo singles"));
-		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "Business", "tlds" => "camera company computer enterprises equipment holdings management solutions support"));
-		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "Shopping & eCommerce", "tlds" => "bike camera clothing diamonds tatoo tips voyage"));
-		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "Food & Drink", "tlds" => "kitchen menu tips today"));
-		$id = insert_query("ispapi_tblcategories",array("name" => "generic TLDs"));
-		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "Top 5", "tlds" => "com net org info biz"));
-		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "Other", "tlds" => "aero mobi asia name pro xxx jobs tel"));
-		$id = insert_query("ispapi_tblcategories",array("name" => "country code TLDs"));
-		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "Europe", "tlds" => "fr de it nl lu"));
-		$id = insert_query("ispapi_tblcategories",array("name" => "Other"));
-		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => "SALES (-20%)", "tlds" => "guru diamonds"));
+			//Insert example categories if table empty (just the first time)
+			$stmt2 = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
+			$stmt2->execute();
+			$data = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+			if(empty($data)){
+				$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories (name) VALUES ( 'new TLDs' )");
+                $insert_stmt->execute();
+				if($insert_stmt->rowCount()){
+		            $stmt = $pdo->prepare("SELECT id FROM ispapi_tblcategories WHERE name = 'new TLDS'");
+		            $stmt->execute();
+					$id = $stmt->fetch(PDO::FETCH_ASSOC);
+					$insert_stmt1 = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES (?, 'Popular', 'camera diamonds domains email guru land sexy tattoo singles')");
+					$insert_stmt1->execute(array($id['id']));
+					$insert_stmt2 = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES (?, 'Business', 'camera company computer enterprises equipment holdings management solutions support')");
+	                $insert_stmt2->execute(array($id['id']));
+					$insert_stmt3 = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES (?, 'Shopping & eCommerce', 'bike camera clothing diamonds tatoo tips voyage')");
+	                $insert_stmt3->execute(array($id['id']));
+					$insert_stmt4 = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES (?, 'Food & Drink', 'kitchen menu tips today')");
+	                $insert_stmt4->execute(array($id['id']));
+		        }
+				$insert_stmt2 = $pdo->prepare("INSERT INTO ispapi_tblcategories (name) VALUES ( 'generic TLDs' )");
+                $insert_stmt2->execute();
+				if($insert_stmt2->rowCount()){
+					$stmt = $pdo->prepare("SELECT id FROM ispapi_tblcategories WHERE name='generic TLDs'");
+		            $stmt->execute();
+					$id = $stmt->fetch(PDO::FETCH_ASSOC);
+					$insert_stmt1 = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES ( ?, 'Top 5', 'com net org info biz')");
+	                $insert_stmt1->execute(array($id['id']));
+					$insert_stmt2 = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES ( ?, 'Other', 'aero mobi asia name pro xxx jobs tel')");
+	                $insert_stmt2->execute(array($id['id']));
+				}
+				$insert_stmt3 = $pdo->prepare("INSERT INTO ispapi_tblcategories (name) VALUES ( 'country code TLDs' )");
+                $insert_stmt3->execute();
+				if($insert_stmt3->rowCount()){
+					$stmt = $pdo->prepare("SELECT id FROM ispapi_tblcategories WHERE name='country code TLDs'");
+		            $stmt->execute();
+					$id = $stmt->fetch(PDO::FETCH_ASSOC);
+					$insert_stmt1 = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES ( ?, 'Europe', 'fr de it nl lu')");
+	                $insert_stmt1->execute(array($id['id']));
+				}
+				$insert_stmt4 = $pdo->prepare("INSERT INTO ispapi_tblcategories (name) VALUES ( 'Others' )");
+                $insert_stmt4->execute();
+				if($insert_stmt4->rowCount()){
+					$stmt = $pdo->prepare("SELECT id FROM ispapi_tblcategories WHERE name='Others'");
+		            $stmt->execute();
+					$id = $stmt->fetch(PDO::FETCH_ASSOC);
+					$insert_stmt1 = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES ( ?, 'SALES (-20%)', 'guru diamonds')");
+	                $insert_stmt1->execute(array($id['id']));
+				}
+
+			}
+			//IF NOT EXISTS Create ispapi_tblsettings table
+			$stmt = $pdo->prepare("CREATE TABLE IF NOT EXISTS ispapi_tblsettings (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, aftermarket_premium INT(10), registry_premium INT(10));");
+			$stmt->execute();
+
+			//IF NOT EXISTS create products for premium domains (DONUTS)
+			$stmt = $pdo->prepare("SELECT * FROM tblproductgroups WHERE name='PREMIUM DOMAIN' LIMIT 1");
+			$stmt->execute();
+			$data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			if(!empty($data)){
+				$productgroupid = $data["id"];
+			}else{
+				$insert_stmt = $pdo->prepare("INSERT INTO tblproductgroups (name, hidden) VALUES ( 'PREMIUM DOMAIN', '1')");
+				$insert_stmt->execute();
+				if($insert_stmt->rowCount()){
+					$stmt = $pdo->prepare("SELECT id FROM tblproductgroups WHERE name='PREMIUM DOMAIN'");
+		            $stmt->execute();
+					$productgroupid = $stmt->fetch(PDO::FETCH_ASSOC);
+				}
+			}
+
+			$classes = array("PREMIUM_DONUTS_A" => "1234",
+					"PREMIUM_DONUTS_A+" => "1234",
+					"PREMIUM_DONUTS_AA" => "1234",
+					"PREMIUM_DONUTS_AA+" => "1234",
+					"PREMIUM_DONUTS_AAA+" => "1234",
+					"PREMIUM_DONUTS_AAAA" => "1234",
+					"PREMIUM_DONUTS_B" => "1234",
+					"PREMIUM_DONUTS_B+" => "1234",
+					"PREMIUM_DONUTS_BB" => "1234",
+					"PREMIUM_DONUTS_BB+" => "1234",
+					"PREMIUM_DONUTS_BBB+" => "1234",
+					"PREMIUM_DONUTS_BBBB" => "1234",
+					"PREMIUM_MENU_A" => "1234",
+					"PREMIUM_MENU_B" => "1234",
+					"PREMIUM_MENU_C" => "1234",
+					"PREMIUM_MENU_D" => "1234",
+					"PREMIUM_CEO_A" => "1234",
+					"PREMIUM_CEO_B" => "1234",
+					"PREMIUM_CEO_C" => "1234",
+					"PREMIUM_CEO_D" => "1234",
+					"PREMIUM_BUILD_A" => "1234",
+					"PREMIUM_BUILD_B" => "1234",
+					"PREMIUM_BUILD_C" => "1234",
+					"PREMIUM_BUILD_D" => "1234",
+					"PREMIUM_BUILD_E" => "1234",
+					"PREMIUM_RIGHTSIDE_A" => "1234",
+					"PREMIUM_RIGHTSIDE_B" => "1234",
+					"PREMIUM_RIGHTSIDE_C" => "1234",
+					"PREMIUM_RIGHTSIDE_D" => "1234",
+					"PREMIUM_RIGHTSIDE_E" => "1234",
+					"PREMIUM_RIGHTSIDE_F" => "1234",
+					"PREMIUM_RIGHTSIDE_G" => "1234",
+					"PREMIUM_RIGHTSIDE_H" => "1234",
+					"PREMIUM_RIGHTSIDE_I" => "1234",
+					"PREMIUM_RIGHTSIDE_J" => "1234",
+					"PREMIUM_RIGHTSIDE_K" => "1234",
+					"PREMIUM_RIGHTSIDE_L" => "1234",
+					"PREMIUM_RIGHTSIDE_M" => "1234",
+					"PREMIUM_RIGHTSIDE_N" => "1234",
+					"PREMIUM_RIGHTSIDE_O" => "1234",
+					"PREMIUM_RIGHTSIDE_P" => "1234",);
+
+			$currencies = array();
+
+			$stmt = $pdo->prepare("SELECT id from tblcurrencies");
+			$stmt->execute();
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data as $key => $value) {
+				array_push($currencies, $value["id"]);
+			}
+
+			foreach($classes as $class => $price){
+				$stmt = $pdo->prepare("SELECT * FROM tblproducts WHERE name=?");
+				$stmt->execute(array(mysql_real_escape_string($class)));
+				$data = $stmt->fetch(PDO::FETCH_ASSOC);
+				if(empty($data)){
+					$insert_stmt = $insert_stmt1 = $pdo->prepare("INSERT INTO tblproducts (type, gid, name, description, autosetup, hidden, servertype, paytype, retired, freedomain, freedomainpaymentterms) VALUES (other, ?, ?, '', 'payment', 'on', 'ispapipremium', 'recurring', '0', 'on', 'Annually')");
+	                $insert_stmt1->execute(array($productgroupid, $class));
+					if($insert_stmt1->rowCount()){
+						$stmt = $pdo->prepare("SELECT id FROM tblproducts WHERE gid=?");
+			            $stmt->execute(array($productgroupid));
+						$newid = $stmt->fetch(PDO::FETCH_ASSOC);
+
+					}
+				}
+			}
+		    return array('status'=>'success','description'=>'The ISPAPI Domaincheck Addon was successfully installed.');
+	} catch (Exception $e) {
+		die($e->getMessage());
 	}
-
-	//IF NOT EXISTS Create ispapi_tblsettings table
-	$query = "CREATE TABLE IF NOT EXISTS ispapi_tblsettings (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, aftermarket_premium INT(10), registry_premium INT(10));";
-	$result = full_query($query);
-
-
-	//IF NOT EXISTS create products for premium domains (DONUTS)
-	$result = mysql_query("SELECT * FROM tblproductgroups WHERE name='PREMIUM DOMAIN' LIMIT 1");
-	$data = mysql_fetch_array($result);
-	if(!empty($data)){
-		$productgroupid = $data["id"];
-	}else{
-		$productgroupid = insert_query("tblproductgroups",array("name" => "PREMIUM DOMAIN", "hidden" => 1));
-	}
-
-	$classes = array("PREMIUM_DONUTS_A" => "1234",
-			"PREMIUM_DONUTS_A+" => "1234",
-			"PREMIUM_DONUTS_AA" => "1234",
-			"PREMIUM_DONUTS_AA+" => "1234",
-			"PREMIUM_DONUTS_AAA+" => "1234",
-			"PREMIUM_DONUTS_AAAA" => "1234",
-			"PREMIUM_DONUTS_B" => "1234",
-			"PREMIUM_DONUTS_B+" => "1234",
-			"PREMIUM_DONUTS_BB" => "1234",
-			"PREMIUM_DONUTS_BB+" => "1234",
-			"PREMIUM_DONUTS_BBB+" => "1234",
-			"PREMIUM_DONUTS_BBBB" => "1234",
-			"PREMIUM_MENU_A" => "1234",
-			"PREMIUM_MENU_B" => "1234",
-			"PREMIUM_MENU_C" => "1234",
-			"PREMIUM_MENU_D" => "1234",
-			"PREMIUM_CEO_A" => "1234",
-			"PREMIUM_CEO_B" => "1234",
-			"PREMIUM_CEO_C" => "1234",
-			"PREMIUM_CEO_D" => "1234",
-			"PREMIUM_BUILD_A" => "1234",
-			"PREMIUM_BUILD_B" => "1234",
-			"PREMIUM_BUILD_C" => "1234",
-			"PREMIUM_BUILD_D" => "1234",
-			"PREMIUM_BUILD_E" => "1234",
-			"PREMIUM_RIGHTSIDE_A" => "1234",
-			"PREMIUM_RIGHTSIDE_B" => "1234",
-			"PREMIUM_RIGHTSIDE_C" => "1234",
-			"PREMIUM_RIGHTSIDE_D" => "1234",
-			"PREMIUM_RIGHTSIDE_E" => "1234",
-			"PREMIUM_RIGHTSIDE_F" => "1234",
-			"PREMIUM_RIGHTSIDE_G" => "1234",
-			"PREMIUM_RIGHTSIDE_H" => "1234",
-			"PREMIUM_RIGHTSIDE_I" => "1234",
-			"PREMIUM_RIGHTSIDE_J" => "1234",
-			"PREMIUM_RIGHTSIDE_K" => "1234",
-			"PREMIUM_RIGHTSIDE_L" => "1234",
-			"PREMIUM_RIGHTSIDE_M" => "1234",
-			"PREMIUM_RIGHTSIDE_N" => "1234",
-			"PREMIUM_RIGHTSIDE_O" => "1234",
-			"PREMIUM_RIGHTSIDE_P" => "1234",);
-
-	$currencies = array();
-	$result = select_query("tblcurrencies", "id");
-	while($data = mysql_fetch_array($result)){
-		array_push($currencies, $data["id"]);
-	}
-
-	foreach($classes as $class => $price){
-
-		$result = mysql_query("SELECT * FROM tblproducts WHERE name='".mysql_real_escape_string($class)."'");
-		$data = mysql_fetch_array($result);
-		if(empty($data)){
-
-			$newid = insert_query("tblproducts",array("type" => "other",
-					"gid" => $productgroupid,
-					"name" => $class,
-					"description" => "",
-					"autosetup" => "payment",
-					"hidden" => "on",
-					"servertype" => "ispapipremium",
-					"paytype" => "recurring",
-					"retired" => "0",
-					"freedomain" => "on",
-					"freedomainpaymentterms" => "Annually",));
-		}
-
-	}
-    return array('status'=>'success','description'=>'The ISPAPI Domaincheck Addon was successfully installed.');
 }
 
 /*
@@ -158,212 +203,233 @@ function ispapidomaincheck_deactivate() {
  * <#WHMCS_URL#>/mydomainchecker.php
  */
 function ispapidomaincheck_clientarea($vars) {
-	//for transfer
-	//###############
-	if (isset($_REQUEST["transfer"])) {
-		if ($_REQUEST["domain"] != $_LANG["domaincheckerdomainexample"]) {
-			$parts = explode(".", $_REQUEST["domain"], 2);
-			if(isset($parts[0]) && isset($parts[1])){
-				redir( "a=add&domain=transfer&sld=" . $parts[0] . "&tld=." . $parts[1], "cart.php" );
-			}else{
-				redir( "a=add&domain=transfer", "cart.php" );
-			}
-		}
-		else {
-			redir( "a=add&domain=transfer", "cart.php" );
-		}
-	}
-	//###############
+    try{
+        $pdo = Capsule::connection()->getPdo();
 
-	//for hosting
-	//###############
-	if (isset($_REQUEST["hosting"])) {
-		if ($_REQUEST["domain"] != $_LANG["domaincheckerdomainexample"]) {
-			$parts = explode(".", $_REQUEST["domain"], 2);
-			if(isset($parts[0]) && isset($parts[1])){
-				redir( "sld=" . $parts[0] . "&tld=." . $parts[1], "cart.php" );
-			}else{
-				redir( "", "cart.php" );
-			}
-		}
-		else {
-			redir( "", "cart.php" );
-		}
-	}
-	//###############
+        //for transfer
+    	//###############
+    	if (isset($_REQUEST["transfer"])) {
+    		if ($_REQUEST["domain"] != $_LANG["domaincheckerdomainexample"]) {
+    			$parts = explode(".", $_REQUEST["domain"], 2);
+    			if(isset($parts[0]) && isset($parts[1])){
+    				redir( "a=add&domain=transfer&sld=" . $parts[0] . "&tld=." . $parts[1], "cart.php" );
+    			}else{
+    				redir( "a=add&domain=transfer", "cart.php" );
+    			}
+    		}
+    		else {
+    			redir( "a=add&domain=transfer", "cart.php" );
+    		}
+    	}
+    	//###############
 
-	require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
+    	//for hosting
+    	//###############
+    	if (isset($_REQUEST["hosting"])) {
+    		if ($_REQUEST["domain"] != $_LANG["domaincheckerdomainexample"]) {
+    			$parts = explode(".", $_REQUEST["domain"], 2);
+    			if(isset($parts[0]) && isset($parts[1])){
+    				redir( "sld=" . $parts[0] . "&tld=." . $parts[1], "cart.php" );
+    			}else{
+    				redir( "", "cart.php" );
+    			}
+    		}
+    		else {
+    			redir( "", "cart.php" );
+    		}
+    	}
+    	//###############
 
-	if(!isset($_SESSION["Language"])){
-		$result = mysql_query("SELECT value FROM tblconfiguration WHERE setting='Language' ");
-		while ($data = mysql_fetch_array($result)) {
-			$language = $data["value"];
-		}
-		$_SESSION["Language"] = strtolower($language);
-	}
-	require(dirname(__FILE__)."/../../../lang/".$_SESSION["Language"].".php");
+    	require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
 
-	//Check if the ISPAPI Registrar Module available, load it, raise error if not existing
-	//ISPAPI DomainChecker require the ISPAPI Registrar Module
-	$error = false;
-	$modulelist = array();
-	if(file_exists(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php")){
-		$file = "ispapi";
-		require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
-		$funcname = $file.'_GetISPAPIModuleVersion';
-		if(function_exists($file.'_GetISPAPIModuleVersion')){
+    	if(!isset($_SESSION["Language"])){
+            $stmt = $pdo->prepare("SELECT value FROM tblconfiguration WHERE setting='Language' ");
+            $stmt->execute();
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $language = $data["value"];
 
-			$version = call_user_func($file.'_GetISPAPIModuleVersion');
-			//check if version = 1.0.15 or higher
-			if( version_compare($version, '1.0.15') >= 0 ){
-				//check authentication
-				$registrarconfigoptions = getregistrarconfigoptions($file);
-				$ispapi_config = ispapi_config($registrarconfigoptions);
-				$command =  $command = array(
-						"command" => "CheckAuthentication",
-						"subuser" => $ispapi_config["login"],
-						"password" => $ispapi_config["password"],
-				);
-				$checkAuthentication = ispapi_call($command, $ispapi_config);
-				if($checkAuthentication["CODE"] != "200"){
-					die("The \"".$file."\" registrar authentication failed! Please verify your registrar credentials and try again.");
-				}else{
-					array_push($modulelist, $file);
-				}
-			}else{
-				$error = true;
-			}
-		}else{
-			$error = true;
-		}
-	}else{
-		$error = true;
-	}
+    		$_SESSION["Language"] = strtolower($language);
+    	}
+    	require(dirname(__FILE__)."/../../../lang/".$_SESSION["Language"].".php");
 
-	if($error){
-		die("The ISPAPI DomainCheck Module requires ISPAPI Registrar Module v1.0.15 or higher!");
-	}
+    	//Check if the ISPAPI Registrar Module available, load it, raise error if not existing
+    	//ISPAPI DomainChecker require the ISPAPI Registrar Module
+    	$error = false;
+    	$modulelist = array();
+    	if(file_exists(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php")){
+    		$file = "ispapi";
+    		require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
+    		$funcname = $file.'_GetISPAPIModuleVersion';
+    		if(function_exists($file.'_GetISPAPIModuleVersion')){
+
+    			$version = call_user_func($file.'_GetISPAPIModuleVersion');
+    			//check if version = 1.0.15 or higher
+    			if( version_compare($version, '1.0.15') >= 0 ){
+    				//check authentication
+    				$registrarconfigoptions = getregistrarconfigoptions($file);
+    				$ispapi_config = ispapi_config($registrarconfigoptions);
+    				$command =  $command = array(
+    						"command" => "CheckAuthentication",
+    						"subuser" => $ispapi_config["login"],
+    						"password" => $ispapi_config["password"],
+    				);
+    				$checkAuthentication = ispapi_call($command, $ispapi_config);
+    				if($checkAuthentication["CODE"] != "200"){
+    					die("The \"".$file."\" registrar authentication failed! Please verify your registrar credentials and try again.");
+    				}else{
+    					array_push($modulelist, $file);
+    				}
+    			}else{
+    				$error = true;
+    			}
+    		}else{
+    			$error = true;
+    		}
+    	}else{
+    		$error = true;
+    	}
+
+    	if($error){
+    		die("The ISPAPI DomainCheck Module requires ISPAPI Registrar Module v1.0.15 or higher!");
+    	}
 
 
-	//Get the list of all used registrar modules
-	$result = select_query("tbldomainpricing","extension,autoreg");
-	$registrar = array();
-	while($data = mysql_fetch_array($result)){
-		if(!empty($data["autoreg"])){
-			if(!in_array($data["autoreg"], $modulelist)){
-				array_push($modulelist, $data["autoreg"]);
-			}
-		}
-	}
-	//filter the whole list to catch only the HEXONET registars
-	foreach($modulelist as $file){
-		if(file_exists(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php")){
-			require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
-			$funcname = $file.'_GetISPAPIModuleVersion';
-			if(function_exists($file.'_GetISPAPIModuleVersion')){
+    	//Get the list of all used registrar modules
+        $stmt = $pdo->prepare("SELECT extension, autoreg FROM tbldomainpricing");
+        $registrar = array();
+        $stmt->execute();
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+         foreach ($data as $key => $value) {
+             if(!empty($value["autoreg"])){
+     			if(!in_array($value["autoreg"], $modulelist)){
+     				array_push($modulelist, $value["autoreg"]);
+     			}
+     		}
+         }
 
-				$version = call_user_func($file.'_GetISPAPIModuleVersion');
-				//check if version = 1.0.15 or higher
-				if( version_compare($version, '1.0.15') >= 0 ){
-					array_push($registrar, $file);
-					//check authentication
-					$registrarconfigoptions = getregistrarconfigoptions($file);
-					$ispapi_config = ispapi_config($registrarconfigoptions);
-					$command =  $command = array(
-							"command" => "CheckAuthentication",
-							"subuser" => $ispapi_config["login"],
-							"password" => $ispapi_config["password"],
-					);
-					$checkAuthentication = ispapi_call($command, $ispapi_config);
-					if($checkAuthentication["CODE"] != "200"){
-						die("The \"".$file."\" registrar authentication failed! Please verify your registrar credentials and try again.");
-					}
-				}else{
-					die("The ISPAPI DomainCheck Module requires \"".$file."\" Registrar Module v1.0.15 or higher!");
-				}
-			}
-		}
-	}
+    	//filter the whole list to catch only the HEXONET registars
+    	foreach($modulelist as $file){
+    		if(file_exists(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php")){
+    			require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
+    			$funcname = $file.'_GetISPAPIModuleVersion';
+    			if(function_exists($file.'_GetISPAPIModuleVersion')){
 
-	//for the domain.php file
-	$_SESSION["ispapi_registrar"] = $registrar;
+    				$version = call_user_func($file.'_GetISPAPIModuleVersion');
+    				//check if version = 1.0.15 or higher
+    				if( version_compare($version, '1.0.15') >= 0 ){
+    					array_push($registrar, $file);
+    					//check authentication
+    					$registrarconfigoptions = getregistrarconfigoptions($file);
+    					$ispapi_config = ispapi_config($registrarconfigoptions);
+    					$command =  $command = array(
+    							"command" => "CheckAuthentication",
+    							"subuser" => $ispapi_config["login"],
+    							"password" => $ispapi_config["password"],
+    					);
+    					$checkAuthentication = ispapi_call($command, $ispapi_config);
+    					if($checkAuthentication["CODE"] != "200"){
+    						die("The \"".$file."\" registrar authentication failed! Please verify your registrar credentials and try again.");
+    					}
+    				}else{
+    					die("The ISPAPI DomainCheck Module requires \"".$file."\" Registrar Module v1.0.15 or higher!");
+    				}
+    			}
+    		}
+    	}
 
-	//Set currency session if not set.
-	if ( !$_SESSION["currency"] ) {
-		$result = select_query("tblcurrencies","id", array("default" => 1), "", "", 1);
-		$data = mysql_fetch_array($result);
-		$_SESSION["currency"] = $data["id"];
-	}
+    	//for the domain.php file
+    	$_SESSION["ispapi_registrar"] = $registrar;
 
-	//set the domain with the post data if filled
-	if(isset($_POST["domain"]))
-		$domain = $_POST["domain"];
-	else
-		$domain = "";
+    	//Set currency session if not set.
+    	if ( !$_SESSION["currency"] ) {
+            // TODO:AM NOT SURE ABOUT THIS QUERY - NEED A RECHECK
+            $stmt = $pdo->prepare("SELECT id FROM tblcurrencies");
+            $stmt->execute();
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $_SESSION["currency"] = $data["id"];
 
-	//empty the cache on all reload
-	if(isset($_SESSION["cache"])){
-		unset($_SESSION["cache"]);
-	}
+    	}
+    	//set the domain with the post data if filled
+    	if(isset($_POST["domain"]))
+    		$domain = $_POST["domain"];
+    	else
+    		$domain = "";
 
-	//get the module name
-	//$parts = Explode("/", __FILE__);
-	//$parts = Explode(".", $parts[count($parts) - 1]);
-	//$modulename = $parts[0];
-	$modulename = "ispapidomaincheck";
-	$path_to_domain_file = "modules/addons/".$modulename."/domain.php";
-	$modulepath = "modules/addons/".$modulename."/";
+    	//empty the cache on all reload
+    	if(isset($_SESSION["cache"])){
+    		unset($_SESSION["cache"]);
+    	}
 
-	//check if backordermodule is installed and set the backorder module path
-	$backordermoduleinstalled = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
-	$backordermodulepath = "modules/addons/ispapibackorder/";
+    	//get the module name
+    	//$parts = Explode("/", __FILE__);
+    	//$parts = Explode(".", $parts[count($parts) - 1]);
+    	//$modulename = $parts[0];
+    	$modulename = "ispapidomaincheck";
+    	$path_to_domain_file = "modules/addons/".$modulename."/domain.php";
+    	$modulepath = "modules/addons/".$modulename."/";
 
-	//get all categories with subgategories for the template
-	$categories = array();
-	$result = mysql_query("SELECT id, name FROM ispapi_tblcategories WHERE parent is NULL");
-	while ($data = mysql_fetch_array($result)) {
-		$subcategories = array();
-		$result2 = select_query("ispapi_tblcategories","id,name,tlds", array("parent"=>$data["id"]));
-		while ($data2 = mysql_fetch_array($result2)) {
-			array_push($subcategories, $data2);
-		}
-		$data["subcategories"] = $subcategories;
-		array_push($categories, $data);
-	}
+    	//check if backordermodule is installed and set the backorder module path
+    	$backordermoduleinstalled = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
+    	$backordermodulepath = "modules/addons/ispapibackorder/";
 
-	//get settings from the DB
-	$result = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
-	$data = mysql_fetch_array($result);
-	if(isset($data)){
-		$show_aftermarket_premium_domains = $data["aftermarket_premium"];
-	}else{
-		$show_aftermarket_premium_domains = 0;
-	}
+    	//get all categories with subgategories for the template
+        $categories = array();
 
-	$prices = ispapi_domainchecker_get_domainprices ($_SESSION["currency"]);
-	$tldpricelist = ispapi_domainchecker_tldpricelist( $prices, $_SESSION["currency"] );
+        $stmt = $pdo->prepare("SELECT id, name FROM ispapi_tblcategories WHERE parent is NULL");
+        $stmt->execute();
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($data as $key => $value) {
+            $subcategories = array();
+            $stmt2 = $pdo->prepare("SELECT id, name, tlds FROM ispapi_tblcategories WHERE parent=?");
+            $stmt2->execute(array($value["id"]));
+            $data2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($data2 as $ky => $val) {
+                array_push($subcategories, $val);
+            }
+            $value["subcategories"] = $subcategories;
+    		array_push($categories, $value);
 
-	$_SESSION["adminuser"] = $vars["username"];
+        }
 
-	return array(
-			'pagetitle' => $_LANG['domaintitle'],
-			'breadcrumb' => array('index.php?m=ispapidomaincheck'=>$_LANG["domaintitle"]),
-			'templatefile' => 'ispapidomaincheck',
-			'requirelogin' => false,
-			'vars' => array(
-					'categories' => $categories,
-					'startsequence' => 4,
-					'show_aftermarket_premium_domains' => $show_aftermarket_premium_domains,
-					'modulename' => $modulename,
-					'modulepath' => $modulepath,
-					'backorder_module_installed' => $backordermoduleinstalled,
-					'backorder_module_path' => $backordermodulepath,
-					'path_to_domain_file' => $path_to_domain_file,
-					'domain' => $domain,
-					'tldpricelist' => $tldpricelist,
-					'currency' => $_SESSION["currency"]
-			),
-	);
+    	//get settings from the DB
+        $stmt = $pdo->prepare("SELECT * FROM ispapi_tblsettings LIMIT 1");
+        $stmt->execute();
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        if(isset($data)){
+            $show_aftermarket_premium_domains = $data["aftermarket_premium"];
+        }else{
+     		$show_aftermarket_premium_domains = 0;
+     	}
+
+    	$prices = ispapi_domainchecker_get_domainprices ($_SESSION["currency"]);
+    	$tldpricelist = ispapi_domainchecker_tldpricelist( $prices, $_SESSION["currency"] );
+
+    	$_SESSION["adminuser"] = $vars["username"];
+
+    	return array(
+    			'pagetitle' => $_LANG['domaintitle'],
+    			'breadcrumb' => array('index.php?m=ispapidomaincheck'=>$_LANG["domaintitle"]),
+    			'templatefile' => 'ispapidomaincheck',
+    			'requirelogin' => false,
+    			'vars' => array(
+    					'categories' => $categories,
+    					'startsequence' => 4,
+    					'show_aftermarket_premium_domains' => $show_aftermarket_premium_domains,
+    					'modulename' => $modulename,
+    					'modulepath' => $modulepath,
+    					'backorder_module_installed' => $backordermoduleinstalled,
+    					'backorder_module_path' => $backordermodulepath,
+    					'path_to_domain_file' => $path_to_domain_file,
+    					'domain' => $domain,
+    					'tldpricelist' => $tldpricelist,
+    					'currency' => $_SESSION["currency"]
+    			),
+    	);
+
+    } catch (Exception $e) {
+         die($e->getMessage());
+     }
+
 }
 
 /*
@@ -449,142 +515,196 @@ function ispapidomaincheck_output($vars) {
 
 
 function ispapidomaincheck_generalsettingscontent($modulelink){
+    try{
+        $pdo = Capsule::connection()->getPdo();
 
-	//Aftermarket Currencies
-	###############################################################################
-	//Create aftermarket currencies table
-	full_query("CREATE TABLE IF NOT EXISTS ispapi_tblaftermarketcurrencies (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, currency TEXT, rate decimal(10,5));");
+        //Aftermarket Currencies
+    	###############################################################################
+    	//Create aftermarket currencies table
 
-	//insert currencies from whmcs to this table
-	$select = mysql_query("SELECT * FROM tblcurrencies where code != 'USD' and code != 'usd'");
-	while ($data = mysql_fetch_array($select)) {
-		$s = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies WHERE currency = '".$data["code"]."' limit 1");
-		$d = mysql_fetch_array($s);
-		if(empty($d)){
-			mysql_query("INSERT INTO ispapi_tblaftermarketcurrencies (currency,rate) VALUES ( '".strtoupper($data["code"])."', 0.0);");
+    	// full_query("CREATE TABLE IF NOT EXISTS ispapi_tblaftermarketcurrencies (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, currency TEXT, rate decimal(10,5));");
+
+        $stmt=$pdo->prepare("SHOW TABLES LIKE 'ispapi_tblaftermarketcurrencies'");
+        $stmt->execute();
+        if(!$stmt->rowCount()){
+            $query = $pdo->prepare("CREATE TABLE ispapi_tblaftermarketcurrencies (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, currency TEXT, rate decimal(10,5));");
+            $query->execute();
+        }
+
+    	//insert currencies from whmcs to this table
+        $stmt=$pdo->prepare("SELECT * FROM tblcurrencies where code != 'USD' and code != 'usd'");
+        $stmt->execute();
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($data as $key => $value) {
+            $stmt2=$pdo->prepare("SELECT * FROM ispapi_tblaftermarketcurrencies WHERE currency=? limit 1");
+            $stmt2->execute(array($value["code"]));
+            $d = $stmt2->fetch(PDO::FETCH_ASSOC);
+            if(empty($d)){
+                $insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblaftermarketcurrencies (currency,rate) VALUES ( ?, 0.0)");
+                $insert_stmt->execute(array(strtoupper($value["code"])));
+            }
+        }
+
+    	//Delete old currencies from the ispapi_tblaftermarketcurrencies
+        $stmt=$pdo->prepare("SELECT * FROM ispapi_tblaftermarketcurrencies");
+        $stmt->execute();
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($data as $key => $value) {
+            $stmt2=$pdo->prepare("SELECT * FROM tblcurrencies WHERE code =?");
+            $stmt2->execute(array($value["currency"]));
+            $d = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+            if(empty($d)){
+                $delete_stmt = $pdo->prepare("DELETE FROM ispapi_tblaftermarketcurrencies WHERE currency =?");
+                $delete_stmt->execute(array($value["currency"]));
+            }
+
+        }
+    	###############################################################################
+
+    	echo '<div id="tab0box" class="tabbox tab-content">';
+
+    	//Save settings
+    	###############################################################################
+		if(isset($_REQUEST["savegeneralsettings"])){
+			$stmt = $pdo->prepare("SELECT id FROM ispapi_tblsettings LIMIT 1");
+			$stmt->execute();
+			$data = $stmt->fetch(PDO::FETCH_ASSOC);
+			if(!empty($data)){
+				$update_stmt = $pdo->prepare("UPDATE ispapi_tblsettings SET aftermarket_premium=?, registry_premium=? WHERE id=?");
+				$update_stmt->execute(array($_REQUEST["aftermarket_premium"], $_REQUEST["registry_premium"], $data["id"]));
+			}else{
+				$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblsettings (aftermarket_premium, registry_premium) VALUES (?, ?)");
+				$insert_stmt->execute(array($_REQUEST["aftermarket_premium"], $_REQUEST["registry_premium"]));
+			}
+
+			$stmt2 = $pdo->prepare("SELECT * FROM ispapi_tblaftermarketcurrencies");
+			$stmt2->execute();
+			$data = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data as $key => $value) {
+				$update_stmt = $pdo->prepare("UPDATE ispapi_tblaftermarketcurrencies SET rate=? WHERE currency=?");
+				$update_stmt->execute(array($_REQUEST[$value["currency"]], $value["currency"]));
+			}
+
+			echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
 		}
-	}
+    	###############################################################################
 
-	//Delete old currencies from the ispapi_tblaftermarketcurrencies
-	$select = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies");
-	while ($data = mysql_fetch_array($select)) {
-		$s = mysql_query("SELECT * FROM tblcurrencies WHERE code = '".$data["currency"]."'");
-		$d = mysql_fetch_array($s);
-		if(empty($d)){
-			mysql_query("DELETE FROM ispapi_tblaftermarketcurrencies WHERE currency = '".$data["currency"]."'");
-		}
-	}
-	###############################################################################
+    	//get the data from the DB for displaying
+    	###############################################################################
+    	$adminuser = $startsequence = $namemedia = "";
+        $stmt=$pdo->prepare("SELECT * FROM ispapi_tblsettings LIMIT 1");
+        $stmt->execute();
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        if(!empty($data)){
+    		$aftermarket = $data["aftermarket_premium"];
+    		$registry = $data["registry_premium"];
+    	}
+    	###############################################################################
 
-	echo '<div id="tab0box" class="tabbox tab-content">';
+    	echo '<form action="'.$modulelink.'" method="post">';
+    	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%" style="color:#333333;"><tbody>';
 
-	//Save settings
-	###############################################################################
-	if(isset($_REQUEST["savegeneralsettings"])){
-		$select = mysql_query("SELECT id FROM ispapi_tblsettings LIMIT 1");
-		$data = mysql_fetch_array($select);
-		if(!empty($data)){
-			update_query( "ispapi_tblsettings", array("aftermarket_premium" => $_REQUEST["aftermarket_premium"], "registry_premium" => $_REQUEST["registry_premium"]), array( "id" => $data["id"]) );
-		}else{
-			insert_query("ispapi_tblsettings",array("aftermarket_premium" => $_REQUEST["aftermarket_premium"],"registry_premium" => $_REQUEST["registry_premium"]));
-		}
+    	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Aftermarket Premium Domains</td></tr>';
+    	echo '<tr><td width="50%" class="fieldlabel"><b>Show aftermarket premium domains</b></td><td class="fieldarea"><input type="radio" name="aftermarket_premium" value="1" '.(($aftermarket==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;<input type="radio" name="aftermarket_premium" value="0" '.(($aftermarket!=1)?"checked":"").'> No</td></tr>';
 
-		$select = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies");
-		while ($data = mysql_fetch_array($select)) {
-			update_query( "ispapi_tblaftermarketcurrencies", array("rate" => $_REQUEST[$data["currency"]]), array( "currency" => $data["currency"]) );
-		}
+    	echo '<tr><td width="50%" class="fieldlabel" valign="top"><b>Aftermarket conversion rates<b></td><td style="padding-left:10px;" class="fieldarea">
+    	<p style="margin-top:0px;">Aftermarket Premium Domains are charged in USD. A currency conversion rate is required in order to display the price in your selling currencies.<br>
+    	If your WHMCS default currency is set to USD you don\'t need to fill the conversion rates here.</p>';
 
-		echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
-	}
-	###############################################################################
+        $stmt=$pdo->prepare("SELECT * FROM ispapi_tblaftermarketcurrencies");
+        $stmt->execute();
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        if($data){
+            echo "1 USD =  <input name='".$data["currency"]."' size='10' type='text' value='".$data["rate"]."'> ".$data["currency"]."<br>";
+        }
 
-	//get the data from the DB for displaying
-	###############################################################################
-	$adminuser = $startsequence = $namemedia = "";
-	$select = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
-	$data = mysql_fetch_array($select);
-	if(!empty($data)){
-		$aftermarket = $data["aftermarket_premium"];
-		$registry = $data["registry_premium"];
-	}
-	###############################################################################
+    	echo '</td></tr>';
 
-	echo '<form action="'.$modulelink.'" method="post">';
-	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%" style="color:#333333;"><tbody>';
+    	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Registry Premium Domains</td></tr>';
 
-	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Aftermarket Premium Domains</td></tr>';
-	echo '<tr><td width="50%" class="fieldlabel"><b>Show aftermarket premium domains</b></td><td class="fieldarea"><input type="radio" name="aftermarket_premium" value="1" '.(($aftermarket==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;<input type="radio" name="aftermarket_premium" value="0" '.(($aftermarket!=1)?"checked":"").'> No</td></tr>';
-
-	echo '<tr><td width="50%" class="fieldlabel" valign="top"><b>Aftermarket conversion rates<b></td><td style="padding-left:10px;" class="fieldarea">
-	<p style="margin-top:0px;">Aftermarket Premium Domains are charged in USD. A currency conversion rate is required in order to display the price in your selling currencies.<br>
-	If your WHMCS default currency is set to USD you don\'t need to fill the conversion rates here.</p>';
-
-	$select = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies");
-	while ($data = mysql_fetch_array($select)) {
-			echo "1 USD =  <input name='".$data["currency"]."' size='10' type='text' value='".$data["rate"]."'> ".$data["currency"]."<br>";
-	}
-
-	echo '</td></tr>';
-
-	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Registry Premium Domains</td></tr>';
-
-	echo '<tr><td width="50%" class="fieldlabel"><b>Show registry premium domains</b></td><td class="fieldarea"><input type="radio" name="registry_premium" value="1" '.(($registry==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;<input type="radio" name="registry_premium" value="0" '.(($registry!=1)?"checked":"").'> No</td></tr>';
+    	echo '<tr><td width="50%" class="fieldlabel"><b>Show registry premium domains</b></td><td class="fieldarea"><input type="radio" name="registry_premium" value="1" '.(($registry==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;<input type="radio" name="registry_premium" value="0" '.(($registry!=1)?"checked":"").'> No</td></tr>';
 
 
-	echo '</tbody></table></div>';
-	echo '<p align="center"><input class="btn" name="savegeneralsettings" type="submit" value="Save Changes"></p>';
-	echo '</form>';
+    	echo '</tbody></table></div>';
+    	echo '<p align="center"><input class="btn" name="savegeneralsettings" type="submit" value="Save Changes"></p>';
+    	echo '</form>';
 
-	echo '</div>';
+    	echo '</div>';
+
+    } catch (Exception $e) {
+         die($e->getMessage());
+     }
+
+
 }
 
 function ispapidomaincheck_categoryeditorcontent($modulelink){
 	echo '<div id="tab1box" class="tabbox tab-content">';
+    try{
+        $pdo = Capsule::connection()->getPdo();
 
-	//Delete categories
-	###############################################################################
-	if(isset($_REQUEST["delete"])){
-		mysql_query("DELETE FROM ispapi_tblcategories WHERE id='".mysql_real_escape_string($_REQUEST["delete"])."'");
-		mysql_query("DELETE FROM ispapi_tblcategories WHERE parent='".mysql_real_escape_string($_REQUEST["delete"])."'");
-		echo '<div class="infobox"><strong><span class="title">Deletion Successfully!</span></strong><br>Your category has been deleted.</div>';
-	}
-	###############################################################################
+        //Delete categories
+    	###############################################################################
+    	if(isset($_REQUEST["delete"])){
+            $delete_stmt = $pdo->prepare("DELETE FROM ispapi_tblcategories WHERE id=?");
+            $delete_stmt->execute(array(mysql_real_escape_string($_REQUEST["delete"])));
 
-	//Save categories
-	###############################################################################
-	if(isset($_REQUEST["savecategories"])){
-		foreach($_POST["CAT"] as $id => $categorie){
-			update_query( "ispapi_tblcategories", array( "name" => $categorie["NAME"], "tlds" => $categorie["TLDS"] ), array( "id" => $id) );
-		}
-		foreach($_POST["ADDSUBCAT"] as $id => $subcat){
-			if(!empty($subcat["NAME"])){
-				insert_query("ispapi_tblcategories",array("parent" => $id, "name" => $subcat["NAME"], "tlds" => $subcat["TLDS"]));
+            $delete_stmt2 = $pdo->prepare("DELETE FROM ispapi_tblcategories WHERE parent=?");
+            $delete_stmt2->execute(array(mysql_real_escape_string($_REQUEST["delete"])));
+
+    		echo '<div class="infobox"><strong><span class="title">Deletion Successfully!</span></strong><br>Your category has been deleted.</div>';
+    	}
+    	###############################################################################
+
+    	//Save categories
+    	###############################################################################
+    	if(isset($_REQUEST["savecategories"])){
+    		foreach($_POST["CAT"] as $id => $categorie){
+                $update_stmt = $pdo->prepare("UPDATE ispapi_tblcategories SET name=?, tlds=? WHERE id=?");
+                $update_stmt->execute(array($categorie["NAME"], $categorie["TLDS"], $id));
+    		}
+    		foreach($_POST["ADDSUBCAT"] as $id => $subcat){
+    			if(!empty($subcat["NAME"])){
+
+                    $insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent,name, tlds) VALUES ( ?, ?, ?)");
+                    $insert_stmt->execute(array($id, $subcat["NAME"], $subcat["TLDS"]));
+    			}
+    		}
+    		if(!empty($_POST["ADDCAT"]["NAME"])){
+                $insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories ( name ) VALUES ( ? )");
+                $insert_stmt->execute(array($_POST["ADDCAT"]["NAME"]));
+                if($insert_stmt->rowCount() != 0){
+                    $stmt=$pdo->prepare("SELECT id FROM ispapi_tblcategories WHERE name=?");
+                    $stmt->execute(array($_POST["ADDCAT"]["NAME"]));
+                    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+                }
+    		}
+    		echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
+    	}
+    	###############################################################################
+
+    	//get all categories with subgategories for displaying
+    	###############################################################################
+		$categories = array();
+		$stmt = $pdo->prepare("SELECT id, name FROM ispapi_tblcategories WHERE parent is NULL");
+		$stmt->execute();
+		$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		foreach ($data as $key => $value) {
+			$subcategories = array();
+			$stmt2 = $pdo->prepare("SELECT id, name, tlds FROM ispapi_tblcategories WHERE parent=?");
+			$stmt2->execute(array($value["id"]));
+			$data2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data2 as $key1) {
+				array_push($subcategories, $key1);
 			}
+			$value["subcategories"] = $subcategories;
+			array_push($categories, $value);
 		}
-		if(!empty($_POST["ADDCAT"]["NAME"])){
-			$id = insert_query("ispapi_tblcategories",array("name" => $_POST["ADDCAT"]["NAME"]));
-			if(!empty($_POST["ADDSUBCAT"]["NAME"])){
-				insert_query("ispapi_tblcategories",array( "parent" => $id, "name" => $_POST["ADDSUBCAT"]["NAME"], "tlds" => $_POST["ADDSUBCAT"]["TLDS"] ));
-			}
-		}
-		echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
-	}
-	###############################################################################
+    	###############################################################################
 
-	//get all categories with subgategories for displaying
-	###############################################################################
-	$categories = array();
-	$result = mysql_query("SELECT id, name FROM ispapi_tblcategories WHERE parent is NULL");
-	while ($data = mysql_fetch_array($result)) {
-		$subcategories = array();
-		$result2 = select_query("ispapi_tblcategories","id,name,tlds", array("parent"=>$data["id"]));
-		while ($data2 = mysql_fetch_array($result2)) {
-			array_push($subcategories, $data2);
-		}
-		$data["subcategories"] = $subcategories;
-		array_push($categories, $data);
-	}
-	###############################################################################
+    } catch (Exception $e) {
+         die($e->getMessage());
+     }
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%"><tbody>';
@@ -625,48 +745,61 @@ function ispapi_domainchecker_price( $number, $cur ) {
 }
 
 function ispapi_domainchecker_tldpricelist( $prices, $currencyid ) {
+	try{
+        $pdo = Capsule::connection()->getPdo();
+		$stmt = $pdo->prepare("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1");
+		$stmt->execute(array(mysql_real_escape_string($currencyid)));
+		$cur = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-	$sql = "SELECT * FROM tblcurrencies
-			WHERE id='".mysql_real_escape_string($currencyid)."'
-			LIMIT 1";
-	$query = mysql_query ($sql);
-	$cur = @mysql_fetch_array ($query, MYSQL_ASSOC);
+		$list = array();
+		$i = 1;
 
-	$list = array();
-	$i = 1;
+		foreach ( $prices as $tld => $values ) {
+			$item = array();
+			$item['tld'] = $tld;
 
-	foreach ( $prices as $tld => $values ) {
-		$item = array();
-		$item['tld'] = $tld;
+			$keys = array_keys($values["domainregister"]);
+			if ( count($keys) ) {
+				$item['period'] = $keys[0];
+				foreach ($cur as $key => $value) {
+					$item['register'] = ispapi_domainchecker_price($values["domainregister"][$keys[0]], $value);
+				}
 
-		$keys = array_keys($values["domainregister"]);
-		if ( count($keys) ) {
-			$item['period'] = $keys[0];
-			$item['register'] = ispapi_domainchecker_price($values["domainregister"][$keys[0]], $cur);
-		}
-
-		$keys = array_keys($values["domaintransfer"]);
-
-		if ( count($keys) ) {
-			if($keys[0] != 1){
-				$item['transfer'] = "";
-			}else{
-				$item['transfer'] = ispapi_domainchecker_price($values["domaintransfer"][$keys[0]], $cur);
 			}
-		}
 
-		$keys = (is_array($values["domainrenew"]))? array_keys($values["domainrenew"]) : array();
-		if ( count($keys) ) {
-			if($keys[0] != 1){
-				$item['renew'] = "";
-			}else{
-				$item['renew'] = ispapi_domainchecker_price($values["domainrenew"][$keys[0]], $cur);
+			$keys = array_keys($values["domaintransfer"]);
+
+			if ( count($keys) ) {
+				if($keys[0] != 1){
+					$item['transfer'] = "";
+				}else{
+					foreach ($cur as $key => $value) {
+						$item['transfer'] = ispapi_domainchecker_price($values["domaintransfer"][$keys[0]], $value);
+					}
+
+				}
 			}
-		}
 
-		$list[$i++] = $item;
-	}
-	return $list;
+			$keys = (is_array($values["domainrenew"]))? array_keys($values["domainrenew"]) : array();
+			if ( count($keys) ) {
+				if($keys[0] != 1){
+					$item['renew'] = "";
+				}else{
+					foreach ($cur as $key => $value) {
+						$item['renew'] = ispapi_domainchecker_price($values["domainrenew"][$keys[0]], $value);
+					}
+
+				}
+			}
+
+			$list[$i++] = $item;
+		}
+		return $list;
+
+	} catch (Exception $e) {
+   	 die($e->getMessage());
+ 	}
+
 }
 
 function ispapi_domainchecker_tldslist( $prices ) {
@@ -679,25 +812,33 @@ function ispapi_domainchecker_tldslist( $prices ) {
 }
 
 function ispapi_domainchecker_get_domainprices ( $currencyid ) {
-	$sql = "SELECT tdp.extension, tp.type, msetupfee year1, qsetupfee year2, ssetupfee year3, asetupfee year4, bsetupfee year5, monthly year6, quarterly year7, semiannually year8, annually year9, biennially year10
-			FROM tbldomainpricing tdp, tblpricing tp
-			WHERE tp.relid = tdp.id
-			AND tp.tsetupfee = 0
-			AND tp.currency = '".mysql_real_escape_string($currencyid)."'
-			ORDER BY tdp.order";
-	$query = mysql_query ($sql);
-	while ($row = @mysql_fetch_array ($query, MYSQL_ASSOC)) {
-		for ( $i = 1; $i <= 10; $i++ ) {
-			if (($row['year'.$i] > 0) && ($row['type'] != 'domaintransfer')) $domainprices[$row['extension']][$row['type']][$i] = $row['year'.$i];
-			if (($row['year'.$i] >= 0) && ($row['type'] == 'domaintransfer')) $domainprices[$row['extension']][$row['type']][$i] = $row['year'.$i];
+	try{
+        $pdo = Capsule::connection()->getPdo();
+
+		$stmt = $pdo->prepare("SELECT tdp.extension, tp.type, msetupfee year1, qsetupfee year2, ssetupfee year3, asetupfee year4, bsetupfee year5, monthly year6, quarterly year7, semiannually year8, annually year9, biennially year10
+				FROM tbldomainpricing tdp, tblpricing tp
+				WHERE tp.relid = tdp.id
+				AND tp.tsetupfee = 0
+				AND tp.currency = ?
+				ORDER BY tdp.order");
+		$stmt->execute(array(mysql_real_escape_string($currencyid)));
+		$row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		foreach ($row as $key => $value) {
+			for ( $i = 1; $i <= 10; $i++ ) {
+				if (($value['year'.$i] > 0) && ($value['type'] != 'domaintransfer')) $domainprices[$value['extension']][$value['type']][$i] = $value['year'.$i];
+				if (($value['year'.$i] >= 0) && ($value['type'] == 'domaintransfer')) $domainprices[$value['extension']][$value['type']][$i] = $value['year'.$i];
+			}
 		}
-	}
-	foreach ( $domainprices as $tld => $values ) {
-		if ( !isset($values['domainregister']) ) {
-			unset($domainprices[$tld]);
+		foreach ( $domainprices as $tld => $values ) {
+			if ( !isset($values['domainregister']) ) {
+				unset($domainprices[$tld]);
+			}
 		}
+		return $domainprices;
+
+	} catch (Exception $e) {
+   	 die($e->getMessage());
 	}
 
-	return $domainprices;
 }
 //#######################################

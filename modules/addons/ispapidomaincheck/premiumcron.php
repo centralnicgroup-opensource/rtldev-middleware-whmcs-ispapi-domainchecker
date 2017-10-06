@@ -1,5 +1,7 @@
-<?php 
+<?php
+#TODO : TESTING
 
+use WHMCS\Database\Capsule;
 if(preg_match('/premiumcron.php/',$_SERVER["SCRIPT_FILENAME"]) ){
 	die("This file cannot be accessed directly");
 }
@@ -9,34 +11,48 @@ require_once(dirname(__FILE__)."/../../servers/ispapipremium/ispapipremium.php")
 $content = "<b>PREMIUM CRON REPORTS</b><br><br>";
 $content .=  "<table><tr><th style='width:250px;text-align:left;'>Domain</th><th style='width:300px;text-align:left;'>Class</th><th style='width:500px;text-align:left;'>Response</th></tr> ";
 
-$sql = "SELECT * FROM tblhosting WHERE domainstatus = 'Active'";
-$res = mysql_query($sql);
-while($hosting = mysql_fetch_array($res)){
-	$ispremium = false;
-	$params = array("pid" => $hosting["packageid"], "serviceid" => $hosting["id"] );
-	
-	$sql = "SELECT * FROM tblproducts where id = ".$params["pid"];
-	$result = mysql_query($sql);
-	$data = mysql_fetch_array($result);
-	if(preg_match('/NAMEMEDIA/',$data["description"])){
-		$domain = $data["name"];
-		$class = $data["description"];
-		$ispremium = true;
-	}elseif(preg_match('/PREMIUM_/',$data["name"])){
-		$domain = $hosting["domain"];
-		$class = $data["name"];
-		$ispremium = true;
+try{
+	$pdo = Capsule::connection()->getPdo();
+
+	$stmt = $pdo->prepare("SELECT * FROM tblhosting WHERE domainstatus = 'Active'");
+	$stmt->execute();
+	$hosting = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	mail("tseelamkurthi@hexonet.net", "debug premiumcron hosting ", print_r($hosting, true));
+
+	foreach ($hosting as $key => $value) {
+		$ispremium = false;
+		$params = array("pid" => $value["packageid"], "serviceid" => $value["id"] );
+
+		$stmt = $pdo->prepare("SELECT * FROM tblproducts where id =?");
+		$stmt->execute(array($params["pid"]));
+		$data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+		mail("tseelamkurthi@hexonet.net", "debug premiumcron data ", print_r($data, true));
+
+			if(preg_match('/NAMEMEDIA/',$data["description"])){
+				$domain = $data["name"];
+				$class = $data["description"];
+				$ispremium = true;
+			}elseif(preg_match('/PREMIUM_/',$data["name"])){
+				$domain = $value["domain"];
+				$class = $data["name"];
+				$ispremium = true;
+			}
+			if($ispremium){
+				$response = ispapipremium_finalizeprocess($params);
+				$content .= "<tr><td>".$domain."</td><td>".$class."</td><td>".$response."</td></tr>";
+			}
 	}
-	if($ispremium){
-		$response = ispapipremium_finalizeprocess($params);
-		$content .= "<tr><td>".$domain."</td><td>".$class."</td><td>".$response."</td></tr>";	
-	}
+
+} catch (Exception $e) {
+	die($e->getMessage());
 }
+
 $content .= "</table>";
 
-//$headers = "Content-Type: text/html; charset=\"iso-8859-1\"";
-//mail("anthonys@hexonet.net","Cron Reports",$content,$headers);
-//echo $content;
+// $headers = "Content-Type: text/html; charset=\"iso-8859-1\"";
+// mail("tseelamkurthi@hexonet.net","Cron Reports",$content,$headers);
+// echo $content;
 
 ?>
-

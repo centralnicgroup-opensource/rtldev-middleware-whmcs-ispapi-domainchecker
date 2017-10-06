@@ -12,21 +12,32 @@ if(file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backe
 	require_once dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php";
 }
 
+use WHMCS\Database\Capsule;
 
 //WORKARROUND: Get a list of all Hexonet registrar modules and include the registrar files
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
 //###########################################################################################
 if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])){
-	$result = select_query("tbldomainpricing","extension,autoreg");
-	$modulelist = array();
-	$registrar = array();
-	while($data = mysql_fetch_array($result)){
-		if(!empty($data["autoreg"])){
-			if(!in_array($data["autoreg"], $modulelist)){
-				array_push($modulelist, $data["autoreg"]);
+	try{
+        $pdo = Capsule::connection()->getPdo();
+
+		$stmt = $pdo->prepare("SELECT extension, autoreg FROM tbldomainpricing");
+		$stmt->execute();
+		$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$modulelist = array();
+		$registrar = array();
+
+		foreach ($data as $key => $value) {
+			if(!empty($value["autoreg"])){
+				if(!in_array($value["autoreg"], $modulelist)){
+					array_push($modulelist, $value["autoreg"]);
+				}
 			}
 		}
-	}
+
+	} catch (Exception $e) {
+	   die($e->getMessage());
+   }
 	foreach($modulelist as $file){
 		require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
 		if(function_exists($file.'_GetISPAPIModuleVersion')){
@@ -111,21 +122,33 @@ class DomainCheck
      * - no_ispapi
      */
     private function sortTLDs(){
-    	$domains = array();
-    	$domains["ispapi"] = array();
-    	$domains["no_ispapi"] = array();
+		try{
+	        $pdo = Capsule::connection()->getPdo();
 
-    	//For ISPAPI domains -> ispapi_domains
-    	//For other domains -> no_ispapi_domains
-    	$result = select_query("tbldomainpricing","extension,autoreg");
-    	while ($data = mysql_fetch_array($result)) {
-    		if(in_array($data["autoreg"], $this->registrar)){
-    			array_push($domains["ispapi"], $data["extension"]);
-    		}else{
-    			array_push($domains["no_ispapi"], $data["extension"]);
-    		}
-    	}
-    	return $domains;
+			$domains = array();
+	    	$domains["ispapi"] = array();
+	    	$domains["no_ispapi"] = array();
+
+	    	//For ISPAPI domains -> ispapi_domains
+	    	//For other domains -> no_ispapi_domains
+			$stmt = $stmt = $pdo->prepare("SELECT extension, autoreg FROM tbldomainpricing");
+			$stmt->execute();
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data as $key => $value) {
+				if(in_array($value["autoreg"], $this->registrar)){
+	    			array_push($domains["ispapi"], $value["extension"]);
+	    		}else{
+	    			array_push($domains["no_ispapi"], $value["extension"]);
+	    		}
+			}
+
+	    	return $domains;
+
+		} catch (Exception $e) {
+		   die($e->getMessage());
+	   	}
+
+
     }
 
     /*
@@ -192,33 +215,43 @@ class DomainCheck
     		$feedback = array("status" => false, "message" => "The domain you entered is not valid !");
     		$do_not_search = true;
     	}else{
+			try{
+				$pdo = Capsule::connection()->getPdo();
 
-    		//check if the searched keyword contains an configured TLD
-    		//example: thebestshop -> thebest.shop should be at the top
-    		$result = select_query("tbldomainpricing","extension");
-    		while($data = mysql_fetch_array($result)){
-    			$tld = substr($data["extension"],1);
-    			if (preg_match('/'.$tld.'$/i', $searched_label)) {
-    				$tmp = explode($tld, $searched_label);
-    				$thedomain = $tmp[0].".".$tld;
-    				//add to the domain list if not empty
-    				if(!empty($tmp[0]))
-    					$domainlist = array_merge(array($thedomain), $domainlist);
-    			}
-    		}
+				//check if the searched keyword contains an configured TLD
+				//example: thebestshop -> thebest.shop should be at the top
+				$stmt = $stmt = $pdo->prepare("SELECT extension FROM tbldomainpricing");
+				$stmt->execute();
+				$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+				foreach ($data as $key => $value) {
+					$tld = substr($value["extension"],1);
+					if (preg_match('/'.$tld.'$/i', $searched_label)) {
+						$tmp = explode($tld, $searched_label);
+						$thedomain = $tmp[0].".".$tld;
+						//add to the domain list if not empty
+						if(!empty($tmp[0]))
+							$domainlist = array_merge(array($thedomain), $domainlist);
+					}
+				}
 
-    		//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
-    		$result = select_query("tbldomainpricing","autoreg",array("extension"=>".".$searched_tld));
-    		$data = mysql_fetch_array($result);
-    		if(!empty($data)){
-    			if(!in_array($this->domain, $domainlist))
-    				$domainlist = array_merge(array($this->domain), $domainlist);
-    		}else{
-    			//if $searched_tld not empty display the message
-    			if(!empty($searched_tld)){
-    				$feedback = array("status" => false, "message" => "Sorry, the extension <b>.$searched_tld</b> is not supported !");
-    			}
-   			}
+				//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
+				$stmt = $stmt = $pdo->prepare("SELECT autoreg FROM tbldomainpricing WHERE extension=?");
+				$stmt->execute(array($searched_tld));
+				$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+				if(!empty($data)){
+					if(!in_array($this->domain, $domainlist))
+						$domainlist = array_merge(array($this->domain), $domainlist);
+				}else{
+					//if $searched_tld not empty display the message
+					if(!empty($searched_tld)){
+						$feedback = array("status" => false, "message" => "Sorry, the extension <b>.$searched_tld</b> is not supported !");
+					}
+				}
+
+			} catch (Exception $e) {
+				die($e->getMessage());
+			}
+
    		}
 
     	//if error -> delete de list
@@ -270,47 +303,73 @@ class DomainCheck
      *  @param int $curencyid The DB id of the selected currency
      */
     private function getConvertedPrice($price, $currencyid){
+		try {
+			$pdo = Capsule::connection()->getPdo();
 
-		//load the selected currency
-		$selected_currency = mysql_fetch_array(select_query("tblcurrencies","*",array("id" => $currencyid),"","","1"));
+			//load the selected currency
+			$stmt = $pdo->prepare("SELECT * FROM tblcurrencies WHERE id=?");
+			$stmt->execute(array($currencyid));
+			$selected_currency = $stmt->fetch(PDO::FETCH_ASSOC);
 
-		//check if the default currency is USD in WHMCS
-    	$default_currency = mysql_fetch_array(select_query("tblcurrencies","*",array("default" => 1 ),"","","1"));
-		if(preg_match("/^USD$/i", $default_currency["code"])){
-			//default currency in WHMCS is USD
-			$p = round($price * $selected_currency["rate"], 2);
-		}else{
-			//default currency in WHMCS in not USD, use the rate from domainchecker
-			if(preg_match("/^USD$/i", $selected_currency["code"])){
-				//if selected currency is USD => display the price directly
-				$p = round($price, 2);
+			//check if the default currency is USD in WHMCS
+			$stmt2 = $pdo->prepare("SELECT * FROM tblcurrencies WHERE `default` = 1");
+			$stmt2->execute();
+			$default_currency = $stmt2->fetch(PDO::FETCH_ASSOC);
+
+			if(preg_match("/^USD$/i", $default_currency["code"])){
+				//default currency in WHMCS is USD
+				$p = round($price * $selected_currency["rate"], 2);
 			}else{
-				$modulecur = mysql_fetch_array(select_query("ispapi_tblaftermarketcurrencies","*",array("currency" => $selected_currency["code"]),"","","1"));
-				if(!empty($modulecur) && $modulecur["rate"] != 0){
-					//use the rate from domainchecker to convert the price in another currency
-					$p = round($price * $modulecur["rate"], 2);
+				//default currency in WHMCS in not USD, use the rate from domainchecker
+				if(preg_match("/^USD$/i", $selected_currency["code"])){
+					//if selected currency is USD => display the price directly
+					$p = round($price, 2);
 				}else{
-					//no currency rate configured in the domainchecker => display no pricing found
-					$p = -1;
+					$stmt3 = $pdo->prepare("SELECT * FROM ispapi_tblaftermarketcurrencies WHERE currency=?");
+					$stmt3->execute(array($selected_currency["code"]));
+					$modulecur = $stmt3->fetch(PDO::FETCH_ASSOC);
+
+					if(!empty($modulecur) && $modulecur["rate"] != 0){
+						//use the rate from domainchecker to convert the price in another currency
+						$p = round($price * $modulecur["rate"], 2);
+					}else{
+						//no currency rate configured in the domainchecker => display no pricing found
+						$p = -1;
+					}
 				}
 			}
+			$p = $this->formatPrice($p, $selected_currency);
+			return $p;
+
+		} catch (Exception $e) {
+			die($e->getMessage());
 		}
-		$p = $this->formatPrice($p, $selected_currency);
-    	return $p;
+
+
     }
 
     /*
      * Returns TRUE if aftermarket premiums have to be displayed
      */
     private function showAftermarketPremium(){
-    	$result = select_query("ispapi_tblsettings", "*", array("id" => 1));
-    	$data = mysql_fetch_array($result);
+		try{
+			$pdo = Capsule::connection()->getPdo();
 
-    	if(isset($data) && $data["aftermarket_premium"] == 1){
-    		return true;
-    	}else{
-    		return false;
-    	}
+			$stmt = $pdo->prepare("SELECT * FROM ispapi_tblsettings WHERE id='1'");
+			$stmt->execute();
+			$data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			if(isset($data) && $data["aftermarket_premium"] == 1){
+				return true;
+			}else{
+				return false;
+			}
+
+		} catch (Exception $e) {
+			die($e->getMessage());
+		}
+
+
     }
 
     /*
@@ -414,9 +473,16 @@ class DomainCheck
     	$extendeddomainlist = $this->getExtendedDomainlist($ispapi_domain_list);
 
     	$showpremium = false;
+		try{
+			$pdo = Capsule::connection()->getPdo();
+			$stmt = $pdo->prepare("SELECT * FROM ispapi_tblsettings LIMIT 1");
+			$stmt->execute();
+			$data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-		$result = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
-    	$data = mysql_fetch_array($result);
+		} catch (Exception $e) {
+			die($e->getMessage());
+		}
+
     	if(isset($data) && $data["registry_premium"] == 0 && $data["aftermarket_premium"] == 1 ){
     		$premiumchannels = "NAMEMEDIA";
     	}elseif(isset($data) && $data["registry_premium"] == 1 ){
@@ -559,10 +625,19 @@ class DomainCheck
 
 		//Get the list of all TLDs available in the backorder module
 		$tlds = "";
-		$result = select_query('backorder_pricing','extension',array("currency_id" => $_SESSION["currency"] ));
-		while ($data = mysql_fetch_array($result)) {
-			$tlds .= "|.".$data["extension"];
+
+		try{
+			$pdo = Capsule::connection()->getPdo();
+			$stmt = $pdo->prepare("SELECT extension FROM backorder_pricing WHERE currency_id=?");
+			$stmt->execute(array($_SESSION["currency"]));
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data as $key => $value) {
+				$tlds .= "|.".$value["extension"];
+			}
+		} catch (Exception $e) {
+			die($e->getMessage());
 		}
+
 		$tld_list = substr($tlds, 1);
 
 		//Iterate all responses and add the backorder information
@@ -591,32 +666,39 @@ class DomainCheck
      *
      */
 	private function getTLDprice($tld) {
-		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
-		$cur = mysql_fetch_array($result);
+		try{
+			$pdo = Capsule::connection()->getPdo();
 
-		$sql = "SELECT tdp.extension, tp.type, msetupfee year1, qsetupfee year2, ssetupfee year3, asetupfee year4, bsetupfee year5, monthly year6, quarterly year7, semiannually year8, annually year9, biennially year10
-				FROM tbldomainpricing tdp, tblpricing tp
-				WHERE tp.relid = tdp.id
-				AND tp.tsetupfee = 0
-				AND tp.currency = ".$cur["id"]."
-				AND tp.type='domainregister'
-				AND tdp.extension = '.".mysql_real_escape_string($tld)."'
-				LIMIT 1";
+			$stmt = $pdo->prepare("SELECT * FROM tblcurrencies WHERE id=?");
+			$stmt->execute(array($_SESSION["currency"]));
+			$cur = $stmt->fetch(PDO::FETCH_ASSOC);
 
-		$result = mysql_query($sql);
-		$data = mysql_fetch_array($result);
+			$stmt2 = $pdo->prepare("SELECT tdp.extension, tp.type, msetupfee year1, qsetupfee year2, ssetupfee year3, asetupfee year4, bsetupfee year5, monthly year6, quarterly year7, semiannually year8, annually year9, biennially year10
+					FROM tbldomainpricing tdp, tblpricing tp
+					WHERE tp.relid = tdp.id
+					AND tp.tsetupfee = 0
+					AND tp.currency =?
+					AND tp.type='domainregister'
+					AND tdp.extension =?
+					LIMIT 1");
+			$stmt2->execute(array($cur["id"], ".".mysql_real_escape_string($tld)));
+			$data = $stmt2->fetch(PDO::FETCH_ASSOC);
 
-		$domainprices = array();
-		if(!empty($data)){
-			for ( $i = 1; $i <= 10; $i++ ) {
-				if (($data['year'.$i] > 0)){
-					//$domainprices[$data['extension']][$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
-					$domainprices[$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
+			$domainprices = array();
+			if(!empty($data)){
+				for ( $i = 1; $i <= 10; $i++ ) {
+					if (($data['year'.$i] > 0)){
+						//$domainprices[$data['extension']][$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
+						$domainprices[$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
+					}
+
 				}
-
 			}
+			return $domainprices;
+
+		} catch (Exception $e) {
+			die($e->getMessage());
 		}
-		return $domainprices;
 	}
 
     /*
@@ -629,40 +711,43 @@ class DomainCheck
      *
      */
 	private function getPremiumClassPrice($class, $domain) {
-		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
-		$cur = mysql_fetch_array($result);
+		try{
+			$pdo = Capsule::connection()->getPdo();
+			$price = "";
+			$stmt = $pdo->prepare("SELECT
+						pp.annually
+					FROM
+						tblpricing pp, tblproducts p
+					WHERE
+						p.name =?
+					AND
+						p.id = pp.relid
+					AND
+						pp.tsetupfee = 0
+					AND
+						pp.type = 'product'
+					AND
+						pp.currency =?
+					LIMIT 1");
+			$stmt->execute(array($class, $_SESSION["currency"]));
+			$data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-		$price = "";
-		$sql = "SELECT
-					pp.annually
-				FROM
-					tblpricing pp, tblproducts p
-				WHERE
-					p.name = '".$class."'
-				AND
-					p.id = pp.relid
-				AND
-					pp.tsetupfee = 0
-				AND
-					pp.type = 'product'
-				AND
-					pp.currency = ".$_SESSION["currency"]."
-				LIMIT 1";
+			$price = $data["annually"];
 
-		$result = mysql_query($sql);
-		$data = mysql_fetch_array($result);
+			if((!empty($price)) && ($price != 0) && ($price != -1)){
+				$price = $this->formatPrice($price,$cur);
+			}else{
+				$price = -1;
+			}
 
-		$price = $data["annually"];
+			$domainprices["domainregister"][1] = $price;
 
-		if((!empty($price)) && ($price != 0) && ($price != -1)){
-			$price = $this->formatPrice($price,$cur);
-		}else{
-			$price = -1;
+			return $domainprices;
+
+		} catch (Exception $e) {
+			die($e->getMessage());
 		}
 
-		$domainprices["domainregister"][1] = $price;
-
-		return $domainprices;
 	}
 
 	/*
@@ -718,13 +803,21 @@ class DomainCheck
     	$whmcsdomainlist["autoreg"] = array();
 
     	//create an array with each extension and his autoreg (the configured resgistrar for this extension)
-    	$result = select_query("tbldomainpricing","extension,autoreg");
-    	while ($data = mysql_fetch_array($result)) {
-    		if(!empty($data["autoreg"])){
-    			array_push($whmcsdomainlist["extension"], $data["extension"]);
-    			array_push($whmcsdomainlist["autoreg"],$data["autoreg"]);
-    		}
-    	}
+		try{
+			$pdo = Capsule::connection()->getPdo();
+			$stmt = $pdo->prepare("SELECT extension, autoreg FROM tbldomainpricing");
+			$stmt->execute();
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data as $key => $value) {
+				if(!empty($value["autoreg"])){
+					array_push($whmcsdomainlist["extension"], $value["extension"]);
+					array_push($whmcsdomainlist["autoreg"],$value["autoreg"]);
+				}
+			}
+
+		} catch (Exception $e) {
+			die($e->getMessage());
+		}
 
 		$extendeddomainlist = array();
 		$ispapiobject = array();
@@ -757,13 +850,22 @@ class DomainCheck
      * @return array An array with all TLDs of the current group.
      */
     private function getTLDGroups(){
-    	$result = select_query("ispapi_tblcategories","id,name,tlds", array("id"=>$this->tldgroup));
-    	$data = mysql_fetch_array($result);
-		if(isset($data["tlds"])){
-			return explode(" ", $data["tlds"]);
-		}else{
-			array();
+		try{
+			$pdo = Capsule::connection()->getPdo();
+			$stmt = $pdo->prepare("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id=?");
+			$stmt->execute(array($this->tldgroup));
+			$data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			if(isset($data["tlds"])){
+				return explode(" ", $data["tlds"]);
+			}else{
+				array();
+			}
+
+		} catch (Exception $e) {
+			die($e->getMessage());
 		}
+
     }
 
     /*
@@ -888,10 +990,20 @@ if(isset($_REQUEST["currency"])){
 	$ca = new WHMCS_ClientArea();
 	$ca->initPage();
 	if ($ca->isLoggedIn()) {
-		$result = mysql_query("SELECT currency FROM tblclients WHERE id=".$ca->getUserID());
-		$data = mysql_fetch_array($result);
-		$_SESSION["currency"] = $data["currency"];
-		$_SESSION["userid"] = $ca->getUserID();
+		try{
+			$pdo = Capsule::connection()->getPdo();
+
+			$stmt = $pdo->prepare("SELECT currency FROM tblclients WHERE id=?");
+			$stmt->execute(array($ca->getUserID()));
+			$data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			$_SESSION["currency"] = $data["currency"];
+			$_SESSION["userid"] = $ca->getUserID();
+
+		} catch (Exception $e) {
+			die($e->getMessage());
+		}
+
 	}
 }
 
