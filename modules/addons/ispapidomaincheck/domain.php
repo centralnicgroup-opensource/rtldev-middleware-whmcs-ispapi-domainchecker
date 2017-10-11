@@ -38,14 +38,13 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 	} catch (Exception $e) {
 	   die($e->getMessage());
    }
-	foreach($modulelist as $file){
-		require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
-		if(function_exists($file.'_GetISPAPIModuleVersion')){
-			array_push($registrar, $file);
-		}
-	}
+   foreach($modulelist as $file){
+	   require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
+	   if(function_exists($file.'_GetISPAPIModuleVersion')){
+		   array_push($registrar, $file);
+	   }
+   }
 	//for the domain.php file
-
 	$_SESSION["ispapi_registrar"] = $registrar;
 }
 //###########################################################################################
@@ -141,7 +140,6 @@ class DomainCheck
 	    			array_push($domains["no_ispapi"], $value["extension"]);
 	    		}
 			}
-
 	    	return $domains;
 
 		} catch (Exception $e) {
@@ -236,8 +234,8 @@ class DomainCheck
 
 				//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
 				$stmt = $stmt = $pdo->prepare("SELECT autoreg FROM tbldomainpricing WHERE extension=?");
-				$stmt->execute(array($searched_tld));
-				$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+				$stmt->execute(array(".".$searched_tld));
+				$data = $stmt->fetch(PDO::FETCH_ASSOC);
 				if(!empty($data)){
 					if(!in_array($this->domain, $domainlist))
 						$domainlist = array_merge(array($this->domain), $domainlist);
@@ -631,6 +629,7 @@ class DomainCheck
 			$stmt = $pdo->prepare("SELECT extension FROM backorder_pricing WHERE currency_id=?");
 			$stmt->execute(array($_SESSION["currency"]));
 			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 			foreach ($data as $key => $value) {
 				$tlds .= "|.".$value["extension"];
 			}
@@ -712,7 +711,13 @@ class DomainCheck
      */
 	private function getPremiumClassPrice($class, $domain) {
 		try{
+
 			$pdo = Capsule::connection()->getPdo();
+
+			$stmt1=$pdo->prepare("SELECT * FROM tblcurrencies WHERE id=?");
+			$stmt1->execute(array($_SESSION["currency"]));
+			$cur = $stmt1->fetch(PDO::FETCH_ASSOC);
+
 			$price = "";
 			$stmt = $pdo->prepare("SELECT
 						pp.annually
@@ -983,7 +988,7 @@ $cached_data =  (isset($_REQUEST["cache"])) ? $_REQUEST["cache"] : "";
 
 //Problem with sessions handling...
 //Currency session will be send on the first ajax call
-if(isset($_REQUEST["currency"])){
+if(isset($_REQUEST["currency"])){ #TODO : testing
 	$_SESSION["currency"] = $_REQUEST["currency"];
 
 	//if customer logged in, check the configured currency.

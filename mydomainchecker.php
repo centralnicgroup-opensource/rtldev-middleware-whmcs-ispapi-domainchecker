@@ -1,6 +1,9 @@
 <?php
 define("CLIENTAREA", true);
 require("init.php");
+
+use WHMCS\Database\Capsule;
+
 $ca = new WHMCS_ClientArea();
 $pagetitle = $_LANG["domaintitle"];
 $ca->setPageTitle($pagetitle);
@@ -17,11 +20,20 @@ if (!file_exists( $modulepath )) {
 require $modulepath;
 
 $modulevars = array();
-$result = select_query( "tbladdonmodules", "", array( "module" => $module ) );
-while ($data = mysql_fetch_array( $result )) {
-	$modulevars[$data["setting"]] = $data["value"];
+
+try{
+	$pdo = Capsule::connection()->getPdo();
+	$stmt = $pdo->prepare("SELECT * FROM tbladdonmodules WHERE module=?");
+	$stmt->execute(array($module));
+	$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	foreach ($data as $key => $value) {
+		$modulevars[$value["setting"]] = $value["value"];
+	}
+	$results = call_user_func( $module . "_clientarea", $modulevars );
+
+} catch (Exception $e) {
+	die($e->getMessage());
 }
-$results = call_user_func( $module . "_clientarea", $modulevars );
 
 $templatefile = "/modules/addons/" . $module . "/" . $results["templatefile"] . ".tpl";
 

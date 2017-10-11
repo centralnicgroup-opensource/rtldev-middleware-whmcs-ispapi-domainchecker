@@ -1,5 +1,4 @@
 <?php
-//TODO:migrate and test
 /*
  * Get the selected registrar for this domain.
  *
@@ -61,10 +60,11 @@ function ispapipremium_CreateAccount($params) {
 		$pdo = Capsule::connection()->getPdo();
 
 		$stmt = $pdo->prepare("SELECT * FROM tblproducts where id=?");
-		$stmt->execute(array($params["pid"]));
+		$stmt->execute(array($params['pid']));
 		$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 		foreach ($data as $key => $value) {
-			if(preg_match('/NAMEMEDIA/',$data["description"])){
+			if(preg_match('/NAMEMEDIA/',$value["description"])){
 				$domain = $value["name"];
 				$class = $value["description"];
 			}else{
@@ -74,14 +74,11 @@ function ispapipremium_CreateAccount($params) {
 		}
 
 		if( preg_match('/NAMEMEDIA/',$class) ){
-
 			//get price in USD
 			$stmt = $pdo->prepare("SELECT * FROM tblpricing where type = 'product' and currency = 1 and relid=?");
-			$stmt->execute(array($params["pid"]));
-			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			foreach ($data as $key => $value) {
-				$price = $value["monthly"];
-			}
+			$stmt->execute(array($params['pid']));
+			$data = $stmt->fetch(PDO::FETCH_ASSOC);
+			$price = $data['monthly'];
 
 			$command = array(
 					"command" => "adddomainapplication",
@@ -146,6 +143,7 @@ function ispapipremium_Renew($params) {
 		$stmt = $pdo->prepare("SELECT * FROM tblproducts where id =?");
 		$stmt->execute(array($params["pid"]));
 		$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 		foreach ($data as $key => $value) {
 			if(preg_match('/NAMEMEDIA/',$value["description"])){
 				$domain = $value["name"];
@@ -175,6 +173,7 @@ function ispapipremium_Renew($params) {
 		}else{
 			$result = "Not a Premium Domain";
 		}
+
 		return $result;
 
 	} catch (Exception $e) {
@@ -190,7 +189,8 @@ function ispapipremium_Renew($params) {
  * @params $fieldvalue
  * @params $params
  */
-function addCustomField($fieldname,$fieldvalue,$params){
+function addCustomField($fieldname,$fieldvalue,$params){ # TODO : Could not test. This is function is not called because I could not buy
+	// premium domain. It always gives the description: credit limit exceeded
 	try{
 		$pdo = Capsule::connection()->getPdo();
 
@@ -226,18 +226,20 @@ function addCustomField($fieldname,$fieldvalue,$params){
 /*
  * This function will display information about the status of the application in the product area.
  */
-function ispapipremium_ClientArea($params) {
+function ispapipremium_ClientArea($params) { #TODO: Testing. what is product area
 	$applicationid = getCustomFieldValue("applicationid",$params);
+
 	try{
 		$pdo = Capsule::connection()->getPdo();
 
 		//get domain name
 		$stmt = $pdo->prepare("SELECT * FROM tblproducts WHERE id =?");
 		$stmt->execute(array($params["pid"]));
-		$data = $stmt->fetch(PDO::FETCH_ASSOC);
-		if($data){
-			if(preg_match('/NAMEMEDIA/',$data["description"])){
-				$domain = $data["name"];
+		$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		foreach ($data as $key => $value) {
+			if(preg_match('/NAMEMEDIA/',$value["description"])){
+				$domain = $value["name"];
 			}else{
 				$domain = $params["domain"];
 			}
@@ -274,7 +276,6 @@ function ispapipremium_ClientArea($params) {
 					$stmt = $pdo->prepare("SELECT * FROM tbldomains WHERE domain =? LIMIT 1");
 					$stmt->execute(array($domain));
 					$data = $stmt->fetch(PDO::FETCH_ASSOC);
-
 					if(empty($data)){
 						//finilize process
 						ispapipremium_finalizeprocess($params);
@@ -301,6 +302,7 @@ function ispapipremium_ClientArea($params) {
  * @params $fieldname
  * @params $params
  */
+ // TODO:from here : Testing
 function getCustomFieldValue($fieldname,$params){
 	try{
 		$pdo = Capsule::connection()->getPdo();
@@ -309,6 +311,7 @@ function getCustomFieldValue($fieldname,$params){
 		$stmt = $pdo->prepare("SELECT * FROM tblcustomfields cf, tblcustomfieldsvalues cfv where cf.fieldname =? and  cf.relid =? and cf.id = cfv.fieldid;");
 		$stmt->execute(array($fieldname, $params["pid"]));
 		$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 		foreach ($data as $key => $val) {
 			$value = $val["value"];
 		}
@@ -347,11 +350,9 @@ function ispapipremium_finalizeprocess($params) {
 		if(preg_match('/NAMEMEDIA/',$data["description"])){
 			$domain = $data["name"];
 			$class = $data["description"];
-
 			//get the extension
 			$tmp = explode(".", $domain, 2);
 			$tld = $tmp[1];
-
 			//get the renewal price for this extension
 			$stmt = $pdo->prepare("SELECT tdp.extension, tp.type, msetupfee year1
 			FROM tbldomainpricing tdp, tblpricing tp
@@ -359,16 +360,13 @@ function ispapipremium_finalizeprocess($params) {
 			AND tp.currency = 1 AND tp.type='domainrenew' AND tdp.extension =? limit 1");
 			$stmt->execute(array(".".$tld));
 			$data = $stmt->fetch(PDO::FETCH_ASSOC);
-
 			$recurringamount = $data['year1'];
-
 		}else{
 			$domain = $hosting["domain"];
 			$class = $data["name"];
 			$recurringamount = 0;
 			$firstpaymentamount = 0;
 		}
-
 		//check if the domain name has already been added as a domain
 		$domainexists = false;
 		$stmt = $pdo->prepare("SELECT * FROM tbldomains WHERE domain =?");
@@ -392,7 +390,7 @@ function ispapipremium_finalizeprocess($params) {
 				$nextduedate = preg_replace('/ .*/', '', $nextduedate);
 				$regdate = $response["PROPERTY"]["CREATEDDATE"][0];
 				$regdate = preg_replace('/ .*/', '', $regdate);
-
+				// TODO: Testing-Yinsert query
 				$insert_stmt = $pdo->prepare("INSERT INTO tbldomains (userid, orderid, type, registrationdate,
 					 domain, firstpaymentamount, recurringamount, registrar, registrationperiod, expirydate, status, donotrenew, nextduedate, paymentmethod) VALUES (?, ?, 'Register', ?, ?, ?, ?, ?, '1', ?, ?, 'on', 'banktransfer')");
 				$insert_stmt->execute(array($userid, $orderid, $regdate, $domain, $firstpaymentamount, $recurringamount, $registrar, $nextduedate, $status, $nextduedate));

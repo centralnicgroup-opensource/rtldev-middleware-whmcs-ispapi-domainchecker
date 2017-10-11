@@ -18,8 +18,6 @@ try{
 	$stmt->execute();
 	$hosting = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-	mail("tseelamkurthi@hexonet.net", "debug premiumcron hosting ", print_r($hosting, true));
-
 	foreach ($hosting as $key => $value) {
 		$ispremium = false;
 		$params = array("pid" => $value["packageid"], "serviceid" => $value["id"] );
@@ -27,8 +25,6 @@ try{
 		$stmt = $pdo->prepare("SELECT * FROM tblproducts where id =?");
 		$stmt->execute(array($params["pid"]));
 		$data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-		mail("tseelamkurthi@hexonet.net", "debug premiumcron data ", print_r($data, true));
 
 			if(preg_match('/NAMEMEDIA/',$data["description"])){
 				$domain = $data["name"];
@@ -52,7 +48,7 @@ try{
 $content .= "</table>";
 
 // $headers = "Content-Type: text/html; charset=\"iso-8859-1\"";
-// mail("tseelamkurthi@hexonet.net","Cron Reports",$content,$headers);
+// mail("anthonys@hexonet.net","Cron Reports",$content,$headers);
 // echo $content;
 
 ?>

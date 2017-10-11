@@ -8,7 +8,6 @@ use WHMCS\Database\Capsule;
  * @params $domain
  */
 function getRegistrar($domain){
-	//TODO: NOT TESTED
 	try{
 		$pdo = Capsule::connection()->getPdo();
 		//get domain extension
@@ -50,7 +49,6 @@ if(isset($_REQUEST["page"])){
 			//Get the group id or create the "PREMIUM DOMAIN" group if not existing
 			//Group name will be "PREMIUM DOMAIN" and should never be modified by the user!
 			try{
-				#TODO : TESTING
 				$pdo = Capsule::connection()->getPdo();
 				$stmt = $pdo->prepare("SELECT * FROM tblproductgroups WHERE name='PREMIUM DOMAIN' LIMIT 1");
 				$stmt->execute();

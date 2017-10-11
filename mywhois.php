@@ -4,6 +4,8 @@ require(dirname(__FILE__)."/includes/functions.php");
 require(dirname(__FILE__)."/includes/clientareafunctions.php");
 require(dirname(__FILE__)."/includes/registrarfunctions.php");
 
+use WHMCS\Database\Capsule;
+
 function WHMCS_LookupDomain($domain){
 	$values["domain"] = $domain;
 	$check = localAPI("domainwhois", $values, $_SESSION["adminuser"]);
@@ -20,17 +22,27 @@ if (strpos( $_REQUEST["domain"], "." )) {
 }
 
 //get the registrar
-$result = select_query("tbldomainpricing","extension,autoreg", array("extension" => $tld));
-$registrar = "";
-while($data = mysql_fetch_array($result)){
-	$file = $data["autoreg"];
-	if(!empty($file)){
-		require_once(dirname(__FILE__)."/modules/registrars/".$file."/".$file.".php");
-		if(function_exists($file.'_GetISPAPIModuleVersion')){
-			$registrar = $file;
+try{
+	$pdo = Capsule::connection()->getPdo();
+	$stmt = $pdo->prepare("SELECT extension, autoreg FROM tbldomainpricing WHERE extension=?");
+	$stmt->execute(array($tld));
+	$registrar = "";
+	$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	foreach ($data as $key => $value) {
+		$file = $value["autoreg"];
+		if(!empty($file)){
+			require_once(dirname(__FILE__)."/modules/registrars/".$file."/".$file.".php");
+			if(function_exists($file.'_GetISPAPIModuleVersion')){
+				$registrar = $file;
+			}
 		}
 	}
+
+} catch (Exception $e) {
+	die($e->getMessage());
 }
+
 
 //if ISPAPI registrar use HEXONET's QueryDomainWhoisInfo, else WHMCS'S LookupDomain
 if(!$registrar){
