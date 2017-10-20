@@ -4,6 +4,9 @@ ______________________________________________________________________________
 Changelog
 ______________________________________________________________________________
 
+v 7.2.1 - 2017-10-20
+ - minor fixes in the domainchecker template
+
 v 7.2.0 - 2017-08-07
  - added whois fallback to WHMCS's DomainLookup when HEXONET's QueryDomainWhoisInfo API command is limited (special case for .CH and .LI)
 
