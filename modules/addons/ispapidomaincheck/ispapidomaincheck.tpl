@@ -685,7 +685,7 @@ $( document ).ready(function() {
 {/literal}
 
 {if $backorder_module_installed}
-    <script src="../modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
+    <script src="{$backorder_module_path}templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
 {/if}
 
 <div class="domain-checker-container2">
