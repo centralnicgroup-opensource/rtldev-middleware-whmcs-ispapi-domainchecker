@@ -238,26 +238,40 @@ $( document ).ready(function() {
 							$( "#" + id + " div.availability").html('<span>'+element.premiumchannel+' PREMIUM</span>').addClass("premium");
 
 						}else{
+                            $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
 
-                            if(element.backorder_installed == "1" && element.backorder_available == 1 && element.backordered=="1"){
+                            $( "#" + id).children().removeClass("search-result-info");
+                            $( "#" + id).children().removeClass("clickable");
 
-                                $( "#" + id).children().children().children().next().addClass("added");
+                            if(element.backorder_installed == "1" && element.backorder_available == 1){
 
-                                $( "#" + id).children().next().next().hide()
-
-                                $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='added'> - BACKORDER</span>");
-
-                                $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
-
-                                $( "#" + id + " div.search-result-price").html('<div class="second-line price style="display:none"><span class="period added">Backorder Placed</span></div>');
-
-
-                            }else{
+                                $( "#" + id).children().addClass("search-result-info");
+                                $( "#" + id).children().addClass("clickable");
 
                                 $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
                                 $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
 
-                                $( "#" + id + " div.search-result-price.details.hide").html('<div class="second-line price"><span class="period added">Backorder Placed</span></div>');
+                                if(element.backordered==1){
+
+                                        $( "#" + id).children().children().children().next().addClass("added");
+
+                                        $( "#" + id).children().next().next().hide()
+
+                                        $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='added'> - BACKORDER</span>");
+
+                                        $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
+
+                                        $( "#" + id + " div.search-result-price").html('<div class="second-line price style="display:none"><span class="period added">Backorder Placed</span></div>');
+
+                                }
+                                else{
+
+                                    $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
+                                    $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
+
+                                    $( "#" + id + " div.search-result-price.details.hide").html('<div class="second-line price"><span class="period added">Backorder Placed</span></div>');
+
+                                }
 
                             }
 
