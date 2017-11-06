@@ -115,6 +115,7 @@ $( document ).ready(function() {
 
 	$(".cat li").bind("click", function(e){
 		var id = $(this).attr("id");
+
 		$(".cat li").each(function() {
 			$(this).removeClass("active");
 		});
@@ -153,6 +154,7 @@ $( document ).ready(function() {
 		});
 
 		var params = $("#searchform").serialize();
+
 		$.ajax({
 			type: "POST",
 			url: "{/literal}{$path_to_domain_file}{literal}",
@@ -172,100 +174,96 @@ $( document ).ready(function() {
 				}
 
 				$.each(data["data"], function(index, element) {
+
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
+
 					$( "#" + id).addClass(element.checkover);
 
 					//create selectbox with the price
-					if(element.price.domainregister && element.price.domainregister[1] != -1){
-						var price = '<select name="domainsregperiod['+element.id+']">';
-						$.each(element.price.domainregister, function(index, p){
-							if(element.premiumchannel == "NAMEMEDIA"){
-								price = price + '<option value="'+index+'">Price: '+p+'</option>';
-							}else{
-								price = price + '<option value="'+index+'">'+index+' {/literal}{$LANG.orderyears}{literal} @ '+p+'</option>';
-							}
-						});
-						price = price + '</select>';
+                    if(element.price.domainregister && element.price.domainregister[1] != -1){
+
+                        var price = '<span name="domainsregperiod['+element.id+']">';
+
+                        $.each(element.price.domainregister, function(index, p){
+
+                            if(element.premiumchannel == "NAMEMEDIA"){
+                                price = price + '<span class="period" value="'+index+'">'+p+'</span>';
+
+                            }else{
+                                price = price + '<span class=" t period" value="'+index+'">'+p+'</span>';
+                            }
+                        });
+
+						price = price + '</span>';
+
 						var priceavailable = true;
+
 					}else{
 						var price = "Pricing not found";
 						var priceavailable = false;
 					}
 
 					if(element.code == "210"){
-						$( "#" + id + " td.checkboxarea").html('<input type="checkbox" value="'+element.id+'" name="domains[]">');
-						$( "#" + id + " td.period").html(price);
-						$( "#" + id + " td.availability").html("<span class='label label-success'>{/literal}{$LANG.domaincheckeravailable}{literal}</span>").addClass("domcheckersuccess");
+
+						$( "#" + id + " span.checkboxarea").html('<input class="checkbox" type="checkbox" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><label for="checkboxId'+element.id+'"><i class="avail fa fa-square-o" aria-hidden="true"></i></label>');
+
+                        $("#" + id).children().next().children().html(price);
+
+                        price =  '<span class="period added">Added</span><br/>'+price;
+
+                        $("#" + id).children().next().next().children().children().html(price);
+
+						$( "#" + id + " div.availability").html("<span>{/literal}{$LANG.domaincheckeravailable}{literal}</span>").addClass("available");
+
 					}else if(element.code == "423"){
-						$( "#" + id + " td.availability").html("<span class='label label-warning'>SERVICE OFFLINE</span>").addClass("domcheckererror");
+						$( "#" + id + " div.availability").html("<span class='label label-warning'>SERVICE OFFLINE</span>").addClass("domcheckererror");
 					}else if(element.code == "541"){
-						$( "#" + id + " td.availability").html("<span class='label label-warning'>Invalid domain name</span>").addClass("domcheckererror");
+						$( "#" + id + " div.availability").html("<span class='label label-warning'>Invalid domain name</span>").addClass("domcheckererror");
 					}else if(element.code == "549"){
-						$( "#" + id + " td.availability").html("<span class='label label-warning'>Unsupported TLD</span>").addClass("domcheckererror");
+						$( "#" + id + " div.availability").html("<span class='label label-warning'>Unsupported TLD</span>").addClass("domcheckererror");
 					}
-					else{
+                    else{
 						//if premium class
 						if(element.class){
+
 							if(priceavailable){
-								$( "#" + id + " td.checkboxarea").html('<input type="checkbox" value="'+element.id+":"+element.class+'" name="premiumdomains[]">');
+
+                                $( "#" + id + " span.checkboxarea").html('<input class="checkbox" type="checkbox" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><label for="checkboxId'+element.id+'"><i class="fa fa-square-o" aria-hidden="true"></i></label>');
 							}
-							$( "#" + id + " td.period").html(price);
-							$( "#" + id + " td.availability").html('<span class="label label-info">'+element.premiumchannel+' PREMIUM</span>').addClass("domcheckersuccess");
+                            <!--  remove this later- checkbox for pricing not found-->
+                            $( "#" + id + " span.checkboxarea").html('<input class="checkbox" type="checkbox" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><label for="checkboxId'+element.id+'"><i class="fa fa-square-o" aria-hidden="true"></i></label>');
+
+                            $("#" + id).children().next().children().html(price);
+
+							$( "#" + id + " div.availability").html('<span>'+element.premiumchannel+' PREMIUM</span>').addClass("premium");
+
 						}else{
 
-                            $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>").addClass("domcheckererror");
+                            if(element.backorder_installed == "1" && element.backorder_available == 1 && element.backordered=="1"){
 
-							var res = element.id.replace('.', ' ');
-							var transfer = res.split(" ");
+                                $( "#" + id).children().children().children().next().addClass("added");
 
-                            var backorder_button = "";
-                            if(element.backorder_installed == "1" && element.backorder_available == 1){
-                                var backorder_button_class = ((element.backordered=="1") ? "active": "btn-default");
-                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span style='border-left:1px solid white;' class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
-                                 backorder_button = "<a class='setbackorder btn btn-sm "+backorder_button_class+"' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
+                                $( "#" + id).children().next().next().hide()
+
+                                $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='added'> - BACKORDER</span>");
+
+                                $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
+
+                                $( "#" + id + " div.search-result-price").html('<div class="second-line price style="display:none"><span class="period added">Backorder Placed</span></div>');
+
+
+                            }else{
+
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
+                                $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
+
+                                $( "#" + id + " div.search-result-price.details.hide").html('<div class="second-line price"><span class="period added">Backorder Placed</span></div>');
+
                             }
 
-							$( "#" + id + " td.period").html("<a class='btn btn-sm btn-default' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
 						}
 					}
 
-                    $('.setbackorder').unbind().click(function() {
-                        var button = $(this);
-                        var command = "CreateBackorder";
-                        if ($(this).hasClass("active"))
-                            command = "DeleteBackorder";
-
-                        $.ajax({
-                            type: "POST",
-                            async: true,
-                            dataType: "json",
-                            url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
-                            data: {
-                                COMMAND: command,
-                                DOMAIN:$(this).attr("value"),
-                                TYPE: "FULL"
-                            },
-                            success: function(data) {
-                                if(command=="CreateBackorder" && data.CODE==200){
-                                    button.addClass("active").removeClass("btn-default");;
-                                    noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-                                }
-                                else if(command=="DeleteBackorder" && data.CODE==200){
-                                    button.addClass("btn-default").removeClass("active");;
-                                    noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-                                }
-                                else if(data.CODE==531){
-                                    noty({text: 'Login Required', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                                }
-                                else{
-                                    noty({text: 'An error occured: ' + data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                                }
-                            },
-                            error: function(data) {
-                                noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                            }
-                        });
-                    });
 				});
 
 				$(".viewWhois").unbind();
@@ -297,7 +295,9 @@ $( document ).ready(function() {
 		count++;
 
 		if("{/literal}{$smarty.get.search}{literal}" && count==1){
+
 			$("#searchform input[name='searched_domain']").attr("value", "{/literal}{$smarty.get.search}{literal}" );
+
 			$("#searchfield").attr("value", "{/literal}{$smarty.get.search}{literal}" );
 			if("{/literal}{$smarty.get.cat}{literal}"){
 				$("#searchform input[name=tldgroup]").attr("value", "{/literal}{$smarty.get.cat}{literal}");
@@ -323,12 +323,14 @@ $( document ).ready(function() {
 			url: "{/literal}{$path_to_domain_file}{literal}",
 			data: getlistparams,
 			dataType:'json',
+
 			success: function(data, textStatus, jqXHR) {
+
 				$("#loading, #errorsarea, #successarea").hide();
 				$("#errorsarea, #successarea").html("");
 
 				$("#resultsarea").show();
-				$('#searchresults').find("tr").remove();
+				$('#searchresults').find("div").remove();
 
 				if(data["feedback"]){
 					if(data["feedback"]["status"] == true){
@@ -342,12 +344,23 @@ $( document ).ready(function() {
 						return;
 					}
 				}
-
 				var nb_results = 0;
+
 				$.each(data["data"], function(index, element) {
+
 					var id = element;//.replace(/\./g, '');
 
-					$('#searchresults').append( '<tr id="' + id + '"><td class="text-center checkboxarea"></td><td><strong>' + element + '</strong></td><td class="text-center availability"><span style="color:#cdcdcd;">{/literal}{$LANG.loading}{literal}</span></td><td class="text-center period"></td></tr>' );
+                        <!-- if(data["data"][0] == id){ -->
+                            <!-- $('#searchresults').append('<hr class="first-domain-separator"></hr>'); -->
+                            <!-- $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " ><strong>' + element + '</strong></span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"><span class="period"></span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added">Added</span><br/><span class="period added"></span></div></div></div>'); -->
+                            <!-- $('#searchresults').append('<hr class="first-domain-separator"></hr>'); -->
+                        <!-- } -->
+                    <!-- else { -->
+
+                        $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " ><strong>' + element + '</strong></span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"><span class="period"></span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added">Added</span><br/><span class="period added"></span></div></div></div>');
+
+                    <!-- } -->
+
 					nb_results++;
 				});
 
@@ -365,12 +378,14 @@ $( document ).ready(function() {
 					return;
 				}else{
 					var getsortedlistparams = params + "&action=getSortedList" + currency;
+
 					$.ajax({
 						type: "POST",
 						url: "{/literal}{$path_to_domain_file}{literal}",
 						data: getsortedlistparams,
 						dataType:'json',
 						success: function(sorteddata, textStatus, jqXHR) {
+
 							startChecking(sorteddata["data"]);
 						}
 					});
@@ -386,6 +401,7 @@ $( document ).ready(function() {
 	});
 
 	function startChecking(domainlist){
+
 
 		var nb_results = domainlist.length;
 		var startwith = {/literal}{$startsequence}{literal};
@@ -436,7 +452,6 @@ $( document ).ready(function() {
 			data: getsuggestionsparams,
 			dataType:'json',
 			success: function(data, textStatus, jqXHR) {
-
 				if(data["feedback"]){
 					if(data["feedback"]["status"] == false){
 						$("#errorsarea").html("PREMIUM: " + data["feedback"]["message"]);
@@ -461,34 +476,30 @@ $( document ).ready(function() {
 
 						//create selectbox with the price
 						if(element.price.domainregister && element.price.domainregister[1] != -1){
-							var price = '<select name="domainsregperiod['+element.id+']">';
+
+							var price = '<span name="domainsregperiod['+element.id+']">';
+
 							$.each(element.price.domainregister, function(index, element){
-								price = price + '<option value="'+index+'">Price: '+element+'</option>';
+								price = price + '<span value="'+index+'">'+element+'</span>';
 							});
-							price = price + '</select>';
+
+							price = price + '</span>';
 							var pricing_available = true;
+
 						}else{
 							var price = "Pricing not found";
 							var pricing_available = false;
 						}
 
-						//place 2 rows each 2 rows
-						if(j<2){
-							j++;
-						}else{
-							j=1;
-							i=i+4;
-						}
-						if(i > $('#searchresults tr').length)
-							selector = '#searchresults tr:last';
-						else
-							selector = '#searchresults tr:nth-child(' + i + ')';
-
 						if(!already_existing){
 							if(pricing_available){
-								$(selector).after( '<tr id="' + id + '" class="api"><td class="text-center checkboxarea"><input type="checkbox" value="'+element.id+":"+element.class+'" name="premiumdomains[]"></td><td><strong>' + element.id + '</strong></td><td class="text-center availability"><span class="label label-info">NAMEMEDIA PREMIUM</span></td><td class="text-center period">'+price+'</td></tr>');
+
+                                $('#searchresults').append( '<div id="' + id + '" class="api"><div class="col-xs-7 search-result-info clickable" ><div class="first-line"><span class="checkboxarea"><input class="checkbox" type="checkbox" value="'+element.id+":"+element.class+'" name="premiumdomains[]" id="checkboxId' + id + '"><label for="checkboxId' + id + '"><i class="fa fa-square-o" aria-hidden="true"></i></label></span><span class=" t domain-label " ><strong>' + element.id + '</strong></span></div><div class="second-line availability"><span class="premium">NAMEMEDIA PREMIUM</span></div></div><div id="pricetest" class="col-xs-5 search-result-price"><div class="second-line price"><span class="period">'+price+'</span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price"><span class="period added">Added</span><br/><span class="period added">'+price+'</span></div></div><br/></div>');
+
 							}else{
-								$(selector).after( '<tr id="' + id + '" class="api"><td class="text-center checkboxarea"></td><td><strong>' + element.id + '</strong></td><td class="text-center availability"><span class="label label-info">NAMEMEDIA PREMIUM</span></td><td class="text-center period">'+price+'</td></tr>');
+
+                                $('#searchresults').append( '<div id="' + id + '" class="api"><div class="col-xs-7 search-result-info clickable" ><div class="first-line"><span class="checkboxarea"><input class="checkbox" type="checkbox" value="'+element.id+":"+element.class+'" name="premiumdomains[]" id="checkboxId' + id + '"><label for="checkboxId' + id + '"><i class="fa fa-square-o" aria-hidden="true"></i></label></span><span class=" t domain-label " ><strong>' + element.id + '</strong></span></div><div class="second-line availability"><span class="premium">NAMEMEDIA PREMIUM</span></div></div><div id="pricetest" class="col-xs-5 search-result-price"><div class="second-line price"><span class="period">'+price+'</span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price"><span class="period added">Added</span><br/><span class="period added">'+price+'</span></div></div><br/></div>');
+
 							}
 						}
 
@@ -525,17 +536,111 @@ $( document ).ready(function() {
 		$(".cat li").first().trigger("click");
 	}
 
-});
-</script>
-<style>
-    .setbackorder.active{
-        color:white;
-        background-color:#0059b3;
-    }
+    $(document).on("click",".search-result-info", function() {
 
-    .label-backorder{
-        color:white;
-        background-color:#0059b3;
+        var box=$(".checkbox", $(this).parent());
+        if(box.prop('checked') == true){
+            box.prop('checked', false);
+         } else{
+             box.prop('checked', true);
+         }
+
+        $(this).find('i.fa-square-o').toggleClass('fa-check-square');
+
+        $(this).siblings().toggleClass('details hide');
+
+
+        $(this).siblings().children().find('span.t').toggleClass('added');
+
+
+        $(this).children().find('span.t').toggleClass('added');
+
+
+        $(this).children().next().children().toggleClass('added');
+
+        if($(this).children().children().children().hasClass('setbackorder')){
+
+            var icon = $(this).children().children().children();
+            var command = "CreateBackorder";
+
+            if ($(this).children().children().children().hasClass("added")){
+                command = "DeleteBackorder";
+            }
+            $.ajax({
+                type: "POST",
+                async: true,
+                dataType: "json",
+                url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
+                data: {
+                    COMMAND: command,
+                    DOMAIN:$(this).children().children().children().attr("value"),
+                    TYPE: "FULL"
+                },
+                success: function(data) {
+                    if(command=="CreateBackorder" && data.CODE==200){
+                        icon.addClass("added");
+                        noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                    }
+                    else if(command=="DeleteBackorder" && data.CODE==200){
+                        $(this).siblings().children().find('span.t').removeClass('added');
+                        icon.removeClass("added");;
+                        noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                    }
+                    else if(data.CODE==531){
+                        noty({text: 'Login Required', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                    }
+                    else{
+                        noty({text: 'An error occured: ' + data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                    }
+                },
+                error: function(data) {
+                    noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                }
+            });
+
+
+        }
+
+    });
+
+    $(document).on("click",".fa-square-o", function() {
+        <!-- $(this).toggleClass('fa-check-square'); -->
+    });
+
+
+
+});
+
+</script>
+
+<style>
+
+    .details.hide {
+        display:none;
+    }
+    .backordertest.added{
+        color: #00a850;
+    }
+    .period.added{
+        color: #00a850;
+    }
+    .available {
+        font-size: 11px;
+        color: #00a850;
+        font-weight: 700;
+        margin-left: 30px;
+    }
+    .backorder {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+        color: #0033a0;
+    }
+    .premium {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+        color: #0033a0;
     }
 
 	#filter {
@@ -681,6 +786,113 @@ $( document ).ready(function() {
         }
     }
 
+<!--  T  -->
+@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+
+.checkboxarea {
+  display: block;
+  padding-left: 15px;
+  text-indent: -15px;
+}
+.checkbox{
+    display:none;
+}
+
+.fa.fa-square-o.fa-check-square{
+    position:absolute;
+    font-size:22px;
+    color: #00a850;
+}
+hr.first-domain-separator {
+   width: 100%;
+   text-align: center;
+   border-bottom: 1px solid #00a850;
+   line-height: 0.1em;
+   margin: 5px 0 10px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+.first-line .tld-zone {
+    font-weight: bold;
+    font-size: 15px;
+    color: #939598;
+}
+.first-line .domain-label{
+    font-weight: lighter;
+    color: #939598;
+    line-height: 1.45;
+    font-size: 15px;
+    margin-left: 30px;
+    margin-right: 1px;
+}
+
+.avail.fa.fa-square-o{
+    position:absolute;
+    font-size:22px;
+    color: #00a850;
+}
+
+.fa.fa-square-o{
+    position:absolute;
+    font-size:22px;
+    color: #939598;
+}
+.domain-label:hover {
+  color: #f26522;
+}
+.clicked .domain-label {
+  padding-left: 30px;
+  color: white;
+}
+.domain-label.added {
+     color: #00a850;
+ }
+ .tld-zone.green {
+     color: #00a850;
+}
+div.second-line{
+    margin-top: 3px;
+    margin-left: 30px;
+
+}
+
+.second-line{
+  display: block;
+  max-height: 14px;
+  font-size: 80%;
+  font-weight: bold;
+  margin-left: 132px;
+  margin-top: -6px;
+}
+span.period {
+     font-size: 15px;
+     color: #f26522;
+     <!-- margin-top: 300px; -->
+}
+
+.search-result-price {
+  text-align: right;
+  margin-bottom: 50px;
+}
+
+.added {
+  font-weight: bold;
+  color: #00a850; !important;
+}
+
+.domain-suggestions .result-item .search-result-details .small-container {
+  margin-top: 12px;
+  margin-left: 29.5px;
+}
+.domain-suggestions .result-item .search-result-details .small-container .details-note {
+  list-style-type: disc;
+  list-style-position: inside;
+  text-indent: -1em;
+  padding-left: 1em;
+}
+
 </style>
 {/literal}
 
@@ -691,6 +903,12 @@ $( document ).ready(function() {
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
 <form method="post" action="index.php?m=ispapicheckdomain" class="form-horizontal" id="searchform">
+
+    <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link href="style.css" rel="stylesheet" />
+</head>
+
 	<input type="hidden" name="tldgroup" value="">
 	<input type="hidden" name="searched_domain" value="">
 
@@ -735,12 +953,12 @@ $( document ).ready(function() {
 </div>
 </div>
 
-<div class="alert text-center" id="loading" style="display:none;"><img src="{$modulepath}loading.gif"/></div>
+<!-- <div class="alert text-center" id="loading" style="display:none;"><img src="{$modulepath}loading.gif"/></div> -->
 <div class="alert alert-danger text-center" id="errorsarea" style="display:none;"></div>
 <div class="domain-checker-result-headline"><p class="domain-checker-available" id="successarea" style="display:none;"></p></div>
 
 
-<div class="domainresults" id="resultsarea" style="display:none;">
+<!-- <div class="domainresults" id="resultsarea" style="display:none;">
 <div>Search Results</div>
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
 		<table class="table table-curved table-hover">
@@ -750,7 +968,25 @@ $( document ).ready(function() {
 		<p align="center"><input id="orderbutton" type="button" value="{$LANG.ordernowbutton} &raquo;" class="btn btn-danger" /></p>
 		<br>
 	</form>
+</div> -->
+
+<div class="result-item" id="resultsarea" style="display:none;">
+<div>Search Results</div><br />
+	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
+
+        <div class="row" id="searchresults">
+
+        </div>
+
+		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.gif"/></p>
+		<p align="center"><input id="orderbutton" type="button" value="{$LANG.ordernowbutton} &raquo;" class="btn btn-danger" /></p>
+		<br>
+	</form>
 </div>
+
+
+
+
 
 
 
