@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 require_once(dirname(__FILE__)."/../../../init.php");
 
@@ -15,6 +15,12 @@ switch ($_REQUEST["action"]) {
         echo json_encode($result);
         die();
         break;
+	case "removeFromCart":
+
+		print_r($_SESSION);
+
+		//delete de $_REQUEST["domain"] from the session.
+
     default:
     	break;
 }

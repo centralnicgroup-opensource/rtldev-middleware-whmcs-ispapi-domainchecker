@@ -552,6 +552,10 @@ $( document ).ready(function() {
 
     $(document).on("click",".search-result-info", function() {
 
+
+
+
+
         var box=$(".checkbox", $(this).parent());
         if(box.prop('checked') == true){
             box.prop('checked', false);
@@ -562,6 +566,25 @@ $( document ).ready(function() {
         $(this).find('i.fa-square-o').toggleClass('fa-check-square');
 
         $(this).siblings().toggleClass('details hide');
+
+        if($(this).siblings().children().find('span.t').hasClass('added')){
+
+
+            $.ajax({
+                  type: "GET",
+                  async: false,
+                  url: "{/literal}{$modulepath}{literal}ajax.php?action=removeFromCart&domain=test.com" ,
+                  dataType:'json',
+                  success: function(data, textStatus, jqXHR) {
+                        if(data["id"]){
+                            addRegistryPremiumToCart(data["id"],domain);
+                        }
+                  }
+            });
+
+
+        }
+
 
 
         $(this).siblings().children().find('span.t').toggleClass('added');
