@@ -141,7 +141,10 @@ $( document ).ready(function() {
 	})
 
 	function checkdomains(domains, cached_data){
+
+        <!-- console.log(domains); -->
 		var currency = "&currency={/literal}{$currency}{literal}" ;
+        <!-- console.log(currency); -->
 
 		var cache = "";
 		if(cached_data){
@@ -150,10 +153,14 @@ $( document ).ready(function() {
 
 		var domainlist = "";
 		$.each(domains, function(index, element) {
+            <!-- console.log(domains); -->
 			domainlist += "&domain[]=" + element;
+            <!-- console.log(domainlist); -->
 		});
 
 		var params = $("#searchform").serialize();
+
+        <!-- console.log(params + cache + currency + domainlist); -->
 
 		$.ajax({
 			type: "POST",
@@ -161,6 +168,7 @@ $( document ).ready(function() {
 			data: params + cache + currency + domainlist,
 			dataType:'json',
 			success: function(data, textStatus, jqXHR) {
+                console.log(data);
 
 				if(data["feedback"]){
 					if(data["feedback"]["status"] == true){
@@ -172,8 +180,10 @@ $( document ).ready(function() {
 						$("#errorsarea").show();
 					}
 				}
-
+                <!-- console.log(data["cart"][0]["domain"]); -->
+                console.log(data["cart"]);
 				$.each(data["data"], function(index, element) {
+
 
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
 
@@ -331,7 +341,9 @@ $( document ).ready(function() {
 
 		var currency = "&currency={/literal}{$currency}{literal}" ;
 		var params = $("#searchform").serialize();
+        <!-- console.log(params); -->
 		var getlistparams = params + "&action=getList" + currency;
+        <!-- console.log(getlistparams); -->
 		$.ajax({
 			type: "POST",
 			url: "{/literal}{$path_to_domain_file}{literal}",
@@ -339,6 +351,7 @@ $( document ).ready(function() {
 			dataType:'json',
 
 			success: function(data, textStatus, jqXHR) {
+                <!-- console.log(data); -->
 
 				$("#loading, #errorsarea, #successarea").hide();
 				$("#errorsarea, #successarea").html("");
@@ -360,20 +373,14 @@ $( document ).ready(function() {
 				}
 				var nb_results = 0;
 
+                <!-- console.log(data["cart"][0]["domain"]); -->
+
 				$.each(data["data"], function(index, element) {
+
 
 					var id = element;//.replace(/\./g, '');
 
-                        <!-- if(data["data"][0] == id){ -->
-                            <!-- $('#searchresults').append('<hr class="first-domain-separator"></hr>'); -->
-                            <!-- $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " ><strong>' + element + '</strong></span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"><span class="period"></span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added">Added</span><br/><span class="period added"></span></div></div></div>'); -->
-                            <!-- $('#searchresults').append('<hr class="first-domain-separator"></hr>'); -->
-                        <!-- } -->
-                    <!-- else { -->
-
                         $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " ><strong>' + element + '</strong></span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"><span class="period"></span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added">Added</span><br/><span class="period added"></span></div></div></div>');
-
-                    <!-- } -->
 
 					nb_results++;
 				});
@@ -416,7 +423,7 @@ $( document ).ready(function() {
 
 	function startChecking(domainlist){
 
-
+<!-- console.log(domainlist); -->
 		var nb_results = domainlist.length;
 		var startwith = {/literal}{$startsequence}{literal};
 
