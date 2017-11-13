@@ -367,6 +367,7 @@ class DomainCheck
     		break;
     	}
 
+
     	$response_array = array("data" => $response, "feedback" => "");
 
     	$this->response = json_encode($response_array);
@@ -471,7 +472,8 @@ class DomainCheck
     				$price = "";
     			}
 
-    			array_push($response, array("id" => $item, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price));
+    			array_push($response, array("id" => $item, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price, "cart" => $_SESSION["cart"]));
+				
 
     			// Feedback for the template
     			if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){

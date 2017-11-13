@@ -15,11 +15,18 @@ switch ($_REQUEST["action"]) {
         echo json_encode($result);
         die();
         break;
+
 	case "removeFromCart":
 
-		print_r($_SESSION);
-
-		//delete de $_REQUEST["domain"] from the session.
+		if(isset($_REQUEST["domain"])){
+			foreach ($_SESSION["cart"]["domains"] as $key => $value) {
+				if(in_array($_REQUEST["domain"], $value)){
+					 unset($_SESSION["cart"]["domains"][$key]);
+				}
+				else{
+				}
+			}
+		}
 
     default:
     	break;

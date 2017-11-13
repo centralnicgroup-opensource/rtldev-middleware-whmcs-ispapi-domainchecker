@@ -32,9 +32,13 @@ $( document ).ready(function() {
 	$("#orderbutton").bind("click", function(e){
 		$("#orderbutton").hide();
 		$("#orderbuttonloading").show();
-		addSelectedpremiumDomainsToCart();
-		addSelectedSimpleDomainsToCart();
+		<!-- addSelectedpremiumDomainsToCart(); -->
+		<!-- addSelectedSimpleDomainsToCart(); -->
+
 		location.href = "{/literal}{$modulepath}{literal}../../../cart.php?a=confdomains";
+
+        <!-- location.href = "{/literal}{$modulepath}{literal}../../../cart.php?a=view"; -->
+
 	});
 
 	function addAftermarketPremiumToCart(id){
@@ -95,7 +99,6 @@ $( document ).ready(function() {
 					  }
 				});
 			}
-
 		});
 	}
 
@@ -142,10 +145,7 @@ $( document ).ready(function() {
 
 	function checkdomains(domains, cached_data){
 
-        <!-- console.log(domains); -->
 		var currency = "&currency={/literal}{$currency}{literal}" ;
-        <!-- console.log(currency); -->
-
 		var cache = "";
 		if(cached_data){
 			cache = "&cache=1";
@@ -153,14 +153,10 @@ $( document ).ready(function() {
 
 		var domainlist = "";
 		$.each(domains, function(index, element) {
-            <!-- console.log(domains); -->
 			domainlist += "&domain[]=" + element;
-            <!-- console.log(domainlist); -->
 		});
 
 		var params = $("#searchform").serialize();
-
-        <!-- console.log(params + cache + currency + domainlist); -->
 
 		$.ajax({
 			type: "POST",
@@ -168,7 +164,6 @@ $( document ).ready(function() {
 			data: params + cache + currency + domainlist,
 			dataType:'json',
 			success: function(data, textStatus, jqXHR) {
-                console.log(data);
 
 				if(data["feedback"]){
 					if(data["feedback"]["status"] == true){
@@ -180,10 +175,8 @@ $( document ).ready(function() {
 						$("#errorsarea").show();
 					}
 				}
-                <!-- console.log(data["cart"][0]["domain"]); -->
-                console.log(data["cart"]);
-				$.each(data["data"], function(index, element) {
 
+				$.each(data["data"], function(index, element) {
 
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
 
@@ -200,7 +193,7 @@ $( document ).ready(function() {
                                 price = price + '<span class="period" value="'+index+'">'+p+'</span>';
 
                             }else{
-                                price = price + '<span class=" t period" value="'+index+'">'+p+'</span>';
+                                price = price + '<span class=" t period " value="'+index+'">'+p+'</span>';
                             }
                         });
 
@@ -213,18 +206,51 @@ $( document ).ready(function() {
 						var priceavailable = false;
 					}
 
-					if(element.code == "210"){
+                    var domainsInCart = [];
+                    if(element.cart){
+                        $.each(element.cart.domains, function(n, currentElem) {
+                            domainsInCart.push(currentElem.domain);
+                        });
+                    }
 
-						$( "#" + id + " span.checkboxarea").html('<input class="checkbox" type="checkbox" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><label for="checkboxId'+element.id+'"><i class="avail fa fa-square-o" aria-hidden="true"></i></label>');
+                    if(element.code == "210"){
 
-                        $("#" + id).children().next().children().html(price);
+                        if (domainsInCart.indexOf(element.id) > -1) {
+                            $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
 
-                        price =  '<span class="period added">Added</span><br/>'+price;
+                            $( "#" + id).children().children().children().next().addClass('added');
 
-                        $("#" + id).children().next().next().children().children().html(price);
+                            $("#" + id).children().next().children().html(price);
+
+                            price =  '<span class="period ">Added</span><br/>'+price;
+
+                            $("#" + id).children().next().next().children().children().html(price);
+
+                            $( "#" + id).children().next().children().children().children().addClass('added');
+
+                            $("#" + id).children().next().addClass('details');
+                            $("#" + id).children().next().addClass('hide');
+
+                            $( "#" + id).children().next().next().children().children().children().children().addClass('added');
+
+                            $("#" + id).children().next().next().removeClass('details');
+                            $("#" + id).children().next().next().removeClass('hide');
+
+                        }else{
+                            $( "#" + id).children().children().children().next().addClass('available');
+
+                            $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
+
+                            $("#" + id).children().next().children().html(price);
+
+                            price = '<span class="period added">Added</span><br/>'+price;
+
+                            $("#" + id).children().next().next().children().children().html(price);
+                        }
 
 						$( "#" + id + " div.availability").html("<span>{/literal}{$LANG.domaincheckeravailable}{literal}</span>").addClass("available");
 
+                        <!--TODO-->
 					}else if(element.code == "423"){
 						$( "#" + id + " div.availability").html("<span class='label label-warning'>SERVICE OFFLINE</span>").addClass("domcheckererror");
 					}else if(element.code == "541"){
@@ -240,23 +266,21 @@ $( document ).ready(function() {
 
                                 $( "#" + id + " span.checkboxarea").html('<input class="checkbox" type="checkbox" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><label for="checkboxId'+element.id+'"><i class="fa fa-square-o" aria-hidden="true"></i></label>');
 							}
-                            <!--  remove this later- checkbox for pricing not found-->
-                            $( "#" + id + " span.checkboxarea").html('<input class="checkbox" type="checkbox" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><label for="checkboxId'+element.id+'"><i class="fa fa-square-o" aria-hidden="true"></i></label>');
+                            $( "#" + id + " div.availability").html('<span class="taken">{/literal}{$LANG.domaincheckertaken}{literal}</span><span class="premium"> - '+element.premiumchannel+' PREMIUM</span>');
 
-                            $("#" + id).children().next().children().html(price);
-
-							$( "#" + id + " div.availability").html('<span>'+element.premiumchannel+' PREMIUM</span>').addClass("premium");
+                            $( "#" + id).children().eq(0).removeClass("search-result-info");
+                            $( "#" + id).children().eq(0).removeClass("clickable");
 
 						}else{
                             $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
 
-                            $( "#" + id).children().removeClass("search-result-info");
-                            $( "#" + id).children().removeClass("clickable");
+                            $( "#" + id).children().eq(0).removeClass("search-result-info");
+                            $( "#" + id).children().eq(0).removeClass("clickable");
 
                             if(element.backorder_installed == "1" && element.backorder_available == 1){
 
-                                $( "#" + id).children().addClass("search-result-info");
-                                $( "#" + id).children().addClass("clickable");
+                                $( "#" + id).children().eq(0).addClass("search-result-info");
+                                $( "#" + id).children().eq(0).addClass("clickable");
 
                                 $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
                                 $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
@@ -265,29 +289,23 @@ $( document ).ready(function() {
 
                                         $( "#" + id).children().children().children().next().addClass("added");
 
-                                        $( "#" + id).children().next().next().hide()
+                                        $( "#" + id).children().next().next().hide();
 
                                         $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='added'> - BACKORDER</span>");
 
                                         $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
 
                                         $( "#" + id + " div.search-result-price").html('<div class="second-line price style="display:none"><span class="period added">Backorder Placed</span></div>');
-
                                 }
                                 else{
-
                                     $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
                                     $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
 
                                     $( "#" + id + " div.search-result-price.details.hide").html('<div class="second-line price"><span class="period added">Backorder Placed</span></div>');
-
                                 }
-
                             }
-
 						}
 					}
-
 				});
 
 				$(".viewWhois").unbind();
@@ -341,9 +359,7 @@ $( document ).ready(function() {
 
 		var currency = "&currency={/literal}{$currency}{literal}" ;
 		var params = $("#searchform").serialize();
-        <!-- console.log(params); -->
 		var getlistparams = params + "&action=getList" + currency;
-        <!-- console.log(getlistparams); -->
 		$.ajax({
 			type: "POST",
 			url: "{/literal}{$path_to_domain_file}{literal}",
@@ -351,7 +367,6 @@ $( document ).ready(function() {
 			dataType:'json',
 
 			success: function(data, textStatus, jqXHR) {
-                <!-- console.log(data); -->
 
 				$("#loading, #errorsarea, #successarea").hide();
 				$("#errorsarea, #successarea").html("");
@@ -373,14 +388,11 @@ $( document ).ready(function() {
 				}
 				var nb_results = 0;
 
-                <!-- console.log(data["cart"][0]["domain"]); -->
-
 				$.each(data["data"], function(index, element) {
-
 
 					var id = element;//.replace(/\./g, '');
 
-                        $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " ><strong>' + element + '</strong></span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"><span class="period"></span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added">Added</span><br/><span class="period added"></span></div></div></div>');
+                    $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " ><strong>' + element + '</strong></span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added">Added</span><br/><span class="period added"></span></div></div></div>');
 
 					nb_results++;
 				});
@@ -423,7 +435,6 @@ $( document ).ready(function() {
 
 	function startChecking(domainlist){
 
-<!-- console.log(domainlist); -->
 		var nb_results = domainlist.length;
 		var startwith = {/literal}{$startsequence}{literal};
 
@@ -515,12 +526,10 @@ $( document ).ready(function() {
 						if(!already_existing){
 							if(pricing_available){
 
-                                $('#searchresults').append( '<div id="' + id + '" class="api"><div class="col-xs-7 search-result-info clickable" ><div class="first-line"><span class="checkboxarea"><input class="checkbox" type="checkbox" value="'+element.id+":"+element.class+'" name="premiumdomains[]" id="checkboxId' + id + '"><label for="checkboxId' + id + '"><i class="fa fa-square-o" aria-hidden="true"></i></label></span><span class=" t domain-label " ><strong>' + element.id + '</strong></span></div><div class="second-line availability"><span class="premium">NAMEMEDIA PREMIUM</span></div></div><div id="pricetest" class="col-xs-5 search-result-price"><div class="second-line price"><span class="period">'+price+'</span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price"><span class="period added">Added</span><br/><span class="period added">'+price+'</span></div></div><br/></div>');
+                                $('#searchresults').append( '<div id="' + id + '" class="api"><div class="col-xs-7 search-result-info clickable" ><div class="first-line"><span class="checkboxarea"><label value="'+element.id+":"+element.class+'" name="premiumdomains[]" id="checkboxId' + id + '"><i class="avail fa fa-square-o" aria-hidden="true"></i></label></span><span class=" t domain-label available " ><strong>' + element.id + '</strong></span></div><div class="second-line availability"><span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium"> - NAMEMEDIA PREMIUM</span></div></div><div id="pricetest" class="col-xs-5 search-result-price"><div class="second-line price"><span class="period">'+price+'</span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price"><span class="period added">Added</span><br/><span class="period added">'+price+'</span></div></div><br/></div>');
 
 							}else{
-
-                                $('#searchresults').append( '<div id="' + id + '" class="api"><div class="col-xs-7 search-result-info clickable" ><div class="first-line"><span class="checkboxarea"><input class="checkbox" type="checkbox" value="'+element.id+":"+element.class+'" name="premiumdomains[]" id="checkboxId' + id + '"><label for="checkboxId' + id + '"><i class="fa fa-square-o" aria-hidden="true"></i></label></span><span class=" t domain-label " ><strong>' + element.id + '</strong></span></div><div class="second-line availability"><span class="premium">NAMEMEDIA PREMIUM</span></div></div><div id="pricetest" class="col-xs-5 search-result-price"><div class="second-line price"><span class="period">'+price+'</span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price"><span class="period added">Added</span><br/><span class="period added">'+price+'</span></div></div><br/></div>');
-
+                                $('#searchresults').append( '<div id="' + id + '" class="api"><div class="col-xs-7 search-result-info clickable" ><div class="first-line"><span class="checkboxarea"><label value="'+element.id+":"+element.class+'" name="premiumdomains[]" id="checkboxId' + id + '"><i class="avail fa fa-square-o" aria-hidden="true"></i></label></span><span class=" t domain-label available " ><strong>' + element.id + '</strong></span></div><div class="second-line availability"><span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium"> - NAMEMEDIA PREMIUM</span></div></div><div id="pricetest" class="col-xs-5 search-result-price"><div class="second-line price"><span class="period">'+price+'</span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price"><span class="period added">Added</span><br/><span class="period added">'+price+'</span></div></div><br/></div>');
 							}
 						}
 
@@ -559,48 +568,37 @@ $( document ).ready(function() {
 
     $(document).on("click",".search-result-info", function() {
 
+        $(this).children().children().children().children().toggleClass('fa-check-square');
+        $(this).children().children().children().next().children().toggleClass('fa-check-square');
 
-
-
-
-        var box=$(".checkbox", $(this).parent());
-        if(box.prop('checked') == true){
-            box.prop('checked', false);
-         } else{
-             box.prop('checked', true);
-         }
-
-        $(this).find('i.fa-square-o').toggleClass('fa-check-square');
+        $(this).siblings().children().find('span.t').toggleClass('added');
+        $(this).children().find('span.t').toggleClass('added');
+        $(this).children().next().children().toggleClass('added');
 
         $(this).siblings().toggleClass('details hide');
 
-        if($(this).siblings().children().find('span.t').hasClass('added')){
+        if($(this).children().find('span.t').hasClass('available') && $(this).children().find('span.t').hasClass('added')){
+            var params = {};
 
+            params['a'] = 'addToCart';
+            params['domain'] = $(this).children().children().children().attr("value");
+            params['token'] = $("#domainform").children().attr("value");
 
+            $.ajax({
+                  url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
+                  type: "POST",
+                  data: params,
+                  async: false
+            });
+        }
+        else{
+            var domainInCart = $(this).children().children().children().attr("value");
             $.ajax({
                   type: "GET",
                   async: false,
-                  url: "{/literal}{$modulepath}{literal}ajax.php?action=removeFromCart&domain=test.com" ,
-                  dataType:'json',
-                  success: function(data, textStatus, jqXHR) {
-                        if(data["id"]){
-                            addRegistryPremiumToCart(data["id"],domain);
-                        }
-                  }
+                  url: "{/literal}{$modulepath}{literal}ajax.php?action=removeFromCart&domain="+domainInCart
             });
-
-
         }
-
-
-
-        $(this).siblings().children().find('span.t').toggleClass('added');
-
-
-        $(this).children().find('span.t').toggleClass('added');
-
-
-        $(this).children().next().children().toggleClass('added');
 
         if($(this).children().children().children().hasClass('setbackorder')){
 
@@ -641,51 +639,14 @@ $( document ).ready(function() {
                     noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
                 }
             });
-
-
         }
-
     });
-
-    $(document).on("click",".fa-square-o", function() {
-        <!-- $(this).toggleClass('fa-check-square'); -->
-    });
-
-
 
 });
 
 </script>
 
 <style>
-
-    .details.hide {
-        display:none;
-    }
-    .backordertest.added{
-        color: #00a850;
-    }
-    .period.added{
-        color: #00a850;
-    }
-    .available {
-        font-size: 11px;
-        color: #00a850;
-        font-weight: 700;
-        margin-left: 30px;
-    }
-    .backorder {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: capitalize;
-        color: #0033a0;
-    }
-    .premium {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: capitalize;
-        color: #0033a0;
-    }
 
 	#filter {
 		background-color:#e6e6e6;
@@ -830,112 +791,128 @@ $( document ).ready(function() {
         }
     }
 
-<!--  T  -->
-@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+    <!--  T  -->
+    @import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
 
-.checkboxarea {
-  display: block;
-  padding-left: 15px;
-  text-indent: -15px;
-}
-.checkbox{
-    display:none;
-}
+    .checkboxarea {
+      display: block;
+      padding-left: 15px;
+      text-indent: -15px;
+    }
+    .checkbox{
+        display:none;
+    }
 
-.fa.fa-square-o.fa-check-square{
-    position:absolute;
-    font-size:22px;
-    color: #00a850;
-}
-hr.first-domain-separator {
-   width: 100%;
-   text-align: center;
-   border-bottom: 1px solid #00a850;
-   line-height: 0.1em;
-   margin: 5px 0 10px;
-}
+    .fa.fa-square-o.fa-check-square{
+        position:absolute;
+        font-size:22px;
+        color: #00a850;
+    }
+    hr.first-domain-separator {
+       width: 100%;
+       text-align: center;
+       border-bottom: 1px solid #00a850;
+       line-height: 0.1em;
+       margin: 5px 0 10px;
+   }
 
-.clickable {
-  cursor: pointer;
-}
-.first-line .tld-zone {
-    font-weight: bold;
-    font-size: 15px;
-    color: #939598;
-}
-.first-line .domain-label{
-    font-weight: lighter;
-    color: #939598;
-    line-height: 1.45;
-    font-size: 15px;
-    margin-left: 30px;
-    margin-right: 1px;
-}
+   .clickable {
+       cursor: pointer;
+   }
+   .first-line .tld-zone {
+        font-weight: bold;
+        font-size: 15px;
+        color: #939598;
+    }
+    .first-line .domain-label{
+        font-weight: lighter;
+        color: #939598;
+        line-height: 1.45;
+        font-size: 15px;
+        margin-left: 30px;
+        margin-right: 1px;
+    }
+    .avail.fa.fa-square-o{
+        position:absolute;
+        font-size:22px;
+        color: #00a850;
+    }
 
-.avail.fa.fa-square-o{
-    position:absolute;
-    font-size:22px;
-    color: #00a850;
-}
+    .fa.fa-square-o{
+        position:absolute;
+        font-size:22px;
+        color: #939598;
+    }
+    .domain-label:hover {
+        color: #f26522;
+    }
+    .clicked .domain-label {
+        padding-left: 30px;
+        color: white;
+    }
+    .domain-label.available.added {
+        color: #00a850;
+    }
+    .domain-label.available{
+        color: #0033a0;
+    }
 
-.fa.fa-square-o{
-    position:absolute;
-    font-size:22px;
-    color: #939598;
-}
-.domain-label:hover {
-  color: #f26522;
-}
-.clicked .domain-label {
-  padding-left: 30px;
-  color: white;
-}
-.domain-label.added {
-     color: #00a850;
- }
- .tld-zone.green {
-     color: #00a850;
-}
-div.second-line{
-    margin-top: 3px;
-    margin-left: 30px;
+    div.second-line{
+        margin-top: 3px;
+        margin-left: 30px;
+    }
+    .second-line{
+        display: block;
+        max-height: 14px;
+        font-size: 80%;
+        font-weight: bold;
+        margin-left: 132px;
+        margin-top: -6px;
+    }
+    span.period {
+        font-size: 15px;
+        color: #f26522;
+    }
 
-}
-
-.second-line{
-  display: block;
-  max-height: 14px;
-  font-size: 80%;
-  font-weight: bold;
-  margin-left: 132px;
-  margin-top: -6px;
-}
-span.period {
-     font-size: 15px;
-     color: #f26522;
-     <!-- margin-top: 300px; -->
-}
-
-.search-result-price {
-  text-align: right;
-  margin-bottom: 50px;
-}
-
-.added {
-  font-weight: bold;
-  color: #00a850; !important;
-}
-
-.domain-suggestions .result-item .search-result-details .small-container {
-  margin-top: 12px;
-  margin-left: 29.5px;
-}
-.domain-suggestions .result-item .search-result-details .small-container .details-note {
-  list-style-type: disc;
-  list-style-position: inside;
-  text-indent: -1em;
-  padding-left: 1em;
-}
+    .search-result-price {
+        text-align: right;
+        margin-bottom: 50px;
+    }
+    .added {
+        font-weight: bold;
+        color: #00a850; !important;
+    }
+    .domain-label.added{
+        font-weight: bold;
+        color: #00a850; !important;
+    }
+    .row1{
+        margin-left: 250px;
+        margin-right: 250px;
+    }
+    .details.hide {
+        display:none;
+    }
+    .period.added{
+        color: #00a850;
+    }
+    .available {
+        font-size: 11px;
+        color: #00a850;
+        font-weight: 700;
+    }
+    .backorder {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+        color: #0033a0;
+    }
+    .premium {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+        color: #0033a0;
+    }
 
 </style>
 {/literal}
@@ -1018,12 +995,12 @@ span.period {
 <div>Search Results</div><br />
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
 
-        <div class="row" id="searchresults">
+        <div class="row row1" id="searchresults">
 
         </div>
 
 		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.gif"/></p>
-		<p align="center"><input id="orderbutton" type="button" value="{$LANG.ordernowbutton} &raquo;" class="btn btn-danger" /></p>
+		<p align="center"><input id="orderbutton" type="button" value="{$LANG.checkoutbutton} &raquo;" class="btn btn-danger" /></p>
 		<br>
 	</form>
 </div>
