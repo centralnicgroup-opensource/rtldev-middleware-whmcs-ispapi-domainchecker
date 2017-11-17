@@ -131,14 +131,13 @@ $( document ).ready(function() {
 		$("div[id='container_" + id + "'] ul li").first().trigger("click");
 	})
 
-
-
     $(".subCat").bind("click", function(){
+        $(".sub").unbind();
+
         $(this).toggleClass('active');
 
         var tmpid = [];
-        $(".sub").on("click", function(e){
-
+        $(".sub").bind("click", function(e){
             $(this).find("li").each(function() {
                 if($(this).hasClass('active')){
                     var id = $(this).attr("id").substring(2);
@@ -148,9 +147,7 @@ $( document ).ready(function() {
             tmpid = jQuery.unique( tmpid );
             $("#searchform input[name=tldgroup]").attr("value", tmpid);
             $("#searchbutton").trigger("click");
-
         })
-
 	})
 
 	function checkdomains(domains, cached_data){
@@ -659,6 +656,9 @@ $( document ).ready(function() {
             });
         }
     });
+    $('.category-button').click(function(){
+        $(this).find('i.category').toggleClass('fa-angle-up fa-angle-down');
+    });
 
 });
 
@@ -809,7 +809,7 @@ $( document ).ready(function() {
         }
     }
 
-    <!--  T  -->
+    <!--  a  -->
     @import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
 
     .checkboxarea {
@@ -906,8 +906,8 @@ $( document ).ready(function() {
         color: #00a850; !important;
     }
     .row1{
-        margin-left: 250px;
-        margin-right: 250px;
+        margin-left: 190px;
+        margin-right: 190px;
     }
     .details.hide {
         display:none;
@@ -919,6 +919,9 @@ $( document ).ready(function() {
         font-size: 11px;
         color: #00a850;
         font-weight: 700;
+    }
+    .backorder.added{
+        color: #00a850;
     }
     .backorder {
         font-size: 11px;
@@ -1149,7 +1152,7 @@ $( document ).ready(function() {
 </div> -->
 
     <!-- CATEGORY -->
-<div id="categories" class="row collapse-category">
+<div id="categories" class="row1 row collapse-category">
     <br/>
     <div class="col-xs-12 category-setting">
         <button class="category-button" type="button" data-toggle="collapse" data-target="#category" >
@@ -1182,8 +1185,8 @@ $( document ).ready(function() {
                 </div>
             </div>
 
+        </div>
     </div>
-</div>
 
 
 </form>
@@ -1208,13 +1211,10 @@ $( document ).ready(function() {
 </div> -->
 
 <div class="result-item" id="resultsarea" style="display:none;">
-<div>Search Results</div><br />
+<!-- <div>Search Results</div><br /> -->
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
-
         <div class="row row1" id="searchresults">
-
         </div>
-
 		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.gif"/></p>
 		<p align="center"><input id="orderbutton" type="button" value="{$LANG.checkoutbutton} &raquo;" class="btn btn-danger" /></p>
 		<br>
@@ -1222,12 +1222,7 @@ $( document ).ready(function() {
 </div>
 
 
-
-
-
-
-
-<div id="pricingTable" style="display:visible;">
+<!-- <div id="pricingTable" style="display:visible;">
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
         <div class="panel panel-default">
             <div class="panel-heading" role="tab" id="heading{$tldCategory->id}">
@@ -1269,7 +1264,7 @@ $( document ).ready(function() {
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 {if !$loggedin && $currencies}
     <div class="currencychooser pull-right clearfix margin-bottom">

@@ -768,19 +768,19 @@ class DomainCheck
 		try{
 			$this->tldgroup = explode(',', $this->tldgroup);
 			$data["tlds"] = [];
-			$test2 = [];
+			$data2 = [];
 			$pdo = Capsule::connection()->getPdo();
 			foreach ($this->tldgroup as $key => $id) {
 				$stmt = $pdo->prepare("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id=?");
 				$stmt->execute(array($id));
-				$test = $stmt->fetch(PDO::FETCH_ASSOC);
-				array_push($test2, $test["tlds"]);
+				$result = $stmt->fetch(PDO::FETCH_ASSOC);
+				array_push($data2, $result["tlds"]);
 			}
-			$test3 = [];
-			foreach ($test2 as $key => $value) {
-				array_push($test3, explode(' ', $value));
+			$data3 = [];
+			foreach ($data2 as $key => $value) {
+				array_push($data3, explode(' ', $value));
 			}
-			foreach ($test3 as $key => $value) {
+			foreach ($data3 as $key => $value) {
 				foreach ($value as $ky => $tld) {
 					if(in_array($tld, $data["tlds"])){
 
