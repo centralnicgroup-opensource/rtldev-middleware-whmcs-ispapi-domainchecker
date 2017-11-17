@@ -132,15 +132,25 @@ $( document ).ready(function() {
 	})
 
 
-	$(".sub li").bind("click", function(e){
-		$(".sub li").each(function() {
-			$(this).removeClass("active");
-		});
-		$(this).addClass("active");
-		var tmpid = $(this).attr("id");
-		var id = tmpid.substring(2);
-		$("#searchform input[name=tldgroup]").attr("value", id);
-		$("#searchbutton").trigger("click");
+
+    $(".subCat").bind("click", function(){
+        $(this).toggleClass('active');
+
+        var tmpid = [];
+        $(".sub").on("click", function(e){
+
+            $(this).find("li").each(function() {
+                if($(this).hasClass('active')){
+                    var id = $(this).attr("id").substring(2);
+                    tmpid.push(id);
+                }
+            });
+            tmpid = jQuery.unique( tmpid );
+            $("#searchform input[name=tldgroup]").attr("value", tmpid);
+            $("#searchbutton").trigger("click");
+
+        })
+
 	})
 
 	function checkdomains(domains, cached_data){
@@ -156,8 +166,7 @@ $( document ).ready(function() {
 			domainlist += "&domain[]=" + element;
 		});
 
-		var params = $("#searchform").serialize();
-
+        var params = $("#searchform").serialize();
 		$.ajax({
 			type: "POST",
 			url: "{/literal}{$path_to_domain_file}{literal}",
@@ -286,10 +295,9 @@ $( document ).ready(function() {
                                 $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
 
                                 if(element.backordered==1){
+                                        $( "#" + id).children().next().next().hide();
 
                                         $( "#" + id).children().children().children().next().addClass("added");
-
-                                        $( "#" + id).children().next().next().hide();
 
                                         $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='added'> - BACKORDER</span>");
 
@@ -337,7 +345,6 @@ $( document ).ready(function() {
 		count++;
 
 		if("{/literal}{$smarty.get.search}{literal}" && count==1){
-
 			$("#searchform input[name='searched_domain']").attr("value", "{/literal}{$smarty.get.search}{literal}" );
 
 			$("#searchfield").attr("value", "{/literal}{$smarty.get.search}{literal}" );
@@ -350,7 +357,17 @@ $( document ).ready(function() {
 			if(searched_domain == ""){
 				return;
 			}else{
+                if($("#searchform input[name=tldgroup").attr("value") == ''){
+                    var idsOfSubCat = $("#searchform").children().eq(6).children().eq(2).children().children().children().children().children().children().children().children();
+                    var tmpid = [];
+                    idsOfSubCat.each(function(){
+                        var id = $(this).attr("id").substring(2);
+                        tmpid.push(id);
+                    });
+                    $("#searchform input[name=tldgroup").attr("value",tmpid);
+                }
 				$("#searchform input[name='searched_domain']").attr("value", searched_domain );
+
 			}
 		}
 
@@ -565,6 +582,7 @@ $( document ).ready(function() {
 	}else{
 		$(".cat li").first().trigger("click");
 	}
+
 
     $(document).on("click",".search-result-info", function() {
 
@@ -878,6 +896,7 @@ $( document ).ready(function() {
         text-align: right;
         margin-bottom: 50px;
     }
+
     .added {
         font-weight: bold;
         color: #00a850; !important;
@@ -913,6 +932,173 @@ $( document ).ready(function() {
         text-transform: capitalize;
         color: #0033a0;
     }
+    .resultson .search-form {
+      margin-top: 0;
+    }
+    .resultson .search-form .search-state {
+      padding-right: 77px;
+      display: none;
+    }
+    .resultson .search-form .search-btn {
+      right: 82px;
+    }
+    .resultson .search-form .collapse-category .category-button {
+      display: block;
+    }
+    .search-form {
+      margin-top: 100px;
+      position: relative;
+    }
+    .search-form .search-state {
+      text-align: right;
+      margin-bottom: 5px;
+    }
+
+    .search-form .search-input-bar {
+      margin-bottom: 10px;
+    }
+    .search-form .search-input-bar .input-group {
+      min-width: 100%;
+      color: #939598;
+    }
+    @media (max-width: 549px) {
+      .search-form .search-input-bar .input-group {
+        margin-bottom: 10px;
+      }
+    }
+    .search-form .search-input-bar .input-group .search-btn {
+      background-color: #f26522;
+      color: #fff;
+      border-radius: 5px;
+      border: none;
+    }
+    .search-form .search-input-bar .input-group .search-btn:focus {
+      outline: none;
+      border: none;
+    }
+    .search-form .search-input-bar .input-group .singlesearch:focus:-webkit-input-placeholder {
+      color: transparent;
+    }
+    .search-form .search-input-bar .input-group .singlesearch:focus::-moz-placeholder {
+      color: transparent;
+    }
+    .search-form .search-input-bar .input-group .singlesearch:focus::-webkit-input-placeholder {
+      color: transparent;
+    }
+    .search-form .search-input-bar .input-group .singlesearch:focus:-ms-input-placeholder {
+      color: transparent;
+    }
+    .search-form .search-input-bar .input-group .bulksearch,
+    .search-form .search-input-bar .input-group .singlesearch {
+      background: transparent;
+      border: 3px solid #0033a0;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+    .search-form .search-input-bar .input-group .singlesearch {
+      margin-left: 0;
+      height: 44px;
+    }
+    .search-form .search-input-bar .input-group .bulksearch {
+      resize: vertical;
+    }
+    .search-form .settings-icons {
+      margin-bottom: 10px;
+      text-align: center;
+      color: #939598;
+    }
+    .search-form .settings-icons > div,
+    .search-form .settings-icons label {
+      cursor: pointer;
+    }
+    .search-form .settings-icons .active {
+      color: #00a850;
+    }
+    .search-form .settings-icons .table-switch i {
+      font-size: 26px;
+    }
+    .search-form .settings-icons label {
+      font-size: 11px;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+    .search-form .collapse-category {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .search-form .collapse-category .category-button {
+      padding: 0;
+      margin: 0 auto;
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      /*display: none;*/
+      color: #939598;
+    }
+    .search-form .collapse-category .category-button i {
+      font-size: 24px;
+    }
+    .search-form .collapse-category .category-button:hover {
+      text-decoration: none;
+    }
+    .search-form .collapse-category .category-button:focus {
+      text-decoration: none;
+      outline: none;
+    }
+    .search-form .collapse-category .category-item {
+      display: inline-block;
+      /*margin: 10px 4px 0;*/  /*gaps inbetween the category items*/
+    }
+    .search-form .collapse-category .category-item.continents {
+      margin-top: 0;
+      cursor: pointer;
+    }
+    .search-form .collapse-category .category-item.continents .category-label {
+      margin-top: 0;
+      cursor: pointer;
+    }
+    /*.search-form .collapse-category .category-item.icon {
+      margin-bottom: 10px;
+    }*/
+    .search-form .collapse-category .category-item .category-label {
+      font-size: 80%;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    /*.search-form .collapse-category input {
+      display: none;
+    }*/
+    .input-group .inner-addon .addon {
+      position: absolute;
+      padding: 6px;
+    }
+    .input-group .inner-addon .input-box {
+      z-index: 0;
+    }
+    .input-group .inner-addon.left-addon .addon {
+      left: 0;
+    }
+    .input-group .inner-addon.left-addon .input-box {
+      padding-left: 50px;
+    }
+    .input-group .inner-addon.right-addon .addon {
+      right: 0;
+    }
+    .input-group .inner-addon.right-addon .input-box {
+      padding-right: 50px;
+    }
+    .input-group .input-group-addon.shoppingcart {
+      background-color: transparent;
+      border: none;
+      vertical-align: top;
+      min-width: 77px;
+      padding-right: 0;
+    }
+    .resultson .search-form .search-btn {
+      right: 82px;
+    }
 
 </style>
 {/literal}
@@ -923,7 +1109,7 @@ $( document ).ready(function() {
 
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
-<form method="post" action="index.php?m=ispapicheckdomain" class="form-horizontal" id="searchform">
+<form method="post" action="index.php?m=ispapicheckdomain" id="searchform" class="search-form">
 
     <head>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -933,42 +1119,72 @@ $( document ).ready(function() {
 	<input type="hidden" name="tldgroup" value="">
 	<input type="hidden" name="searched_domain" value="">
 
-	<div class="well2">
-	    <ul class="cat">
-	    {foreach from=$categories item=cat}
-	    	<li id="cat_{$cat.id}">{$cat.name}</li>
-	    {/foreach}
-	    </ul>
-	    <div class="clear"></div>
-	    <div id="filter">
-		    {foreach from=$categories item=cat}
-		    <div class="catcontainer" id="container_cat_{$cat.id}" style="display:none;">
-		    	<ul class="sub">
-			    	 {foreach from=$cat.subcategories item=sub}
-			    	 	<li id="s_{$sub.id}">{$sub.name}</li>
-			    	 {/foreach}
-			    </ul>
-		    </div>
-		    {/foreach}
+    <div class="text-center">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
+                <div class="input-group input-group-lg input-group-box">
+                    <input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
+                    <!-- <span class="input-group-btn"> -->
+                        <button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go </button>
+                    <!-- </span> -->
+                 </div>
+            </div>
+        </div>
+    </div>
 
-		    <div class="clear"></div>
+<!-- <div class="text-center">
+    <div class="row search-input-bar">
+        <div class="col-xs-12">
+            <div class="input-group">
+                <div class="inner-addon right-addon"> -->
+                    <!-- <input type="text" id="text" onkeyup ="searchBox()" class="form-control singlesearch input-box"/> -->
+                    <!-- <input type="text" class="form-control singlesearch input-box"/>
+                    <div class="addon">
+                        <button id="searchbutton" class="btn btn-default search-btn">GO</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
 
-			<br>
+    <!-- CATEGORY -->
+<div id="categories" class="row collapse-category">
+    <br/>
+    <div class="col-xs-12 category-setting">
+        <button class="category-button" type="button" data-toggle="collapse" data-target="#category" >
+            <span>CATEGORIES</span>
+            <br />
+            <!-- <i class="button fa fa-toggle-off"></i> -->
+            <i class="category fa fa-angle-down"></i>
+        </button>
+    </div>
 
-		    <div class="text-center">
-				<div class="row">
-					<div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
-						<div class="input-group input-group-lg input-group-box">
-							<input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
-							<!--<span class="input-group-btn">-->
-								<button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go<!--{$LANG.checkavailability}--></button>
-							<!--</span>-->
-						</div>
-					</div>
-				</div>
-		    </div>
-	    </div>
-	</div>
+    <div class="col-xs-12">
+
+        <div class="collapse" id="category">
+
+            <div class="category-item icon">
+                <div class="domain-checker-container2">
+                    <div class="domain-checker-bg2">
+                        <div class="well2">
+                            <div class="catcontainer" > <!-- id="container_cat" -->
+                                <ul class="sub">
+                                  {foreach from=$categories item=cat}
+                        			  {foreach from=$cat.subcategories item=sub}
+                        			    	<li class="subCat" id="s_{$sub.id}">{$sub.name}</li>
+                        			   {/foreach}
+                        		  {/foreach}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    </div>
+</div>
+
 
 </form>
 </div>

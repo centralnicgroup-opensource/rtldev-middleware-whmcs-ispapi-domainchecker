@@ -12,6 +12,7 @@ if(file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backe
 	require_once dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php";
 }
 
+use WHMCS\Database\Capsule;
 
 //WORKARROUND: Get a list of all Hexonet registrar modules and include the registrar files
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
@@ -60,6 +61,7 @@ class DomainCheck
     private $registrar;
 	private $cached_data;
 	private $response;
+
 
     /*
      *  Constructor
@@ -171,8 +173,11 @@ class DomainCheck
     	$do_not_search = false;
     	$domainlist = array();
 
+
     	$domains = $this->sortTLDs();
+		// print_r($domains);
     	$tldgroups = $this->getTLDGroups();
+		// print_r($tldgroups);
 
     	$searched_label = $this->getDomainLabel($this->domain);
     	$searched_tld = $this->getDomainExtension($this->domain);
@@ -225,6 +230,7 @@ class DomainCheck
     	if($do_not_search){
     		$domainlist = array();
     	}
+
 
 		$response_array = array("data" => $domainlist, "feedback" => $feedback);
 		//save the list in the session for the premium domains.
@@ -473,7 +479,7 @@ class DomainCheck
     			}
 
     			array_push($response, array("id" => $item, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price, "cart" => $_SESSION["cart"]));
-				
+
 
     			// Feedback for the template
     			if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){
@@ -758,15 +764,53 @@ class DomainCheck
      *
      * @return array An array with all TLDs of the current group.
      */
-    private function getTLDGroups(){
-    	$result = select_query("ispapi_tblcategories","id,name,tlds", array("id"=>$this->tldgroup));
-    	$data = mysql_fetch_array($result);
-		if(isset($data["tlds"])){
-			return explode(" ", $data["tlds"]);
-		}else{
-			array();
+	 private function getTLDGroups(){
+		try{
+			$this->tldgroup = explode(',', $this->tldgroup);
+			$data["tlds"] = [];
+			$test2 = [];
+			$pdo = Capsule::connection()->getPdo();
+			foreach ($this->tldgroup as $key => $id) {
+				$stmt = $pdo->prepare("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id=?");
+				$stmt->execute(array($id));
+				$test = $stmt->fetch(PDO::FETCH_ASSOC);
+				array_push($test2, $test["tlds"]);
+			}
+			$test3 = [];
+			foreach ($test2 as $key => $value) {
+				array_push($test3, explode(' ', $value));
+			}
+			foreach ($test3 as $key => $value) {
+				foreach ($value as $ky => $tld) {
+					if(in_array($tld, $data["tlds"])){
+
+					}else{
+						array_push($data["tlds"], $tld);
+					}
+				}
+			}
+
+			if(isset($data["tlds"])){
+				return $data["tlds"];
+			}else{
+				array();
+			}
+
+		} catch (Exception $e) {
+			die($e->getMessage());
 		}
-    }
+
+	}
+
+    // private function getTLDGroups(){
+    // 	$result = select_query("ispapi_tblcategories","id,name,tlds", array("id"=>$this->tldgroup));
+    // 	$data = mysql_fetch_array($result);
+	// 	if(isset($data["tlds"])){
+	// 		return explode(" ", $data["tlds"]);
+	// 	}else{
+	// 		array();
+	// 	}
+    // }
 
     /*
      * Convert the domain into an IDN code
