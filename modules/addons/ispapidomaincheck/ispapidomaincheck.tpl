@@ -32,75 +32,8 @@ $( document ).ready(function() {
 	$("#orderbutton").bind("click", function(e){
 		$("#orderbutton").hide();
 		$("#orderbuttonloading").show();
-		<!-- addSelectedpremiumDomainsToCart(); -->
-		<!-- addSelectedSimpleDomainsToCart(); -->
-
 		location.href = "{/literal}{$modulepath}{literal}../../../cart.php?a=confdomains";
-
-        <!-- location.href = "{/literal}{$modulepath}{literal}../../../cart.php?a=view"; -->
-
 	});
-
-	function addAftermarketPremiumToCart(id){
-		$.ajax({
-			  url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&pid=" + id,
-			  type: "POST",
-			  async: false,
-		});
-	}
-
-	function addRegistryPremiumToCart(id,domain){
-		$.ajax({
-			  type: "POST",
-			  async: false,
-			  url: encodeURI("{/literal}{$modulepath}{literal}../../../cart.php?a=add&ajax=1&domains[]="+domain+"&domainselect=1&pid="+id)
-		});
-	}
-
-	function addSelectedSimpleDomainsToCart(){
-		var params = $("#domainform").serialize();
-		$.ajax({
-			  url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
-			  type: "POST",
-			  data: params,
-			  async: false
-		});
-	}
-
-	function addSelectedpremiumDomainsToCart(){
-		$("#domainform input[name='premiumdomains[]']:checked").each(function() {
-
-			var premiumarray = $(this).attr("value").split(":");
-			var domain = premiumarray[0];
-			var class_ = premiumarray[1];
-
-			if (class_ == "PREMIUM_NAMEMEDIA") {
-				$.ajax({
-					  type: "POST",
-					  async: false,
-					  dataType:'json',
-					  url: "{/literal}{$modulepath}{literal}product.php?page=create&domain=" +  domain + "&class=" + encodeURIComponent(class_) ,
-					  success: function(data, textStatus, jqXHR) {
-						  if(data["status"] == "ok"){
-							  addAftermarketPremiumToCart(data["productid"]);
-						  }
-					  }
-				});
-			} else if (class_.indexOf("PREMIUM") !=-1) {
-				$.ajax({
-					  type: "GET",
-					  async: false,
-					  url: "{/literal}{$modulepath}{literal}ajax.php?action=getproduct&class=" + encodeURIComponent(class_),
-					  dataType:'json',
-					  success: function(data, textStatus, jqXHR) {
-							if(data["id"]){
-								addRegistryPremiumToCart(data["id"],domain);
-							}
-					  }
-				});
-			}
-		});
-	}
 
 	$('#searchform').submit(function(e){
 	    e.preventDefault();
@@ -109,45 +42,27 @@ $( document ).ready(function() {
 	$('#searchfield').bind("enterKey",function(e){
 		$("#searchbutton").trigger("click");
 	});
+
 	$('#searchfield').keyup(function(e){
-	    if(e.keyCode == 13)
-	    {
-	        $(this).trigger("enterKey");
+        if(e.keyCode == 13){
+            $(this).trigger("enterKey");
 	    }
 	});
 
-	$(".cat li").bind("click", function(e){
-		var id = $(this).attr("id");
-
-		$(".cat li").each(function() {
-			$(this).removeClass("active");
-		});
-		$(this).addClass("active");
-
-		$(".catcontainer").each(function(){
-			$(this).hide();
-		});
-		$("div[id='container_" + id + "']").show();
-		$("div[id='container_" + id + "'] ul li").first().trigger("click");
-	})
-
+    //handle the categories events
     $(".subCat").bind("click", function(){
-        $(".sub").unbind();
-
         $(this).toggleClass('active');
 
         var tmpid = [];
-        $(".sub").bind("click", function(e){
-            $(this).find("li").each(function() {
-                if($(this).hasClass('active')){
-                    var id = $(this).attr("id").substring(2);
-                    tmpid.push(id);
-                }
-            });
-            tmpid = jQuery.unique( tmpid );
-            $("#searchform input[name=tldgroup]").attr("value", tmpid);
-            $("#searchbutton").trigger("click");
-        })
+        $(".sub").find("li").each(function() {
+            if($(this).hasClass('active')){
+                var id = $(this).attr("id").substring(2);
+                tmpid.push(id);
+            }
+        });
+        tmpid = jQuery.unique( tmpid );
+        $("#searchform input[name=tldgroup]").attr("value", tmpid);
+        $("#searchbutton").trigger("click");
 	})
 
 	function checkdomains(domains, cached_data){
@@ -171,42 +86,22 @@ $( document ).ready(function() {
 			dataType:'json',
 			success: function(data, textStatus, jqXHR) {
 
-				if(data["feedback"]){
-					if(data["feedback"]["status"] == true){
-						$("#successarea").html(data["feedback"]["message"]);
-						$("#successarea").show();
-					}
-					if(data["feedback"]["status"] == false){
-						$("#errorsarea").html(data["feedback"]["message"]);
-						$("#errorsarea").show();
-					}
-				}
-
 				$.each(data["data"], function(index, element) {
-
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
-
 					$( "#" + id).addClass(element.checkover);
 
 					//create selectbox with the price
                     if(element.price.domainregister && element.price.domainregister[1] != -1){
-
                         var price = '<span name="domainsregperiod['+element.id+']">';
-
                         $.each(element.price.domainregister, function(index, p){
-
                             if(element.premiumchannel == "NAMEMEDIA"){
                                 price = price + '<span class="period" value="'+index+'">'+p+'</span>';
-
                             }else{
                                 price = price + '<span class=" t period " value="'+index+'">'+p+'</span>';
                             }
                         });
-
 						price = price + '</span>';
-
 						var priceavailable = true;
-
 					}else{
 						var price = "Pricing not found";
 						var priceavailable = false;
@@ -223,34 +118,22 @@ $( document ).ready(function() {
 
                         if (domainsInCart.indexOf(element.id) > -1) {
                             $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
-
                             $( "#" + id).children().children().children().next().addClass('added');
-
                             $("#" + id).children().next().children().html(price);
-
                             price =  '<span class="period ">Added</span><br/>'+price;
-
                             $("#" + id).children().next().next().children().children().html(price);
-
                             $( "#" + id).children().next().children().children().children().addClass('added');
-
                             $("#" + id).children().next().addClass('details');
                             $("#" + id).children().next().addClass('hide');
-
                             $( "#" + id).children().next().next().children().children().children().children().addClass('added');
-
                             $("#" + id).children().next().next().removeClass('details');
                             $("#" + id).children().next().next().removeClass('hide');
 
                         }else{
                             $( "#" + id).children().children().children().next().addClass('available');
-
                             $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
-
                             $("#" + id).children().next().children().html(price);
-
                             price = '<span class="period added">Added</span><br/>'+price;
-
                             $("#" + id).children().next().next().children().children().html(price);
                         }
 
@@ -293,19 +176,14 @@ $( document ).ready(function() {
 
                                 if(element.backordered==1){
                                         $( "#" + id).children().next().next().hide();
-
                                         $( "#" + id).children().children().children().next().addClass("added");
-
                                         $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='added'> - BACKORDER</span>");
-
                                         $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
-
                                         $( "#" + id + " div.search-result-price").html('<div class="second-line price style="display:none"><span class="period added">Backorder Placed</span></div>');
                                 }
                                 else{
                                     $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
                                     $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
-
                                     $( "#" + id + " div.search-result-price.details.hide").html('<div class="second-line price"><span class="period added">Backorder Placed</span></div>');
                                 }
                             }
