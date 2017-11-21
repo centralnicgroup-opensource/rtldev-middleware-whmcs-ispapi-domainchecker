@@ -1103,6 +1103,7 @@ $( document ).ready(function() {
       right: 82px;
     }
 
+
 </style>
 {/literal}
 
@@ -1123,33 +1124,15 @@ $( document ).ready(function() {
 	<input type="hidden" name="searched_domain" value="">
 
     <div class="text-center">
-        <div class="row">
+        <div class="row search-input-bar">
             <div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
                 <div class="input-group input-group-lg input-group-box">
                     <input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
-                    <!-- <span class="input-group-btn"> -->
                         <button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go </button>
-                    <!-- </span> -->
                  </div>
             </div>
         </div>
     </div>
-
-<!-- <div class="text-center">
-    <div class="row search-input-bar">
-        <div class="col-xs-12">
-            <div class="input-group">
-                <div class="inner-addon right-addon"> -->
-                    <!-- <input type="text" id="text" onkeyup ="searchBox()" class="form-control singlesearch input-box"/> -->
-                    <!-- <input type="text" class="form-control singlesearch input-box"/>
-                    <div class="addon">
-                        <button id="searchbutton" class="btn btn-default search-btn">GO</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> -->
 
     <!-- CATEGORY -->
 <div id="categories" class="row1 row collapse-category">
