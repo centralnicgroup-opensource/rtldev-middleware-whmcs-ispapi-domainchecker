@@ -88,6 +88,7 @@ $( document ).ready(function() {
 
 				$.each(data["data"], function(index, element) {
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
+
 					$( "#" + id).addClass(element.checkover);
 
 					//create selectbox with the price
@@ -117,24 +118,24 @@ $( document ).ready(function() {
                     if(element.code == "210"){
 
                         if (domainsInCart.indexOf(element.id) > -1) {
-                            $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
-                            $( "#" + id).children().children().children().next().addClass('added');
-                            $("#" + id).children().next().children().html(price);
-                            price =  '<span class="period ">Added</span><br/>'+price;
-                            $("#" + id).children().next().next().children().children().html(price);
-                            $( "#" + id).children().next().children().children().children().addClass('added');
-                            $("#" + id).children().next().addClass('details');
-                            $("#" + id).children().next().addClass('hide');
-                            $( "#" + id).children().next().next().children().children().children().children().addClass('added');
-                            $("#" + id).children().next().next().removeClass('details');
-                            $("#" + id).children().next().next().removeClass('hide');
+                            var test = $("#domainform input[id=orderbutton]");
+                            $("#domainform input[id=orderbutton]").removeClass('hide');
 
+                            $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
+                            $( "#" + id).find('span.t.domain-label').addClass('available added');
+                            $("#" + id).find('div.second-line').html(price);
+                            price =  '<span class="period ">Added</span><br/>'+price;
+                            $("#" + id).find('span').eq(6).html(price);
+                            $( "#" + id).find('span.period').addClass('added');
+                            $("#" + id).find('div.search-result-price').addClass('details hide');
+                            $("#" + id).find('div.search-result-price').eq(1).removeClass('details hide');
                         }else{
-                            $( "#" + id).children().children().children().next().addClass('available');
+
+                            $( "#" + id).find('span.t.domain-label').addClass('available');
                             $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
-                            $("#" + id).children().next().children().html(price);
+                            $("#" + id).find('div.second-line.price').html(price);
                             price = '<span class="period added">Added</span><br/>'+price;
-                            $("#" + id).children().next().next().children().children().html(price);
+                            $("#" + id).find('span.period.added').html(price);
                         }
 
 						$( "#" + id + " div.availability").html("<span>{/literal}{$LANG.domaincheckeravailable}{literal}</span>").addClass("available");
@@ -148,6 +149,7 @@ $( document ).ready(function() {
 						$( "#" + id + " div.availability").html("<span class='label label-warning'>Unsupported TLD</span>").addClass("domcheckererror");
 					}
                     else{
+
 						//if premium class
 						if(element.class){
 
@@ -157,34 +159,28 @@ $( document ).ready(function() {
 							}
                             $( "#" + id + " div.availability").html('<span class="taken">{/literal}{$LANG.domaincheckertaken}{literal}</span><span class="premium"> - '+element.premiumchannel+' PREMIUM</span>');
 
-                            $( "#" + id).children().eq(0).removeClass("search-result-info");
-                            $( "#" + id).children().eq(0).removeClass("clickable");
-
+                            $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
 						}else{
-                            $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
 
-                            $( "#" + id).children().eq(0).removeClass("search-result-info");
-                            $( "#" + id).children().eq(0).removeClass("clickable");
+                            $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
+                            $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
 
                             if(element.backorder_installed == "1" && element.backorder_available == 1){
 
-                                $( "#" + id).children().eq(0).addClass("search-result-info");
-                                $( "#" + id).children().eq(0).addClass("clickable");
-
-                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
+                                $( "#" + id).find('div.col-xs-7').addClass("search-result-info clickable");
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder added'> - BACKORDER</span>");
                                 $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
 
                                 if(element.backordered==1){
-                                        $( "#" + id).children().next().next().hide();
-                                        $( "#" + id).children().children().children().next().addClass("added");
-                                        $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='added'> - BACKORDER</span>");
+                                        $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder added'> - BACKORDER</span>");
                                         $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
-                                        $( "#" + id + " div.search-result-price").html('<div class="second-line price style="display:none"><span class="period added">Backorder Placed</span></div>');
+                                        $( "#" + id + " div.second-line").eq(1).html('<span class="period added">Backorder Placed</span>');
                                 }
                                 else{
+
                                     $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
                                     $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
-                                    $( "#" + id + " div.search-result-price.details.hide").html('<div class="second-line price"><span class="period added">Backorder Placed</span></div>');
+                                    $( "#" + id + " div.search-result-price.details.hide").find('div').html('<span class="period added">Backorder Placed</span>');
                                 }
                             }
 						}
@@ -233,7 +229,7 @@ $( document ).ready(function() {
 				return;
 			}else{
                 if($("#searchform input[name=tldgroup").attr("value") == ''){
-                    var idsOfSubCat = $("#searchform").children().eq(6).children().eq(2).children().children().children().children().children().children().children().children();
+                    var idsOfSubCat = $("#searchform").find('li');
                     var tmpid = [];
                     idsOfSubCat.each(function(){
                         var id = $(this).attr("id").substring(2);
@@ -284,7 +280,14 @@ $( document ).ready(function() {
 
 					var id = element;//.replace(/\./g, '');
 
-                    $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " ><strong>' + element + '</strong></span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added">Added</span><br/><span class="period added"></span></div></div></div>');
+                    var tld = element.split(".");
+                    tld = tld[0];
+
+                    var index = element.indexOf(".");
+                    var idtld = element.substr(0, index);
+                    var zone = element.substr(index + 0).bold();
+
+                    $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " >' + tld+zone + '</span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added"></span><span class="period added"></span></div></div></div>');
 
 					nb_results++;
 				});
@@ -461,21 +464,22 @@ $( document ).ready(function() {
 
     $(document).on("click",".search-result-info", function() {
 
-        $(this).children().children().children().children().toggleClass('fa-check-square');
-        $(this).children().children().children().next().children().toggleClass('fa-check-square');
-
-        $(this).siblings().children().find('span.t').toggleClass('added');
-        $(this).children().find('span.t').toggleClass('added');
-        $(this).children().next().children().toggleClass('added');
-
+        $(this).find('i.fa-square-o').toggleClass('fa-check-square');
+        $(this).siblings().find('span.t').toggleClass('added');
+        $(this).find('span.t').toggleClass('added');
+        $(this).find('span').eq(2).toggleClass('added');
+        $(this).find('span.backorder').toggleClass('added');
         $(this).siblings().toggleClass('details hide');
 
-        if($(this).children().find('span.t').hasClass('available') && $(this).children().find('span.t').hasClass('added')){
-            var params = {};
 
+        if($(this).find('span.t.domain-label').hasClass('available') && $(this).find('span.t.domain-label').hasClass('added')){
+
+            $("#domainform input[id=orderbutton]").removeClass('hide');
+
+            var params = {};
             params['a'] = 'addToCart';
-            params['domain'] = $(this).children().children().children().attr("value");
-            params['token'] = $("#domainform").children().attr("value");
+            params['domain'] = $(this).find('label').attr("value");
+            params['token'] = $("#domainform").find('input').eq(0).attr("value");
 
             $.ajax({
                   url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
@@ -485,7 +489,13 @@ $( document ).ready(function() {
             });
         }
         else{
-            var domainInCart = $(this).children().children().children().attr("value");
+            if($("#domainform").find('span.t.domain-label').hasClass('added') && $("#domainform").find('span.t.domain-label').hasClass('available')){
+                //
+            }else{
+                $("#domainform input[id=orderbutton]").addClass('hide');
+            }
+            var domainInCart = $(this).find('label').attr("value");
+
             $.ajax({
                   type: "GET",
                   async: false,
@@ -493,12 +503,12 @@ $( document ).ready(function() {
             });
         }
 
-        if($(this).children().children().children().hasClass('setbackorder')){
+        if($(this).find('label').hasClass('setbackorder')){
 
-            var icon = $(this).children().children().children();
+            var iconLabel = $(this).find('label.setbackorder');
             var command = "CreateBackorder";
 
-            if ($(this).children().children().children().hasClass("added")){
+            if ($(this).find('label.setbackorder').hasClass("added")){
                 command = "DeleteBackorder";
             }
             $.ajax({
@@ -508,17 +518,16 @@ $( document ).ready(function() {
                 url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
                 data: {
                     COMMAND: command,
-                    DOMAIN:$(this).children().children().children().attr("value"),
+                    DOMAIN:$(this).find('label.setbackorder').attr("value"),
                     TYPE: "FULL"
                 },
                 success: function(data) {
                     if(command=="CreateBackorder" && data.CODE==200){
-                        icon.addClass("added");
+                        iconLabel.addClass("added");
                         noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
                     }
                     else if(command=="DeleteBackorder" && data.CODE==200){
-                        $(this).siblings().children().find('span.t').removeClass('added');
-                        icon.removeClass("added");;
+                        iconLabel.removeClass("added");;
                         noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
                     }
                     else if(data.CODE==531){
@@ -542,447 +551,6 @@ $( document ).ready(function() {
 
 </script>
 
-<style>
-
-	#filter {
-		background-color:#e6e6e6;
-		-webkit-border-radius: 3px;
-		-webkit-border-top-left-radius: 0;
-		-moz-border-radius: 3px;
-		-moz-border-radius-topleft: 0;
-		border-radius: 3px;
-		border-top-left-radius: 0;
-		border: none; /*1px solid #e6e6e6*/;
-		padding-top:20px;
-		padding-bottom:25px;
-		padding-right:20px;
-        background: linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        background: -moz-linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        background: -webkit-linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        background: -ms-linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        background: -o-linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#e6e6e6, endColorstr=#f2f2f2,GradientType=1);
-    }
-
-	ul.cat {
-		margin:0px;
-		padding:0px;
-	}
-
-	ul.cat li {
-		display:inline;
-		float:left;
-		background-color: #ffffff;
-		color: #111111;
-		padding:7px 12px 7px 12px;
-		margin-right:5px;
-		-webkit-border-top-left-radius: 3px;
-		-webkit-border-top-right-radius: 3px;
-		-moz-border-radius-topleft: 3px;
-		-moz-border-radius-topright: 3px;
-		border-top-left-radius: 3px;
-		border-top-right-radius: 3px;
-		cursor:pointer;
-	}
-
-	ul.cat li.active {
-		background-color: #e6e6e6;
-		border: 1px solid #e6e6e6;
-		border-bottom-color: #e6e6e6;
-		margin-bottom:-1px;
-		font-weight:bold;
-	}
-
-	ul.sub {
-		margin:0px;
-		padding:0px;
-	}
-
-	ul.sub li {
-		display:inline;
-		float:left;
-		background-color: #939598;
-		color: #ffffff;
-		padding:7px 12px 7px 12px;
-		margin-left:10px;
-		margin-bottom:10px;
-		cursor:pointer;
-		-webkit-border-radius: 3px;
-		-moz-border-radius: 3px;
-		border-radius: 3px;
-	}
-
-	ul.sub li.active {
-		background-color: #f26522;
-		color:#ffffff;
-	}
-
-	td.availability p {
-		font-weight:bold;
-		font-size: 80%;
-	}
-
-	.domain-checker-container2 {
-	    /*background: rgba(0, 0, 0, 0) -moz-linear-gradient(center top , #ffd960, #ffb201) repeat scroll 0 0;*/
-	    border-radius: 10px;
-	    margin: 20px 0;
-	    padding: 0;
-	}
-
-	.domain-checker-bg2 {
-	    /*background-image: url("../img/globe.png");
-	    background-position: 110% -5px;
-	    background-repeat: no-repeat;*/
-	    margin: 0;
-	    padding: 10px 0;
-	}
-
-	.clear {
-		clear:both;
-	}
-
-	@media (max-width:991px) {
-
-        #searchfield {
-            width:600px;
-        }
-
-		div.well2 {
-			margin-left:auto;
-			margin-right:auto;
-		}
-
-		ul.cat li{
-			display:block;
-			float:left;
-			width: 100%;
-			text-align:center;
-			background-color:#e6e6e6;
-		}
-
-		ul.cat li.active {
-		 	border-width: 0px;
-		    font-weight: normal;
-		    margin-bottom: 0px;
-		    background-color:#f26522;
-            color:#ffffff;
-		}
-	}
-
-    @media (min-width:1200px) {
-        #searchfield {
-            width:750px;
-        }
-    }
-
-    @media (max-width:1200px) {
-        #searchfield {
-            width:600px;
-        }
-    }
-
-    @media (max-width:767px){
-        #searchfield {
-            width:250px;
-        }
-    }
-
-    <!--  a  -->
-    @import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
-
-    .checkboxarea {
-      display: block;
-      padding-left: 15px;
-      text-indent: -15px;
-    }
-    .checkbox{
-        display:none;
-    }
-
-    .fa.fa-square-o.fa-check-square{
-        position:absolute;
-        font-size:22px;
-        color: #00a850;
-    }
-    hr.first-domain-separator {
-       width: 100%;
-       text-align: center;
-       border-bottom: 1px solid #00a850;
-       line-height: 0.1em;
-       margin: 5px 0 10px;
-   }
-
-   .clickable {
-       cursor: pointer;
-   }
-   .first-line .tld-zone {
-        font-weight: bold;
-        font-size: 15px;
-        color: #939598;
-    }
-    .first-line .domain-label{
-        font-weight: lighter;
-        color: #939598;
-        line-height: 1.45;
-        font-size: 15px;
-        margin-left: 30px;
-        margin-right: 1px;
-    }
-    .avail.fa.fa-square-o{
-        position:absolute;
-        font-size:22px;
-        color: #00a850;
-    }
-
-    .fa.fa-square-o{
-        position:absolute;
-        font-size:22px;
-        color: #939598;
-    }
-    .domain-label:hover {
-        color: #f26522;
-    }
-    .clicked .domain-label {
-        padding-left: 30px;
-        color: white;
-    }
-    .domain-label.available.added {
-        color: #00a850;
-    }
-    .domain-label.available{
-        color: #0033a0;
-    }
-
-    div.second-line{
-        margin-top: 3px;
-        margin-left: 30px;
-    }
-    .second-line{
-        display: block;
-        max-height: 14px;
-        font-size: 80%;
-        font-weight: bold;
-        margin-left: 132px;
-        margin-top: -6px;
-    }
-    span.period {
-        font-size: 15px;
-        color: #f26522;
-    }
-
-    .search-result-price {
-        text-align: right;
-        margin-bottom: 50px;
-    }
-
-    .added {
-        font-weight: bold;
-        color: #00a850; !important;
-    }
-    .domain-label.added{
-        font-weight: bold;
-        color: #00a850; !important;
-    }
-    .row1{
-        margin-left: 190px;
-        margin-right: 190px;
-    }
-    .details.hide {
-        display:none;
-    }
-    .period.added{
-        color: #00a850;
-    }
-    .available {
-        font-size: 11px;
-        color: #00a850;
-        font-weight: 700;
-    }
-    .backorder.added{
-        color: #00a850;
-    }
-    .backorder {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: capitalize;
-        color: #0033a0;
-    }
-    .premium {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: capitalize;
-        color: #0033a0;
-    }
-    .resultson .search-form {
-      margin-top: 0;
-    }
-    .resultson .search-form .search-state {
-      padding-right: 77px;
-      display: none;
-    }
-    .resultson .search-form .search-btn {
-      right: 82px;
-    }
-    .resultson .search-form .collapse-category .category-button {
-      display: block;
-    }
-    .search-form {
-      margin-top: 100px;
-      position: relative;
-    }
-    .search-form .search-state {
-      text-align: right;
-      margin-bottom: 5px;
-    }
-
-    .search-form .search-input-bar {
-      margin-bottom: 10px;
-    }
-    .search-form .search-input-bar .input-group {
-      min-width: 100%;
-      color: #939598;
-    }
-    @media (max-width: 549px) {
-      .search-form .search-input-bar .input-group {
-        margin-bottom: 10px;
-      }
-    }
-    .search-form .search-input-bar .input-group .search-btn {
-      background-color: #f26522;
-      color: #fff;
-      border-radius: 5px;
-      border: none;
-    }
-    .search-form .search-input-bar .input-group .search-btn:focus {
-      outline: none;
-      border: none;
-    }
-    .search-form .search-input-bar .input-group .singlesearch:focus:-webkit-input-placeholder {
-      color: transparent;
-    }
-    .search-form .search-input-bar .input-group .singlesearch:focus::-moz-placeholder {
-      color: transparent;
-    }
-    .search-form .search-input-bar .input-group .singlesearch:focus::-webkit-input-placeholder {
-      color: transparent;
-    }
-    .search-form .search-input-bar .input-group .singlesearch:focus:-ms-input-placeholder {
-      color: transparent;
-    }
-    .search-form .search-input-bar .input-group .bulksearch,
-    .search-form .search-input-bar .input-group .singlesearch {
-      background: transparent;
-      border: 3px solid #0033a0;
-      border-radius: 10px;
-      font-size: 18px;
-    }
-    .search-form .search-input-bar .input-group .singlesearch {
-      margin-left: 0;
-      height: 44px;
-    }
-    .search-form .search-input-bar .input-group .bulksearch {
-      resize: vertical;
-    }
-    .search-form .settings-icons {
-      margin-bottom: 10px;
-      text-align: center;
-      color: #939598;
-    }
-    .search-form .settings-icons > div,
-    .search-form .settings-icons label {
-      cursor: pointer;
-    }
-    .search-form .settings-icons .active {
-      color: #00a850;
-    }
-    .search-form .settings-icons .table-switch i {
-      font-size: 26px;
-    }
-    .search-form .settings-icons label {
-      font-size: 11px;
-      text-transform: uppercase;
-      line-height: 1.2;
-    }
-    .search-form .collapse-category {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .search-form .collapse-category .category-button {
-      padding: 0;
-      margin: 0 auto;
-      border: none;
-      background: transparent;
-      font-weight: 600;
-      font-size: 12px;
-      text-transform: uppercase;
-      /*display: none;*/
-      color: #939598;
-    }
-    .search-form .collapse-category .category-button i {
-      font-size: 24px;
-    }
-    .search-form .collapse-category .category-button:hover {
-      text-decoration: none;
-    }
-    .search-form .collapse-category .category-button:focus {
-      text-decoration: none;
-      outline: none;
-    }
-    .search-form .collapse-category .category-item {
-      display: inline-block;
-      /*margin: 10px 4px 0;*/  /*gaps inbetween the category items*/
-    }
-    .search-form .collapse-category .category-item.continents {
-      margin-top: 0;
-      cursor: pointer;
-    }
-    .search-form .collapse-category .category-item.continents .category-label {
-      margin-top: 0;
-      cursor: pointer;
-    }
-    /*.search-form .collapse-category .category-item.icon {
-      margin-bottom: 10px;
-    }*/
-    .search-form .collapse-category .category-item .category-label {
-      font-size: 80%;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    /*.search-form .collapse-category input {
-      display: none;
-    }*/
-    .input-group .inner-addon .addon {
-      position: absolute;
-      padding: 6px;
-    }
-    .input-group .inner-addon .input-box {
-      z-index: 0;
-    }
-    .input-group .inner-addon.left-addon .addon {
-      left: 0;
-    }
-    .input-group .inner-addon.left-addon .input-box {
-      padding-left: 50px;
-    }
-    .input-group .inner-addon.right-addon .addon {
-      right: 0;
-    }
-    .input-group .inner-addon.right-addon .input-box {
-      padding-right: 50px;
-    }
-    .input-group .input-group-addon.shoppingcart {
-      background-color: transparent;
-      border: none;
-      vertical-align: top;
-      min-width: 77px;
-      padding-right: 0;
-    }
-    .resultson .search-form .search-btn {
-      right: 82px;
-    }
-
-
-</style>
 {/literal}
 
 {if $backorder_module_installed}
@@ -992,65 +560,60 @@ $( document ).ready(function() {
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
 <form method="post" action="index.php?m=ispapicheckdomain" id="searchform" class="search-form">
-
     <head>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-  <link href="style.css" rel="stylesheet" />
-</head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <link href="style.css" rel="stylesheet" />
+        <link rel="stylesheet" href="../modules/addons/ispapidomaincheck/ispapidomaincheck.css">
+    </head>
 
 	<input type="hidden" name="tldgroup" value="">
 	<input type="hidden" name="searched_domain" value="">
 
-    <div class="text-center">
-        <div class="row search-input-bar">
-            <div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
-                <div class="input-group input-group-lg input-group-box">
-                    <input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
-                        <button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go </button>
-                 </div>
-            </div>
+    <div class="row search-input-bar">
+        <div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
+            <div class="input-group input-group-lg input-group-box">
+                <input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;margin-left:50px;width:230%;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
+                    <button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go </button>
+             </div>
         </div>
     </div>
 
     <!-- CATEGORY -->
-<div id="categories" class="row1 row collapse-category">
-    <br/>
-    <div class="col-xs-12 category-setting">
-        <button class="category-button" type="button" data-toggle="collapse" data-target="#category" >
-            <span>CATEGORIES</span>
-            <br />
-            <!-- <i class="button fa fa-toggle-off"></i> -->
-            <i class="category fa fa-angle-down"></i>
-        </button>
-    </div>
+    <div id="categories" class="row1 row collapse-category">
+        <br/>
+        <div class="col-xs-12 category-setting">
+            <button class="category-button" type="button" data-toggle="collapse" data-target="#category" >
+                <span>CATEGORIES</span>
+                <br />
+                <i class="category fa fa-angle-down"></i>
+            </button>
+        </div>
 
-    <div class="col-xs-12">
+        <div class="col-xs-12">
 
-        <div class="collapse" id="category">
+            <div class="collapse" id="category">
 
-            <div class="category-item icon">
-                <div class="domain-checker-container2">
-                    <div class="domain-checker-bg2">
-                        <div class="well2">
-                            <div class="catcontainer" > <!-- id="container_cat" -->
-                                <ul class="sub">
-                                  {foreach from=$categories item=cat}
-                        			  {foreach from=$cat.subcategories item=sub}
-                        			    	<li class="subCat" id="s_{$sub.id}">{$sub.name}</li>
-                        			   {/foreach}
-                        		  {/foreach}
-                                </ul>
+                <div class="category-item icon">
+                    <div class="domain-checker-container2">
+                        <div class="domain-checker-bg2">
+                            <div class="well2">
+                                <div class="catcontainer" > <!-- id="container_cat" -->
+                                    <ul class="sub">
+                                        {foreach from=$categories item=cat}
+                                            {foreach from=$cat.subcategories item=sub}
+                                                <li class="subCat" id="s_{$sub.id}">{$sub.name}</li>
+                                            {/foreach}
+                                        {/foreach}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
-    </div>
 
-
-</form>
+    </form>
 </div>
 </div>
 
@@ -1059,17 +622,6 @@ $( document ).ready(function() {
 <div class="domain-checker-result-headline"><p class="domain-checker-available" id="successarea" style="display:none;"></p></div>
 
 
-<!-- <div class="domainresults" id="resultsarea" style="display:none;">
-<div>Search Results</div>
-	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
-		<table class="table table-curved table-hover">
-			<tbody id="searchresults"></tbody>
-		</table>
-		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.gif"/></p>
-		<p align="center"><input id="orderbutton" type="button" value="{$LANG.ordernowbutton} &raquo;" class="btn btn-danger" /></p>
-		<br>
-	</form>
-</div> -->
 
 <div class="result-item" id="resultsarea" style="display:none;">
 <!-- <div>Search Results</div><br /> -->
@@ -1077,7 +629,7 @@ $( document ).ready(function() {
         <div class="row row1" id="searchresults">
         </div>
 		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.gif"/></p>
-		<p align="center"><input id="orderbutton" type="button" value="{$LANG.checkoutbutton} &raquo;" class="btn btn-danger" /></p>
+		<p align="center"><input id="orderbutton" type="button" value="{$LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
 		<br>
 	</form>
 </div>
