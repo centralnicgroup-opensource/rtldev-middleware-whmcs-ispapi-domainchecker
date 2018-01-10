@@ -1,6 +1,6 @@
 <?php
 
-$module_version = "7.2.1";
+$module_version = "7.2.2";
 
 //if (!defined("WHMCS"))
 //	die("This file cannot be accessed directly");
@@ -220,9 +220,7 @@ function ispapidomaincheck_clientarea($vars) {
 				$registrarconfigoptions = getregistrarconfigoptions($file);
 				$ispapi_config = ispapi_config($registrarconfigoptions);
 				$command =  $command = array(
-						"command" => "CheckAuthentication",
-						"subuser" => $ispapi_config["login"],
-						"password" => $ispapi_config["password"],
+						"command" => "CheckAuthentication"
 				);
 				$checkAuthentication = ispapi_call($command, $ispapi_config);
 				if($checkAuthentication["CODE"] != "200"){
@@ -270,9 +268,7 @@ function ispapidomaincheck_clientarea($vars) {
 					$registrarconfigoptions = getregistrarconfigoptions($file);
 					$ispapi_config = ispapi_config($registrarconfigoptions);
 					$command =  $command = array(
-							"command" => "CheckAuthentication",
-							"subuser" => $ispapi_config["login"],
-							"password" => $ispapi_config["password"],
+							"command" => "CheckAuthentication"
 					);
 					$checkAuthentication = ispapi_call($command, $ispapi_config);
 					if($checkAuthentication["CODE"] != "200"){
