@@ -1,3 +1,5 @@
+
+
 {literal}
 
 
@@ -27,6 +29,7 @@ jQuery.extend(jQuery, {
 });
 
 $( document ).ready(function() {
+    console.log("HERE\n");
 	var count = 0;
 
 	$("#orderbutton").bind("click", function(e){
@@ -40,6 +43,7 @@ $( document ).ready(function() {
 	});
 
 	$('#searchfield').bind("enterKey",function(e){
+        // console.log(e);
 		$("#searchbutton").trigger("click");
 	});
 
@@ -66,6 +70,7 @@ $( document ).ready(function() {
 	})
 
 	function checkdomains(domains, cached_data){
+        // console.log(domains);
 
 		var currency = "&currency={/literal}{$currency}{literal}" ;
 		var cache = "";
@@ -91,8 +96,11 @@ $( document ).ready(function() {
 
 					$( "#" + id).addClass(element.checkover);
 
+                    // alert(element.price.renewalprice);
 					//create selectbox with the price
-                    if(element.price.domainregister && element.price.domainregister[1] != -1){
+                    if(element.price.domainregister && element.price.domainregister[1] != -1 || element.price.domainrenew){
+
+                        var renewalprice = '<span name="domainsregperiod['+element.id+']">';
                         var price = '<span name="domainsregperiod['+element.id+']">';
                         $.each(element.price.domainregister, function(index, p){
                             if(element.premiumchannel == "NAMEMEDIA"){
@@ -101,7 +109,12 @@ $( document ).ready(function() {
                                 price = price + '<span class=" t period " value="'+index+'">'+p+'</span>';
                             }
                         });
+                        $.each(element.price.domainrenew, function(index, rp){
+                            renewalprice = renewalprice + '<span class="renewal" value="'+index+'">Renewal: '+rp+'</span>';
+                        });
 						price = price + '</span>';
+                        renewalprice = renewalprice + '</span>';
+
 						var priceavailable = true;
 					}else{
 						var price = "Pricing not found";
@@ -125,7 +138,7 @@ $( document ).ready(function() {
                             $( "#" + id).find('span.t.domain-label').addClass('available added');
                             $("#" + id).find('div.second-line').html(price);
                             price =  '<span class="period ">Added</span><br/>'+price;
-                            $("#" + id).find('span').eq(6).html(price);
+                            $("#" + id).find('span').eq(8).html(price);
                             $( "#" + id).find('span.period').addClass('added');
                             $("#" + id).find('div.search-result-price').addClass('details hide');
                             $("#" + id).find('div.search-result-price').eq(1).removeClass('details hide');
@@ -134,6 +147,7 @@ $( document ).ready(function() {
                             $( "#" + id).find('span.t.domain-label').addClass('available');
                             $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
                             $("#" + id).find('div.second-line.price').html(price);
+                            $("#" + id).find('div.second-line.renewalprice').html(renewalprice);
                             price = '<span class="period added">Added</span><br/>'+price;
                             $("#" + id).find('span.period.added').html(price);
                         }
@@ -146,24 +160,85 @@ $( document ).ready(function() {
 					}else if(element.code == "541"){
 						$( "#" + id + " div.availability").html("<span class='label label-warning'>Invalid domain name</span>").addClass("domcheckererror");
 					}else if(element.code == "549"){
-						$( "#" + id + " div.availability").html("<span class='label label-warning'>Unsupported TLD</span>").addClass("domcheckererror");
+                        // $( "#" + id + " div.availability").html("<span>{/literal}{$LANG.domaincheckeravailable}{literal}</span>").addClass("available");
+						$( "#" + id + " div.availability").html("<span class='taken' style='font-size:12px;'>Unsupported TLD</span>");
+                        price = '<span class="period added"></span><br/>'+'';
+                        $("#" + id).find('div.second-line.price').html(price);
+                        $("#" + id).find('div.second-line.renewalprice').html(renewalprice);
+
 					}
                     else{
 
 						//if premium class
 						if(element.class){
+                            if (domainsInCart.indexOf(element.id) > -1) {
 
-							if(priceavailable){
+                                $("#domainform input[id=orderbutton]").removeClass('hide');
+                                $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
+                                $( "#" + id).find('span.t.domain-label').addClass('available added');
+                                $("#" + id).find('div.second-line').html(price);
+                                price =  '<span class="period ">Added</span><br/>'+price;
+                                // console.log($("#" + id).find('span').eq(8));
+                                $("#" + id).find('span').eq(8).html(price);
+                                $( "#" + id).find('span.period').addClass('added');
+                                $("#" + id).find('div.search-result-price').addClass('details hide');
+                                $("#" + id).find('div.search-result-price').eq(1).removeClass('details hide');
+                                $( "#" + id + " div.availability").html('<span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium added" value="'+element.id+'"> - '+element.premiumchannel+' PREMIUM</span>');
 
-                                $( "#" + id + " span.checkboxarea").html('<input class="checkbox" type="checkbox" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><label for="checkboxId'+element.id+'"><i class="fa fa-square-o" aria-hidden="true"></i></label>');
-							}
-                            $( "#" + id + " div.availability").html('<span class="taken">{/literal}{$LANG.domaincheckertaken}{literal}</span><span class="premium"> - '+element.premiumchannel+' PREMIUM</span>');
 
-                            $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
+                            }else{
+
+                                $( "#" + id).find('span.t.domain-label').addClass('available');
+                                if(priceavailable){
+                                    $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
+                                    // $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
+                                    // $( "#" + id + " span.checkboxarea").html('<input class="checkbox" type="checkbox" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><label for="checkboxId'+element.id+'"><i class="fa fa-square-o" aria-hidden="true"></i></label>');
+                                }
+                                // else{
+                                //     var spanelement = '<span class="spanelement">span<span></span></span>';
+                                //     $("#" + id).find('div.second-line.price').html(spanelement);
+                                // }
+
+                                // TODO
+                                if(price == "Pricing not found"){
+
+                                    $("#" + id).find('div.second-line.renewalprice').html(price).addClass('taken');
+                                    $("#" + id).find('div.second-line.price').html(price).addClass('hide');
+                                    var spanelement = '<span class="spanelement">span<span></span></span>';
+                                    $("#" + id).find('div.second-line.price').html(spanelement);
+                                    $( "#" + id).find('span.t.domain-label').removeClass('available');
+                                    $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
+                                }
+                                // $("#" + id).find('div.second-line').html(price);
+
+                                $("#" + id).find('div.second-line.price').html(price);
+                                $("#" + id).find('div.second-line.renewalprice').html(renewalprice);
+
+                                price = '<span class="period added">Added</span><br/>'+price;
+                                $("#" + id).find('span.period.added').html(price);
+
+                                // remove value="'+element.id+'" for span class premium TODO
+                                $( "#" + id + " div.availability").html('<span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium " value="'+element.id+'"> - '+element.premiumchannel+' PREMIUM</span>');
+
+
+                                // $( "#" + id + " div.availability").html('<span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium"> - '+element.premiumchannel+' PREMIUM</span>');
+
+
+
+                                // OLD
+                                // $( "#" + id + " div.availability").html('<span class="taken">{/literal}{$LANG.domaincheckertaken}{literal}</span><span class="premium"> - '+element.premiumchannel+' PREMIUM</span>');
+                                // $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
+                            }
+
+
 						}else{
 
                             $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
                             $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
+                            // var spanelement = '<span class="spanelement">span<span></span></span>';
+                            var spanelement = '<span class="spanelement">span</span>';
+                            $("#" + id).find('div.second-line.price').html(spanelement);
+                            $("#" + id).find('div.second-line.renewalprice').html(spanelement);
 
                             if(element.backorder_installed == "1" && element.backorder_available == 1){
 
@@ -172,15 +247,59 @@ $( document ).ready(function() {
                                 $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
 
                                 if(element.backordered==1){
+                                        $( "#" + id).find('span.t.domain-label').addClass('added');
                                         $( "#" + id + " div.availability").html("<span class='added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder added'> - BACKORDER</span>");
                                         $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
-                                        $( "#" + id + " div.second-line").eq(1).html('<span class="period added">Backorder Placed</span>');
+                                        $( "#" + id + " div.second-line.renewalprice").html('<span class="period added">Backorder Placed</span>');
+
+                                        // var test = $( "#" + id + " div.second-line.price");
+                                        // console.log(test);
+                                        // $( "#" + id + " div.search-result-price.details.hide").find('div').html('<span class="period added">Backorder Placed</span>');
+
+                                        // $("#" + id).find('div.second-line.renewalprice').html('<span class="period added">Backorder Placed</span>');
+
+
+                                        // var test = $("#" + id).find('div.second-line.price').children().eq(0);
+                                        // $("#" + id).find('div.second-line.price').children().eq(0).addClass('details hide');
+                                        // console.log(test);
+
+
+                                        // $( "#" + id + " div.search-result-price").find('div.price').html('<span class="period added">Backorder Placed</span>');
+                                        // var test = $( "#" + id + " div.search-result-price").find('div').eq(0);
+                                        // console.log(test);
+                                        // $( "#" + id + " div.search-result-price").find('div').eq(0).html('<span style="display:block;" class="period added">Backorder Placed</span>');
+                                        // $( "#" + id + " div.second-line").eq(1).html('<span class="period added">Backorder Placed</span>');
                                 }
                                 else{
-
                                     $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder'> - BACKORDER</span>");
                                     $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="' +element.id+'"><i class=" fa fa-square-o" aria-hidden="true"></i></label>');
+
                                     $( "#" + id + " div.search-result-price.details.hide").find('div').html('<span class="period added">Backorder Placed</span>');
+                                    // $( "#" + id + " div.search-result-price.details.hide").insertAfter(spanelement, $( "#" + id + " div.search-result-price.details.hide").children().eq(0));
+                                    // $( "#" + id + " div.search-result-price.details.hide").appendChild('<div><span class="spanelement">span</span></div>')
+
+                                    // var afteradd = $("#" + id).find('div.search-result-price.details.hide').children().eq(0);
+                                    // $( "#" + id + " div.search-result-price.details.hide").html('<div><span class="period added">Backorder Placed</span></div>');
+                                    // $("#" + id).find('div.search-result-price.details.hide').children().eq(0).html(spanelement);
+
+
+                                    // var test = $("#s" + id).find('div.search-result-price.details.hide');
+                                    // console.log(test);
+                                    // $("#" + id).find('div.search-result-price.details.hide').html(test1);
+                                    // var test = $("#" + id).find('div.search-result-price');
+                                    // console.log(test);
+
+
+
+
+
+                                    // $("#" + id).find('div.second-line.price').html('<span class="period added">Backorder Placed</span>');
+                                    // $( "#" + id + " div.search-result-price.details.hide").find('div.second-line.renewalprice').html('<span class="period added">Backorder Placed</span>');
+
+                                    // $("#" + id).find('div.search-result-price').html(spanelement);
+                                    // $("#" + id).find('div.second-line.renewalprice').html(spanelement);
+                                    // $("#" + id).find('div.second-line.price').html(spanelement);
+                                    // $( "#" + id + " div.search-result-price.details.hide").find('div').html('<span class="period added">Backorder Placed</span>');
                                 }
                             }
 						}
@@ -287,7 +406,9 @@ $( document ).ready(function() {
                     var idtld = element.substr(0, index);
                     var zone = element.substr(index + 0).bold();
 
-                    $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " >' + tld+zone + '</span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added"></span><span class="period added"></span></div></div></div>');
+                    $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " >' + tld+zone + '</span></div><div class="second-line availability"><span></span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"></div><div class="second-line renewalprice"></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added"></span><span class="period added"></span></div></div></div>');
+
+                    // $('#searchresults').append('<div id="' + id + '" ><div class="col-xs-7 search-result-info clickable"><div class="first-line"><span class="checkboxarea"></span><span class=" t domain-label " >' + tld+zone + '</span></div><div class="second-line availability"><span>{/literal}{$LANG.loading}{literal}</span></div></div><div class="col-xs-5 search-result-price"><div class="second-line price"></div><div class="second-line renewalprice"></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price><span class="period added"></span><span class="period added"></span></div></div></div>');
 
 					nb_results++;
 				});
@@ -424,6 +545,7 @@ $( document ).ready(function() {
                                 $('#searchresults').append( '<div id="' + id + '" class="api"><div class="col-xs-7 search-result-info clickable" ><div class="first-line"><span class="checkboxarea"><label value="'+element.id+":"+element.class+'" name="premiumdomains[]" id="checkboxId' + id + '"><i class="avail fa fa-square-o" aria-hidden="true"></i></label></span><span class=" t domain-label available " ><strong>' + element.id + '</strong></span></div><div class="second-line availability"><span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium"> - NAMEMEDIA PREMIUM</span></div></div><div id="pricetest" class="col-xs-5 search-result-price"><div class="second-line price"><span class="period">'+price+'</span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price"><span class="period added">Added</span><br/><span class="period added">'+price+'</span></div></div><br/></div>');
 
 							}else{
+
                                 $('#searchresults').append( '<div id="' + id + '" class="api"><div class="col-xs-7 search-result-info clickable" ><div class="first-line"><span class="checkboxarea"><label value="'+element.id+":"+element.class+'" name="premiumdomains[]" id="checkboxId' + id + '"><i class="avail fa fa-square-o" aria-hidden="true"></i></label></span><span class=" t domain-label available " ><strong>' + element.id + '</strong></span></div><div class="second-line availability"><span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium"> - NAMEMEDIA PREMIUM</span></div></div><div id="pricetest" class="col-xs-5 search-result-price"><div class="second-line price"><span class="period">'+price+'</span></div></div><div class="col-xs-5 search-result-price details hide"><div class="second-line price"><span class="period added">Added</span><br/><span class="period added">'+price+'</span></div></div><br/></div>');
 							}
 						}
@@ -469,7 +591,15 @@ $( document ).ready(function() {
         $(this).find('span.t').toggleClass('added');
         $(this).find('span').eq(2).toggleClass('added');
         $(this).find('span.backorder').toggleClass('added');
+        $(this).find('span.premium').toggleClass('added');
         $(this).siblings().toggleClass('details hide');
+
+        // $(this).find('div.renewalprice').toggleClass('details hide');
+
+        // $(this).siblings().eq(1).find('div.renewalprice').toggleClass('details hide');
+        // $(this).siblings().eq(1).find('div.renewalprice').toggleClass('details hide');
+        var test = $(this).siblings().eq(1).find('div.renewalprice');
+        // console.log(test);
 
 
         if($(this).find('span.t.domain-label').hasClass('available') && $(this).find('span.t.domain-label').hasClass('added')){
@@ -477,16 +607,43 @@ $( document ).ready(function() {
             $("#domainform input[id=orderbutton]").removeClass('hide');
 
             var params = {};
+
             params['a'] = 'addToCart';
             params['domain'] = $(this).find('label').attr("value");
             params['token'] = $("#domainform").find('input').eq(0).attr("value");
 
-            $.ajax({
-                  url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
-                  type: "POST",
-                  data: params,
-                  async: false
-            });
+            if($(this).find('span').hasClass('premium')){
+                var paramspremium = {};
+                var price = $(this).siblings().find('span.t.period').text();
+                var renewalprice = $(this).siblings().find('span.renewal').text();
+
+                var regex = /[\d|,|.|e|E|\+]+/g;
+                var registerprice = price.match(regex);
+                var renewprice = renewalprice.match(regex);
+
+                paramspremium['action'] = 'addPremiumDomainToCart';
+                paramspremium['domain'] = $(this).find('label').attr("value");
+                paramspremium['registerprice']= registerprice[0];
+                paramspremium['renewalprice']= renewprice[2];
+
+                $.ajax({
+
+                      type: "GET",
+                      data: paramspremium,
+                      async: false,
+                      url: "{/literal}{$modulepath}{literal}ajax.php?"
+                });
+
+            }else{
+                $.ajax({
+                      url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
+                      type: "POST",
+                      data: params,
+                      async: false
+                });
+
+            }
+
         }
         else{
             if($("#domainform").find('span.t.domain-label').hasClass('added') && $("#domainform").find('span.t.domain-label').hasClass('available')){
@@ -598,10 +755,10 @@ $( document ).ready(function() {
                         <div class="domain-checker-bg2">
                             <div class="well2">
                                 <div class="catcontainer" > <!-- id="container_cat" -->
-                                    <ul class="sub">
+                                    <ul class="sub" style="text-align:center;">
                                         {foreach from=$categories item=cat}
                                             {foreach from=$cat.subcategories item=sub}
-                                                <li class="subCat" id="s_{$sub.id}">{$sub.name}</li>
+                                                <li class="subCat" style="margin-right:10px;display:inline-block;" id="s_{$sub.id}">{$sub.name}</li>
                                             {/foreach}
                                         {/foreach}
                                     </ul>

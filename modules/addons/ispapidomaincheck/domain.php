@@ -22,6 +22,7 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 	$modulelist = array();
 	$registrar = array();
 	while($data = mysql_fetch_array($result)){
+		echo "<pre>domain.php ==> "; print_r($data); echo "</pre>";
 		if(!empty($data["autoreg"])){
 			if(!in_array($data["autoreg"], $modulelist)){
 				array_push($modulelist, $data["autoreg"]);
@@ -384,7 +385,48 @@ class DomainCheck
      * Handle the check domain with the configured ispapi registrar account configured in WHMCS
      * return a JSON list of all domains with the availability
      */
+	 function ispapi_getRegistryPremiumDomainRenewalPrice($priceclass){
+
+		$date = new DateTime();
+		if((!isset($_SESSION["ISPAPICACHE"])) || ($_SESSION["ISPAPICACHE"]["TIMESTAMP"] + 600 < $date->getTimestamp() )){
+
+			$command["COMMAND"] = "StatusUser";
+
+			$registrarconfigoptions = getregistrarconfigoptions($_SESSION['ispapi_registrar'][0]);
+			$ispapi_config = ispapi_config($registrarconfigoptions);
+			$response = ispapi_call($command, $ispapi_config);
+
+			if ($response["CODE"] == 200) {
+				$_SESSION["ISPAPICACHE"] = array("TIMESTAMP" => $date->getTimestamp() , "RELATIONS" => $response["PROPERTY"]);
+
+				foreach($_SESSION["ISPAPICACHE"]["RELATIONS"] as $key => $relationtype) {
+					foreach ($relationtype as $ky => $relation) {
+						if($relation == "PRICE_CLASS_DOMAIN_".$priceclass."_ANNUAL"){
+							$renewalprice = $_SESSION["ISPAPICACHE"]["RELATIONS"]["RELATIONVALUE"][$ky];
+						}else{
+						}
+					}
+				}
+				return $renewalprice;
+			}else{
+				return false;
+			}
+		}else{
+			// mail("tseelamkurthi@hexonet.net", "relationtypes", print_r($_SESSION["ISPAPICACHE"]["RELATIONS"], true));
+			foreach($_SESSION["ISPAPICACHE"]["RELATIONS"] as $key => $relationtype) {
+				foreach ($relationtype as $ky => $relation) {
+					if($relation == "PRICE_CLASS_DOMAIN_".$priceclass."_ANNUAL"){
+						$renewalprice = $_SESSION["ISPAPICACHE"]["RELATIONS"]["RELATIONVALUE"][$ky];
+					}else{
+					}
+				}
+			}
+			return $renewalprice;
+		}
+	}
+
     private function startDomainCheck(){
+
 
     	//return the cached data only if $this->cached_data = 1
     	if($this->cached_data){
@@ -437,6 +479,9 @@ class DomainCheck
     		//IDN convert before sending to checkdomain
     		$converted_domains = $this->convertIDN($item["domain"], $item["registrar"]);
 
+			// echo "<pre>"; print_r($converted_domains); echo "</pre>";
+
+
     		$command = array(
     				"COMMAND" => "checkDomains",
     				"PREMIUMCHANNELS" => $premiumchannels,
@@ -447,16 +492,24 @@ class DomainCheck
     		$ispapi_config = ispapi_config($registrarconfigoptions);
     		$check = ispapi_call($command, $ispapi_config);
 
+			// echo "<pre> check ----> "; print_r($check); echo "<----- </pre>";
+
     		$index = 0;
     		foreach($item["domain"] as $item){
 
+				// echo "<pre> item ----> "; print_r($item); echo "<----- </pre>";
+
     			$tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
+
+				// echo "<pre> tmp ----> "; print_r($tmp); echo "<----- </pre>";
 
     			$price = array();
     			if($tmp[0] == "210"){
     				//get the price for this domain
     				$tld = $this->getDomainExtension($item);
+
     				$price = $this->getTLDprice($tld);
+
     			}else{
 
     				if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
@@ -466,20 +519,47 @@ class DomainCheck
     						//override class
     						$check["PROPERTY"]["CLASS"][$index] = "PREMIUM_NAMEMEDIA";
 					}else{
+
 						if(isset($check["PROPERTY"]["CLASS"][$index]) && !empty($check["PROPERTY"]["CLASS"][$index])) {
 							//get the premium price
-    						$price = $this->getPremiumClassPrice($check["PROPERTY"]["CLASS"][$index], $item);
+							$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
+							$cur = mysql_fetch_array($result);
+
+							$command = array(
+									"COMMAND" => "checkDomains",
+									"DOMAIN0" => $item,
+									"PREMIUMCHANNELS" => $premiumchannels
+							);
+
+							$premiumdomainprice = ispapi_call($command, $ispapi_config);
+
+							if(isset($premiumdomainprice["PROPERTY"]["PRICE"]) && !empty($premiumdomainprice["PROPERTY"]["PRICE"])){
+								$renewalprice = $this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
+
+								$pricet = $premiumdomainprice["PROPERTY"]["PRICE"][0];
+								if((!empty($pricet)) && ($pricet != 0) && ($pricet != -1)){
+									$pricet = $this->formatPrice($pricet, $cur);
+									$renewalprice = $this->formatPrice($renewalprice, $cur);
+								}else{
+									$renewalprice = -1;
+									$pricet = -1;
+								}
+								$price["domainregister"][1] = $pricet;
+								$price["domainrenew"][1] = $renewalprice;
+
+							}
+							// else{
+							// 	$price = $this->getPremiumClassPrice($check["PROPERTY"]["CLASS"][$index], $item);
+							// }
 						}
 					}
     			}
-
 				//if no price configured or price = 0 display as taken...
     			if($price["domainregister"][1] == -1){
     				$price = "";
     			}
 
     			array_push($response, array("id" => $item, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price, "cart" => $_SESSION["cart"]));
-
 
     			// Feedback for the template
     			if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){
@@ -607,23 +687,24 @@ class DomainCheck
 				WHERE tp.relid = tdp.id
 				AND tp.tsetupfee = 0
 				AND tp.currency = ".$cur["id"]."
-				AND tp.type='domainregister'
+				AND tp.type IN ('domainregister', 'domainrenew')
 				AND tdp.extension = '.".mysql_real_escape_string($tld)."'
-				LIMIT 1";
+				";
 
 		$result = mysql_query($sql);
-		$data = mysql_fetch_array($result);
-
 		$domainprices = array();
-		if(!empty($data)){
-			for ( $i = 1; $i <= 10; $i++ ) {
-				if (($data['year'.$i] > 0)){
-					//$domainprices[$data['extension']][$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
-					$domainprices[$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
+		while ($data = mysql_fetch_array($result)) {
+			if(!empty($data)){
+				for ( $i = 1; $i <= 10; $i++ ) {
+					if (($data['year'.$i] > 0)){
+						//$domainprices[$data['extension']][$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
+						$domainprices[$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
+					}
 				}
-
 			}
 		}
+		// $data = mysql_fetch_array($result);
+
 		return $domainprices;
 	}
 
@@ -637,6 +718,9 @@ class DomainCheck
      *
      */
 	private function getPremiumClassPrice($class, $domain) {
+
+		// $_SESSION["currency"] is 1  (USD)
+
 		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
 		$cur = mysql_fetch_array($result);
 
@@ -661,6 +745,8 @@ class DomainCheck
 		$data = mysql_fetch_array($result);
 
 		$price = $data["annually"];
+
+		// echo "price is --> $price <--";
 
 		if((!empty($price)) && ($price != 0) && ($price != -1)){
 			$price = $this->formatPrice($price,$cur);

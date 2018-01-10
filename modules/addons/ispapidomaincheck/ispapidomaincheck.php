@@ -1,5 +1,5 @@
 <?php
-
+use WHMCS\Database\Capsule;
 $module_version = "7.2.0";
 
 //if (!defined("WHMCS"))
@@ -51,7 +51,7 @@ function ispapidomaincheck_activate() {
 	}
 
 	//IF NOT EXISTS Create ispapi_tblsettings table
-	$query = "CREATE TABLE IF NOT EXISTS ispapi_tblsettings (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, aftermarket_premium INT(10), registry_premium INT(10));";
+	$query = "CREATE TABLE IF NOT EXISTS ispapi_tblsettings (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, aftermarket_premium INT(10), registry_premium INT(10), normal_suggestion_mode INT(10), suggestion_mode INT(10));"; #,
 	$result = full_query($query);
 
 
@@ -323,7 +323,8 @@ function ispapidomaincheck_clientarea($vars) {
 	$result = mysql_query("SELECT id, name FROM ispapi_tblcategories WHERE parent is NULL");
 	while ($data = mysql_fetch_array($result)) {
 		$subcategories = array();
-		$result2 = select_query("ispapi_tblcategories","id,name,tlds", array("parent"=>$data["id"]));
+		// $result2 = select_query("ispapi_tblcategories","id,name,tlds", array("parent"=>$data["id"]));
+		$result2 = select_query("ispapi_tblcategories","id,name,tlds", array("id"=>$data["id"]));
 		while ($data2 = mysql_fetch_array($result2)) {
 			array_push($subcategories, $data2);
 		}
@@ -344,7 +345,7 @@ function ispapidomaincheck_clientarea($vars) {
 	$tldpricelist = ispapi_domainchecker_tldpricelist( $prices, $_SESSION["currency"] );
 
 	$_SESSION["adminuser"] = $vars["username"];
-
+	echo "<pre> =====>"; print_r($domain); echo "</pre>";
 	return array(
 			'pagetitle' => $_LANG['domaintitle'],
 			'breadcrumb' => array('index.php?m=ispapidomaincheck'=>$_LANG["domaintitle"]),
@@ -370,6 +371,7 @@ function ispapidomaincheck_clientarea($vars) {
  * Backend module
  */
 function ispapidomaincheck_output($vars) {
+	// echo "<pre>"; print_r($_SESSION); echo "</pre>";
 	if(!isset($_GET["tab"])){
 		$_GET["tab"] = 0;
 	}
@@ -449,7 +451,7 @@ function ispapidomaincheck_output($vars) {
 
 
 function ispapidomaincheck_generalsettingscontent($modulelink){
-
+	// echo "<pre>"; print_r($_REQUEST); echo "</pre>";
 	//Aftermarket Currencies
 	###############################################################################
 	//Create aftermarket currencies table
@@ -481,12 +483,30 @@ function ispapidomaincheck_generalsettingscontent($modulelink){
 	//Save settings
 	###############################################################################
 	if(isset($_REQUEST["savegeneralsettings"])){
+		// echo "<pre>=====> "; print_r($_POST); echo "<=== </pre>";
+		// echo "<pre>=====> "; print_r($_REQUEST); echo "<=== </pre>";
 		$select = mysql_query("SELECT id FROM ispapi_tblsettings LIMIT 1");
 		$data = mysql_fetch_array($select);
+		// echo "<pre>=====> "; print_r($data); echo "<=== </pre>";
 		if(!empty($data)){
-			update_query( "ispapi_tblsettings", array("aftermarket_premium" => $_REQUEST["aftermarket_premium"], "registry_premium" => $_REQUEST["registry_premium"]), array( "id" => $data["id"]) );
+			if($_REQUEST["suggestion_mode"] === "suggestions"){
+				update_query( "ispapi_tblsettings", array("aftermarket_premium" => $_REQUEST["aftermarket_premium"], "registry_premium" => $_REQUEST["registry_premium"], "suggestion_mode" => "1", "normal_suggestion_mode" => '0'), array( "id" => $data["id"]) );
+			}elseif($_REQUEST["suggestion_mode"] === "normalsuggestions"){
+				update_query( "ispapi_tblsettings", array("aftermarket_premium" => $_REQUEST["aftermarket_premium"], "registry_premium" => $_REQUEST["registry_premium"], "normal_suggestion_mode" => "1", "suggestion_mode" => '0'), array( "id" => $data["id"]) );
+			}
+			else{
+				update_query( "ispapi_tblsettings", array("aftermarket_premium" => $_REQUEST["aftermarket_premium"], "registry_premium" => $_REQUEST["registry_premium"]), array( "id" => $data["id"]) );
+			}
 		}else{
-			insert_query("ispapi_tblsettings",array("aftermarket_premium" => $_REQUEST["aftermarket_premium"],"registry_premium" => $_REQUEST["registry_premium"]));
+			if($_REQUEST["suggestion_mode"]  === "suggestions"){
+				insert_query("ispapi_tblsettings",array("aftermarket_premium" => $_REQUEST["aftermarket_premium"],"registry_premium" => $_REQUEST["registry_premium"], "suggestion_mode" => "1", "normal_suggestion_mode" => "0"));
+			}elseif($_REQUEST["suggestion_mode"] === "normalsuggestions"){
+				insert_query("ispapi_tblsettings",array("aftermarket_premium" => $_REQUEST["aftermarket_premium"],"registry_premium" => $_REQUEST["registry_premium"], "normal_suggestion_mode" => "1", "suggestion_mode" => "0",));
+			}
+			else{
+				insert_query("ispapi_tblsettings",array("aftermarket_premium" => $_REQUEST["aftermarket_premium"],"registry_premium" => $_REQUEST["registry_premium"]));
+			}
+
 		}
 
 		$select = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies");
@@ -506,8 +526,12 @@ function ispapidomaincheck_generalsettingscontent($modulelink){
 	if(!empty($data)){
 		$aftermarket = $data["aftermarket_premium"];
 		$registry = $data["registry_premium"];
+		$suggestion_mode = $data["suggestion_mode"];
+		$normal_mode = $data["normal_suggestion_mode"];
+
 	}
 	###############################################################################
+
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%" style="color:#333333;"><tbody>';
@@ -530,15 +554,31 @@ function ispapidomaincheck_generalsettingscontent($modulelink){
 
 	echo '<tr><td width="50%" class="fieldlabel"><b>Show registry premium domains</b></td><td class="fieldarea"><input type="radio" name="registry_premium" value="1" '.(($registry==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;<input type="radio" name="registry_premium" value="0" '.(($registry!=1)?"checked":"").'> No</td></tr>';
 
+	####################################
+	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Domain Suggestion Mode</td></tr>';
+// https://www.homeandlearn.co.uk/php/php4p10.html
+
+	echo '<tr><td width="50%" class="fieldlabel"><b>suggestions</b></td><td class="fieldarea"><input type="radio" name="suggestion_mode" value="suggestions" '.(($suggestion_mode==1)?"checked":"").' ></td></tr>';
+	echo '<tr><td width="50%" class="fieldlabel"><b>normal</b></td><td class="fieldarea"><input type="radio" id="radioButton" name="suggestion_mode"  value="normalsuggestions" '.(($normal_mode==1)?"checked":"").'></td></tr>';
+
+// 	echo '<tr><td width="50%" class="fieldlabel"><b>normal</b></td><td class="fieldarea"><input type="radio" id="radioButton" name="suggestion_mode"  value="normalsuggestions"
+// </td></tr>';
+// 	echo '<tr><td width="50%" class="fieldlabel"><b>suggestions</b></td><td class="fieldarea"><input type="radio" name="suggestion_mode" value="suggestions" '.(($suggestion_mode==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;</td></tr>';
+
+	####################################
 
 	echo '</tbody></table></div>';
 	echo '<p align="center"><input class="btn" name="savegeneralsettings" type="submit" value="Save Changes"></p>';
 	echo '</form>';
 
 	echo '</div>';
+
 }
 
 function ispapidomaincheck_categoryeditorcontent($modulelink){
+
+	include(dirname(__FILE__)."/categorieslib.php");
+
 	echo '<div id="tab1box" class="tabbox tab-content">';
 
 	//Delete categories
@@ -550,23 +590,68 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 	}
 	###############################################################################
 
+	//Import Default categories
+	###############################################################################
+	if(isset($_REQUEST["importdefaultcategories"])){
+		$category_not_found_in_categorieslib = array();
+		try{
+        	$pdo = Capsule::connection()->getPdo();
+			$request = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
+			$request->execute();
+			$data = $request->fetchAll(PDO::FETCH_ASSOC);
+			if(empty($data)){
+				foreach ($categorieslib as $category => $tlds) {
+					insert_query("ispapi_tblcategories",array("name" => $category, "tlds" => implode(" ", $tlds) ));
+				}
+			}else{
+				foreach ($categorieslib as $key => $value) {
+					in_array_r($key, $data) ? '' : $category_not_found_in_categorieslib[$key] = $value;
+				}
+				if(!empty($category_not_found_in_categorieslib)){
+					foreach ($category_not_found_in_categorieslib as $category => $tlds) {
+						insert_query("ispapi_tblcategories",array("name" => $category, "tlds" => implode(" ", $tlds) ));
+					}
+
+				}
+			}
+        } catch (Exception $e) {
+        	die($e->getMessage());
+        }
+		// echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
+	}
+	###############################################################################
+// echo "<pre>"; print_r($_POST); echo "</pre>";
 	//Save categories
 	###############################################################################
 	if(isset($_REQUEST["savecategories"])){
 		foreach($_POST["CAT"] as $id => $categorie){
 			update_query( "ispapi_tblcategories", array( "name" => $categorie["NAME"], "tlds" => $categorie["TLDS"] ), array( "id" => $id) );
 		}
-		foreach($_POST["ADDSUBCAT"] as $id => $subcat){
-			if(!empty($subcat["NAME"])){
-				insert_query("ispapi_tblcategories",array("parent" => $id, "name" => $subcat["NAME"], "tlds" => $subcat["TLDS"]));
-			}
+
+		//added
+		if($_POST["ADDSUBCAT"]['NAME']){
+			try{
+	        	$pdo = Capsule::connection()->getPdo();
+				$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories (parent, name, tlds) VALUES (NULL, ?, ?)");
+				$insert_stmt->execute(array( $_POST["ADDSUBCAT"]["NAME"], $_POST["ADDSUBCAT"]["TLDS"]));
+	        } catch (Exception $e) {
+	        	die($e->getMessage());
+	        }
+			// insert_query("ispapi_tblcategories",array("parent" => "NULL", "name" => $_POST["ADDSUBCAT"]["NAME"], "tlds" => $_POST["ADDSUBCAT"]["TLDS"]));
 		}
-		if(!empty($_POST["ADDCAT"]["NAME"])){
-			$id = insert_query("ispapi_tblcategories",array("name" => $_POST["ADDCAT"]["NAME"]));
-			if(!empty($_POST["ADDSUBCAT"]["NAME"])){
-				insert_query("ispapi_tblcategories",array( "parent" => $id, "name" => $_POST["ADDSUBCAT"]["NAME"], "tlds" => $_POST["ADDSUBCAT"]["TLDS"] ));
-			}
-		}
+
+		// foreach($_POST["ADDSUBCAT"] as $id => $subcat){
+		// 	if(!empty($subcat["NAME"])){
+		// 		insert_query("ispapi_tblcategories",array("parent" => $id, "name" => $subcat["NAME"], "tlds" => $subcat["TLDS"]));
+		// 	}
+		// }
+
+		// if(!empty($_POST["ADDCAT"]["NAME"])){
+		// 	$id = insert_query("ispapi_tblcategories",array("name" => $_POST["ADDCAT"]["NAME"]));
+		// 	if(!empty($_POST["ADDSUBCAT"]["NAME"])){
+		// 		insert_query("ispapi_tblcategories",array( "parent" => $id, "name" => $_POST["ADDSUBCAT"]["NAME"], "tlds" => $_POST["ADDSUBCAT"]["TLDS"] ));
+		// 	}
+		// }
 		echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
 	}
 	###############################################################################
@@ -577,7 +662,7 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 	$result = mysql_query("SELECT id, name FROM ispapi_tblcategories WHERE parent is NULL");
 	while ($data = mysql_fetch_array($result)) {
 		$subcategories = array();
-		$result2 = select_query("ispapi_tblcategories","id,name,tlds", array("parent"=>$data["id"]));
+		$result2 = select_query("ispapi_tblcategories","id,name,tlds", array("id" => $data["id"] ));
 		while ($data2 = mysql_fetch_array($result2)) {
 			array_push($subcategories, $data2);
 		}
@@ -588,20 +673,35 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%"><tbody>';
+	echo '<tr><th>Categories</th>';
+	echo '<th>TLDs</th>';
+	echo '<th width="20"></th></tr>';
 	foreach($categories as $category){
-		echo '<tr><td colspan="2" style="background-color:#2162A3;"><input style="font-weight:bold;width:210px;" type="text" name="CAT['.$category["id"].'][NAME]" value="'.$category["name"].'"/></td><td width="20" style="background-color:#2162A3;"><a href="'.$modulelink."&delete=".$category["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
+		// echo '<tr><td colspan="2" style="background-color:#2162A3;"><input style="font-weight:bold;width:210px;" type="text" name="CAT['.$category["id"].'][NAME]" value="'.$category["name"].'"/></td><td width="20" style="background-color:#2162A3;"><a href="'.$modulelink."&delete=".$category["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
 		foreach($category["subcategories"] as $subcategory){
-			echo '<tr><td width="220"><input style="width:210px;" type="text" name="CAT['.$subcategory["id"].'][NAME]" value="'.$subcategory["name"].'"/></td><td><input style="width:650px;" type="text" name="CAT['.$subcategory["id"].'][TLDS]" value="'.$subcategory["tlds"].'"/></td><td width="20"><a href="'.$modulelink."&delete=".$subcategory["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
+			echo '<tr><td width="220"><input style="width:210px;font-weight:bold" type="text" name="CAT['.$subcategory["id"].'][NAME]" value="'.$subcategory["name"].'"/></td><td><input style="width:650px;" type="text" name="CAT['.$subcategory["id"].'][TLDS]" value="'.$subcategory["tlds"].'"/></td><td width="20"><a href="'.$modulelink."&delete=".$subcategory["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
 		}
-		echo '<tr><td><input style="width:210px;" type="text" name="ADDSUBCAT['.$category["id"].'][NAME]" value=""/></td><td><input style="width:650px;" type="text" name="ADDSUBCAT['.$category["id"].'][TLDS]" value=""/></td><td></td></tr>';
+		// echo '<tr><td><input style="width:210px;" type="text" name="ADDSUBCAT['.$category["id"].'][NAME]" value=""/></td><td><input style="width:650px;" type="text" name="ADDSUBCAT['.$category["id"].'][TLDS]" value=""/></td><td></td></tr>';
 	}
-	echo '<tr><td colspan="3" style="background-color:#2162A3;"><input style="font-weight:bold;width:210px;" type="text" name="ADDCAT[NAME]" value=""/> <span style="color:#fff;">(Fill to add a new category)</span></td></tr>';
+	// echo '<tr><td colspan="3" style="background-color:#2162A3;"><input style="font-weight:bold;width:210px;" type="text" name="ADDCAT[NAME]" value=""/> <span style="color:#fff;">(Fill to add a new category)</span></td></tr>';
 	echo '<tr><td><input style="width:210px;" type="text" name="ADDSUBCAT[NAME]" value=""/></td><td><input style="width:650px;" type="text" name="ADDSUBCAT[TLDS]" value=""/></td><td></td></tr>';
 	echo '</tbody></table></div>';
-	echo '<p align="center"><input class="btn" name="savecategories" type="submit" value="Save Changes"></p>';
+	echo '<p align="center"><input class="btn" name="savecategories" type="submit" value="Save Changes">';
+	echo '<input style="margin-left:10px;" class="btn" name="importdefaultcategories" type="submit" value="import default categories"></p>';
 	echo '</form>';
 
 	echo '</div>';
+}
+
+//import default categories helper
+function in_array_r($key, $dataarray, $strict = false) {
+    foreach ($dataarray as $item) {
+        if (($strict ? $item === $key : $item == $key) || (is_array($item) && in_array_r($key, $item, $strict))) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 //domain pricing helpers
