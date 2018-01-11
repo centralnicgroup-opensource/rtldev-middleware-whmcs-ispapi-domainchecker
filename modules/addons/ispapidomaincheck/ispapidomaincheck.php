@@ -219,7 +219,7 @@ function ispapidomaincheck_clientarea($vars) {
 				//check authentication
 				$registrarconfigoptions = getregistrarconfigoptions($file);
 				$ispapi_config = ispapi_config($registrarconfigoptions);
-				$command =  $command = array(
+				$command = array(
 						"command" => "CheckAuthentication"
 				);
 				$checkAuthentication = ispapi_call($command, $ispapi_config);
@@ -267,7 +267,7 @@ function ispapidomaincheck_clientarea($vars) {
 					//check authentication
 					$registrarconfigoptions = getregistrarconfigoptions($file);
 					$ispapi_config = ispapi_config($registrarconfigoptions);
-					$command =  $command = array(
+					$command = array(
 							"command" => "CheckAuthentication"
 					);
 					$checkAuthentication = ispapi_call($command, $ispapi_config);
