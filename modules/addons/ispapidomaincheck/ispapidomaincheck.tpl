@@ -39,7 +39,7 @@ $( document ).ready(function() {
 	});
 
 	$('#searchform').submit(function(e){
-	    e.preventDefault();
+	    // e.preventDefault();
 	});
 
 	$('#searchfield').bind("enterKey",function(e){
