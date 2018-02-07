@@ -39,17 +39,18 @@ $( document ).ready(function() {
 	});
 
 	$('#searchform').submit(function(e){
-	    // e.preventDefault();
+	    e.preventDefault();
 	});
 
-	$('#searchfield').bind("enterKey",function(e){
-        // console.log(e);
-		$("#searchbutton").trigger("click");
-	});
+	// $('#searchfield').bind("enterKey",function(e){
+    //     // console.log(e);
+	// 	$("#searchbutton").trigger("click");
+	// });
 
 	$('#searchfield').keyup(function(e){
         if(e.keyCode == 13){
-            $(this).trigger("enterKey");
+            $("#searchbutton").trigger("click");
+            // $(this).trigger("enterKey");
 	    }
 	});
 
