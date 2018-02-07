@@ -39,7 +39,7 @@ $( document ).ready(function() {
 
 	function addAftermarketPremiumToCart(id){
 		$.ajax({
-			  url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&pid=" + id,
+              url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&skipconfig=1&pid=" + id,
 			  type: "POST",
 			  async: false,
 		});
