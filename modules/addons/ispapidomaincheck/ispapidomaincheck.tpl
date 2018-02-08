@@ -29,7 +29,7 @@ jQuery.extend(jQuery, {
 });
 
 $( document ).ready(function() {
-    console.log("HERE\n");
+    // console.log("HERE\n");
 	var count = 0;
 
 	$("#orderbutton").bind("click", function(e){
@@ -39,18 +39,21 @@ $( document ).ready(function() {
 	});
 
 	$('#searchform').submit(function(e){
+        console.log("HERE\n");
 	    e.preventDefault();
 	});
 
-	// $('#searchfield').bind("enterKey",function(e){
-    //     // console.log(e);
-	// 	$("#searchbutton").trigger("click");
-	// });
+	$('#searchfield').bind("enterKey",function(e){
+        // console.log(e);
+		$("#searchbutton").trigger("click");
+	});
 
 	$('#searchfield').keyup(function(e){
+        console.log("HERE\n");
         if(e.keyCode == 13){
-            $("#searchbutton").trigger("click");
-            // $(this).trigger("enterKey");
+            console.log($(this));
+            // $("#searchbutton").trigger("click");
+            $(this).trigger("enterKey");
 	    }
 	});
 
