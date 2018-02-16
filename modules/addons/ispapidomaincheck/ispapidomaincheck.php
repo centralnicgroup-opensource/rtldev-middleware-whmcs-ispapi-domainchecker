@@ -345,7 +345,6 @@ function ispapidomaincheck_clientarea($vars) {
 	$tldpricelist = ispapi_domainchecker_tldpricelist( $prices, $_SESSION["currency"] );
 
 	$_SESSION["adminuser"] = $vars["username"];
-	echo "<pre> =====>"; print_r($domain); echo "</pre>";
 	return array(
 			'pagetitle' => $_LANG['domaintitle'],
 			'breadcrumb' => array('index.php?m=ispapidomaincheck'=>$_LANG["domaintitle"]),
@@ -371,7 +370,6 @@ function ispapidomaincheck_clientarea($vars) {
  * Backend module
  */
 function ispapidomaincheck_output($vars) {
-	// echo "<pre>"; print_r($_SESSION); echo "</pre>";
 	if(!isset($_GET["tab"])){
 		$_GET["tab"] = 0;
 	}
@@ -451,7 +449,6 @@ function ispapidomaincheck_output($vars) {
 
 
 function ispapidomaincheck_generalsettingscontent($modulelink){
-	// echo "<pre>"; print_r($_REQUEST); echo "</pre>";
 	//Aftermarket Currencies
 	###############################################################################
 	//Create aftermarket currencies table
@@ -483,11 +480,8 @@ function ispapidomaincheck_generalsettingscontent($modulelink){
 	//Save settings
 	###############################################################################
 	if(isset($_REQUEST["savegeneralsettings"])){
-		// echo "<pre>=====> "; print_r($_POST); echo "<=== </pre>";
-		// echo "<pre>=====> "; print_r($_REQUEST); echo "<=== </pre>";
 		$select = mysql_query("SELECT id FROM ispapi_tblsettings LIMIT 1");
 		$data = mysql_fetch_array($select);
-		// echo "<pre>=====> "; print_r($data); echo "<=== </pre>";
 		if(!empty($data)){
 			if($_REQUEST["suggestion_mode"] === "suggestions"){
 				update_query( "ispapi_tblsettings", array("aftermarket_premium" => $_REQUEST["aftermarket_premium"], "registry_premium" => $_REQUEST["registry_premium"], "suggestion_mode" => "1", "normal_suggestion_mode" => '0'), array( "id" => $data["id"]) );
@@ -556,7 +550,6 @@ function ispapidomaincheck_generalsettingscontent($modulelink){
 
 	####################################
 	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Domain Suggestion Mode</td></tr>';
-// https://www.homeandlearn.co.uk/php/php4p10.html
 
 	echo '<tr><td width="50%" class="fieldlabel"><b>suggestions</b></td><td class="fieldarea"><input type="radio" name="suggestion_mode" value="suggestions" '.(($suggestion_mode==1)?"checked":"").' ></td></tr>';
 	echo '<tr><td width="50%" class="fieldlabel"><b>normal</b></td><td class="fieldarea"><input type="radio" id="radioButton" name="suggestion_mode"  value="normalsuggestions" '.(($normal_mode==1)?"checked":"").'></td></tr>';
@@ -620,14 +613,12 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 		// echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
 	}
 	###############################################################################
-// echo "<pre>"; print_r($_POST); echo "</pre>";
 	//Save categories
 	###############################################################################
 	if(isset($_REQUEST["savecategories"])){
 		foreach($_POST["CAT"] as $id => $categorie){
 			update_query( "ispapi_tblcategories", array( "name" => $categorie["NAME"], "tlds" => $categorie["TLDS"] ), array( "id" => $id) );
 		}
-
 		//added
 		if($_POST["ADDSUBCAT"]['NAME']){
 			try{

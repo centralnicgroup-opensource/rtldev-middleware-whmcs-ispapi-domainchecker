@@ -22,7 +22,6 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 	$modulelist = array();
 	$registrar = array();
 	while($data = mysql_fetch_array($result)){
-		echo "<pre>domain.php ==> "; print_r($data); echo "</pre>";
 		if(!empty($data["autoreg"])){
 			if(!in_array($data["autoreg"], $modulelist)){
 				array_push($modulelist, $data["autoreg"]);
@@ -174,31 +173,46 @@ class DomainCheck
     	$do_not_search = false;
     	$domainlist = array();
 
+		$suggestiondomainlist = array();
 
     	$domains = $this->sortTLDs();
-		// print_r($domains);
     	$tldgroups = $this->getTLDGroups();
-		// print_r($tldgroups);
-
     	$searched_label = $this->getDomainLabel($this->domain);
-    	$searched_tld = $this->getDomainExtension($this->domain);
 
-    	foreach($tldgroups as $tld){
-    		//add the domain in the list if the searched TLD isn't in the TLD group
-    		//If the searched TLD is in the TLD group, this will be put at the first place of the list later
-    		if($tld != $searched_tld){
-    			if( (in_array(".".$tld, $domains["ispapi"]) || in_array(".".$tld, $domains["no_ispapi"])) && !in_array($searched_label.".".$tld, $domainlist) ){
-    				array_push($domainlist, $searched_label.".".$tld);
-    			}
-    		}
-    	}
+####################################################tulsi
+		$domainSuggestionMode = $this->domainSuggestionMode();
+		if($domainSuggestionMode){
+			//TODO: check for third level domains and skip them is needed?
+			$command = array(
+				"COMMAND" => "QueryDomainSuggestionList",
+				"KEYWORD" => $searched_label,
+				"ZONE" => $tldgroups,
+				"SOURCE" => "ISPAPI-SUGGESTIONS",
+			);
+			$registrarconfigoptions = getregistrarconfigoptions($_SESSION['ispapi_registrar'][0]);
+			$ispapi_config = ispapi_config($registrarconfigoptions);
+			$suggestions = ispapi_call($command, $ispapi_config);
 
+			array_push($suggestiondomainlist, $suggestions['PROPERTY']['DOMAIN']);
+			$domainlist = $suggestiondomainlist[0];
+		}else {
+				$searched_tld = $this->getDomainExtension($this->domain);
+				foreach($tldgroups as $tld){
+					//add the domain in the list if the searched TLD isn't in the TLD group
+					//If the searched TLD is in the TLD group, this will be put at the first place of the list later
+					if($tld != $searched_tld){
+						if( (in_array(".".$tld, $domains["ispapi"]) || in_array(".".$tld, $domains["no_ispapi"])) && !in_array($searched_label.".".$tld, $domainlist) ){
+							array_push($domainlist, $searched_label.".".$tld);
+						}
+					}
+				}
+		}
+###################################################
     	//if searched domain contains " " -> show message
     	if (preg_match('/\s/',$this->domain) || strlen($searched_label) > 63){
     		$feedback = array("status" => false, "message" => "The domain you entered is not valid !");
     		$do_not_search = true;
     	}else{
-
     		//check if the searched keyword contains an configured TLD
     		//example: thebestshop -> thebest.shop should be at the top
     		$result = select_query("tbldomainpricing","extension");
@@ -231,8 +245,6 @@ class DomainCheck
     	if($do_not_search){
     		$domainlist = array();
     	}
-
-
 		$response_array = array("data" => $domainlist, "feedback" => $feedback);
 		//save the list in the session for the premium domains.
 		$_SESSION["domainlist"] = $domainlist;
@@ -251,7 +263,6 @@ class DomainCheck
      */
     private function getSortedDomainList(){
     	$domains = $this->sortTLDs();
-
     	$ispapi_domain_list = array();
     	$no_ispapi_domain_list = array();
     	foreach($_SESSION["domainlist"] as $item){
@@ -319,7 +330,17 @@ class DomainCheck
     		return false;
     	}
     }
-
+###############################################tulsi
+	private function domainSuggestionMode(){
+		$result = select_query("ispapi_tblsettings", "*", array("id" => 1));
+		$data = mysql_fetch_array($result);
+		if(isset($data) && $data["suggestion_mode"] == 1){
+			return true;
+		}else{
+			return false;
+		}
+	}
+############################ tulsi
     /*
      * Get a list of premium domain suggestions
      */
@@ -332,7 +353,6 @@ class DomainCheck
     	$response = array();
 
     	$domains = $this->sortTLDs();
-
     	//for ispapi_domain_list (domains that use our registrar module)
     	$extendeddomainlist = $this->getExtendedDomainlist($domains["ispapi"]);
 
@@ -343,6 +363,7 @@ class DomainCheck
     	foreach($domains["ispapi"] as $domain){
     		array_push($all_premium_extension, substr($domain, 1));
     	}
+
 
     	foreach($extendeddomainlist as $list){
     		$command = array(
@@ -356,7 +377,6 @@ class DomainCheck
     		$registrarconfigoptions = getregistrarconfigoptions($list["registrar"]);
     		$ispapi_config = ispapi_config($registrarconfigoptions);
     		$suggestionList = ispapi_call($command, $ispapi_config);
-
     		if($suggestionList["CODE"]=="200"){
     			if(isset($suggestionList["PROPERTY"]["DOMAIN"])){
     				$i = 0;
@@ -412,7 +432,6 @@ class DomainCheck
 				return false;
 			}
 		}else{
-			// mail("tseelamkurthi@hexonet.net", "relationtypes", print_r($_SESSION["ISPAPICACHE"]["RELATIONS"], true));
 			foreach($_SESSION["ISPAPICACHE"]["RELATIONS"] as $key => $relationtype) {
 				foreach ($relationtype as $ky => $relation) {
 					if($relation == "PRICE_CLASS_DOMAIN_".$priceclass."_ANNUAL"){
@@ -426,8 +445,6 @@ class DomainCheck
 	}
 
     private function startDomainCheck(){
-
-
     	//return the cached data only if $this->cached_data = 1
     	if($this->cached_data){
     		$cache = $this->getCache("response");
@@ -461,7 +478,6 @@ class DomainCheck
 
     	//for ispapi_domain_list (domains that use our registrar module)
     	$extendeddomainlist = $this->getExtendedDomainlist($ispapi_domain_list);
-
     	$showpremium = false;
 
 		$result = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
@@ -479,9 +495,6 @@ class DomainCheck
     		//IDN convert before sending to checkdomain
     		$converted_domains = $this->convertIDN($item["domain"], $item["registrar"]);
 
-			// echo "<pre>"; print_r($converted_domains); echo "</pre>";
-
-
     		$command = array(
     				"COMMAND" => "checkDomains",
     				"PREMIUMCHANNELS" => $premiumchannels,
@@ -491,17 +504,9 @@ class DomainCheck
     		$registrarconfigoptions = getregistrarconfigoptions($item["registrar"]);
     		$ispapi_config = ispapi_config($registrarconfigoptions);
     		$check = ispapi_call($command, $ispapi_config);
-
-			// echo "<pre> check ----> "; print_r($check); echo "<----- </pre>";
-
     		$index = 0;
     		foreach($item["domain"] as $item){
-
-				// echo "<pre> item ----> "; print_r($item); echo "<----- </pre>";
-
     			$tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
-
-				// echo "<pre> tmp ----> "; print_r($tmp); echo "<----- </pre>";
 
     			$price = array();
     			if($tmp[0] == "210"){
@@ -745,8 +750,6 @@ class DomainCheck
 		$data = mysql_fetch_array($result);
 
 		$price = $data["annually"];
-
-		// echo "price is --> $price <--";
 
 		if((!empty($price)) && ($price != 0) && ($price != -1)){
 			$price = $this->formatPrice($price,$cur);
