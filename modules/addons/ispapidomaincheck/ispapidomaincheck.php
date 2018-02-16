@@ -144,8 +144,8 @@ function ispapidomaincheck_deactivate() {
 	//$result = full_query($query);
 
 	// Remove ispapi_tblsettings DB table
-	//$query = "DROP TABLE ispapi_tblsettings;";
-	//$result = full_query($query);
+	$query = "DROP TABLE ispapi_tblsettings;";
+	$result = full_query($query);
 
 	//For easier updates, the tables won't be dropped.
 
