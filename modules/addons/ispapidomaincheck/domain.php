@@ -195,7 +195,7 @@ class DomainCheck
 
 			array_push($suggestiondomainlist, $suggestions['PROPERTY']['DOMAIN']);
 			$domainlist = $suggestiondomainlist[0];
-		}else {
+		}else{
 				$searched_tld = $this->getDomainExtension($this->domain);
 				foreach($tldgroups as $tld){
 					//add the domain in the list if the searched TLD isn't in the TLD group
@@ -276,7 +276,6 @@ class DomainCheck
 
     	$sortedDomainlist = array();
     	$sortedDomainlist = array_merge($ispapi_domain_list,$no_ispapi_domain_list);
-
     	$response_array = array("data" => $sortedDomainlist);
     	$this->response = json_encode($response_array);
     }
@@ -313,6 +312,7 @@ class DomainCheck
 				}
 			}
 		}
+		// print_r($p);
 		$p = $this->formatPrice($p, $selected_currency);
     	return $p;
     }
@@ -478,6 +478,7 @@ class DomainCheck
 
     	//for ispapi_domain_list (domains that use our registrar module)
     	$extendeddomainlist = $this->getExtendedDomainlist($ispapi_domain_list);
+		// print_r($extendeddomainlist);
     	$showpremium = false;
 
 		$result = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
@@ -494,6 +495,9 @@ class DomainCheck
     	foreach($extendeddomainlist as $item){
     		//IDN convert before sending to checkdomain
     		$converted_domains = $this->convertIDN($item["domain"], $item["registrar"]);
+			// echo "HERE\n";
+			// print_r($converted_domains);
+			// echo "HERE2\n";
 
     		$command = array(
     				"COMMAND" => "checkDomains",
