@@ -1,0 +1,645 @@
+div.projectmanagement div.adminbar {
+    float:right;
+    margin:-40px 0 0 0;
+    padding: 5px 15px;
+    background-color:#f2f2f2;
+    border: 1px dashed #ccc;
+    font-size: 11px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+div.projectmanagement div.adminbar img {
+    vertical-align: top;
+}
+
+div.projectmanagement .mainbar {
+    margin: 0 0 15px 0;
+    padding: 10px;
+    background-color:#1A4D80;
+    font-weight:bold;
+    color: #fff;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+div.projectmanagement .mainbar td {
+    color: #fff;
+}
+
+div.projectmanagement .mainbar a {
+    color: #fff;
+    font-weight: normal;
+    font-size: 11px;
+}
+div.projectmanagement .mainbar a.create {
+    margin: 0;
+    padding: 8px 15px 8px 10px;
+    background-color:#fff;
+    font-size: 12px;
+    font-weight:bold;
+    color: #666;
+    white-space: nowrap;
+    text-decoration: none;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.projectmanagement .mainbar div.search {
+    margin: 0;
+    padding:0;
+    float: right;
+    background-color:#fff;
+    border: 0;
+    width: 170px;
+    font-weight:normal;
+    color: #666;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+div.projectmanagement .mainbar input.search {
+    margin: 0;
+    padding:6px 10px;
+    background-color:#fff;
+    background:url('../images/search.png') right center no-repeat;
+    border: 0;
+    width: 145px;
+    font-weight:normal;
+    color: #666;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+
+div.projectmanagement table.datatable tr td {
+    text-align: center;
+}
+div.projectmanagement table.datatable tr td.left {
+    text-align: left;
+}
+
+div.projectmanagement div.recentactivity {
+    margin:5px;
+    padding:3px;
+    background-color:#f2f2f2;
+    border: 1px dotted #ccc;
+    border-left: 4px solid #1A4D80;
+    text-align: left;
+    font-size: 11px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+div.projectmanagement div.recentactivity:hover {
+    border: 1px solid #1A4D80;
+    border-left: 4px solid #1A4D80;
+    cursor: hand;
+    cursor: pointer;
+}
+div.projectmanagement div.recentactivity .title {
+    padding: 0 3px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+    text-align: left;
+}
+div.projectmanagement div.recentactivity .desc {
+    margin:3px;
+    padding:3px 5px;
+    background-color: #fff;
+    color: #000;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+div.projectmanagement div.recentactivity div.small {
+    margin: 0;
+    padding: 0 10px;
+    font-size: 10px;
+}
+
+div.projectmanagement div.messages {
+    margin: 0 0 0 10px;
+    padding: 10px;
+    background-color: #f2f2f2;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.projectmanagement div.messages div.title {
+    margin: 0;
+    padding: 0 0 10px 0;
+    font-family: 'Trebuchet MS',Tahoma;
+    font-size: 18px;
+    color: #000;
+}
+
+div.projectmanagement div.messages .msgeditor {
+    width:100%;
+    height:150px;
+    overflow:auto;
+}
+
+div.projectmanagement div.messages .editstaffmsg {
+    cursor:hand;
+    cursor:pointer;
+}
+
+div.projectmanagement div.messages div.actions {
+    clear:both;
+    margin:5px;
+}
+
+div.projectmanagement div.title, div.projectmanagement div.title div {
+    font-family: 'Trebuchet MS',Tahoma;
+    font-size: 24px;
+    color: #000;
+}
+div.projectmanagement div.title input {
+    font-family: 'Trebuchet MS',Tahoma;
+    font-size: 24px;
+    color: #000;
+    width: 50%;
+}
+
+div.projectmanagement div.daysleft {
+    font-size: 18px;
+}
+
+div.projectmanagement div#saveprocess {
+    display: none;
+    float: right;
+    margin: -2px 20px;
+    padding:2px 10px;
+    width: 200px;
+    background-color:#fff;
+    border: 1px solid #ccc;
+    color:#666;
+    font-weight:bold;
+    text-align: center;
+    line-height: 30px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+div.projectmanagement div#savesuccess {
+    display: none;
+    float: right;
+    margin: -2px 20px;
+    padding:2px 10px;
+    width: 200px;
+    background-color:#B3DF97;
+    border: 1px solid #8CD064;
+    color:#007500;
+    font-weight:bold;
+    text-align: center;
+    line-height: 30px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.projectmanagement div.editbtn {
+    float: right;
+    margin: 10px 30px 0 0;
+    cursor: hand;
+    cursor: pointer;
+}
+div.projectmanagement div.editbtn a {
+    margin: 0;
+    padding: 8px 20px;
+    background-color: #B8DAF5;
+    font-weight: bold;
+    color: #fff;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.projectmanagement .editfield {
+    display: none;
+}
+
+div.projectmanagement div.infobar {
+    margin: 0 0 10px 0;
+    padding: 20px 0;
+    background-color: #F7F5E1;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+div.projectmanagement div.infobar table th {
+    font-family: Tahoma;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    color: #1A4D80;
+    border-right:2px solid #EEECC4;
+}
+div.projectmanagement div.infobar table td {
+    width: 17%;
+    border-right:2px solid #EEECC4;
+}
+div.projectmanagement div.infobar table td div {
+    font-family: Tahoma;
+    font-size: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    color: #000000;
+}
+div.projectmanagement div.infobar table td div#ticketclientsearchresults div {
+    text-transform: none;
+    font-size: 12px;
+}
+div.projectmanagement div.infobar table td div#ticketclientsearchresults div.searchresult {
+    text-align: left;
+    font-weight: normal;
+}
+div.projectmanagement div.infobar table td input {
+    padding: 4px;
+    border: 2px solid #EEECC4;
+    font-size: 16px;
+    width: 50%;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+div.projectmanagement div.infobar table td select {
+    padding: 4px;
+    border: 2px solid #EEECC4;
+    font-size: 16px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.projectmanagement div.heading {
+    margin: 0 0 10px 0;
+    padding: 5px 5px 5px 20px;
+    color: #444;
+    font-family: 'Trebuchet MS',Tahoma;
+    font-size: 18px;
+}
+
+div.projectmanagement div.heading span.stat {
+    margin: 0;
+    padding: 1px 10px;
+    background-color: #efefef;
+    color: #444;
+    font-size: 14px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.projectmanagement div.heading span.stat .red {
+    color: #cc0000;
+}
+div.projectmanagement div.heading span.stat .green {
+    color: #77BA3A;
+    font-weight: bold;
+}
+
+div.projectmanagement div.heading span.stat input {
+    border: 1px solid #ccc;
+    font-size: 10px;
+}
+
+div.projectmanagement .loading {
+    display: none;
+}
+
+div.projectmanagement span.loading {
+    padding: 0 10px;
+    font-size: 12px;
+}
+
+div.projectmanagement div.msg1 {
+    margin: 0;
+    padding: 0 0 10px 0;
+}
+div.projectmanagement div.msg1 div.date {
+    margin: 0;
+    padding: 5px 10px;
+    background-color: #1A4D80;
+    color: #fff;
+    font-size: 11px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+div.projectmanagement div.msg1 div.msg {
+    margin: 0;
+    padding: 8px 20px;
+    background-color: #fff;
+    font-size: 12px;
+}
+div.projectmanagement div.msg2 {
+    margin: 0;
+    padding: 0 0 10px 0;
+}
+div.projectmanagement div.msg2 div.date {
+    margin: 0;
+    padding: 5px 10px;
+    background-color: #ccc;
+    color: #000;
+    font-size: 11px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+div.projectmanagement div.msg2 div.msg {
+    margin: 0;
+    padding: 8px 20px;
+    background-color: #fff;
+    font-size: 12px;
+}
+div.projectmanagement div.msgreply {
+    margin: 0 0 14px 0;
+    padding: 0 0 10px 0;
+    border-bottom: 1px dashed #ccc;
+    text-align: center;
+    color: #000;
+    -moz-border-radius: 10px ;
+    -webkit-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+div.projectmanagement div.msgreply textarea {
+    height: 100px;
+    width: 95%;
+}
+div.projectmanagement .msgnone {
+    padding: 30px 0 40px 0;
+    text-align: center;
+}
+
+div.projectmanagement div.box {
+    padding: 0px;
+    border: 3px solid #E2E7E9;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    border-radius: 4px;
+}
+
+div.projectmanagement div.box div.padding {
+    padding: 10px;
+    text-align: center;
+}
+
+div.projectmanagement div.messages div.attachmentupload {
+    margin: 10px 0 0 0;
+    text-align: center;
+}
+
+div.projectmanagement table.tasks tr:first-child th:first-child {
+        -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    border-radius: 4px;
+}
+
+div.projectmanagement table.tasks th {
+    background-color: #efefef;
+    font-weight: bold;
+    text-align: center;
+}
+
+div.projectmanagement table.tasks tr.time {
+    font-size: 11px;
+    text-align: center;
+    background-color: #EEF3F9;
+}
+
+div.projectmanagement table.tasks a.timerlink {
+    margin: 10px;
+    padding: 2px 10px;
+    background-color: #efefef;
+    font-size: 11px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    border-radius: 4px;
+    cursor:hand;
+    cursor:pointer;
+}
+
+div.projectmanagement div.addtask {
+    margin: 10px 0 0 0;
+    text-align: center;
+}
+
+div.projectmanagement input.taskinput {
+    margin: 0 0 10px 0;
+    width: 80%;
+    font-size: 18px;
+}
+
+div.projectmanagement div#createnewcont {
+    display: none;
+    position: absolute;
+    top: 250px;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+div.projectmanagement div.createnewcont2 {
+    margin: 0 auto;
+    padding: 30px;
+    width: 550px;
+    background-color: #fff;
+    -moz-border-radius: 10px ;
+    -webkit-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+
+div.projectmanagement div.createnewproject {
+    margin: 0 auto;
+    padding: 15px;
+    width: 500px;
+    background-color: #fff;
+    border: 10px solid #E5E5E5;
+    -moz-border-radius: 10px ;
+    -webkit-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+
+div.leftCol {
+    padding-right: 6px;
+}
+
+div.rightCol {
+    padding-left: 6px;
+}
+
+div.projectmanagement div.createnewproject div.float {
+    float: left;
+    width: 50%;
+}
+
+div.projectmanagement div.createnewproject div.label {
+    margin: 5px 0;
+    padding: 4px;
+    background-color: #fff;
+    border: 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    text-transform: none;
+}
+
+
+
+div.projectmanagement div.reports {
+    text-align: center;
+}
+div.projectmanagement div.reports a {
+    margin: 10px;
+    padding: 10px 30px;
+    background-color:#efefef;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    color: #000;
+    text-decoration: none;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+h1 {
+    border: 0;
+}
+
+div.projectmanagement .clear {
+    clear: both;
+}
+
+div.projectmanagement .edittask {
+    margin: 0 auto;
+    padding: 20px 30px;
+    width: 700px;
+    background-color: #f2f2f2;
+    border: 3px solid #efefef;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+
+div.projectmanagement .taskbox {
+    margin: 0;
+    padding: 2px 5px;
+    font-size: 11px;
+    background-color:#efefef;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.projectmanagement .taskdue {
+    padding: 0 4px;
+    color: #BCBCBC;
+    font-size: 11px;
+}
+
+div.projectmanagement .tasktimer {
+    margin: 0;
+    padding: 2px 5px;
+    font-size: 11px;
+    background-color:#efefef;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.tickettimer {
+    margin: 0;
+    padding: 2px 5px;
+    font-size: 10px;
+    background-color:#efefef;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.projectmanagement .ui-progressbar {
+    height: 10px;
+}
+
+div.projectmanagement td.sortcol {
+    width: 2px;
+    background-color: #efefef;
+    cursor: move;
+}
+div.projectmanagement .tDnD_whileDrag td {
+    background-color: #efefef;
+}
+
+div.projectmanagement #cpticketclientsearchresults {
+    position: absolute;
+    width: 300px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 3px;
+    margin: 0 10px 0 0;
+    display: none;
+    white-space: nowrap;
+    font-size: 11px;
+    font-family: Tahoma;
+}
+div.projectmanagement #cpticketclientsearchresults .searchresultheader {
+    background-color:#ccc;
+    padding:2px;
+    font-weight:bold;
+    text-align:center;
+}
+div.projectmanagement #cpticketclientsearchresults .searchresult {
+    background-color:#f4f4f4;
+    border-top: 3px solid #fff;
+    padding: 2px 0 2px 5px;
+}
+div.projectmanagement #cpticketclientsearchresults .searchresult .desc {
+    color: #888;
+}
+div.projectmanagement #cpticketclientsearchresults .searchresult:hover {
+    background-color: #fff;
+}
+div.projectmanagement #cpticketclientsearchresults .searchresult a {
+    text-decoration: none;
+    display: block;
+}
+
+.create-new-project-link {
+    float: right;
+    padding: 0 50px 0 0;
+}
+

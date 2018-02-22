@@ -1,8 +1,8 @@
 <?php
-//require_once(dirname(__FILE__)."/FirePHP.class.php");
 require_once(dirname(__FILE__)."/../../../init.php");
 require_once(dirname(__FILE__)."/../../../includes/domainfunctions.php");
 require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
+
 //include ISPAPI registrar module if installed
 if(file_exists(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php")){
 	require_once(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php");
@@ -13,6 +13,8 @@ if(file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backe
 }
 
 use WHMCS\Database\Capsule;
+use WHMCS\Domains\Pricing\Premium;
+
 
 //WORKARROUND: Get a list of all Hexonet registrar modules and include the registrar files
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
@@ -48,9 +50,7 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 /**
  * PHP Class for the WHMCS checkdomain feature
  *
- * @copyright  2014 1API GmbH
- * @license
- * @version    1.0
+ * @copyright  2018 1API GmbH
  */
 class DomainCheck
 {
@@ -59,7 +59,6 @@ class DomainCheck
     private $tldgroup;
     private $action;
     private $registrar;
-	private $cached_data;
 	private $response;
 
 
@@ -70,14 +69,12 @@ class DomainCheck
      *  @param string $tldgroup The searched tldgroup
      *  @param string $action The action
      *  @param array $registrar The configured registrar (can be more than one)
-     *  @param int $cached_data if 1 returns the cached data
      */
-    public function __construct($domain, $tldgroup, $action, $registrar, $cached_data, $adminuser){
+    public function __construct($domain, $tldgroup, $action, $registrar, $adminuser){
     	$this->domain = $domain;
 		$this->tldgroup = $tldgroup;
 		$this->action = $action;
 		$this->registrar = $registrar;
-		$this->cached_data = $cached_data;
 		$this->adminuser = $adminuser;
 
 		$this->doDomainCheck();
@@ -89,16 +86,11 @@ class DomainCheck
      *
      * Allowed actions:
      *  - getList: returns the complete list of domains
-     *  - getSuggestions: returns a list of premium suggestions.
      *  - if empty -> startDomainCheck
      */
     private function doDomainCheck(){
     	if(isset($this->action) && ($this->action == "getList")){
     		$this->getDomainList();
-    	}elseif(isset($this->action) && ($this->action == "getSortedList")){
-    		$this->getSortedDomainList();
-    	}elseif(isset($this->action) && ($this->action == "getSuggestions")){
-    		$this->getPremiumDomainSuggestions();
     	}else{
     		$this->startDomainCheck();
     	}
@@ -106,7 +98,7 @@ class DomainCheck
     }
 
     /*
-     * Split the tld list to start with our extensions first
+     * Split the TLD list in 2 lists, the first one with the TLDs configured with HEXONET, the second one with all others.
      *
      * @return array an array with 2 keys
      * - ispapi
@@ -161,14 +153,6 @@ class DomainCheck
 
     	$_SESSION["domain"] = $this->domain;
 
-    	//if the data has been cached, return cached data
-    	$cache = $this->getCache("list");
-    	if(!empty($cache)){
-    		$this->response = json_encode($cache);
-    		$_SESSION["domainlist"] = $cache["data"];
-    		return;
-    	}
-
     	$feedback = array();
     	$do_not_search = false;
     	$domainlist = array();
@@ -179,22 +163,28 @@ class DomainCheck
     	$tldgroups = $this->getTLDGroups();
     	$searched_label = $this->getDomainLabel($this->domain);
 
-####################################################tulsi
-		$domainSuggestionMode = $this->domainSuggestionMode();
-		if($domainSuggestionMode){
-			//TODO: check for third level domains and skip them is needed?
+
+		//select the right mode: regular or suggestions
+		if( $this->domainSuggestionModeActivated() ){
+
+			//TODO: check for third level domains and skip them is needed? why?
 			$command = array(
 				"COMMAND" => "QueryDomainSuggestionList",
 				"KEYWORD" => $searched_label,
 				"ZONE" => $tldgroups,
 				"SOURCE" => "ISPAPI-SUGGESTIONS",
 			);
+			//echo "<pre>"; print_r($tldgroups); echo "</pre>";
 			$registrarconfigoptions = getregistrarconfigoptions($_SESSION['ispapi_registrar'][0]);
 			$ispapi_config = ispapi_config($registrarconfigoptions);
 			$suggestions = ispapi_call($command, $ispapi_config);
 
+			//echo "<pre>"; print_r($suggestions); echo "</pre>";
 			array_push($suggestiondomainlist, $suggestions['PROPERTY']['DOMAIN']);
 			$domainlist = $suggestiondomainlist[0];
+
+			#TODO: check if we need to add the TLDs which we are not supported at hexonet to the list also...
+
 		}else{
 				$searched_tld = $this->getDomainExtension($this->domain);
 				foreach($tldgroups as $tld){
@@ -207,7 +197,9 @@ class DomainCheck
 					}
 				}
 		}
-###################################################
+
+
+
     	//if searched domain contains " " -> show message
     	if (preg_match('/\s/',$this->domain) || strlen($searched_label) > 63){
     		$feedback = array("status" => false, "message" => "The domain you entered is not valid !");
@@ -249,10 +241,11 @@ class DomainCheck
 		//save the list in the session for the premium domains.
 		$_SESSION["domainlist"] = $domainlist;
 
-		//Save the data in the cache
-		$this->setCache($response_array, "list");
-
     	$this->response = json_encode($response_array);
+
+		//THIS NEED TO BE REFACTORED. getDomainList AND getSortedDomainList needs to be merged together.
+		//This is saving us 1 ajax call in the frontend.
+		$this->getSortedDomainList();
     }
 
     /*
@@ -265,6 +258,8 @@ class DomainCheck
     	$domains = $this->sortTLDs();
     	$ispapi_domain_list = array();
     	$no_ispapi_domain_list = array();
+
+
     	foreach($_SESSION["domainlist"] as $item){
     		$tld = $this->getDomainExtension($item);
     		if( in_array(".".$tld, $domains["ispapi"]) ){
@@ -277,6 +272,9 @@ class DomainCheck
     	$sortedDomainlist = array();
     	$sortedDomainlist = array_merge($ispapi_domain_list,$no_ispapi_domain_list);
     	$response_array = array("data" => $sortedDomainlist);
+
+		//echo "<pre>"; print_r($sortedDomainlist); echo "</pre>";
+
     	$this->response = json_encode($response_array);
     }
 
@@ -317,21 +315,10 @@ class DomainCheck
     	return $p;
     }
 
-    /*
-     * Returns TRUE if aftermarket premiums have to be displayed
-     */
-    private function showAftermarketPremium(){
-    	$result = select_query("ispapi_tblsettings", "*", array("id" => 1));
-    	$data = mysql_fetch_array($result);
-
-    	if(isset($data) && $data["aftermarket_premium"] == 1){
-    		return true;
-    	}else{
-    		return false;
-    	}
-    }
-###############################################tulsi
-	private function domainSuggestionMode(){
+   /*
+	* Returns TRUE if the "suggestion" mode is activated in the domainchecker configuration
+	*/
+	private function domainSuggestionModeActivated() {
 		$result = select_query("ispapi_tblsettings", "*", array("id" => 1));
 		$data = mysql_fetch_array($result);
 		if(isset($data) && $data["suggestion_mode"] == 1){
@@ -340,71 +327,9 @@ class DomainCheck
 			return false;
 		}
 	}
-############################ tulsi
-    /*
-     * Get a list of premium domain suggestions
-     */
-    private function getPremiumDomainSuggestions(){
-    	if(!isset($_SESSION["domainlist"]))
-    		return;
-
-    	$domainlist = array();
-    	$feedback = array();
-    	$response = array();
-
-    	$domains = $this->sortTLDs();
-    	//for ispapi_domain_list (domains that use our registrar module)
-    	$extendeddomainlist = $this->getExtendedDomainlist($domains["ispapi"]);
-
-    	$limit = count($_SESSION["domainlist"]);
-
-    	//get all ispapi extension
-    	$all_premium_extension = array();
-    	foreach($domains["ispapi"] as $domain){
-    		array_push($all_premium_extension, substr($domain, 1));
-    	}
 
 
-    	foreach($extendeddomainlist as $list){
-    		$command = array(
-    				"COMMAND" => "QueryDomainSuggestionList",
-    				"KEYWORD" => $this->convertIDN($this->domain, $list["registrar"]),
-    				"LIMIT" => $limit,
-    				"SOURCE" => "CP_PREMIUM",
-    				"ZONE" => $all_premium_extension
-    		);
-
-    		$registrarconfigoptions = getregistrarconfigoptions($list["registrar"]);
-    		$ispapi_config = ispapi_config($registrarconfigoptions);
-    		$suggestionList = ispapi_call($command, $ispapi_config);
-    		if($suggestionList["CODE"]=="200"){
-    			if(isset($suggestionList["PROPERTY"]["DOMAIN"])){
-    				$i = 0;
-    				foreach($suggestionList["PROPERTY"]["DOMAIN"] as $domain){
-
-    					$price = $this->getConvertedPrice($suggestionList["PROPERTY"]["PRICE"][$i], $_SESSION["currency"]);
-
-    					$domainprices["domainregister"][1] = $price;
-    					array_push($response, array("id" => $domain, "price" => $domainprices, "class" => "PREMIUM_NAMEMEDIA"));
-    					$i++;
-    				}
-    			}
-    		}
-    		//just one time for the first ispapi registrar
-    		break;
-    	}
-
-
-    	$response_array = array("data" => $response, "feedback" => "");
-
-    	$this->response = json_encode($response_array);
-    }
-
-    /*
-     * Start the domain check procedure.
-     * Handle the check domain with the configured ispapi registrar account configured in WHMCS
-     * return a JSON list of all domains with the availability
-     */
+	//TODO: rewrite this methode. This is a copy of Registrar Module
 	 function ispapi_getRegistryPremiumDomainRenewalPrice($priceclass){
 
 		$date = new DateTime();
@@ -444,20 +369,12 @@ class DomainCheck
 		}
 	}
 
+	/*
+     * Start the domain check procedure.
+     * Handle the check domain with the configured ispapi registrar account configured in WHMCS
+     * return a JSON list of all domains with the availability
+     */
     private function startDomainCheck(){
-    	//return the cached data only if $this->cached_data = 1
-    	if($this->cached_data){
-    		$cache = $this->getCache("response");
-    		if(!empty($cache["data"])){
-    			//call handleBackorderButton to get the cache updated for backorder related informations
-				$cache["data"] = $this->handleBackorderButton($cache["data"]);
-				$this->response = json_encode($cache);
-    			return;
-    		}
-    	}
-
-    	$showAftermarketPremium = $this->showAftermarketPremium();
-
     	$feedback = array();
     	$domains = $this->sortTLDs();
 
@@ -481,15 +398,18 @@ class DomainCheck
 		// print_r($extendeddomainlist);
     	$showpremium = false;
 
-		$result = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
-    	$data = mysql_fetch_array($result);
-    	if(isset($data) && $data["registry_premium"] == 0 && $data["aftermarket_premium"] == 1 ){
-    		$premiumchannels = "NAMEMEDIA";
-    	}elseif(isset($data) && $data["registry_premium"] == 1 ){
-    		$premiumchannels = "*";
-    	}else{
-    		$premiumchannels = "";
-    	}
+		// $result = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
+    	// $data = mysql_fetch_array($result);
+    	// if(isset($data) && $data["registry_premium"] == 0 && $data["aftermarket_premium"] == 1 ){
+    	// 	$premiumchannels = "NAMEMEDIA";
+    	// }elseif(isset($data) && $data["registry_premium"] == 1 ){
+    	// 	$premiumchannels = "*";
+    	// }else{
+    	// 	$premiumchannels = "";
+    	// }
+
+		#TODO: check if premium domains are activated in WHMCS.
+		$premiumEnabled = true;
 
     	$response = array();
     	foreach($extendeddomainlist as $item){
@@ -501,96 +421,155 @@ class DomainCheck
 
     		$command = array(
     				"COMMAND" => "checkDomains",
-    				"PREMIUMCHANNELS" => $premiumchannels,
+    				"PREMIUMCHANNELS" => "*",
     				"DOMAIN" => $converted_domains
     		);
 
     		$registrarconfigoptions = getregistrarconfigoptions($item["registrar"]);
     		$ispapi_config = ispapi_config($registrarconfigoptions);
     		$check = ispapi_call($command, $ispapi_config);
+
+			//echo "<pre>"; print_r($check); echo "</pre>";
+
+
     		$index = 0;
     		foreach($item["domain"] as $item){
     			$tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
+				$code = $tmp[0];
+				$availability = $check["PROPERTY"]["DOMAINCHECK"][$index];
+				$class = $check["PROPERTY"]["CLASS"][$index];
+				$premiumchannel = $check["PROPERTY"]["PREMIUMCHANNEL"][$index];
+				$status="";
 
-    			$price = array();
-    			if($tmp[0] == "210"){
-    				//get the price for this domain
-    				$tld = $this->getDomainExtension($item);
+				if(preg_match('/549/', $check["PROPERTY"]["DOMAINCHECK"][$index])){
+					//TLD NOT SUPPORTED AT HEXONET USE A FALLBACK TO THE WHOIS LOOKUP.
+					//Add the domain to the $no_ispapi_domain_list so it will be automatically checked by the WHOIS LOOKUP in the next step.
+					array_push($no_ispapi_domain_list, $item);
+				}elseif(preg_match('/210/', $check["PROPERTY"]["DOMAINCHECK"][$index])){
+					//DOMAIN AVAILABLE
+					$whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
+	    			$register_price = $whmcspricearray["domainregister"][1];
+				 	$renew_price = $whmcspricearray["domainrenew"][1];
+					$status="available";
+				}elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index]) || !empty($check["PROPERTY"]["CLASS"][$index])){ //IT IS A PREMIUMDOMAIN
+					//IF PREMIUM DOMAIN ENABLED IN WHMCS - DISPLAY AVAILABLE + PRICE
+					if($premiumEnabled){
+						//PREMIUMDOMAIN ENABLED IN WHMCS
 
-    				$price = $this->getTLDprice($tld);
+						//TODO: GET THE PRICE FROM AFTERMARKET DOMAIN AND ADD MARGIN
+						//TODO: GET THE PRICE FROM PRICECLASS AND ADD MARGIN
 
-    			}else{
+						//get the markup from the WHMCS backend
+						$markupToAdd = Premium::markupForCost($check["PROPERTY"]["PRICE"][$index]);
 
-    				if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
-    						//get the NAMEMEDIA price
-    						$p = $this->getConvertedPrice($check["PROPERTY"]["PRICE"][$index], $_SESSION["currency"]);
-    						$price["domainregister"][1] = $p;
-    						//override class
-    						$check["PROPERTY"]["CLASS"][$index] = "PREMIUM_NAMEMEDIA";
+						$register_price = $check["PROPERTY"]["PRICE"][$index] + ($check["PROPERTY"]["PRICE"][$index] * $markupToAdd / 100);
+
+						$renew_price = "todo"; //$this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
+
+						$status="available";
 					}else{
-
-						if(isset($check["PROPERTY"]["CLASS"][$index]) && !empty($check["PROPERTY"]["CLASS"][$index])) {
-							//get the premium price
-							$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
-							$cur = mysql_fetch_array($result);
-
-							$command = array(
-									"COMMAND" => "checkDomains",
-									"DOMAIN0" => $item,
-									"PREMIUMCHANNELS" => $premiumchannels
-							);
-
-							$premiumdomainprice = ispapi_call($command, $ispapi_config);
-
-							if(isset($premiumdomainprice["PROPERTY"]["PRICE"]) && !empty($premiumdomainprice["PROPERTY"]["PRICE"])){
-								$renewalprice = $this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
-
-								$pricet = $premiumdomainprice["PROPERTY"]["PRICE"][0];
-								if((!empty($pricet)) && ($pricet != 0) && ($pricet != -1)){
-									$pricet = $this->formatPrice($pricet, $cur);
-									$renewalprice = $this->formatPrice($renewalprice, $cur);
-								}else{
-									$renewalprice = -1;
-									$pricet = -1;
-								}
-								$price["domainregister"][1] = $pricet;
-								$price["domainrenew"][1] = $renewalprice;
-
-							}
-							// else{
-							// 	$price = $this->getPremiumClassPrice($check["PROPERTY"]["CLASS"][$index], $item);
-							// }
-						}
+						//PREMIUM DOMAIN NOT ENABLED IN WHMCS -> DISPLAY THE DOMAIN AS TAKEN
+						$status="taken";
 					}
-    			}
-				//if no price configured or price = 0 display as taken...
-    			if($price["domainregister"][1] == -1){
-    				$price = "";
-    			}
+				}else{
+					//DOMAIN TAKEN
+					$status="taken";
 
-    			array_push($response, array("id" => $item, "checkover" => "api", "availability" => $check["PROPERTY"]["DOMAINCHECK"][$index], "code" => $tmp[0], "class" => $check["PROPERTY"]["CLASS"][$index], "premiumchannel" => $check["PROPERTY"]["PREMIUMCHANNEL"][$index], "price" => $price, "cart" => $_SESSION["cart"]));
+					//TODO: add flag is we need to display backorder button, and also backorder status.
 
-    			// Feedback for the template
-    			if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){
-    				if(preg_match('/210/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
-    					$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available!");
-    				}elseif(preg_match('/211 Premium/',$check["PROPERTY"]["DOMAINCHECK"][$index]) && !empty($price)){
-    					$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available for registration as a premium-domain!");
-    				}elseif(preg_match('/541/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
-    					$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is an invalid domain name!");
-    				}elseif(preg_match('/549/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
-    					$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is not supported!");
-    				}else{
-    					if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
-    						$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available for registration as a premium-domain!");
-    					}else{
-    						$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is already taken!");
-    					}
-    				}
-    			}
+				}
+
+    			// $price = array();
+    			// if($tmp[0] == "210"){
+    			// 	//get the price for this domain
+    			// 	$tld = $this->getDomainExtension($item);
+    			// 	$price = $this->getTLDprice($tld);
+				//
+    			// }else{
+				//
+    			// 	if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
+    			// 			//get the NAMEMEDIA price
+    			// 			$p = $this->getConvertedPrice($check["PROPERTY"]["PRICE"][$index], $_SESSION["currency"]);
+    			// 			$price["domainregister"][1] = $p;
+    			// 			//override class
+    			// 			$check["PROPERTY"]["CLASS"][$index] = "PREMIUM_NAMEMEDIA";
+				// 	}else{
+				//
+				// 		if(isset($check["PROPERTY"]["CLASS"][$index]) && !empty($check["PROPERTY"]["CLASS"][$index])) {
+				// 			//get the premium price
+				// 			$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
+				// 			$cur = mysql_fetch_array($result);
+				//
+				// 			$command = array(
+				// 					"COMMAND" => "checkDomains",
+				// 					"DOMAIN0" => $item,
+				// 					"PREMIUMCHANNELS" => $premiumchannels
+				// 			);
+				//
+				// 			$premiumdomainprice = ispapi_call($command, $ispapi_config);
+				//
+				// 			if(isset($premiumdomainprice["PROPERTY"]["PRICE"]) && !empty($premiumdomainprice["PROPERTY"]["PRICE"])){
+				// 				$renewalprice = $this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
+				//
+				// 				$pricet = $premiumdomainprice["PROPERTY"]["PRICE"][0];
+				// 				if((!empty($pricet)) && ($pricet != 0) && ($pricet != -1)){
+				// 					$pricet = $this->formatPrice($pricet, $cur);
+				// 					$renewalprice = $this->formatPrice($renewalprice, $cur);
+				// 				}else{
+				// 					$renewalprice = -1;
+				// 					$pricet = -1;
+				// 				}
+				// 				$price["domainregister"][1] = $pricet;
+				// 				$price["domainrenew"][1] = $renewalprice;
+				//
+				// 			}
+				// 			// else{
+				// 			// 	$price = $this->getPremiumClassPrice($check["PROPERTY"]["CLASS"][$index], $item);
+				// 			// }
+				// 		}
+				// 	}
+    			// }
+				// //if no price configured or price = 0 display as taken...
+    			// if($price["domainregister"][1] == -1){
+    			// 	$price = "";
+    			// }
+
+    			array_push($response, array("id" => $item,
+											"checkover" => "api",
+											"code" => $code,
+											"availability" => $availability,
+											"class" => $class,
+											"premiumchannel" => $premiumchannel,
+											"registerprice" => $register_price,
+											"renewprice" => $renew_price,
+											"status" => $status,
+											"cart" => $_SESSION["cart"]));
+
+    			// // Feedback for the template TODO: use that to display a box with information like in hexonet.domains
+
+    			// if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){
+    			// 	if(preg_match('/210/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
+    			// 		$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available!");
+    			// 	}elseif(preg_match('/211 Premium/',$check["PROPERTY"]["DOMAINCHECK"][$index]) && !empty($price)){
+    			// 		$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available for registration as a premium-domain!");
+    			// 	}elseif(preg_match('/541/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
+    			// 		$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is an invalid domain name!");
+    			// 	}elseif(preg_match('/549/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
+    			// 		$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is not supported!");
+    			// 	}else{
+    			// 		if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
+    			// 			$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available for registration as a premium-domain!");
+    			// 		}else{
+    			// 			$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is already taken!");
+    			// 		}
+    			// 	}
+    			// }
 
     			$index++;
     		}
+
+			//echo "<pre>"; print_r($response); echo "</pre>";
+
     	}
 
     	//for no_ispapi_domain_list (domains that don't use our registrar module)
@@ -606,36 +585,33 @@ class DomainCheck
     		if($check["status"] == "available"){
     			$code = "210";
 	    		//get the price for this domain
-	    		$tld = $this->getDomainExtension($item);
-	    		$price = $this->getTLDprice($tld);
+				$whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
+				$register_price = $whmcspricearray["domainregister"][1];
+				$renew_price = $whmcspricearray["domainrenew"][1];
+				$status = "available";
     		}else{
     			$code = "211";
+				$status = "taken";
     		}
-    		array_push($response, array("id" => $item, "checkover" => "whois", "availability" => $check["result"], "code" => $code, "class" => "", "premiumchannel" => "", "price" => $price));
+
+			array_push($response, array("id" => $item,
+										"checkover" => "whois",
+										"code" => $code,
+										"availability" => $check["result"],
+										"class" => "",
+										"premiumchannel" => "",
+										"registerprice" => $register_price,
+										"renewprice" => $renew_price,
+										"status" => $status,
+										"cart" => $_SESSION["cart"]));
+
+
     	}
 
-		//Handle the displaying of the backorder button in the search response
-		$response = $this->handleBackorderButton($response);
-		//Handle backorder feedback
-		// $backorder_feedback = "";
-		// if(isset($_SESSION["domain"])){
-		// 	foreach($response as $item){
-		// 		if($_SESSION["domain"]==$item["id"] && $item["backorder_available"] && $item["backordered"] == 0 ){
-		// 			$backorder_feedback = "<p><b>You can backorder this domain name.</b></p>";
-		// 		}
-		// 		if($_SESSION["domain"]==$item["id"] && $item["backorder_available"] && $item["backordered"] == 1 ){
-		// 			$backorder_feedback = "<p><b>You backordered this domain name.</b></p>";
-		// 		}
-		// 	}
-		// }
-		// if(!empty($backorder_feedback)){
-		// 	$feedback["message"] .= " ".$backorder_feedback;
-		// }
+		//Handle the displaying of the backorder button in the search response TODO: rewrite that
+		//$response = $this->handleBackorderButton($response);
 
     	$response_array = array("data" => $response, "feedback" => $feedback);
-
-		//Save the data in the cache
-    	$this->setCache($response_array, "response");
 
     	$this->response = json_encode($response_array);
     }
@@ -957,53 +933,6 @@ class DomainCheck
     	return $tmp[1];
     }
 
-    /*
-     * Cache the result in a SESSION
-     *
-     * @param array $res The array to cache
-     * @param string $type The type of data (list OR response)
-     */
-    private function setCache($res, $type){
-    	$searched_domain = $_SESSION["domain"];
-
-    	if($type == "list"){
-    		$_SESSION["cache"][$this->tldgroup][$searched_domain]["list"] = $res;
-    	}else{
-    		//wenn leer -> initialisieren
-    		if(!isset($_SESSION["cache"][$this->tldgroup][$searched_domain]["response"]["data"])){
-    			$_SESSION["cache"][$this->tldgroup][$searched_domain]["response"]["data"] = array();
-    		}
-    		//merge the data with the existing data
-    		$result = array_merge($_SESSION["cache"][$this->tldgroup][$searched_domain]["response"]["data"], $res["data"]);
-    		$_SESSION["cache"][$this->tldgroup][$searched_domain]["response"]["data"] = $result;
-
-    		//if feedback isn't set, set it
-    		if(!isset($_SESSION["cache"][$this->tldgroup][$searched_domain]["response"]["data"])){
-    			$_SESSION["cache"][$this->tldgroup][$searched_domain]["response"]["feedback"] = $res["feedback"];
-    		}
-    		//if feedback is not empty, replace the old session value
-    		if(!empty($res["feedback"])){
-    			$_SESSION["cache"][$this->tldgroup][$searched_domain]["response"]["feedback"] = $res["feedback"];
-    		}
-    	}
-    }
-
-    /*
-     * Get the cached result if available (returns an empty array if no data cached)
-     *
-     * @param string $type Type of data cached: list OR response
-     * @return array The cached data
-     */
-    private function getCache($type){
-    	$searched_domain = $_SESSION["domain"];
-
-    	if(isset($_SESSION["cache"][$this->tldgroup][$searched_domain][$type])){
-    		$_SESSION["cache"][$this->tldgroup][$searched_domain][$type]["cache"] = true;
-    		return $_SESSION["cache"][$this->tldgroup][$searched_domain][$type];
-    	}else{
-    		return array();
-    	}
-    }
 
     /*
      * Send the JSON response back to the template
@@ -1016,7 +945,6 @@ class DomainCheck
 
 /*new*/
 $action = (isset($_REQUEST["action"])) ? $_REQUEST["action"] : "";
-$cached_data =  (isset($_REQUEST["cache"])) ? $_REQUEST["cache"] : "";
 
 //Problem with sessions handling...
 //Currency session will be send on the first ajax call
@@ -1039,7 +967,6 @@ $domaincheck = new DomainCheck( $_REQUEST["domain"],
 								$_REQUEST["tldgroup"],
 								$action,
 								$_SESSION["ispapi_registrar"],
-								$cached_data,
 								$_SESSION["adminuser"]);
 
 $domaincheck->send();
