@@ -91,7 +91,7 @@ $( document ).ready(function() {
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
 					$( "#" + id).addClass(element.checkover);
 
-                    //TODO: GO THROUGH EVERY ELEMENTS AND DISPLAY THE CORRECT DESIGN
+                    // TULSI TODO: GO THROUGH EVERY ELEMENTS AND DISPLAY THE CORRECT DESIGN
 
 				});
 
@@ -136,7 +136,7 @@ $( document ).ready(function() {
 			}
 		}else{
 			var searched_domain = $("#searchfield").val();
-            
+
 			//stop the request when domainfield is not filled
 			if(searched_domain == ""){
 				return;
@@ -189,6 +189,8 @@ $( document ).ready(function() {
 				// 		return;
 				// 	}
 				// }
+
+                // TODO: TULSI HERE CREATE A BOX LIKE IN HEXONET.DOMAINS
 
 				var nb_results = 0;
 				$.each(data["data"], function(index, element) {

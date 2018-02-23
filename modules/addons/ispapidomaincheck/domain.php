@@ -459,12 +459,12 @@ class DomainCheck
 						//TODO: GET THE PRICE FROM AFTERMARKET DOMAIN AND ADD MARGIN
 						//TODO: GET THE PRICE FROM PRICECLASS AND ADD MARGIN
 
-						//get the markup from the WHMCS backend
-						$markupToAdd = Premium::markupForCost($check["PROPERTY"]["PRICE"][$index]);
+						$registrarprice = $check["PROPERTY"]["PRICE"][$index];
+						$registrarpriceCurrency = $check["PROPERTY"]["CURRENCY"][$index];
 
-						$register_price = $check["PROPERTY"]["PRICE"][$index] + ($check["PROPERTY"]["PRICE"][$index] * $markupToAdd / 100);
+						$register_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
 
-						$renew_price = "todo"; //$this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
+						$renew_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency); //$this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
 
 						$status="available";
 					}else{
@@ -682,15 +682,32 @@ class DomainCheck
 			if(!empty($data)){
 				for ( $i = 1; $i <= 10; $i++ ) {
 					if (($data['year'.$i] > 0)){
-						//$domainprices[$data['extension']][$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
 						$domainprices[$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
 					}
 				}
 			}
 		}
-		// $data = mysql_fetch_array($result);
-
 		return $domainprices;
+	}
+
+	/*
+     * Returns the price for a premiumdomain registration. (This function adds the markup)
+     *
+     * @param string $registrarprice The domain registration price asked by the registrar
+     * @param string $registrarpriceCurrency The currency of this price
+     * @return string The price well formatted
+     *
+     */
+	private function getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency) {
+
+		// //get the markup from the WHMCS backend
+		// $markupToAdd = Premium::markupForCost($registrarprice, $registrarpriceCurrency);
+		//
+		// $register_price = $registrarprice + ($registrarprice * $markupToAdd / 100);
+		//TODO ANTHONY
+		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
+		$cur = mysql_fetch_array($result);
+		return $this->formatPrice(1000, $cur);
 	}
 
     /*
