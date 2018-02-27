@@ -218,14 +218,19 @@ span.renewal{
 }
 span.taken{
     color: #939598;
+    /*font-weight: 700;*/
+    /*text-transform: capitalize;*/
     /*max-height: 14px;*/
 }
-
+.first-line{
+    color: #939598;
+    font-weight: 700;
+    text-transform: capitalize;
+}
 span.taken.added{
     color: #00a850;
     /*max-height: 14px;*/
 }
-
 .second-line.price{
     display: block;
     /*max-height: 14px;*/
