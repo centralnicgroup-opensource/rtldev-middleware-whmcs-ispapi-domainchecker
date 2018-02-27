@@ -90,62 +90,83 @@ $( document ).ready(function() {
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
 					$( "#" + id).addClass(element.checkover);
                     // TULSI TODO: GO THROUGH EVERY ELEMENTS AND DISPLAY THE CORRECT DESIGN
-
-                    //create selectbox with the price
-                    if(element.registerprice || element.renewprice){
-                        var registerprice = '<span name="domainsregperiod['+element.id+']">';
-                        registerprice = registerprice + '<span class=" t period ">'+element.registerprice+'</span>';
-                        registerprice = registerprice + '</span>';
-
-                        var renewprice = '<span name="domainsregperiod['+element.id+']">';
-                        renewprice = renewprice + '<span class="renewal">Renewal: '+element.renewprice+'</span>';
-                        renewprice = renewprice + '</span>';
-
-                        var priceavailable = true;
-                    }else{
-                        var registerprice = "Pricing not found";
-                        var priceavailable = false;
+                    //prices of the domains
+                    var registerprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" t period ">'+element.registerprice+'</span>' + '</span>';
+                    var renewprice = '<span name="domainsregperiod['+element.id+']">'+ '<span class="renewal">Renewal: '+element.renewprice+'</span>'+ '</span>';
+                    //ALL THE DOMAINS IN THE CART
+                    var domainsInCart = [];
+                    if(element.cart){
+                        $.each(element.cart.domains, function(n, currentElem) {
+                            domainsInCart.push(currentElem.domain);
+                        });
                     }
-                    if(element.status == "available" && element.premiumtype == ""){
-                        $( "#" + id).find('span.t.domain-label').addClass('available');
-                        $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
-                        $( "#" + id + " div.availability").html("<span>{/literal}{$LANG.domaincheckeravailable}{literal}</span>").addClass("available");
-                        $("#" + id).find('div.second-line.price').html(registerprice);
-                        $("#" + id).find('div.second-line.renewalprice').html(renewprice);
+                    //IF THE DOMAIN IS PRESENT IN CART:
+                    if (domainsInCart.indexOf(element.id) > -1) { //TODO: an issue
+                            var test = $("#domainform input[id=orderbutton]");
+                            $("#domainform input[id=orderbutton]").removeClass('hide');
 
-                    }else if(element.status == "available" && element.premiumtype == "PREMIUM"){
-                        $( "#" + id).find('span.t.domain-label').addClass('available');
-                        $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
-                         $( "#" + id + " div.availability").html('<span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium " value="'+element.id+'"> - PREMIUM</span>');
-                        $("#" + id).find('div.second-line.price').html(registerprice);
-                        $("#" + id).find('div.second-line.renewalprice').html(renewprice);
+                            $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
+                            $( "#" + id).find('span.t.domain-label').addClass('available added');
+                            $("#" + id).find('div.second-line').html(registerprice);
+                            registerprice =  '<span class="period ">Added</span><br/>'+registerprice;
+                            $("#" + id).find('span').eq(8).html(registerprice);
+                            $( "#" + id).find('span.period').addClass('added');
+                            $("#" + id).find('div.search-result-price').addClass('details hide');
+                            $("#" + id).find('div.search-result-price').eq(1).removeClass('details hide');
+                    } else {
+                        //IF DOMAIN IS AVAILABLE => IT CAN BE PREMIUM OR NORMAL
+                        if(element.status == "available"){
+                            if(element.premiumtype == "") {
+                                    $( "#" + id).find('span.t.domain-label').addClass('available');
+                                    $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
+                                    $( "#" + id + " div.availability").html("<span>{/literal}{$LANG.domaincheckeravailable}{literal}</span>").addClass("available");
+                                    $("#" + id).find('div.second-line.price').eq(0).html(registerprice);
+                                    $("#" + id).find('div.second-line.renewalprice').html(renewprice);
+                                    //add ADDED to the hidden div
+                                    registerprice = '<span class="period added">Added</span><br/>'+registerprice;
+                                    $("#" + id).find('span.period.added').eq(0).html(registerprice);
+                                } else {
+                                    $( "#" + id).find('span.t.domain-label').addClass('available');
+                                    $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
+                                    $( "#" + id + " div.availability").html('<span class="available">{/literal}{$LANG.domaincheckeravailable}{literal}</span><span class="premium " value="'+element.id+'"> - '+element.premiumtype+'</span>');
+                                    $("#" + id).find('div.second-line.price').eq(0).html(registerprice);
+                                    $("#" + id).find('div.second-line.renewalprice').html(renewprice);
+                                    //add ADDED to the hidden div
+                                    registerprice = '<span class="period added">Added</span><br/>'+registerprice;
+                                    $("#" + id).find('span.period.added').eq(0).html(registerprice);
+                                }
+                            // IF DOMAIN IS TAKEN => BACKORDER MAYBE AVAILABLE
+                        }else if(element.status == "taken"){
+                            if(element.backorder_available == "1"){ //TODO : when backorder placed => check and design display
+                                // when backorder available, display More option
+                                $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder '> - BACKORDER</span>");
+                                var moreelement ='<div class="first-line click">'+
+                                                    '<span class="see-more">'+
+                                                        '<i class="more fa fa-caret-down" style="font-size: 14px;color: #939598;"></i>'+
+                                                    '</span>'+
+                                                    '<span class="taken more" style="font-size: 14px;color: #939598;"> More</span>'+
+                                                '</div>';
 
-                    }else if(element.status == "taken"){
-                        $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
-                        $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
+                                $("#" + id).find('div.second-line').eq(1).html(moreelement);
 
-                        // for taken => to display —
-                        // var spanelement = '<span style="font-size: 14px;color: #939598;font-weight:bold;">—</span>';
-                        // $("#" + id).find('div.second-line.price').html(spanelement);
-
-                        // or when backorder available, display More option
-                        var moreelement ='<div class="first-line click">'+
-                                            '<span class="see-more">'+
-                                                '<i class="more fa fa-caret-down" style="font-size: 14px;color: #939598;"></i>'+
-                                            '</span>'+
-                                            '<span class="taken more" style="font-size: 14px;color: #939598;"> More</span>'+
-                                        '</div>';
-
-                        $("#" + id).find('div.second-line').eq(1).html(moreelement);
-
-                        var moreinformation = '<div class="small-container">'+
-                                                '<small>'+
-                                                    '<span ></span><span>'+element.id+'</span>'+
-                                                    '<span > is registered</span>'+
-                                                '</small>'+
-                                            '</div>';
-                        $("#" + id).find('div.second-line').eq(2).addClass('details hide');
-                        $("#" + id).find('div.second-line').eq(2).html(moreinformation);
+                                var moreinformation = '<div class="small-container">'+
+                                                        '<small>'+
+                                                            '<span ></span><span>'+element.id+'</span>'+
+                                                            '<span > is registered</span>'+
+                                                        '</small>'+
+                                                    '</div>';
+                                $("#" + id).find('div.second-line').eq(2).addClass('details hide');
+                                $("#" + id).find('div.second-line').eq(2).html(moreinformation);
+                            } else {
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
+                                console.log("HERE");
+                                $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
+                                // for taken => to display —
+                                var spanelement = '<span style="font-size: 14px;color: #939598;font-weight:bold;">—</span>';
+                                $("#" + id).find('div.second-line.price').html(spanelement);
+                            }
+                        }
                     }
 				});
 
