@@ -440,6 +440,9 @@ class DomainCheck
 				$class = $check["PROPERTY"]["CLASS"][$index];
 				$premiumchannel = $check["PROPERTY"]["PREMIUMCHANNEL"][$index];
 				$status="";
+				$premiumtype="";
+				$register_price = "";
+				$renew_price = "";
 
 				if(preg_match('/549/', $check["PROPERTY"]["DOMAINCHECK"][$index])){
 					//TLD NOT SUPPORTED AT HEXONET USE A FALLBACK TO THE WHOIS LOOKUP.
@@ -450,7 +453,8 @@ class DomainCheck
 					$whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
 	    			$register_price = $whmcspricearray["domainregister"][1];
 				 	$renew_price = $whmcspricearray["domainrenew"][1];
-					$status="available";
+					//TODO ANTHONY if no prices set, then display taken.
+					$status = "available";
 				}elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index]) || !empty($check["PROPERTY"]["CLASS"][$index])){ //IT IS A PREMIUMDOMAIN
 					//IF PREMIUM DOMAIN ENABLED IN WHMCS - DISPLAY AVAILABLE + PRICE
 					if($premiumEnabled){
@@ -463,20 +467,27 @@ class DomainCheck
 						$registrarpriceCurrency = $check["PROPERTY"]["CURRENCY"][$index];
 
 						$register_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
-
 						$renew_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency); //$this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
 
-						$status="available";
+						$premiumtype = $check["PROPERTY"]["PREMIUMCHANNEL"][$index]; //TODO ANTHONY only display premium
+						//TODO ANTHONY if no prices set, then display taken.
+						$status = "available";
 					}else{
 						//PREMIUM DOMAIN NOT ENABLED IN WHMCS -> DISPLAY THE DOMAIN AS TAKEN
-						$status="taken";
+						$status = "taken";
 					}
 				}else{
 					//DOMAIN TAKEN
-					$status="taken";
+					$status = "taken";
 
 					//TODO: add flag is we need to display backorder button, and also backorder status.
+				}
 
+				//if one of the prices is not set, then display the domain as taken
+				if(empty($register_price) || empty($renew_price)){
+					$status = "taken";
+					$register_price = "";
+					$renew_price = "";
 				}
 
     			// $price = array();
@@ -540,7 +551,7 @@ class DomainCheck
 											"availability" => $availability,
 											"class" => $class,
 											"premiumchannel" => $premiumchannel,
-											"premiumtype" => "PREMIUM",
+											"premiumtype" => $premiumtype,
 											"registerprice" => $register_price,
 											"renewprice" => $renew_price,
 											"status" => $status,
@@ -595,6 +606,12 @@ class DomainCheck
 				$status = "taken";
     		}
 
+			if(empty($register_price) || empty($renew_price)){
+				$status = "taken";
+				$register_price = "";
+				$renew_price = "";
+			}
+
 			array_push($response, array("id" => $item,
 										"checkover" => "whois",
 										"code" => $code,
@@ -611,7 +628,7 @@ class DomainCheck
     	}
 
 		//Handle the displaying of the backorder button in the search response TODO: rewrite that
-		//$response = $this->handleBackorderButton($response);
+		$response = $this->handleBackorderButton($response);
 
     	$response_array = array("data" => $response, "feedback" => $feedback);
 
@@ -643,14 +660,20 @@ class DomainCheck
 		//Iterate all responses and add the backorder information
 		foreach($response as $item){
 			$tmp = $item;
-			$tmp["backorder_installed"] = $tmp["backorder_available"] = $tmp["backordered"] = 0;
+			$tmp["backorder_available"] = $tmp["backordered"] = 0;
 			if($item["code"]==211){
 				//In this case, backorder module is installed so, set to 1
-				$tmp["backorder_installed"] = 1;
+				//$tmp["backorder_installed"] = 1;
 				//Check if pricing set for this TLD
 				$tmp["backorder_available"] = (preg_match('/^([a-z0-9](\-*[a-z0-9])*)\\'.$tld_list.'$/i', $item["id"])) ? 1 : 0;
 				//Check if backorder set in the backorder module
 				$tmp["backordered"] = (in_array($item["id"], $ownbackorders["PROPERTY"]["DOMAIN"])) ? 1 : 0;
+
+				//TODO ANTHONY rewrite this section
+				if($tmp["backorder_available"]){
+					$tmp["backorderprice"] = $this->getBackorderprice($item["id"]);
+				}
+
 			}
 			$newresponse[] = $tmp;
 		}
@@ -692,6 +715,12 @@ class DomainCheck
 		return $domainprices;
 	}
 
+	private function getBackorderprice($domain) {
+		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
+		$cur = mysql_fetch_array($result);
+		return $this->formatPrice(100,$cur);
+	}
+
 	/*
      * Returns the price for a premiumdomain registration. (This function adds the markup)
      *
@@ -701,15 +730,49 @@ class DomainCheck
      *
      */
 	private function getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency) {
+		//get the markup from the WHMCS backend and add it to the registrar price
+		$markupToAdd = Premium::markupForCost($registrarprice, $registrarpriceCurrency);
+		$markupedprice = $registrarprice + ($registrarprice * $markupToAdd / 100);
 
-		// //get the markup from the WHMCS backend
-		// $markupToAdd = Premium::markupForCost($registrarprice, $registrarpriceCurrency);
-		//
-		// $register_price = $registrarprice + ($registrarprice * $markupToAdd / 100);
-		//TODO ANTHONY
+		//get the selected currency
 		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
-		$cur = mysql_fetch_array($result);
-		return $this->formatPrice(1000, $cur);
+		$selected_currency_array = mysql_fetch_array($result);
+		$selected_currency_code = $selected_currency_array["code"];
+
+		//check if the domain currency is available in WHMCS
+		$result = select_query("tblcurrencies","*",array("code" => strtoupper($registrarpriceCurrency)),"","","1");
+		$domain_currency_array = mysql_fetch_array($result);
+		if($domain_currency_array){
+			//In this case we can calculate the price
+			$domain_currency_code = $domain_currency_array["code"];
+			if($selected_currency_code == $domain_currency_code){
+				return $this->formatPrice($markupedprice, $selected_currency_array);
+			}else{
+				if($domain_currency_array["default"] == 1){
+					//then it should be easy to convert the price in the selected currency.
+					$convertedprice = $markupedprice * $selected_currency_array["rate"];
+					return $this->formatPrice($convertedprice, $selected_currency_array);
+					//TODO Anthony (julie.club) we are getting rounding problems, not exactly the same price than with the standard domain checker.
+				}else{
+					//we need to convert the price in the default currency and then convert in the selected currency
+
+					//$price_default_currency = $markupedprice * $domain_currency_array["rate"];
+
+
+
+
+					// $result = select_query("tblcurrencies","*",array("default" => "1","","","1");
+					// $default_currency_array = mysql_fetch_array($result);
+					// if($default_currency){
+					// 	$price_default_currency = $markupedprice * $domain_currency_array["rate"];
+					// }
+
+
+					//TODO anthony
+					return $this->formatPrice($markupedprice, $selected_currency_array);
+				}
+			}
+		}
 	}
 
     /*
@@ -772,6 +835,9 @@ class DomainCheck
 	 *
 	 */
 	private function formatPrice($number, $cur) {
+		//$number = round($number, 3, PHP_ROUND_HALF_UP);
+		//mail("anthonys@hexonet.net", "formatprice2", $number );
+
 		if ($number <= 0){
 			return -1;
 		}
