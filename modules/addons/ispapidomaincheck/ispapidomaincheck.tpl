@@ -67,6 +67,14 @@ $( document ).ready(function() {
         $("#searchbutton").trigger("click");
 	})
 
+    //handle the feedback message for a searched domain
+    function handleFeedbackMessage(data){
+        if(data.feedback.type){
+            console.log(data.feedback);
+            //TODO Tulsi :)
+        }
+    }
+
     //MAIN FUNCTION: handle the availability checks
 	function checkdomains(domains, cached_data){
 		var currency = "&currency={/literal}{$currency}{literal}" ;
@@ -86,6 +94,10 @@ $( document ).ready(function() {
 			data: params + cache + currency + domainlist,
 			dataType:'json',
 			success: function(data, textStatus, jqXHR) {
+
+                //handle the feedback message
+                handleFeedbackMessage(data);
+
 				$.each(data["data"], function(index, element) {
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
 					$( "#" + id).addClass(element.checkover);
@@ -292,22 +304,8 @@ $( document ).ready(function() {
 				$("#resultsarea").show();
 				$('#searchresults').find("div").remove();
 
-                //handle the feedback message, required here???TODO
-                //here we need to display the response of the searched domain TODO
-				// if(data["feedback"]){
-				// 	if(data["feedback"]["status"] == true){
-				// 		$("#successarea").html(data["feedback"]["message"]);
-				// 		$("#successarea").show();
-				// 	}
-				// 	if(data["feedback"]["status"] == false){
-				// 		$("#errorsarea").html(data["feedback"]["message"]);
-				// 		$("#errorsarea").show();
-				// 		$("#resultsarea").hide();
-				// 		return;
-				// 	}
-				// }
-
-                // TODO: TULSI HERE CREATE A BOX LIKE IN HEXONET.DOMAINS
+                //handle the feedback message
+                handleFeedbackMessage(data);
 
 				var nb_results = 0;
 				$.each(data["data"], function(index, element) {
