@@ -494,6 +494,8 @@ $( document ).ready(function() {
     <script src="../modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
 {/if}
 
+
+
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
 <form method="post" action="index.php?m=ispapicheckdomain" id="searchform" class="search-form">

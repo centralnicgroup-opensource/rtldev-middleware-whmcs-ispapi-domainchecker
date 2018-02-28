@@ -455,7 +455,7 @@ class DomainCheck
 				 	$renew_price = $whmcspricearray["domainrenew"][1];
 					//TODO ANTHONY if no prices set, then display taken.
 					$status = "available";
-				}elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index]) || !empty($check["PROPERTY"]["CLASS"][$index])){ //IT IS A PREMIUMDOMAIN
+				}elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index])){ //IT IS A PREMIUMDOMAIN // || !empty($check["PROPERTY"]["CLASS"][$index])
 					//IF PREMIUM DOMAIN ENABLED IN WHMCS - DISPLAY AVAILABLE + PRICE
 					if($premiumEnabled){
 						//PREMIUMDOMAIN ENABLED IN WHMCS
@@ -469,7 +469,11 @@ class DomainCheck
 						$register_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
 						$renew_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency); //$this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
 
-						$premiumtype = $check["PROPERTY"]["PREMIUMCHANNEL"][$index]; //TODO ANTHONY only display premium
+						$premiumtype = $check["PROPERTY"]["PREMIUMCHANNEL"][$index]; //TODO ANTHONY only display premium rewrite part
+						if($premiumtype != "SEDO" && $premiumtype != "AFTERNIC"){
+							$premiumtype = "PREMIUM";
+						}
+
 						//TODO ANTHONY if no prices set, then display taken.
 						$status = "available";
 					}else{
