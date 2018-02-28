@@ -66,12 +66,11 @@ class DomainCheck
      *  @param string $action The action
      *  @param array $registrar The configured registrar (can be more than one)
      */
-    public function __construct($domain, $tldgroup, $action, $registrar, $adminuser){
+    public function __construct($domain, $tldgroup, $action, $registrar){
     	$this->domain = $domain;
 		$this->tldgroup = $tldgroup;
 		$this->action = $action;
 		$this->registrar = $registrar;
-		$this->adminuser = $adminuser;
 
 		$this->doDomainCheck();
     }
@@ -170,7 +169,7 @@ class DomainCheck
     	$searched_label = $this->getDomainLabel($this->domain);
 		$searched_tld = $this->getDomainExtension($this->domain);
 
-		//select the  mode: REGULAR or SUGGESTIONS
+		//SUGGESTIONS MODE
 		if( $this->domainSuggestionModeActivated() ){
 
 			//TODO: check for third level domains and skip them is needed? why?
@@ -180,27 +179,27 @@ class DomainCheck
 				"ZONE" => $tldgroups,
 				"SOURCE" => "ISPAPI-SUGGESTIONS",
 			);
-			//echo "<pre>"; print_r($tldgroups); echo "</pre>";
+
 			$registrarconfigoptions = getregistrarconfigoptions($_SESSION['ispapi_registrar'][0]);
 			$ispapi_config = ispapi_config($registrarconfigoptions);
 			$suggestions = ispapi_call($command, $ispapi_config);
 
-			//echo "<pre>"; print_r($suggestions); echo "</pre>";
 			array_push($suggestiondomainlist, $suggestions['PROPERTY']['DOMAIN']);
 			$domainlist = $suggestiondomainlist[0];
 
 			#TODO: check if we need to add the TLDs which we are not supporting at hexonet to the list also...
-
-		}else{
-				foreach($tldgroups as $tld){
-					//add the domain in the list if the searched TLD isn't in the TLD group
-					//If the searched TLD is in the TLD group, this will be put at the first place of the list later
-					if($tld != $searched_tld){
-						if( (in_array(".".$tld, $domains["ispapi"]) || in_array(".".$tld, $domains["no_ispapi"])) && !in_array($searched_label.".".$tld, $domainlist) ){
-							array_push($domainlist, $searched_label.".".$tld);
-						}
+		}
+		//REGULAR MODE
+		else{
+			foreach($tldgroups as $tld){
+				//add the domain in the list if the searched TLD isn't in the TLD group
+				//If the searched TLD is in the TLD group, this will be put at the first place of the list later
+				if($tld != $searched_tld){
+					if( (in_array(".".$tld, $domains["ispapi"]) || in_array(".".$tld, $domains["no_ispapi"])) && !in_array($searched_label.".".$tld, $domainlist) ){
+						array_push($domainlist, $searched_label.".".$tld);
 					}
 				}
+			}
 		}
 
 		//check if the searched keyword contains an configured TLD
@@ -255,7 +254,6 @@ class DomainCheck
     	$ispapi_domain_list = array();
     	$no_ispapi_domain_list = array();
 
-
     	foreach($_SESSION["domainlist"] as $item){
     		$tld = $this->getDomainExtension($item);
     		if( in_array(".".$tld, $domains["ispapi"]) ){
@@ -268,8 +266,6 @@ class DomainCheck
     	$sortedDomainlist = array();
     	$sortedDomainlist = array_merge($ispapi_domain_list,$no_ispapi_domain_list);
     	$response_array = array("data" => $sortedDomainlist);
-
-		//echo "<pre>"; print_r($sortedDomainlist); echo "</pre>";
 
     	$this->response = json_encode($response_array);
     }
@@ -391,12 +387,17 @@ class DomainCheck
 
     	//for ispapi_domain_list (domains that use our registrar module)
     	$extendeddomainlist = $this->getExtendedDomainlist($ispapi_domain_list);
-		// print_r($extendeddomainlist);
-    	$showpremium = false;
 
+		//check if premium domains are activated in WHMCS
+		$premiumEnabled = false;
 
-		#TODO: check if premium domains are activated in WHMCS.
-		$premiumEnabled = true;
+		$pdo = Capsule::connection()->getPdo();
+		$stmt = $pdo->prepare("select * from tblconfiguration where setting='PremiumDomains'");
+		$stmt->execute();
+		$premiumdomains = $stmt->fetch(PDO::FETCH_ASSOC);
+		if($premiumdomains["value"] == 1){
+			$premiumEnabled = true;
+		}
 
     	$response = array();
     	foreach($extendeddomainlist as $item){
@@ -412,9 +413,6 @@ class DomainCheck
     		$registrarconfigoptions = getregistrarconfigoptions($item["registrar"]);
     		$ispapi_config = ispapi_config($registrarconfigoptions);
     		$check = ispapi_call($command, $ispapi_config);
-
-			//echo "<pre>"; print_r($check); echo "</pre>";
-
 
     		$index = 0;
     		foreach($item["domain"] as $item){
@@ -432,17 +430,18 @@ class DomainCheck
 					//TLD NOT SUPPORTED AT HEXONET USE A FALLBACK TO THE WHOIS LOOKUP.
 					//Add the domain to the $no_ispapi_domain_list so it will be automatically checked by the WHOIS LOOKUP in the next step.
 					array_push($no_ispapi_domain_list, $item);
-				}elseif(preg_match('/210/', $check["PROPERTY"]["DOMAINCHECK"][$index])){
+				}
+				elseif(preg_match('/210/', $check["PROPERTY"]["DOMAINCHECK"][$index])){
 					//DOMAIN AVAILABLE
 					$whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
 	    			$register_price = $whmcspricearray["domainregister"][1];
 				 	$renew_price = $whmcspricearray["domainrenew"][1];
 					//TODO ANTHONY if no prices set, then display taken.
 					$status = "available";
-				}elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index])){ //IT IS A PREMIUMDOMAIN // || !empty($check["PROPERTY"]["CLASS"][$index])
-					//IF PREMIUM DOMAIN ENABLED IN WHMCS - DISPLAY AVAILABLE + PRICE
+				}
+				elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index])){ //IT IS A PREMIUMDOMAIN // || !empty($check["PROPERTY"]["CLASS"][$index])
 					if($premiumEnabled){
-						//PREMIUMDOMAIN ENABLED IN WHMCS
+						//IF PREMIUM DOMAIN ENABLED IN WHMCS - DISPLAY AVAILABLE + PRICE
 
 						//TODO: GET THE PRICE FROM AFTERMARKET DOMAIN AND ADD MARGIN
 						//TODO: GET THE PRICE FROM PRICECLASS AND ADD MARGIN
@@ -464,74 +463,18 @@ class DomainCheck
 						//PREMIUM DOMAIN NOT ENABLED IN WHMCS -> DISPLAY THE DOMAIN AS TAKEN
 						$status = "taken";
 					}
-				}else{
+				}
+				else{
 					//DOMAIN TAKEN
 					$status = "taken";
-
-					//TODO: add flag is we need to display backorder button, and also backorder status.
 				}
 
-				//if one of the prices is not set, then display the domain as taken
+				//for security reasons, if one of the prices is not set, then display the domain as taken
 				if(empty($register_price) || empty($renew_price)){
 					$status = "taken";
 					$register_price = "";
 					$renew_price = "";
 				}
-
-    			// $price = array();
-    			// if($tmp[0] == "210"){
-    			// 	//get the price for this domain
-    			// 	$tld = $this->getDomainExtension($item);
-    			// 	$price = $this->getTLDprice($tld);
-				//
-    			// }else{
-				//
-    			// 	if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
-    			// 			//get the NAMEMEDIA price
-    			// 			$p = $this->getConvertedPrice($check["PROPERTY"]["PRICE"][$index], $_SESSION["currency"]);
-    			// 			$price["domainregister"][1] = $p;
-    			// 			//override class
-    			// 			$check["PROPERTY"]["CLASS"][$index] = "PREMIUM_NAMEMEDIA";
-				// 	}else{
-				//
-				// 		if(isset($check["PROPERTY"]["CLASS"][$index]) && !empty($check["PROPERTY"]["CLASS"][$index])) {
-				// 			//get the premium price
-				// 			$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
-				// 			$cur = mysql_fetch_array($result);
-				//
-				// 			$command = array(
-				// 					"COMMAND" => "checkDomains",
-				// 					"DOMAIN0" => $item,
-				// 					"PREMIUMCHANNELS" => $premiumchannels
-				// 			);
-				//
-				// 			$premiumdomainprice = ispapi_call($command, $ispapi_config);
-				//
-				// 			if(isset($premiumdomainprice["PROPERTY"]["PRICE"]) && !empty($premiumdomainprice["PROPERTY"]["PRICE"])){
-				// 				$renewalprice = $this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
-				//
-				// 				$pricet = $premiumdomainprice["PROPERTY"]["PRICE"][0];
-				// 				if((!empty($pricet)) && ($pricet != 0) && ($pricet != -1)){
-				// 					$pricet = $this->formatPrice($pricet, $cur);
-				// 					$renewalprice = $this->formatPrice($renewalprice, $cur);
-				// 				}else{
-				// 					$renewalprice = -1;
-				// 					$pricet = -1;
-				// 				}
-				// 				$price["domainregister"][1] = $pricet;
-				// 				$price["domainrenew"][1] = $renewalprice;
-				//
-				// 			}
-				// 			// else{
-				// 			// 	$price = $this->getPremiumClassPrice($check["PROPERTY"]["CLASS"][$index], $item);
-				// 			// }
-				// 		}
-				// 	}
-    			// }
-				// //if no price configured or price = 0 display as taken...
-    			// if($price["domainregister"][1] == -1){
-    			// 	$price = "";
-    			// }
 
     			array_push($response, array("id" => $item,
 											"checkover" => "api",
@@ -547,9 +490,6 @@ class DomainCheck
 
     			$index++;
     		}
-
-			//echo "<pre>"; print_r($response); echo "</pre>";
-
     	}
 
     	//for no_ispapi_domain_list (domains that don't use our registrar module)
@@ -561,7 +501,7 @@ class DomainCheck
 			$command = "domainwhois";
 		    $values["domain"] = $label.".".$tld;
 
-		    $check = localAPI($command,$values, $this->adminuser); 	//$check = "";//lookupDomain($label, ".".$tld);
+		    $check = localAPI($command,$values); 	//$check = "";//lookupDomain($label, ".".$tld);
     		if($check["status"] == "available"){
     			$code = "210";
 	    		//get the price for this domain
@@ -606,7 +546,6 @@ class DomainCheck
 				continue;
 			}
 		}
-
 		if(isset($_SESSION["domain"]) && $_SESSION["domain"] == $searched_domain_object["id"]){
 			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
 				$feedback = array("type" => "backorder", "message" => "Backorder Available!");
@@ -624,6 +563,9 @@ class DomainCheck
     	$this->response = json_encode($response_array);
     }
 
+	/*
+     * Add the backorder functionality ẃhen module installed.
+     */
 	private function handleBackorderButton($response){
 		//Check if backorder module is installed
 		$backorder_mod_installed = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
@@ -764,54 +706,6 @@ class DomainCheck
 		}
 	}
 
-    /*
-     * Returns the price for a given class
-     * If class not found, returns the registry price
-     *
-     * @param string $class The priceclass
-     * @param string $domain The domain
-     * @return $price The formated price
-     *
-     */
-	private function getPremiumClassPrice($class, $domain) {
-
-		// $_SESSION["currency"] is 1  (USD)
-
-		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
-		$cur = mysql_fetch_array($result);
-
-		$price = "";
-		$sql = "SELECT
-					pp.annually
-				FROM
-					tblpricing pp, tblproducts p
-				WHERE
-					p.name = '".$class."'
-				AND
-					p.id = pp.relid
-				AND
-					pp.tsetupfee = 0
-				AND
-					pp.type = 'product'
-				AND
-					pp.currency = ".$_SESSION["currency"]."
-				LIMIT 1";
-
-		$result = mysql_query($sql);
-		$data = mysql_fetch_array($result);
-
-		$price = $data["annually"];
-
-		if((!empty($price)) && ($price != 0) && ($price != -1)){
-			$price = $this->formatPrice($price,$cur);
-		}else{
-			$price = -1;
-		}
-
-		$domainprices["domainregister"][1] = $price;
-
-		return $domainprices;
-	}
 
 	/*
 	 * Returns the formated price
@@ -868,7 +762,7 @@ class DomainCheck
     	$whmcsdomainlist["extension"] = array();
     	$whmcsdomainlist["autoreg"] = array();
 
-    	//create an array with each extension and his autoreg (the configured resgistrar for this extension)
+    	//create an array with extension and autoreg (autoreg = the configured resgistrar for this extension)
     	$result = select_query("tbldomainpricing","extension,autoreg");
     	while ($data = mysql_fetch_array($result)) {
     		if(!empty($data["autoreg"])){
@@ -887,7 +781,6 @@ class DomainCheck
     											   "extension" => $whmcsdomainlist["extension"][$index],
     											   "autoreg" => $whmcsdomainlist["autoreg"][$index]));
     	}
-    	//$_SESSION["ispapi_registrar_object"] = $ispapiobject[$registrar];
 
     	//reorganize the information
     	$newlist = array();
@@ -908,52 +801,36 @@ class DomainCheck
      * @return array An array with all TLDs of the current group.
      */
 	 private function getTLDGroups(){
-		try{
-			$this->tldgroup = explode(',', $this->tldgroup);
-			$data["tlds"] = [];
-			$data2 = [];
-			$pdo = Capsule::connection()->getPdo();
-			foreach ($this->tldgroup as $key => $id) {
-				$stmt = $pdo->prepare("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id=?");
-				$stmt->execute(array($id));
-				$result = $stmt->fetch(PDO::FETCH_ASSOC);
-				array_push($data2, $result["tlds"]);
-			}
-			$data3 = [];
-			foreach ($data2 as $key => $value) {
-				array_push($data3, explode(' ', $value));
-			}
-			foreach ($data3 as $key => $value) {
-				foreach ($value as $ky => $tld) {
-					if(in_array($tld, $data["tlds"])){
+		$this->tldgroup = explode(',', $this->tldgroup);
+		$data["tlds"] = [];
+		$data2 = [];
+		$pdo = Capsule::connection()->getPdo();
+		foreach ($this->tldgroup as $key => $id) {
+			$stmt = $pdo->prepare("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id=?");
+			$stmt->execute(array($id));
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			array_push($data2, $result["tlds"]);
+		}
+		$data3 = [];
+		foreach ($data2 as $key => $value) {
+			array_push($data3, explode(' ', $value));
+		}
+		foreach ($data3 as $key => $value) {
+			foreach ($value as $ky => $tld) {
+				if(in_array($tld, $data["tlds"])){
 
-					}else{
-						array_push($data["tlds"], $tld);
-					}
+				}else{
+					array_push($data["tlds"], $tld);
 				}
 			}
-
-			if(isset($data["tlds"])){
-				return $data["tlds"];
-			}else{
-				array();
-			}
-
-		} catch (Exception $e) {
-			die($e->getMessage());
 		}
 
+		if(isset($data["tlds"])){
+			return $data["tlds"];
+		}else{
+			array();
+		}
 	}
-
-    // private function getTLDGroups(){
-    // 	$result = select_query("ispapi_tblcategories","id,name,tlds", array("id"=>$this->tldgroup));
-    // 	$data = mysql_fetch_array($result);
-	// 	if(isset($data["tlds"])){
-	// 		return explode(" ", $data["tlds"]);
-	// 	}else{
-	// 		array();
-	// 	}
-    // }
 
     /*
      * Convert the domain into an IDN code
@@ -966,19 +843,15 @@ class DomainCheck
     	$registrarconfigoptions = getregistrarconfigoptions($registrar);
     	$ispapi_config = ispapi_config($registrarconfigoptions);
 
+		$command = array(
+				"COMMAND" => "convertIDN",
+				"DOMAIN" => $domain
+		);
+		$response = ispapi_call($command, $ispapi_config);
+
 		if(!is_array($domain)){
-	    	$command = array(
-	    			"COMMAND" => "convertIDN",
-	    			"DOMAIN" => $domain
-	    	);
-	    	$response = ispapi_call($command, $ispapi_config);
 	    	return $response["PROPERTY"]["ACE"][0];
 		}else{
-			$command = array(
-					"COMMAND" => "convertIDN",
-					"DOMAIN" => $domain
-			);
-			$response = ispapi_call($command, $ispapi_config);
 			return $response["PROPERTY"]["ACE"];
 		}
     }
@@ -1017,10 +890,10 @@ class DomainCheck
     }
 }
 
-/*new*/
+
 $action = (isset($_REQUEST["action"])) ? $_REQUEST["action"] : "";
 
-//Problem with sessions handling...
+
 //Currency session will be send on the first ajax call
 if(isset($_REQUEST["currency"])){
 	$_SESSION["currency"] = $_REQUEST["currency"];
@@ -1040,10 +913,7 @@ if(isset($_REQUEST["currency"])){
 $domaincheck = new DomainCheck( $_REQUEST["domain"],
 								$_REQUEST["tldgroup"],
 								$action,
-								$_SESSION["ispapi_registrar"],
-								$_SESSION["adminuser"]);
-
+								$_SESSION["ispapi_registrar"]);
 $domaincheck->send();
-/*new*/
 
 ?>
