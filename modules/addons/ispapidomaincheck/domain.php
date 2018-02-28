@@ -42,10 +42,6 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 }
 //###########################################################################################
 
-//DEBUGGING TOOL
-//$f = FirePHP::getInstance(true);
-//$f->fb("debug");
-
 
 /**
  * PHP Class for the WHMCS checkdomain feature
@@ -122,6 +118,16 @@ class DomainCheck
     	return $domains;
     }
 
+	/*
+     * Helper to delete an element from an array.
+     */
+	private function deleteElement($element, &$array){
+	    $index = array_search($element, $array);
+	    if($index !== false){
+	        unset($array[$index]);
+	    }
+	}
+
     /*
      * Returns a combination of all domains of the current group and all domains configured in WHMCS
      * If a domain isn't configured in WHMCS and is in the current group, this won't be displayed.
@@ -162,9 +168,9 @@ class DomainCheck
     	$domains = $this->sortTLDs();
     	$tldgroups = $this->getTLDGroups();
     	$searched_label = $this->getDomainLabel($this->domain);
+		$searched_tld = $this->getDomainExtension($this->domain);
 
-
-		//select the right mode: regular or suggestions
+		//select the  mode: REGULAR or SUGGESTIONS
 		if( $this->domainSuggestionModeActivated() ){
 
 			//TODO: check for third level domains and skip them is needed? why?
@@ -183,10 +189,9 @@ class DomainCheck
 			array_push($suggestiondomainlist, $suggestions['PROPERTY']['DOMAIN']);
 			$domainlist = $suggestiondomainlist[0];
 
-			#TODO: check if we need to add the TLDs which we are not supported at hexonet to the list also...
+			#TODO: check if we need to add the TLDs which we are not supporting at hexonet to the list also...
 
 		}else{
-				$searched_tld = $this->getDomainExtension($this->domain);
 				foreach($tldgroups as $tld){
 					//add the domain in the list if the searched TLD isn't in the TLD group
 					//If the searched TLD is in the TLD group, this will be put at the first place of the list later
@@ -198,54 +203,45 @@ class DomainCheck
 				}
 		}
 
-
-
-    	//if searched domain contains " " -> show message
-    	if (preg_match('/\s/',$this->domain) || strlen($searched_label) > 63){
-    		$feedback = array("status" => false, "message" => "The domain you entered is not valid !");
-    		$do_not_search = true;
-    	}else{
-    		//check if the searched keyword contains an configured TLD
-    		//example: thebestshop -> thebest.shop should be at the top
-    		$result = select_query("tbldomainpricing","extension");
-    		while($data = mysql_fetch_array($result)){
-    			$tld = substr($data["extension"],1);
-    			if (preg_match('/'.$tld.'$/i', $searched_label)) {
-    				$tmp = explode($tld, $searched_label);
-    				$thedomain = $tmp[0].".".$tld;
-    				//add to the domain list if not empty
-    				if(!empty($tmp[0]))
-    					$domainlist = array_merge(array($thedomain), $domainlist);
-    			}
-    		}
-
-    		//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
-    		$result = select_query("tbldomainpricing","autoreg",array("extension"=>".".$searched_tld));
-    		$data = mysql_fetch_array($result);
-    		if(!empty($data)){
-    			if(!in_array($this->domain, $domainlist))
-    				$domainlist = array_merge(array($this->domain), $domainlist);
-    		}else{
-    			//if $searched_tld not empty display the message
-    			if(!empty($searched_tld)){
-    				$feedback = array("status" => false, "message" => "Sorry, the extension <b>.$searched_tld</b> is not supported !");
-    			}
-   			}
-   		}
-
-    	//if error -> delete de list
-    	if($do_not_search){
-    		$domainlist = array();
-    	}
-		$response_array = array("data" => $domainlist, "feedback" => $feedback);
-		//save the list in the session for the premium domains.
-		$_SESSION["domainlist"] = $domainlist;
-
-    	$this->response = json_encode($response_array);
+		//check if the searched keyword contains an configured TLD
+		//example: thebestshop -> thebest.shop should be at the top
+		$result = select_query("tbldomainpricing","extension");
+		while($data = mysql_fetch_array($result)){
+			$tld = substr($data["extension"],1);
+			if (preg_match('/'.$tld.'$/i', $searched_label)) {
+				$tmp = explode($tld, $searched_label);
+				$thedomain = $tmp[0].".".$tld;
+				//add to the domain list if not empty
+				if(!empty($tmp[0]))
+					$domainlist = array_merge(array($thedomain), $domainlist);
+			}
+		}
 
 		//THIS NEED TO BE REFACTORED. getDomainList AND getSortedDomainList needs to be merged together.
 		//This is saving us 1 ajax call in the frontend.
 		$this->getSortedDomainList();
+
+
+		//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
+		$result = select_query("tbldomainpricing","autoreg",array("extension"=>".".$searched_tld));
+		$data = mysql_fetch_array($result);
+		if(!empty($data)){
+			$this->deleteElement($this->domain, $domainlist);
+			array_unshift($domainlist, $this->domain);
+		}else{
+			//if $searched_tld not empty display the message
+			if(!empty($searched_tld)){
+				$feedback = array("type" => "error", "message" => "Extension .$searched_tld not supported !");
+			}
+		}
+
+
+		$response_array = array("data" => $domainlist, "feedback" => $feedback);
+
+		//save the list in the session for the premium domains. TODO check if still required...
+		$_SESSION["domainlist"] = $domainlist;
+
+    	$this->response = json_encode($response_array);
     }
 
     /*
@@ -398,15 +394,6 @@ class DomainCheck
 		// print_r($extendeddomainlist);
     	$showpremium = false;
 
-		// $result = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
-    	// $data = mysql_fetch_array($result);
-    	// if(isset($data) && $data["registry_premium"] == 0 && $data["aftermarket_premium"] == 1 ){
-    	// 	$premiumchannels = "NAMEMEDIA";
-    	// }elseif(isset($data) && $data["registry_premium"] == 1 ){
-    	// 	$premiumchannels = "*";
-    	// }else{
-    	// 	$premiumchannels = "";
-    	// }
 
 		#TODO: check if premium domains are activated in WHMCS.
 		$premiumEnabled = true;
@@ -415,9 +402,6 @@ class DomainCheck
     	foreach($extendeddomainlist as $item){
     		//IDN convert before sending to checkdomain
     		$converted_domains = $this->convertIDN($item["domain"], $item["registrar"]);
-			// echo "HERE\n";
-			// print_r($converted_domains);
-			// echo "HERE2\n";
 
     		$command = array(
     				"COMMAND" => "checkDomains",
@@ -561,26 +545,6 @@ class DomainCheck
 											"status" => $status,
 											"cart" => $_SESSION["cart"]));
 
-    			// // Feedback for the template TODO: use that to display a box with information like in hexonet.domains
-
-    			// if(isset($_SESSION["domain"]) && $_SESSION["domain"]==$item){
-    			// 	if(preg_match('/210/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
-    			// 		$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available!");
-    			// 	}elseif(preg_match('/211 Premium/',$check["PROPERTY"]["DOMAINCHECK"][$index]) && !empty($price)){
-    			// 		$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available for registration as a premium-domain!");
-    			// 	}elseif(preg_match('/541/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
-    			// 		$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is an invalid domain name!");
-    			// 	}elseif(preg_match('/549/',$check["PROPERTY"]["DOMAINCHECK"][$index])){
-    			// 		$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is not supported!");
-    			// 	}else{
-    			// 		if($check["PROPERTY"]["PREMIUMCHANNEL"][$index] == "NAMEMEDIA" && $showAftermarketPremium){
-    			// 			$feedback = array("status" => true, "message" => "Congratulations! <b>$item</b> is available for registration as a premium-domain!");
-    			// 		}else{
-    			// 			$feedback = array("status" => false, "message" => "Sorry! <b>$item</b> is already taken!");
-    			// 		}
-    			// 	}
-    			// }
-
     			$index++;
     		}
 
@@ -634,7 +598,28 @@ class DomainCheck
 		//Handle the displaying of the backorder button in the search response TODO: rewrite that
 		$response = $this->handleBackorderButton($response);
 
+		// Feedback for the template
+		$searched_domain_object = array();
+		foreach($response as $item){
+			if($item["id"] == $_SESSION["domain"]){
+				$searched_domain_object = $item;
+				continue;
+			}
+		}
+
+		if(isset($_SESSION["domain"]) && $_SESSION["domain"] == $searched_domain_object["id"]){
+			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
+				$feedback = array("type" => "backorder", "message" => "Backorder Available!");
+			}
+			elseif($searched_domain_object["status"] == "taken"){
+				$feedback = array("type" => "taken", "message" => "Domain already taken!");
+			}
+			elseif($searched_domain_object["status"] == "available"){
+				$feedback = array("type" => "available", "message" => "Your domain is available!");
+			}
+		}
     	$response_array = array("data" => $response, "feedback" => $feedback);
+
 
     	$this->response = json_encode($response_array);
     }
