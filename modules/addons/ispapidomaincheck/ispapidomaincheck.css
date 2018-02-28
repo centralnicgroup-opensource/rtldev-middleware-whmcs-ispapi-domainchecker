@@ -249,7 +249,7 @@ span.spanelement{
 }
 
 .search-result-price {
-    text-align: right;
+    text-align: right; !important;
     margin-bottom: 30px;
 }
 
@@ -257,7 +257,25 @@ span.spanelement{
     font-weight: bold;
     color: #00a850; !important;
 }
-
+/*feb 28th*/
+/*.small-container {
+    margin-right: 29.5px;
+}
+.details-note{
+    color: blue;
+}*/
+/*.search-result-details .small-container .details-note {
+  list-style-type: disc;
+  list-style-position: inside;
+  text-indent: -1em;
+  padding-left: 1em;
+  color: blue;
+}
+.search-result-details .small-container {
+  margin-top: 12px;
+  margin-left: 29.5px;
+}*/
+/*feb 28th*/
 .domain-label.added{
     font-weight: bold;
     color: #00a850; !important;
