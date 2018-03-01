@@ -227,7 +227,7 @@ class DomainCheck
 		}else{
 			//if $searched_tld not empty display the message
 			if(!empty($searched_tld)){
-				$feedback = array("type" => "error", "message" => "Extension .$searched_tld not supported !");
+				$feedback = array("type" => "error", "message" => "Extension .$searched_tld not supported !", "domain" => $this->domain);
 				$do_not_search = true;
 			}
 		}
