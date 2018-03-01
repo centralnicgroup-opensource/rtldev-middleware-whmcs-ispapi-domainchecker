@@ -256,7 +256,10 @@ hr.first-domain-separator {
     margin-left: 10px;
     line-height: 1.45;
 }
-
+.action-button-added{
+    background-color: #939598;
+    cursor: default;
+}
 /*march 1st*/
 .clicked .domain-label {
     padding-left: 30px;
