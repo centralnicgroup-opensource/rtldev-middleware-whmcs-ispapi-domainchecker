@@ -169,6 +169,9 @@ hr.first-domain-separator {
 .clickable {
    cursor: pointer;
 }
+.click {
+     cursor: pointer;
+}
 .first-line .tld-zone {
     font-weight: bold;
     font-size: 15px;
@@ -196,6 +199,65 @@ hr.first-domain-separator {
 .domain-label:hover {
     color: #f26522;
 }
+/*march 1st for the searched domain to display in a box*/
+.domaininbox-backorder{
+    width: 645px;
+    text-align: left;
+    font-size: 15px;
+    padding: 20px 20px 10px;
+    border: 3px solid #00a651;
+    margin: 20px 8px;
+    color: #0033a0;
+    line-height: 1.45;
+}
+.domainlabel {
+    line-height: 38px;
+    font-size: 20px;
+}
+.tldzone{
+    font-weight: bold;
+    font-size: 20px;
+}
+.action-button{
+    background-color: #00a651;
+    border: none;
+    color: white;
+    padding: 10px;
+    float: right;
+    font-size: 13px;
+    min-width: 120px;
+}
+.renewalprice-of-domain{
+    color: #939598;
+}
+.domaininbox-taken{
+    width: 645px;
+    text-align: left;
+    font-size: 15px;
+    padding: 20px 20px 10px;
+    border: 3px solid #939598;
+    margin: 20px 8px;
+    color: #0033a0;
+    line-height: 1.45;
+}
+.domaininbox-available{
+    width: 645px;
+    text-align: left;
+    font-size: 15px;
+    padding: 20px 20px 10px;
+    border: 3px solid #00a651;
+    margin: 20px 8px;
+    color: #0033a0;
+    line-height: 1.45;
+}
+.premium-label{
+    color: #00b1df;
+    font-weight: bold;
+    margin-left: 10px;
+    line-height: 1.45;
+}
+
+/*march 1st*/
 .clicked .domain-label {
     padding-left: 30px;
     color: white;
@@ -257,25 +319,7 @@ span.spanelement{
     font-weight: bold;
     color: #00a850; !important;
 }
-/*feb 28th*/
-/*.small-container {
-    margin-right: 29.5px;
-}
-.details-note{
-    color: blue;
-}*/
-/*.search-result-details .small-container .details-note {
-  list-style-type: disc;
-  list-style-position: inside;
-  text-indent: -1em;
-  padding-left: 1em;
-  color: blue;
-}
-.search-result-details .small-container {
-  margin-top: 12px;
-  margin-left: 29.5px;
-}*/
-/*feb 28th*/
+
 .domain-label.added{
     font-weight: bold;
     color: #00a850; !important;

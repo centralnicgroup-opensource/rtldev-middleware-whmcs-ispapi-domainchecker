@@ -69,10 +69,108 @@ $( document ).ready(function() {
 
     //handle the feedback message for a searched domain
     function handleFeedbackMessage(data){
-        if(data.feedback.type){
-            console.log(data.feedback);
-            //TODO Tulsi :)
+        console.log(data);
+        if(data.feedback.type == "error"){ //I had to handle 'error' case like this-otherwise it is not working properly
+            domainName = data.feedback.domain;
+            var index = domainName.indexOf(".");
+            var domainLabel = domainName.substr(0, index);
+            var tldZone = domainName.substr(index + 0);
+            $("#domain-in-box").removeAttr('style');
+            $("#domain-in-box").addClass("domaininbox-taken");
+            $('.status-text').append("We currently do not support this domain");
+            $('.domainlabel').append(domainLabel);
+            $('.tldzone').append(tldZone);
+            $('.domain-description').append("But not to worry, we have other domains you might be interested in. Check them out!<br>");
+            $('.action-button').remove();
         }
+        if(data.feedback.type){
+            var domainName = data.data[0].id;
+            var index = domainName.indexOf(".");
+            var domainLabel = domainName.substr(0, index);
+            var tldZone = domainName.substr(index + 0);
+        }
+        if(data.feedback.type == "backorder"){ //anthony.com
+            var backorderprice = data.data[0].backorderprice;
+            $("#domain-in-box").removeAttr('style');
+            $("#domain-in-box").addClass("domaininbox-backorder");
+            $('.status-text').append("This domain is registered but it can be still be yours!");
+            $('.domainlabel').append(domainLabel);
+            $('.tldzone').append(tldZone);
+            $('.action-button').append("Backorder");
+            $('.domain-description').append("using our backorder system, we will attempt to register the domain as soon as it becomes available.");
+            $('.price-of-domain').append("<br>"+backorderprice+" upon successful registration<br>");
+            $('.renewalprice-of-domain').append("Renewal:00.00 USD");
+
+            $(".action-button").click(function(){
+                // alert("The paragraph was clicked.");
+                // alert(domainName);
+                var command = "CreateBackorder";
+                $.ajax({
+                    type: "POST",
+                    async: true,
+                    dataType: "json",
+                    url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
+                    data: {
+                        COMMAND: command,
+                        DOMAIN: domainName,
+                        TYPE: "FULL"
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        if(command=="CreateBackorder" && data.CODE==200){
+                            // $('.action-button').val("Button Clicked");
+                            // $('.action-button').append("ADDED");
+                            noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                        }
+                        else if(data.CODE==531){
+                            noty({text: 'Login Required', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                        }
+                        else{
+                            // noty({text: 'An error occured: ' + data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                        }
+                    },
+                    error: function(data) {
+                        noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                    }
+                });
+            });
+        }
+        if(data.feedback.type == "taken"){ //tulsi.co //TODO another case - when taken and backordered then display that it is backordered in the box
+            $("#domain-in-box").removeAttr('style');
+            $("#domain-in-box").addClass("domaininbox-taken");
+            $('.status-text').append("This domain is not available");
+            $('.domainlabel').append(domainLabel);
+            $('.tldzone').append(tldZone);
+            $('.domain-description').append("But not to worry, we have other domains you might be interested in. Check them out!");
+            $('.action-button').remove();
+        }
+        if(data.feedback.type == "available"){ //premium - anthony.blog /normal-testi234.com
+            var registerprice = data.data[0].registerprice;
+            var renewprice = data.data[0].renewprice;
+            $("#domain-in-box").removeAttr('style');
+            $("#domain-in-box").addClass("domaininbox-available");
+            $('.status-text').append("Your domain is available!");
+            $('.domainlabel').append(domainLabel);
+            $('.tldzone').append(tldZone);
+            if(data.data[0].premiumtype){
+                $('.premium-label').append("PREMIUM");
+                $('.domain-description').append("This is a registry premium domain. It is classified differently than a standard domain which may affect its pricing.<br>");
+            }
+            // .attr("style", "background-color: #00a651;border: none;color: white;padding: 10px;float: right;font-size: 13px;min-width: 120px;")
+            $('.action-button').append("Add to cart");
+            $('.price-of-domain').append("<br>"+registerprice);
+            $('.renewalprice-of-domain').append("Renewal: "+renewprice);
+        }
+        // if(data.feedback.type){
+        //     console.log(data.feedback);
+        //     //TODO Tulsi :)
+        // }
+        // TODO : on GO button clcik the box not cleared
+
+        // $("#domain-in-box").html("");
+        // var test = $("form");
+        // console.log(test);
+        // $("form")[0].reset();
     }
 
     //MAIN FUNCTION: handle the availability checks
@@ -114,7 +212,7 @@ $( document ).ready(function() {
                         });
                     }
                     //IF THE DOMAIN IS PRESENT IN CART:
-                    if (domainsInCart.indexOf(element.id) > -1) { //TODO: an issue
+                    if (domainsInCart.indexOf(element.id) > -1) {
                             $("#domainform input[id=orderbutton]").removeClass('hide');
 
                             $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
@@ -169,7 +267,7 @@ $( document ).ready(function() {
                                             //
                             var moreinformation = '<div class="text col-xs-12 search-result-details hide">'+'<div class="small-container">'+
                                                     '<small>'+
-                                                        '<span></span><span style="color:#0033a0;font-weight:500;">'+element.id+' is registered, but you still want this domain if and when it expires. Place a free BACKORDER today and we will notify and attempt to register* when it becomes available. </span>'+ //TODO: add more information and add blue color to the text
+                                                        '<span></span><span style="color:#0033a0;font-weight:500;">'+element.id+' is registered, but you still want this domain if and when it expires. Place a free BACKORDER today and we will notify and attempt to register* when it becomes available. </span>'+
                                                         '<br><br><ul style="color:#0033a0; font-weight:700;margin-right:20px;">'+
                                                             '<li class="details-note">'+
                                                                 '<i >Registration attempt executed only for active accounts with enough positive prepaid funds at the time of expiration</i>'+
@@ -224,7 +322,7 @@ $( document ).ready(function() {
                     }
 				});
 
-                //handle the click on the WHOIS button
+                //handle the click on the WHOIS button //TODO : there is no use of WHOIS. isnt it?
 				$(".viewWhois").unbind();
 				$(".viewWhois").bind("click", function(){
 					var domain = $(this).attr("id").substring(6);
@@ -559,8 +657,28 @@ $( document ).ready(function() {
         </div>
     </div>
 
-    <!-- CATEGORY -->
+
+    <!-- CATEGORY and searched domain in box-->
     <div id="categories" class="row1 row collapse-category">
+        <!-- To display searched domain in a box with feedback message  -->
+        <div id="domain-in-box" style="display:none">
+            <div class="status-text"></div>
+            <div class="label-text">
+                <span class="domainlabel"></span>
+                <span class="tldzone"></span>
+                <span class="premium-label"></span>
+                <button class="action-button"></button>
+            </div>
+            <div class="description-text">
+                <span class="domain-description"></span>
+            </div>
+            <div class="price-text">
+                <span class="price-of-domain"></span>
+                <span class="renewalprice-of-domain"></span>
+            </div>
+        </div>
+
+        <!--  CATEGORY-->
         <br/>
         <div class="col-xs-12 category-setting">
             <button class="category-button" type="button" data-toggle="collapse" data-target="#category" >
@@ -607,6 +725,7 @@ $( document ).ready(function() {
 <div class="result-item" id="resultsarea" style="display:none;">
 <!-- <div>Search Results</div><br /> -->
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
+
         <div class="row row1" id="searchresults">
         </div>
 		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.gif"/></p>
