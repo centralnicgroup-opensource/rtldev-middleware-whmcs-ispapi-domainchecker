@@ -468,13 +468,13 @@ class DomainCheck
 		}
 		if(isset($_SESSION["domain"]) && $_SESSION["domain"] == $searched_domain_object["id"]){
 			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
-				$feedback = array("type" => "backorder", "message" => "Backorder Available!");
+				$feedback = array("type" => "backorder", "message" => "Backorder Available!", "domain" => $searched_domain_object["id"]);
 			}
 			elseif($searched_domain_object["status"] == "taken"){
-				$feedback = array("type" => "taken", "message" => "Domain already taken!");
+				$feedback = array("type" => "taken", "message" => "Domain already taken!", "domain" => $searched_domain_object["id"]);
 			}
 			elseif($searched_domain_object["status"] == "available"){
-				$feedback = array("type" => "available", "message" => "Your domain is available!");
+				$feedback = array("type" => "available", "message" => "Your domain is available!", "domain" => $searched_domain_object["id"]);
 			}
 		}
     	$response_array = array("data" => $response, "feedback" => $feedback);
