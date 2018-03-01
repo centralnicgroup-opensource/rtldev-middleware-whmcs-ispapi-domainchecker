@@ -1,4 +1,5 @@
 <?php
+
 require_once(dirname(__FILE__)."/../../../init.php");
 require_once(dirname(__FILE__)."/../../../includes/domainfunctions.php");
 require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
@@ -37,7 +38,6 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 		}
 	}
 	//for the domain.php file
-
 	$_SESSION["ispapi_registrar"] = $registrar;
 }
 //###########################################################################################
@@ -50,13 +50,11 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
  */
 class DomainCheck
 {
-
 	private $domain;
     private $tldgroup;
     private $action;
     private $registrar;
 	private $response;
-
 
     /*
      *  Constructor
@@ -71,7 +69,6 @@ class DomainCheck
 		$this->tldgroup = $tldgroup;
 		$this->action = $action;
 		$this->registrar = $registrar;
-
 		$this->doDomainCheck();
     }
 
@@ -120,11 +117,20 @@ class DomainCheck
 	/*
      * Helper to delete an element from an array.
      */
-	private function deleteElement($element, &$array){
+	public static function deleteElement($element, &$array){
 	    $index = array_search($element, $array);
 	    if($index !== false){
 	        unset($array[$index]);
 	    }
+	}
+
+	/*
+     * Send an API command to the registrar and returns the response
+     */
+	private function sendAPICommand($registrar, $command){
+		$registrarconfigoptions = getregistrarconfigoptions($registrar);
+		$ispapi_config = ispapi_config($registrarconfigoptions);
+		return ispapi_call($command, $ispapi_config);
 	}
 
     /*
@@ -133,13 +139,6 @@ class DomainCheck
      * First our domains and then the others.
      */
     private function getDomainList(){
-
-    	//if session lost after a few minutes, display a message:  Session expired, please reload page!
-    	/*if(empty($_SESSION["ispapi_registrar"])){
-    		$response_array = array("data" => "", "feedback" => array("status" => false, "message" => "An error occurred!<br><span style='font-size:12px'>Session lost, please reload the page.</span>"));
-    		$this->response = json_encode($response_array);
-    		return;
-    	}*/
 
     	//delete HTTP:// if domain's starting with it
     	if (preg_match('/^http\:\/\//i', $this->domain)) {
@@ -179,10 +178,8 @@ class DomainCheck
 				"ZONE" => $tldgroups,
 				"SOURCE" => "ISPAPI-SUGGESTIONS",
 			);
-
-			$registrarconfigoptions = getregistrarconfigoptions($_SESSION['ispapi_registrar'][0]);
-			$ispapi_config = ispapi_config($registrarconfigoptions);
-			$suggestions = ispapi_call($command, $ispapi_config);
+			//use the first ispapi registrar to query the suggestion list
+			$suggestions = $this->sendAPICommand($this->registrar[0], $command);
 
 			array_push($suggestiondomainlist, $suggestions['PROPERTY']['DOMAIN']);
 			$domainlist = $suggestiondomainlist[0];
@@ -225,15 +222,20 @@ class DomainCheck
 		$result = select_query("tbldomainpricing","autoreg",array("extension"=>".".$searched_tld));
 		$data = mysql_fetch_array($result);
 		if(!empty($data)){
-			$this->deleteElement($this->domain, $domainlist);
+			DomainCheck::deleteElement($this->domain, $domainlist);
 			array_unshift($domainlist, $this->domain);
 		}else{
 			//if $searched_tld not empty display the message
 			if(!empty($searched_tld)){
 				$feedback = array("type" => "error", "message" => "Extension .$searched_tld not supported !");
+				$do_not_search = true;
 			}
 		}
 
+		//if there is an issue with the search, do not start checking
+		if($do_not_search){
+			$domainlist = array();
+		}
 
 		$response_array = array("data" => $domainlist, "feedback" => $feedback);
 
@@ -270,43 +272,6 @@ class DomainCheck
     	$this->response = json_encode($response_array);
     }
 
-    /*
-     *  Returns the converted price well formated
-     *
-     *  @param int $price The price in USD (always USD in this case)
-     *  @param int $curencyid The DB id of the selected currency
-     */
-    private function getConvertedPrice($price, $currencyid){
-
-		//load the selected currency
-		$selected_currency = mysql_fetch_array(select_query("tblcurrencies","*",array("id" => $currencyid),"","","1"));
-
-		//check if the default currency is USD in WHMCS
-    	$default_currency = mysql_fetch_array(select_query("tblcurrencies","*",array("default" => 1 ),"","","1"));
-		if(preg_match("/^USD$/i", $default_currency["code"])){
-			//default currency in WHMCS is USD
-			$p = round($price * $selected_currency["rate"], 2);
-		}else{
-			//default currency in WHMCS in not USD, use the rate from domainchecker
-			if(preg_match("/^USD$/i", $selected_currency["code"])){
-				//if selected currency is USD => display the price directly
-				$p = round($price, 2);
-			}else{
-				$modulecur = mysql_fetch_array(select_query("ispapi_tblaftermarketcurrencies","*",array("currency" => $selected_currency["code"]),"","","1"));
-				if(!empty($modulecur) && $modulecur["rate"] != 0){
-					//use the rate from domainchecker to convert the price in another currency
-					$p = round($price * $modulecur["rate"], 2);
-				}else{
-					//no currency rate configured in the domainchecker => display no pricing found
-					$p = -1;
-				}
-			}
-		}
-		// print_r($p);
-		$p = $this->formatPrice($p, $selected_currency);
-    	return $p;
-    }
-
    /*
 	* Returns TRUE if the "suggestion" mode is activated in the domainchecker configuration
 	*/
@@ -317,47 +282,6 @@ class DomainCheck
 			return true;
 		}else{
 			return false;
-		}
-	}
-
-
-	//TODO: rewrite this methode. This is a copy of Registrar Module
-	 function ispapi_getRegistryPremiumDomainRenewalPrice($priceclass){
-
-		$date = new DateTime();
-		if((!isset($_SESSION["ISPAPICACHE"])) || ($_SESSION["ISPAPICACHE"]["TIMESTAMP"] + 600 < $date->getTimestamp() )){
-
-			$command["COMMAND"] = "StatusUser";
-
-			$registrarconfigoptions = getregistrarconfigoptions($_SESSION['ispapi_registrar'][0]);
-			$ispapi_config = ispapi_config($registrarconfigoptions);
-			$response = ispapi_call($command, $ispapi_config);
-
-			if ($response["CODE"] == 200) {
-				$_SESSION["ISPAPICACHE"] = array("TIMESTAMP" => $date->getTimestamp() , "RELATIONS" => $response["PROPERTY"]);
-
-				foreach($_SESSION["ISPAPICACHE"]["RELATIONS"] as $key => $relationtype) {
-					foreach ($relationtype as $ky => $relation) {
-						if($relation == "PRICE_CLASS_DOMAIN_".$priceclass."_ANNUAL"){
-							$renewalprice = $_SESSION["ISPAPICACHE"]["RELATIONS"]["RELATIONVALUE"][$ky];
-						}else{
-						}
-					}
-				}
-				return $renewalprice;
-			}else{
-				return false;
-			}
-		}else{
-			foreach($_SESSION["ISPAPICACHE"]["RELATIONS"] as $key => $relationtype) {
-				foreach ($relationtype as $ky => $relation) {
-					if($relation == "PRICE_CLASS_DOMAIN_".$priceclass."_ANNUAL"){
-						$renewalprice = $_SESSION["ISPAPICACHE"]["RELATIONS"]["RELATIONVALUE"][$ky];
-					}else{
-					}
-				}
-			}
-			return $renewalprice;
 		}
 	}
 
@@ -400,22 +324,20 @@ class DomainCheck
 		}
 
     	$response = array();
-    	foreach($extendeddomainlist as $item){
+
+    	foreach($extendeddomainlist as $listitem){
     		//IDN convert before sending to checkdomain
-    		$converted_domains = $this->convertIDN($item["domain"], $item["registrar"]);
+    		$converted_domains = $this->convertIDN($listitem["domain"], $listitem["registrar"]);
 
     		$command = array(
     				"COMMAND" => "checkDomains",
     				"PREMIUMCHANNELS" => "*",
     				"DOMAIN" => $converted_domains
     		);
-
-    		$registrarconfigoptions = getregistrarconfigoptions($item["registrar"]);
-    		$ispapi_config = ispapi_config($registrarconfigoptions);
-    		$check = ispapi_call($command, $ispapi_config);
+			$check = $this->sendAPICommand($listitem["registrar"], $command);
 
     		$index = 0;
-    		foreach($item["domain"] as $item){
+    		foreach($listitem["domain"] as $item){
     			$tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
 				$code = $tmp[0];
 				$availability = $check["PROPERTY"]["DOMAINCHECK"][$index];
@@ -436,28 +358,26 @@ class DomainCheck
 					$whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
 	    			$register_price = $whmcspricearray["domainregister"][1];
 				 	$renew_price = $whmcspricearray["domainrenew"][1];
-					//TODO ANTHONY if no prices set, then display taken.
+
 					$status = "available";
 				}
 				elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index])){ //IT IS A PREMIUMDOMAIN // || !empty($check["PROPERTY"]["CLASS"][$index])
 					if($premiumEnabled){
 						//IF PREMIUM DOMAIN ENABLED IN WHMCS - DISPLAY AVAILABLE + PRICE
 
-						//TODO: GET THE PRICE FROM AFTERMARKET DOMAIN AND ADD MARGIN
-						//TODO: GET THE PRICE FROM PRICECLASS AND ADD MARGIN
-
 						$registrarprice = $check["PROPERTY"]["PRICE"][$index];
 						$registrarpriceCurrency = $check["PROPERTY"]["CURRENCY"][$index];
 
 						$register_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
-						$renew_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency); //$this->ispapi_getRegistryPremiumDomainRenewalPrice($check["PROPERTY"]["CLASS"][$index]);
+						$renew_price = $this->getPremiumRenewPrice($listitem["registrar"], $check["PROPERTY"]["CLASS"][$index], $registrarpriceCurrency, $item);
 
-						$premiumtype = $check["PROPERTY"]["PREMIUMCHANNEL"][$index]; //TODO ANTHONY only display premium rewrite part
-						if($premiumtype != "SEDO" && $premiumtype != "AFTERNIC"){
+
+						if (strpos($check["PROPERTY"]["CLASS"][$index], $check["PROPERTY"]["PREMIUMCHANNEL"][$index]) !== false){
 							$premiumtype = "PREMIUM";
+						}else{
+							$premiumtype = $check["PROPERTY"]["PREMIUMCHANNEL"][$index];
 						}
 
-						//TODO ANTHONY if no prices set, then display taken.
 						$status = "available";
 					}else{
 						//PREMIUM DOMAIN NOT ENABLED IN WHMCS -> DISPLAY THE DOMAIN AS TAKEN
@@ -653,58 +573,104 @@ class DomainCheck
 	}
 
 	/*
-     * Returns the price for a premiumdomain registration. (This function adds the markup)
+     * Returns the price for a premiumdomain registration.
      *
      * @param string $registrarprice The domain registration price asked by the registrar
      * @param string $registrarpriceCurrency The currency of this price
      * @return string The price well formatted
-     *
+	 *
+	 * TODO: Sometimes we are getting rounding problems (1 cent), not exactly the same price than with the standard lookup.
+     * TODO: check if markup is done at the beginning or at the end in the standard lookup
+	 *
      */
 	private function getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency) {
+		return $this->convertPriceToSelectedCurrency($registrarprice, $registrarpriceCurrency);
+	}
+
+
+	/*
+	 * Convert the price in the selected currency and add the markup.
+	 * Selected currency is taken from the session.
+	 */
+	private function convertPriceToSelectedCurrency($price, $currency) {
 		//get the markup from the WHMCS backend and add it to the registrar price
-		$markupToAdd = Premium::markupForCost($registrarprice, $registrarpriceCurrency);
-		$markupedprice = $registrarprice + ($registrarprice * $markupToAdd / 100);
+		$markupToAdd = Premium::markupForCost($price, $currency);
+		$markupedprice = $price + ($price * $markupToAdd / 100);
 
 		//get the selected currency
 		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
 		$selected_currency_array = mysql_fetch_array($result);
 		$selected_currency_code = $selected_currency_array["code"];
 
-		//check if the domain currency is available in WHMCS
-		$result = select_query("tblcurrencies","*",array("code" => strtoupper($registrarpriceCurrency)),"","","1");
+		//check if the registrarpriceCurrency is available in WHMCS
+		$result = select_query("tblcurrencies","*",array("code" => strtoupper($currency)),"","","1");
 		$domain_currency_array = mysql_fetch_array($result);
+
 		if($domain_currency_array){
-			//In this case we can calculate the price
+			//WE ARE ABLE TO CALCULATE THE PRICE
 			$domain_currency_code = $domain_currency_array["code"];
 			if($selected_currency_code == $domain_currency_code){
 				return $this->formatPrice($markupedprice, $selected_currency_array);
 			}else{
 				if($domain_currency_array["default"] == 1){
-					//then it should be easy to convert the price in the selected currency.
+					//CONVERT THE PRICE IN THE SELECTED CURRENCY
 					$convertedprice = $markupedprice * $selected_currency_array["rate"];
 					return $this->formatPrice($convertedprice, $selected_currency_array);
-					//TODO Anthony (julie.club) we are getting rounding problems, not exactly the same price than with the standard domain checker.
 				}else{
-					//we need to convert the price in the default currency and then convert in the selected currency
+					//FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
-					//$price_default_currency = $markupedprice * $domain_currency_array["rate"];
+					//get the default currency set in WHMCS
+					$result = select_query("tblcurrencies", "*", array("default" => "1","","","1"));
+					$default_currency_array = mysql_fetch_array($result);
+					$default_currency_code = $default_currency_array["code"];
 
+					//get the price in the default currency
+					$price_default_currency = $markupedprice * ( 1 / $domain_currency_array["rate"] );
 
+					//get the price in the selected currency
+					$price_selected_currency = $price_default_currency * $selected_currency_array["rate"];
 
-
-					// $result = select_query("tblcurrencies","*",array("default" => "1","","","1");
-					// $default_currency_array = mysql_fetch_array($result);
-					// if($default_currency){
-					// 	$price_default_currency = $markupedprice * $domain_currency_array["rate"];
-					// }
-
-
-					//TODO anthony
-					return $this->formatPrice($markupedprice, $selected_currency_array);
+					return $this->formatPrice($price_selected_currency, $selected_currency_array);
 				}
 			}
 		}
+		return "";
 	}
+
+
+
+
+	/*
+     * Returns the price for a premiumdomain renewal. (This function adds the markup)
+     *
+     * @param string $registrarprice The domain registration price asked by the registrar
+     * @param string $registrarpriceCurrency The currency of this price
+     * @return string The price well formatted
+	 *
+     */
+	private function getPremiumRenewPrice($registrar, $class, $registrarPriceCurrency, $domain) {
+		$registrarPriceCurrency = strtoupper($registrarPriceCurrency);
+
+		//get the domain currency id
+		$result = select_query("tblcurrencies","*",array("code" => $registrarPriceCurrency),"","","1");
+		$domain_currency_array = mysql_fetch_array($result);
+		$domain_currency_id = $domain_currency_array["id"];
+
+		//get domain extension
+		$tld = $this->getDomainExtension($domain);
+
+		//here we reuse the code from the registrar module
+		$params = getregistrarconfigoptions($registrar);
+
+		//echo "$class $domain_currency_id $tld";
+		// print_r($params);
+		$registrarRenewPrice = ispapi_getRenewPrice($params, $class, $domain_currency_id, $tld);
+		//echo "<".$registrarRenewPrice.">";
+
+		//the renew price has to be converted to the selected currency
+		return $this->convertPriceToSelectedCurrency($registrarRenewPrice, $registrarPriceCurrency);
+	}
+
 
 
 	/*
@@ -722,7 +688,7 @@ class DomainCheck
 		//mail("anthonys@hexonet.net", "formatprice2", $number );
 
 		if ($number <= 0){
-			return -1;
+			return "";
 		}
 		$format = $cur["format"];
 		if ( $format == 1 ) {
@@ -840,14 +806,11 @@ class DomainCheck
      * @return string|array IDN code of the domain name or array of IDN codes (saarbrücken.de => xn--saarbrcken-feb.de )
      */
     private function convertIDN($domain, $registrar){
-    	$registrarconfigoptions = getregistrarconfigoptions($registrar);
-    	$ispapi_config = ispapi_config($registrarconfigoptions);
-
 		$command = array(
 				"COMMAND" => "convertIDN",
 				"DOMAIN" => $domain
 		);
-		$response = ispapi_call($command, $ispapi_config);
+		$response = $this->sendAPICommand($registrar, $command);
 
 		if(!is_array($domain)){
 	    	return $response["PROPERTY"]["ACE"][0];
@@ -879,7 +842,6 @@ class DomainCheck
     	$tmp = explode(".", $domain, 2);
     	return $tmp[1];
     }
-
 
     /*
      * Send the JSON response back to the template
