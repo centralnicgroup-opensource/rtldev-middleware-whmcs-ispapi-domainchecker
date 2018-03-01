@@ -496,7 +496,7 @@ class DomainCheck
 
 		//Get all domains that have already been backordered by the user. If not logged in, array will be empty, this is perfect.
 		$queryBackorderList = array(
-				"COMMAND" => "QueryBackorderList"
+			"COMMAND" => "QueryBackorderList"
 		);
 		$ownbackorders = backorder_api_call($queryBackorderList);
 
@@ -513,16 +513,20 @@ class DomainCheck
 			$tmp = $item;
 			$tmp["backorder_available"] = $tmp["backordered"] = 0;
 			if($item["code"]==211){
-				//In this case, backorder module is installed so, set to 1
-				//$tmp["backorder_installed"] = 1;
+				//In this case, backorder module is installed
+
 				//Check if pricing set for this TLD
 				$tmp["backorder_available"] = (preg_match('/^([a-z0-9](\-*[a-z0-9])*)\\'.$tld_list.'$/i', $item["id"])) ? 1 : 0;
+
 				//Check if backorder set in the backorder module
 				$tmp["backordered"] = (in_array($item["id"], $ownbackorders["PROPERTY"]["DOMAIN"])) ? 1 : 0;
 
-				//TODO ANTHONY rewrite this section
 				if($tmp["backorder_available"]){
-					$tmp["backorderprice"] = $this->getBackorderprice($item["id"]);
+					$tmp["backorderprice"] = $this->getBackorderPrice($item["id"]);
+					//if no price set for the currency, then do not display the backorder
+					if(empty($tmp["backorderprice"])){
+						$tmp["backorder_available"] = 0;
+					}
 				}
 
 			}
@@ -566,10 +570,22 @@ class DomainCheck
 		return $domainprices;
 	}
 
-	private function getBackorderprice($domain) {
-		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
-		$cur = mysql_fetch_array($result);
-		return $this->formatPrice(100,$cur);
+	/*
+     * Returns the backorder price for a domain
+	 */
+	private function getBackorderPrice($domain) {
+		$selected_currency_id = $_SESSION["currency"];
+
+		//get the selected currency
+		$result = select_query("tblcurrencies","*",array("id" => $selected_currency_id),"","","1");
+		$selected_currency_array = mysql_fetch_array($result);
+
+		$result = select_query("backorder_pricing","*",array("extension" => $this->getDomainExtension($domain), "currency_id" => $selected_currency_id),"","","1");
+		$price = mysql_fetch_array($result);
+
+		$backorderprice = isset($price)?$price["fullprice"]:"";
+
+		return $this->formatPrice($backorderprice, $selected_currency_array);
 	}
 
 	/*
@@ -685,9 +701,7 @@ class DomainCheck
 	 */
 	private function formatPrice($number, $cur) {
 		//$number = round($number, 3, PHP_ROUND_HALF_UP);
-		//mail("anthonys@hexonet.net", "formatprice2", $number );
-
-		if ($number <= 0){
+		if (empty($number) || $number <= 0){
 			return "";
 		}
 		$format = $cur["format"];
