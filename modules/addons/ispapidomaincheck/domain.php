@@ -17,28 +17,20 @@ use WHMCS\Database\Capsule;
 use WHMCS\Domains\Pricing\Premium;
 
 
-//WORKARROUND: Get a list of all Hexonet registrar modules and include the registrar files
+//WORKARROUND: Get a list of all HEXONET registrar modules and include the registrar files
 //For some users we need this hack. This is normally done in the ispapidomaincheck file.
 //###########################################################################################
 if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])){
-	$result = select_query("tbldomainpricing","extension,autoreg");
-	$modulelist = array();
-	$registrar = array();
-	while($data = mysql_fetch_array($result)){
-		if(!empty($data["autoreg"])){
-			if(!in_array($data["autoreg"], $modulelist)){
-				array_push($modulelist, $data["autoreg"]);
+	$registrars = DomainCheck::SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
+	foreach($registrars as $registrar){
+		$autoreg = $registrar["autoreg"];
+		if(!empty($autoreg)){
+			require_once(dirname(__FILE__)."/../../../modules/registrars/".$autoreg."/".$autoreg.".php");
+			if(function_exists($autoreg.'_GetISPAPIModuleVersion')){
+				array_push($_SESSION["ispapi_registrar"], $autoreg);
 			}
 		}
 	}
-	foreach($modulelist as $file){
-		require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
-		if(function_exists($file.'_GetISPAPIModuleVersion')){
-			array_push($registrar, $file);
-		}
-	}
-	//for the domain.php file
-	$_SESSION["ispapi_registrar"] = $registrar;
 }
 //###########################################################################################
 
@@ -54,6 +46,7 @@ class DomainCheck
     private $tldgroup;
     private $action;
     private $registrar;
+	private $currency;
 	private $response;
 
     /*
@@ -62,13 +55,15 @@ class DomainCheck
      *  @param string $domain The searched domain
      *  @param string $tldgroup The searched tldgroup
      *  @param string $action The action
-     *  @param array $registrar The configured registrar (can be more than one)
+     *  @param array $registrar The configured registrars (can be more than one)
+     *  @param array $currency The selected currency
      */
-    public function __construct($domain, $tldgroup, $action, $registrar){
+    public function __construct($domain, $tldgroup, $action, $registrar, $currency){
     	$this->domain = $domain;
 		$this->tldgroup = $tldgroup;
 		$this->action = $action;
 		$this->registrar = $registrar;
+		$this->currency = $currency;
 		$this->doDomainCheck();
     }
 
@@ -92,30 +87,31 @@ class DomainCheck
     /*
      * Split the TLD list in 2 lists, the first one with the TLDs configured with HEXONET, the second one with all others.
      *
-     * @return array an array with 2 keys
-     * - ispapi
-     * - no_ispapi
+     * @return array an array with 2 keys: ispapi and no_ispapi
      */
     private function sortTLDs(){
     	$domains = array();
     	$domains["ispapi"] = array();
     	$domains["no_ispapi"] = array();
 
-    	//For ISPAPI domains -> ispapi_domains
-    	//For other domains -> no_ispapi_domains
-    	$result = select_query("tbldomainpricing","extension,autoreg");
-    	while ($data = mysql_fetch_array($result)) {
-    		if(in_array($data["autoreg"], $this->registrar)){
-    			array_push($domains["ispapi"], $data["extension"]);
+		$extensions = DomainCheck::SQLCall("SELECT extension, autoreg FROM tbldomainpricing", array(), "fetchall");
+		foreach($extensions as $extension){
+			if(in_array($extension["autoreg"], $this->registrar)){
+    			array_push($domains["ispapi"], $extension["extension"]);
     		}else{
-    			array_push($domains["no_ispapi"], $data["extension"]);
+    			array_push($domains["no_ispapi"], $extension["extension"]);
     		}
-    	}
+		}
+
     	return $domains;
     }
 
 	/*
      * Helper to delete an element from an array.
+	 *
+     * @param string $element The element to delete
+     * @param array &$array The array
+	 *
      */
 	public static function deleteElement($element, &$array){
 	    $index = array_search($element, $array);
@@ -126,6 +122,11 @@ class DomainCheck
 
 	/*
      * Send an API command to the registrar and returns the response
+	 *
+	 * @param string $registrar The registrar
+     * @param string $command The API command to send
+	 *
+     * @return array The response from the API
      */
 	private function sendAPICommand($registrar, $command){
 		$registrarconfigoptions = getregistrarconfigoptions($registrar);
@@ -134,9 +135,8 @@ class DomainCheck
 	}
 
     /*
-     * Returns a combination of all domains of the current group and all domains configured in WHMCS
-     * If a domain isn't configured in WHMCS and is in the current group, this won't be displayed.
-     * First our domains and then the others.
+     * Returns the list of domains that have to be checked.
+     * First the domains configured with HEXONET, then the others.
      */
     private function getDomainList(){
 
@@ -155,8 +155,6 @@ class DomainCheck
 
     	$this->domain = strtolower($this->domain);
 
-    	$_SESSION["domain"] = $this->domain;
-
     	$feedback = array();
     	$do_not_search = false;
     	$domainlist = array();
@@ -170,8 +168,6 @@ class DomainCheck
 
 		//SUGGESTIONS MODE
 		if( $this->domainSuggestionModeActivated() ){
-
-			//TODO: check for third level domains and skip them is needed? why?
 			$command = array(
 				"COMMAND" => "QueryDomainSuggestionList",
 				"KEYWORD" => $searched_label,
@@ -184,7 +180,7 @@ class DomainCheck
 			array_push($suggestiondomainlist, $suggestions['PROPERTY']['DOMAIN']);
 			$domainlist = $suggestiondomainlist[0];
 
-			#TODO: check if we need to add the TLDs which we are not supporting at hexonet to the list also...
+			//TODO: check if we need to add the TLDs which we are not supporting at hexonet to the list also...
 		}
 		//REGULAR MODE
 		else{
@@ -201,9 +197,9 @@ class DomainCheck
 
 		//check if the searched keyword contains an configured TLD
 		//example: thebestshop -> thebest.shop should be at the top
-		$result = select_query("tbldomainpricing","extension");
-		while($data = mysql_fetch_array($result)){
-			$tld = substr($data["extension"],1);
+		$extensions = DomainCheck::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
+		foreach($extensions as $extension){
+			$tld = substr($extension["extension"],1);
 			if (preg_match('/'.$tld.'$/i', $searched_label)) {
 				$tmp = explode($tld, $searched_label);
 				$thedomain = $tmp[0].".".$tld;
@@ -213,50 +209,49 @@ class DomainCheck
 			}
 		}
 
-		//THIS NEED TO BE REFACTORED. getDomainList AND getSortedDomainList needs to be merged together.
-		//This is saving us 1 ajax call in the frontend.
-		$this->getSortedDomainList();
-
 
 		//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
-		$result = select_query("tbldomainpricing","autoreg",array("extension"=>".".$searched_tld));
-		$data = mysql_fetch_array($result);
-		if(!empty($data)){
-			DomainCheck::deleteElement($this->domain, $domainlist);
-			array_unshift($domainlist, $this->domain);
-		}else{
-			//if $searched_tld not empty display the message
-			if(!empty($searched_tld)){
-				$feedback = array("f_type" => "error", "f_message" => "Extension .$searched_tld not supported !", "id" => $this->domain);
-				$do_not_search = true;
+		$list = DomainCheck::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld), "fetchall");
+		foreach($list as $item){
+			if(!empty($item)){
+				//put the searched domain at the first place of the domain list
+				DomainCheck::deleteElement($this->domain, $domainlist);
+				array_unshift($domainlist, $this->domain);
+			}else{
+				//if $searched_tld not empty display feedback message
+				if(!empty($searched_tld)){
+					$feedback = array("f_type" => "error", "f_message" => "Extension .$searched_tld not supported !", "id" => $this->domain);
+					$do_not_search = true;
+				}
 			}
 		}
+
+		$domainlist_checkorder = $this->getSortedDomainList($domainlist);
 
 		//if there is an issue with the search, do not start checking
 		if($do_not_search){
 			$domainlist = array();
+			$domainlist_checkorder = array();
 		}
 
-		$response_array = array("data" => $domainlist, "feedback" => $feedback);
-
-		//save the list in the session for the premium domains. TODO check if still required...
-		$_SESSION["domainlist"] = $domainlist;
+		$response_array = array("data" => $domainlist, "checkorder" => $domainlist_checkorder, "feedback" => $feedback);
 
     	$this->response = json_encode($response_array);
     }
 
     /*
-     *  Returns a json response with the sorted domain list.
-     *  ispapi domain list first, then no ispapi domain list
-     *  Needed for the check order.
-     *  Displaying of the list stay unchanged.
+     * Returns the list sorted. HEXONET domains at first place, then the others
+
+	 * @param array $domainlist The original domain list
+	 *
+     * @return array The sorted domain list
      */
-    private function getSortedDomainList(){
+    private function getSortedDomainList($domainlist){
     	$domains = $this->sortTLDs();
     	$ispapi_domain_list = array();
     	$no_ispapi_domain_list = array();
 
-    	foreach($_SESSION["domainlist"] as $item){
+    	foreach($domainlist as $item){
     		$tld = $this->getDomainExtension($item);
     		if( in_array(".".$tld, $domains["ispapi"]) ){
     			array_push($ispapi_domain_list, $item);
@@ -265,11 +260,7 @@ class DomainCheck
     		}
     	}
 
-    	$sortedDomainlist = array();
-    	$sortedDomainlist = array_merge($ispapi_domain_list,$no_ispapi_domain_list);
-    	$response_array = array("data" => $sortedDomainlist);
-
-    	$this->response = json_encode($response_array);
+    	return array_merge($ispapi_domain_list,$no_ispapi_domain_list);
     }
 
    /*
@@ -461,13 +452,13 @@ class DomainCheck
 		// Feedback for the template
 		$searched_domain_object = array();
 		foreach($response as $item){
-			if($item["id"] == $_SESSION["domain"]){
+			if($item["id"] == $this->domain){
 				$searched_domain_object = $item;
 				continue;
 			}
 		}
 
-		if(isset($_SESSION["domain"]) && $_SESSION["domain"] == $searched_domain_object["id"]){
+		if(isset($this->domain) && $this->domain == $searched_domain_object["id"]){
 			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
 				$feedback = array_merge(array("f_type" => "backorder", "f_message" => "Backorder Available!"), $searched_domain_object);
 			}
@@ -503,7 +494,7 @@ class DomainCheck
 
 		//Get the list of all TLDs available in the backorder module
 		$tlds = "";
-		$result = select_query('backorder_pricing','extension',array("currency_id" => $_SESSION["currency"] ));
+		$result = select_query('backorder_pricing','extension',array("currency_id" => $this->currency ));
 		while ($data = mysql_fetch_array($result)) {
 			$tlds .= "|.".$data["extension"];
 		}
@@ -545,25 +536,25 @@ class DomainCheck
      *
      */
 	private function getTLDprice($tld) {
-		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
-		$cur = mysql_fetch_array($result);
+		//get the selected currency
+		$selected_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 
 		$sql = "SELECT tdp.extension, tp.type, msetupfee year1, qsetupfee year2, ssetupfee year3, asetupfee year4, bsetupfee year5, monthly year6, quarterly year7, semiannually year8, annually year9, biennially year10
 				FROM tbldomainpricing tdp, tblpricing tp
 				WHERE tp.relid = tdp.id
 				AND tp.tsetupfee = 0
-				AND tp.currency = ".$cur["id"]."
+				AND tp.currency = ?
 				AND tp.type IN ('domainregister', 'domainrenew')
-				AND tdp.extension = '.".mysql_real_escape_string($tld)."'
-				";
+				AND tdp.extension = ?";
 
-		$result = mysql_query($sql);
+		$list = DomainCheck::SQLCall($sql, array($selected_currency_array["id"], ".".$tld), "fetchall");
+
 		$domainprices = array();
-		while ($data = mysql_fetch_array($result)) {
-			if(!empty($data)){
+		foreach($list as $item) {
+			if(!empty($item)){
 				for ( $i = 1; $i <= 10; $i++ ) {
-					if (($data['year'.$i] > 0)){
-						$domainprices[$data['type']][$i] = $this->formatPrice($data['year'.$i],$cur);
+					if (($item['year'.$i] > 0)){
+						$domainprices[$item['type']][$i] = $this->formatPrice($item['year'.$i], $selected_currency_array);
 					}
 				}
 			}
@@ -575,16 +566,13 @@ class DomainCheck
      * Returns the backorder price for a domain
 	 */
 	private function getBackorderPrice($domain) {
-		$selected_currency_id = $_SESSION["currency"];
-
 		//get the selected currency
-		$result = select_query("tblcurrencies","*",array("id" => $selected_currency_id),"","","1");
-		$selected_currency_array = mysql_fetch_array($result);
+		$selected_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 
-		$result = select_query("backorder_pricing","*",array("extension" => $this->getDomainExtension($domain), "currency_id" => $selected_currency_id),"","","1");
-		$price = mysql_fetch_array($result);
+		//get backorder price of the domain
+		$price = DomainCheck::SQLCall("SELECT * FROM backorder_pricing WHERE extension=? AND currency_id=? LIMIT 1", array($this->getDomainExtension($domain), $this->currency));
 
-		$backorderprice = isset($price)?$price["fullprice"]:"";
+		$backorderprice = isset($price) ? $price["fullprice"] : "";
 
 		return $this->formatPrice($backorderprice, $selected_currency_array);
 	}
@@ -615,7 +603,7 @@ class DomainCheck
 		$markupedprice = $price + ($price * $markupToAdd / 100);
 
 		//get the selected currency
-		$result = select_query("tblcurrencies","*",array("id" => $_SESSION["currency"]),"","","1");
+		$result = select_query("tblcurrencies","*",array("id" => $this->currency),"","","1");
 		$selected_currency_array = mysql_fetch_array($result);
 		$selected_currency_code = $selected_currency_array["code"];
 
@@ -901,7 +889,8 @@ if(isset($_REQUEST["currency"])){
 $domaincheck = new DomainCheck( $_REQUEST["domain"],
 								$_REQUEST["tldgroup"],
 								$action,
-								$_SESSION["ispapi_registrar"]);
+								$_SESSION["ispapi_registrar"],
+								$_SESSION["currency"]);
 $domaincheck->send();
 
 ?>
