@@ -155,6 +155,9 @@ class DomainCheck
 
     	$this->domain = strtolower($this->domain);
 
+		//TODO remove that !!!
+		$_SESSION["domain"] = $this->domain;
+
     	$feedback = array();
     	$do_not_search = false;
     	$domainlist = array();
@@ -209,20 +212,17 @@ class DomainCheck
 			}
 		}
 
-
 		//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
-		$list = DomainCheck::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld), "fetchall");
-		foreach($list as $item){
-			if(!empty($item)){
-				//put the searched domain at the first place of the domain list
-				DomainCheck::deleteElement($this->domain, $domainlist);
-				array_unshift($domainlist, $this->domain);
-			}else{
-				//if $searched_tld not empty display feedback message
-				if(!empty($searched_tld)){
-					$feedback = array("f_type" => "error", "f_message" => "Extension .$searched_tld not supported !", "id" => $this->domain);
-					$do_not_search = true;
-				}
+		$item = DomainCheck::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld));
+		if(!empty($item)){
+			//put the searched domain at the first place of the domain list
+			DomainCheck::deleteElement($this->domain, $domainlist);
+			array_unshift($domainlist, $this->domain);
+		}else{
+			//if $searched_tld not empty display feedback message
+			if(!empty($searched_tld)){
+				$feedback = array("f_type" => "error", "f_message" => "Extension .$searched_tld not supported !", "id" => $this->domain);
+				$do_not_search = true;
 			}
 		}
 
@@ -234,9 +234,7 @@ class DomainCheck
 			$domainlist_checkorder = array();
 		}
 
-		$response_array = array("data" => $domainlist, "checkorder" => $domainlist_checkorder, "feedback" => $feedback);
-
-    	$this->response = json_encode($response_array);
+    	$this->response = json_encode( array("data" => $domainlist, "checkorder" => $domainlist_checkorder, "feedback" => $feedback) );
     }
 
     /*
@@ -452,13 +450,13 @@ class DomainCheck
 		// Feedback for the template
 		$searched_domain_object = array();
 		foreach($response as $item){
-			if($item["id"] == $this->domain){
+			if($item["id"] == $_SESSION["domain"]){
 				$searched_domain_object = $item;
 				continue;
 			}
 		}
 
-		if(isset($this->domain) && $this->domain == $searched_domain_object["id"]){
+		if(isset($_SESSION["domain"]) && $_SESSION["domain"] == $searched_domain_object["id"]){
 			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
 				$feedback = array_merge(array("f_type" => "backorder", "f_message" => "Backorder Available!"), $searched_domain_object);
 			}
