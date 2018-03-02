@@ -43,6 +43,7 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 class DomainCheck
 {
 	private $domain;
+	private $domains;
     private $tldgroup;
     private $action;
     private $registrar;
@@ -58,8 +59,9 @@ class DomainCheck
      *  @param array $registrar The configured registrars (can be more than one)
      *  @param array $currency The selected currency
      */
-    public function __construct($domain, $tldgroup, $action, $registrar, $currency){
+    public function __construct($domain, $domains, $tldgroup, $action, $registrar, $currency){
     	$this->domain = $domain;
+		$this->domains = $domains;
 		$this->tldgroup = $tldgroup;
 		$this->action = $action;
 		$this->registrar = $registrar;
@@ -90,20 +92,21 @@ class DomainCheck
      * @return array an array with 2 keys: ispapi and no_ispapi
      */
     private function sortTLDs(){
-    	$domains = array();
-    	$domains["ispapi"] = array();
-    	$domains["no_ispapi"] = array();
+    	$tldconfiguration = array();
+    	$tldconfiguration["ispapi"] = array();
+    	$tldconfiguration["no_ispapi"] = array();
 
 		$extensions = DomainCheck::SQLCall("SELECT extension, autoreg FROM tbldomainpricing", array(), "fetchall");
+
 		foreach($extensions as $extension){
 			if(in_array($extension["autoreg"], $this->registrar)){
-    			array_push($domains["ispapi"], $extension["extension"]);
+    			array_push($tldconfiguration["ispapi"], $extension["extension"]);
     		}else{
-    			array_push($domains["no_ispapi"], $extension["extension"]);
+    			array_push($tldconfiguration["no_ispapi"], $extension["extension"]);
     		}
 		}
 
-    	return $domains;
+    	return $tldconfiguration;
     }
 
 	/*
@@ -162,43 +165,36 @@ class DomainCheck
     	$do_not_search = false;
     	$domainlist = array();
 
-		$suggestiondomainlist = array();
-
-    	$domains = $this->sortTLDs();
+    	$tldconfiguration = $this->sortTLDs();
     	$tldgroups = $this->getTLDGroups();
+
     	$searched_label = $this->getDomainLabel($this->domain);
 		$searched_tld = $this->getDomainExtension($this->domain);
 
-		//SUGGESTIONS MODE
 		if( $this->domainSuggestionModeActivated() ){
+			//SUGGESTIONS MODE
 			$command = array(
 				"COMMAND" => "QueryDomainSuggestionList",
 				"KEYWORD" => $searched_label,
 				"ZONE" => $tldgroups,
 				"SOURCE" => "ISPAPI-SUGGESTIONS",
 			);
+
 			//use the first ispapi registrar to query the suggestion list
 			$suggestions = $this->sendAPICommand($this->registrar[0], $command);
 
-			array_push($suggestiondomainlist, $suggestions['PROPERTY']['DOMAIN']);
-			$domainlist = $suggestiondomainlist[0];
+			$domainlist = $suggestions['PROPERTY']['DOMAIN'];
 
 			//TODO: check if we need to add the TLDs which we are not supporting at hexonet to the list also...
 		}
-		//REGULAR MODE
 		else{
+			//REGULAR MODE
 			foreach($tldgroups as $tld){
-				//add the domain in the list if the searched TLD isn't in the TLD group
-				//If the searched TLD is in the TLD group, this will be put at the first place of the list later
-				if($tld != $searched_tld){
-					if( (in_array(".".$tld, $domains["ispapi"]) || in_array(".".$tld, $domains["no_ispapi"])) && !in_array($searched_label.".".$tld, $domainlist) ){
-						array_push($domainlist, $searched_label.".".$tld);
-					}
-				}
+				array_push($domainlist, $searched_label.".".$tld);
 			}
 		}
 
-		//check if the searched keyword contains an configured TLD
+		//check if the searched keyword contains a configured TLD
 		//example: thebestshop -> thebest.shop should be at the top
 		$extensions = DomainCheck::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
 		foreach($extensions as $extension){
@@ -206,7 +202,7 @@ class DomainCheck
 			if (preg_match('/'.$tld.'$/i', $searched_label)) {
 				$tmp = explode($tld, $searched_label);
 				$thedomain = $tmp[0].".".$tld;
-				//add to the domain list if not empty
+				//add to the domain to the list if not empty
 				if(!empty($tmp[0]))
 					$domainlist = array_merge(array($thedomain), $domainlist);
 			}
@@ -245,13 +241,13 @@ class DomainCheck
      * @return array The sorted domain list
      */
     private function getSortedDomainList($domainlist){
-    	$domains = $this->sortTLDs();
+    	$tldconfiguration = $this->sortTLDs();
     	$ispapi_domain_list = array();
     	$no_ispapi_domain_list = array();
 
     	foreach($domainlist as $item){
     		$tld = $this->getDomainExtension($item);
-    		if( in_array(".".$tld, $domains["ispapi"]) ){
+    		if( in_array(".".$tld, $tldconfiguration["ispapi"]) ){
     			array_push($ispapi_domain_list, $item);
     		}else{
     			array_push($no_ispapi_domain_list, $item);
@@ -262,12 +258,13 @@ class DomainCheck
     }
 
    /*
-	* Returns TRUE if the "suggestion" mode is activated in the domainchecker configuration
+	* Returns TRUE if the "suggestions" mode is activated
+	*
+	* @return boulean TRUE if "suggestions" mode is activated in the domainchecker configuration
 	*/
 	private function domainSuggestionModeActivated() {
-		$result = select_query("ispapi_tblsettings", "*", array("id" => 1));
-		$data = mysql_fetch_array($result);
-		if(isset($data) && $data["suggestion_mode"] == 1){
+		$dc_settings = DomainCheck::SQLCall("SELECT * FROM ispapi_tblsettings WHERE id = ? LIMIT 1", array(1));
+		if($dc_settings && $dc_settings["suggestion_mode"] == 1){
 			return true;
 		}else{
 			return false;
@@ -281,16 +278,16 @@ class DomainCheck
      */
     private function startDomainCheck(){
     	$feedback = array();
-    	$domains = $this->sortTLDs();
+    	$tldconfiguration = $this->sortTLDs();
 
     	// create 2 domain lists
     	// 1: domains that use our registrar module
     	// 2: domains that don't use our registrar module
     	$ispapi_domain_list = array();
     	$no_ispapi_domain_list = array();
-    	foreach($this->domain as $item){
+    	foreach($this->domains as $item){
     		$tld = $this->getDomainExtension($item);
-    		if( in_array(".".$tld, $domains["ispapi"]) ){
+    		if( in_array(".".$tld, $tldconfiguration["ispapi"]) ){
     			array_push($ispapi_domain_list, $item);
     		}else{
 				//array_push($ispapi_domain_list, $item);
@@ -302,14 +299,11 @@ class DomainCheck
     	$extendeddomainlist = $this->getExtendedDomainlist($ispapi_domain_list);
 
 		//check if premium domains are activated in WHMCS
-		$premiumEnabled = false;
-
-		$pdo = Capsule::connection()->getPdo();
-		$stmt = $pdo->prepare("select * from tblconfiguration where setting='PremiumDomains'");
-		$stmt->execute();
-		$premiumdomains = $stmt->fetch(PDO::FETCH_ASSOC);
-		if($premiumdomains["value"] == 1){
+		$premium_settings = DomainCheck::SQLCall("SELECT * FROM tblconfiguration WHERE setting = 'PremiumDomains' LIMIT 1", array());
+		if($premium_settings && $premium_settings["value"] == 1){
 			$premiumEnabled = true;
+		}else{
+			$premiumEnabled = false;
 		}
 
     	$response = array();
@@ -410,7 +404,8 @@ class DomainCheck
 			$command = "domainwhois";
 		    $values["domain"] = $label.".".$tld;
 
-		    $check = localAPI($command,$values); 	//$check = "";//lookupDomain($label, ".".$tld);
+		    $check = localAPI($command, $values);
+
     		if($check["status"] == "available"){
     			$code = "210";
 	    		//get the price for this domain
@@ -492,9 +487,9 @@ class DomainCheck
 
 		//Get the list of all TLDs available in the backorder module
 		$tlds = "";
-		$result = select_query('backorder_pricing','extension',array("currency_id" => $this->currency ));
-		while ($data = mysql_fetch_array($result)) {
-			$tlds .= "|.".$data["extension"];
+		$backorder_tlds = DomainCheck::SQLCall("SELECT extension FROM backorder_pricing WHERE currency_id = ?", array($this->currency), "fetchall");
+		foreach($backorder_tlds as $backorder){
+			$tlds .= "|.".$backorder["extension"];
 		}
 		$tld_list = substr($tlds, 1);
 
@@ -601,13 +596,12 @@ class DomainCheck
 		$markupedprice = $price + ($price * $markupToAdd / 100);
 
 		//get the selected currency
-		$result = select_query("tblcurrencies","*",array("id" => $this->currency),"","","1");
-		$selected_currency_array = mysql_fetch_array($result);
+		$selected_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 		$selected_currency_code = $selected_currency_array["code"];
 
 		//check if the registrarpriceCurrency is available in WHMCS
-		$result = select_query("tblcurrencies","*",array("code" => strtoupper($currency)),"","","1");
-		$domain_currency_array = mysql_fetch_array($result);
+		$domain_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array(strtoupper($currency)));
+
 
 		if($domain_currency_array){
 			//WE ARE ABLE TO CALCULATE THE PRICE
@@ -623,8 +617,7 @@ class DomainCheck
 					//FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
 					//get the default currency set in WHMCS
-					$result = select_query("tblcurrencies", "*", array("default" => "1","","","1"));
-					$default_currency_array = mysql_fetch_array($result);
+					$default_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE default=? LIMIT 1", array(1));
 					$default_currency_code = $default_currency_array["code"];
 
 					//get the price in the default currency
@@ -655,20 +648,14 @@ class DomainCheck
 		$registrarPriceCurrency = strtoupper($registrarPriceCurrency);
 
 		//get the domain currency id
-		$result = select_query("tblcurrencies","*",array("code" => $registrarPriceCurrency),"","","1");
-		$domain_currency_array = mysql_fetch_array($result);
+		$domain_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarPriceCurrency));
 		$domain_currency_id = $domain_currency_array["id"];
 
 		//get domain extension
 		$tld = $this->getDomainExtension($domain);
 
 		//here we reuse the code from the registrar module
-		$params = getregistrarconfigoptions($registrar);
-
-		//echo "$class $domain_currency_id $tld";
-		// print_r($params);
-		$registrarRenewPrice = ispapi_getRenewPrice($params, $class, $domain_currency_id, $tld);
-		//echo "<".$registrarRenewPrice.">";
+		$registrarRenewPrice = ispapi_getRenewPrice(getregistrarconfigoptions($registrar), $class, $domain_currency_id, $tld);
 
 		//the renew price has to be converted to the selected currency
 		return $this->convertPriceToSelectedCurrency($registrarRenewPrice, $registrarPriceCurrency);
@@ -730,13 +717,13 @@ class DomainCheck
     	$whmcsdomainlist["autoreg"] = array();
 
     	//create an array with extension and autoreg (autoreg = the configured resgistrar for this extension)
-    	$result = select_query("tbldomainpricing","extension,autoreg");
-    	while ($data = mysql_fetch_array($result)) {
-    		if(!empty($data["autoreg"])){
-    			array_push($whmcsdomainlist["extension"], $data["extension"]);
-    			array_push($whmcsdomainlist["autoreg"],$data["autoreg"]);
+		$list = DomainCheck::SQLCall("SELECT extension, autoreg  FROM tbldomainpricing", array(), "fetchall");
+		foreach($list as $item){
+			if(!empty($item["autoreg"])){
+    			array_push($whmcsdomainlist["extension"], $item["extension"]);
+    			array_push($whmcsdomainlist["autoreg"],$item["autoreg"]);
     		}
-    	}
+		}
 
 		$extendeddomainlist = array();
 		$ispapiobject = array();
@@ -745,8 +732,8 @@ class DomainCheck
     		$tld = ".".$this->getDomainExtension($domain);
     		$index = array_search($tld, $whmcsdomainlist["extension"]);
     		array_push($extendeddomainlist, array("domain"=>$domain,
-    											   "extension" => $whmcsdomainlist["extension"][$index],
-    											   "autoreg" => $whmcsdomainlist["autoreg"][$index]));
+    											  "extension" => $whmcsdomainlist["extension"][$index],
+    											  "autoreg" => $whmcsdomainlist["autoreg"][$index]));
     	}
 
     	//reorganize the information
@@ -779,35 +766,25 @@ class DomainCheck
      * @return array An array with all TLDs of the current group.
      */
 	 private function getTLDGroups(){
-		$this->tldgroup = explode(',', $this->tldgroup);
-		$data["tlds"] = [];
-		$data2 = [];
-		$pdo = Capsule::connection()->getPdo();
-		foreach ($this->tldgroup as $key => $id) {
-			$stmt = $pdo->prepare("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id=?");
-			$stmt->execute(array($id));
-			$result = $stmt->fetch(PDO::FETCH_ASSOC);
-			array_push($data2, $result["tlds"]);
-		}
-		$data3 = [];
-		foreach ($data2 as $key => $value) {
-			array_push($data3, explode(' ', $value));
-		}
-		foreach ($data3 as $key => $value) {
-			foreach ($value as $ky => $tld) {
-				if(in_array($tld, $data["tlds"])){
+		 $groups = explode(',', $this->tldgroup);
+		 $tlds = array();
 
-				}else{
-					array_push($data["tlds"], $tld);
-				}
-			}
-		}
-
-		if(isset($data["tlds"])){
-			return $data["tlds"];
-		}else{
-			array();
-		}
+		 foreach($groups as $group) {
+			 $tlds_of_the_group = DomainCheck::SQLCall("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id = ? LIMIT 1", array($group));
+			 if($tlds_of_the_group){
+				 $tlds_of_the_group_array = explode(' ', $tlds_of_the_group["tlds"]);
+				 //remove all empty elements (yes it happens)
+				 $i=0;
+				 foreach($tlds_of_the_group_array as $tld){
+					 if(empty($tld)){
+						 unset($tlds_of_the_group_array[$i]);
+					 }
+					 $i++;
+				 }
+				 $tlds = array_merge($tlds, $tlds_of_the_group_array);
+			 }
+		 }
+		 return $tlds;
 	}
 
     /*
@@ -883,8 +860,11 @@ if(isset($_REQUEST["currency"])){
 	}
 }
 
+$domains = (isset($_REQUEST["domains"])) ? $_REQUEST["domains"] : "";
+
 //Instanciate .the DomainCheck class and send the request
 $domaincheck = new DomainCheck( $_REQUEST["domain"],
+								$domains,
 								$_REQUEST["tldgroup"],
 								$action,
 								$_SESSION["ispapi_registrar"],
