@@ -69,156 +69,43 @@ $( document ).ready(function() {
 
     //handle the feedback message for a searched domain
     function handleFeedbackMessage(data){
-        console.log(data);
-        if(data.feedback.type == "error"){ //I had to handle 'error' case like this-otherwise it is not working properly
-            var domainName = data.feedback.domain;
+        // error, backorder, available, taken
+        if(data.feedback.f_type){
+            var domainName = data.feedback.id;
             var index = domainName.indexOf(".");
             var domainLabel = domainName.substr(0, index);
             var tldZone = domainName.substr(index + 0);
             $("#domain-in-box").removeAttr('style');
-            $("#domain-in-box").addClass("domaininbox-taken");
-            $('.status-text').append("We currently do not support this domain");
+            $('.status-text').append(data.feedback.f_message);
             $('.domainlabel').append(domainLabel);
             $('.tldzone').append(tldZone);
-            $('.domain-description').append("But not to worry, we have other domains you might be interested in. Check them out!<br>");
-            $('.action-button').remove();
-        }
-        if(data.feedback.type){
-            var domainsInCart = [];
-            if(data.data[0].cart){
-                $.each(data.data[0].cart.domains, function(n, currentElem) {
-                    domainsInCart.push(currentElem.domain);
-                });
+            if(data.feedback.f_type == "error" || data.feedback.f_type == "taken"){ //anthony.coco //tulsi.co
+                $("#domain-in-box").addClass("domaininbox-taken");
+                $('.domain-description').append("But not to worry, we have other domains you might be interested in. Check them out!<br>");
+                $('.action-button').remove();
             }
-            var domainName = data.feedback.domain;
-            // var domainName = data.data[0].id;
-            var index = domainName.indexOf(".");
-            var domainLabel = domainName.substr(0, index);
-            var tldZone = domainName.substr(index + 0);
-        }
-        if(data.feedback.type == "backorder" || (data.feedback.type == "taken" && data.data[0].backordered == "1")){ //anthony.com
-            var backorderprice = data.data[0].backorderprice;
-            $("#domain-in-box").removeAttr('style');
-            $("#domain-in-box").addClass("domaininbox-backorder");
-            $('.status-text').append("This domain is registered but it can be still be yours!");
-            $('.domainlabel').append(domainLabel);
-            $('.tldzone').append(tldZone);
-            if(data.data[0].backordered == "1"){
-                $("#actionbutton").html('Added').addClass("action-button-added");
-            }
-            else{
+            if(data.feedback.f_type == "backorder"){ //anthony.com
+                $("#domain-in-box").addClass("domaininbox-backorder");
                 $('.action-button').append("Backorder");
+                $('.domain-description').append("using our backorder system, we will attempt to register the domain as soon as it becomes available.");
+                $('.price-of-domain').append("<br>"+data.feedback.backorderprice+" upon successful registration<br>");
             }
-            $('.domain-description').append("using our backorder system, we will attempt to register the domain as soon as it becomes available.");
-            $('.price-of-domain').append("<br>"+backorderprice+" upon successful registration<br>");
-            $('.renewalprice-of-domain').append("Renewal:00.00 USD");
-
-            $(".action-button").click(function(){
-                var command = "CreateBackorder";
-                $.ajax({
-                    type: "POST",
-                    async: true,
-                    dataType: "json",
-                    url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
-                    data: {
-                        COMMAND: command,
-                        DOMAIN: domainName,
-                        TYPE: "FULL"
-                    },
-                    success: function(data) {
-                        console.log(data);
-                        if(command=="CreateBackorder" && data.CODE==200){
-                            $("#actionbutton").html('Added').addClass("action-button-added");
-                            noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-                        }
-                        else if(data.CODE==531){
-                            noty({text: 'Login Required', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                        }
-                        else{
-                            // noty({text: 'An error occured: ' + data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                        }
-                    },
-                    error: function(data) {
-                        noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                    }
-                });
-            });
-        }
-        if(data.feedback.type == "taken" && data.data[0].backordered == "0"){ //tulsi.co
-            $("#domain-in-box").removeAttr('style');
-            $("#domain-in-box").addClass("domaininbox-taken");
-            $('.status-text').append("This domain is not available");
-            $('.domainlabel').append(domainLabel);
-            $('.tldzone').append(tldZone);
-            $('.domain-description').append("But not to worry, we have other domains you might be interested in. Check them out!");
-            $('.action-button').remove();
-        }
-        if(data.feedback.type == "available"){ //premium - anthony.blog /normal-testi234.com
-            var registerprice = data.data[0].registerprice;
-            var renewprice = data.data[0].renewprice;
-            $("#domain-in-box").removeAttr('style');
-            $("#domain-in-box").addClass("domaininbox-available");
-            $('.status-text').append("Your domain is available!");
-            $('.domainlabel').append(domainLabel);
-            $('.tldzone').append(tldZone);
-            if(data.data[0].premiumtype){
-                $('.premium-label').append("PREMIUM");
-                $('.domain-description').append("This is a registry premium domain. It is classified differently than a standard domain which may affect its pricing.<br>");
-            }
-            if (domainsInCart.indexOf(domainName) > -1) {
-                $("#actionbutton").html('Added').addClass("action-button-added");
-            }
-            else{
-                $('.action-button').append("Add to cart");
-            }
-            //
-            $('.price-of-domain').append("<br>"+registerprice);
-            $('.renewalprice-of-domain').append("Renewal: "+renewprice);
-
-            $(".action-button").click(function(){
-                $("#actionbutton").html('Added').addClass("action-button-added");
-                var params = {};
-                params['a'] = 'addToCart';
-                params['domain'] = domainName;
-                params['token'] = $("#domainform").find('input').eq(0).attr("value");
-                if(data.data[0].premiumtype){
-                    var paramspremium = {};
-                    paramspremium['action'] = 'addPremiumDomainToCart';
-                    paramspremium['domain'] = domainName;
-
-                    var regex = /[\d|,|.|e|E|\+]+/g;
-                    var registerpricet = registerprice.match(regex);
-                    var renewpricet = renewprice.match(regex);
-                    paramspremium['registerprice']= registerpricet[0];
-                    paramspremium['renewalprice']= renewpricet[0];
-                    $.ajax({
-                          type: "GET",
-                          data: paramspremium,
-                          async: false,
-                          url: "{/literal}{$modulepath}{literal}ajax.php?"
-                    });
-                }else{
-                    $.ajax({
-                          url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
-                          type: "POST",
-                          data: params,
-                          async: false
-                    });
+            if(data.feedback.f_type == "available"){ //premium - anthony.blog /normal-testi234.com
+                $("#domain-in-box").addClass("domaininbox-available");
+                if(data.feedback.premiumtype){
+                    $('.premium-label').append("PREMIUM");
+                    $('.domain-description').append("This is a registry premium domain. It is classified differently than a standard domain which may affect its pricing.<br>");
                 }
-
-            });
-
+                $('.action-button').append("Add to cart");
+                $('.price-of-domain').append("<br>"+data.feedback.registerprice);
+                $('.renewalprice-of-domain').append("Renewal: "+data.feedback.renewprice);
+            }
         }
+
         // if(data.feedback.type){
-        //     console.log(data.feedback);
         //     //TODO Tulsi :)
         // }
         // TODO : on GO button click, the box is not cleared
-
-        // $("#domain-in-box").html("");
-        // var test = $("form");
-        // console.log(test);
-        // $("form")[0].reset();
     }
 
     //MAIN FUNCTION: handle the availability checks
@@ -454,7 +341,7 @@ $( document ).ready(function() {
                 handleFeedbackMessage(data);
 
 				var nb_results = 0;
-				$.each(data["data"], function(index, element) {
+				$.each(data["checkorder"], function(index, element) {
 					var domain = element; //.replace(/\./g, '');
 
                     //TODO split and bold the tld
@@ -495,7 +382,7 @@ $( document ).ready(function() {
 					checkdomains(new Array(), true);
 					return;
 				}else{
-                    startChecking(data["data"]);
+                    startChecking(data["checkorder"]);
 				}
 
 			},
