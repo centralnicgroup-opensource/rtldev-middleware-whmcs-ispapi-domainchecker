@@ -227,7 +227,7 @@ class DomainCheck
 		}else{
 			//if $searched_tld not empty display the message
 			if(!empty($searched_tld)){
-				$feedback = array("type" => "error", "message" => "Extension .$searched_tld not supported !", "domain" => $this->domain);
+				$feedback = array("f_type" => "error", "f_message" => "Extension .$searched_tld not supported !", "id" => $this->domain);
 				$do_not_search = true;
 			}
 		}
@@ -466,15 +466,16 @@ class DomainCheck
 				continue;
 			}
 		}
+
 		if(isset($_SESSION["domain"]) && $_SESSION["domain"] == $searched_domain_object["id"]){
 			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
-				$feedback = array("type" => "backorder", "message" => "Backorder Available!", "domain" => $searched_domain_object["id"]);
+				$feedback = array_merge(array("f_type" => "backorder", "f_message" => "Backorder Available!"), $searched_domain_object);
 			}
 			elseif($searched_domain_object["status"] == "taken"){
-				$feedback = array("type" => "taken", "message" => "Domain already taken!", "domain" => $searched_domain_object["id"]);
+				$feedback = array_merge(array("f_type" => "taken", "f_message" => "Domain already taken!"), $searched_domain_object);
 			}
 			elseif($searched_domain_object["status"] == "available"){
-				$feedback = array("type" => "available", "message" => "Your domain is available!", "domain" => $searched_domain_object["id"]);
+				$feedback = array_merge(array("f_type" => "available", "f_message" => "Your domain is available!"), $searched_domain_object);
 			}
 		}
     	$response_array = array("data" => $response, "feedback" => $feedback);
@@ -774,6 +775,17 @@ class DomainCheck
 
     	return $newlist;
     }
+
+	public static function SQLCall($sql, $params, $fetchmode = "fetch"){
+		$pdo = Capsule::connection()->getPdo();
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute($params);
+		if($fetchmode == "fetch"){
+			return $stmt->fetch(PDO::FETCH_ASSOC);
+		}else{
+			return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		}
+	}
 
     /*
      * Get all domains of a TLD group
