@@ -1,9 +1,6 @@
 <?php
 use WHMCS\Database\Capsule;
-$module_version = "7.2.0";
-
-//if (!defined("WHMCS"))
-//	die("This file cannot be accessed directly");
+$module_version = "7.3.0";
 
 /*
  * Configuration of the addon module.
@@ -11,15 +8,12 @@ $module_version = "7.2.0";
 function ispapidomaincheck_config() {
 	global $module_version;
     $configarray = array(
-	    "name" => "ISPAPI DomainCheck",
-	    "description" => "The ISPAPI DomainCheck use the configured ISPAPI registrar module to check the availability of domains.",
+	    "name" => "ISPAPI High Performance DomainChecker",
+	    "description" => "This addon provides a new domainchecker interface with high speed checks and premium support.",
 	    "version" => $module_version,
 	    "author" => "HEXONET",
-	    "language" => "english",
-		"fields" => array(
-			"username" => array ("FriendlyName" => "Admin username", "Type" => "text", "Size" => "30", "Description" => "[REQUIRED]", "Default" => "admin", )
-	    ));
-
+	    "language" => "english"
+	);
     return $configarray;
 }
 
@@ -54,84 +48,6 @@ function ispapidomaincheck_activate() {
 	$query = "CREATE TABLE IF NOT EXISTS ispapi_tblsettings (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, aftermarket_premium INT(10), registry_premium INT(10), normal_suggestion_mode INT(10), suggestion_mode INT(10));"; #,
 	$result = full_query($query);
 
-
-	//IF NOT EXISTS create products for premium domains (DONUTS)
-	$result = mysql_query("SELECT * FROM tblproductgroups WHERE name='PREMIUM DOMAIN' LIMIT 1");
-	$data = mysql_fetch_array($result);
-	if(!empty($data)){
-		$productgroupid = $data["id"];
-	}else{
-		$productgroupid = insert_query("tblproductgroups",array("name" => "PREMIUM DOMAIN", "hidden" => 1));
-	}
-
-	$classes = array("PREMIUM_DONUTS_A" => "1234",
-			"PREMIUM_DONUTS_A+" => "1234",
-			"PREMIUM_DONUTS_AA" => "1234",
-			"PREMIUM_DONUTS_AA+" => "1234",
-			"PREMIUM_DONUTS_AAA+" => "1234",
-			"PREMIUM_DONUTS_AAAA" => "1234",
-			"PREMIUM_DONUTS_B" => "1234",
-			"PREMIUM_DONUTS_B+" => "1234",
-			"PREMIUM_DONUTS_BB" => "1234",
-			"PREMIUM_DONUTS_BB+" => "1234",
-			"PREMIUM_DONUTS_BBB+" => "1234",
-			"PREMIUM_DONUTS_BBBB" => "1234",
-			"PREMIUM_MENU_A" => "1234",
-			"PREMIUM_MENU_B" => "1234",
-			"PREMIUM_MENU_C" => "1234",
-			"PREMIUM_MENU_D" => "1234",
-			"PREMIUM_CEO_A" => "1234",
-			"PREMIUM_CEO_B" => "1234",
-			"PREMIUM_CEO_C" => "1234",
-			"PREMIUM_CEO_D" => "1234",
-			"PREMIUM_BUILD_A" => "1234",
-			"PREMIUM_BUILD_B" => "1234",
-			"PREMIUM_BUILD_C" => "1234",
-			"PREMIUM_BUILD_D" => "1234",
-			"PREMIUM_BUILD_E" => "1234",
-			"PREMIUM_RIGHTSIDE_A" => "1234",
-			"PREMIUM_RIGHTSIDE_B" => "1234",
-			"PREMIUM_RIGHTSIDE_C" => "1234",
-			"PREMIUM_RIGHTSIDE_D" => "1234",
-			"PREMIUM_RIGHTSIDE_E" => "1234",
-			"PREMIUM_RIGHTSIDE_F" => "1234",
-			"PREMIUM_RIGHTSIDE_G" => "1234",
-			"PREMIUM_RIGHTSIDE_H" => "1234",
-			"PREMIUM_RIGHTSIDE_I" => "1234",
-			"PREMIUM_RIGHTSIDE_J" => "1234",
-			"PREMIUM_RIGHTSIDE_K" => "1234",
-			"PREMIUM_RIGHTSIDE_L" => "1234",
-			"PREMIUM_RIGHTSIDE_M" => "1234",
-			"PREMIUM_RIGHTSIDE_N" => "1234",
-			"PREMIUM_RIGHTSIDE_O" => "1234",
-			"PREMIUM_RIGHTSIDE_P" => "1234",);
-
-	$currencies = array();
-	$result = select_query("tblcurrencies", "id");
-	while($data = mysql_fetch_array($result)){
-		array_push($currencies, $data["id"]);
-	}
-
-	foreach($classes as $class => $price){
-
-		$result = mysql_query("SELECT * FROM tblproducts WHERE name='".mysql_real_escape_string($class)."'");
-		$data = mysql_fetch_array($result);
-		if(empty($data)){
-
-			$newid = insert_query("tblproducts",array("type" => "other",
-					"gid" => $productgroupid,
-					"name" => $class,
-					"description" => "",
-					"autosetup" => "payment",
-					"hidden" => "on",
-					"servertype" => "ispapipremium",
-					"paytype" => "recurring",
-					"retired" => "0",
-					"freedomain" => "on",
-					"freedomainpaymentterms" => "Annually",));
-		}
-
-	}
     return array('status'=>'success','description'=>'The ISPAPI Domaincheck Addon was successfully installed.');
 }
 
@@ -255,6 +171,7 @@ function ispapidomaincheck_clientarea($vars) {
 			}
 		}
 	}
+	
 	//filter the whole list to catch only the HEXONET registars
 	foreach($modulelist as $file){
 		if(file_exists(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php")){
@@ -449,31 +366,6 @@ function ispapidomaincheck_output($vars) {
 
 
 function ispapidomaincheck_generalsettingscontent($modulelink){
-	//Aftermarket Currencies
-	###############################################################################
-	//Create aftermarket currencies table
-	full_query("CREATE TABLE IF NOT EXISTS ispapi_tblaftermarketcurrencies (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, currency TEXT, rate decimal(10,5));");
-
-	//insert currencies from whmcs to this table
-	$select = mysql_query("SELECT * FROM tblcurrencies where code != 'USD' and code != 'usd'");
-	while ($data = mysql_fetch_array($select)) {
-		$s = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies WHERE currency = '".$data["code"]."' limit 1");
-		$d = mysql_fetch_array($s);
-		if(empty($d)){
-			mysql_query("INSERT INTO ispapi_tblaftermarketcurrencies (currency,rate) VALUES ( '".strtoupper($data["code"])."', 0.0);");
-		}
-	}
-
-	//Delete old currencies from the ispapi_tblaftermarketcurrencies
-	$select = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies");
-	while ($data = mysql_fetch_array($select)) {
-		$s = mysql_query("SELECT * FROM tblcurrencies WHERE code = '".$data["currency"]."'");
-		$d = mysql_fetch_array($s);
-		if(empty($d)){
-			mysql_query("DELETE FROM ispapi_tblaftermarketcurrencies WHERE currency = '".$data["currency"]."'");
-		}
-	}
-	###############################################################################
 
 	echo '<div id="tab0box" class="tabbox tab-content">';
 
@@ -502,24 +394,15 @@ function ispapidomaincheck_generalsettingscontent($modulelink){
 			}
 
 		}
-
-		$select = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies");
-		while ($data = mysql_fetch_array($select)) {
-			update_query( "ispapi_tblaftermarketcurrencies", array("rate" => $_REQUEST[$data["currency"]]), array( "currency" => $data["currency"]) );
-		}
-
 		echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
 	}
 	###############################################################################
 
 	//get the data from the DB for displaying
 	###############################################################################
-	$adminuser = $startsequence = $namemedia = "";
 	$select = mysql_query("SELECT * FROM ispapi_tblsettings LIMIT 1");
 	$data = mysql_fetch_array($select);
 	if(!empty($data)){
-		$aftermarket = $data["aftermarket_premium"];
-		$registry = $data["registry_premium"];
 		$suggestion_mode = $data["suggestion_mode"];
 		$normal_mode = $data["normal_suggestion_mode"];
 
@@ -529,37 +412,9 @@ function ispapidomaincheck_generalsettingscontent($modulelink){
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%" style="color:#333333;"><tbody>';
-
-	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Aftermarket Premium Domains</td></tr>';
-	echo '<tr><td width="50%" class="fieldlabel"><b>Show aftermarket premium domains</b></td><td class="fieldarea"><input type="radio" name="aftermarket_premium" value="1" '.(($aftermarket==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;<input type="radio" name="aftermarket_premium" value="0" '.(($aftermarket!=1)?"checked":"").'> No</td></tr>';
-
-	echo '<tr><td width="50%" class="fieldlabel" valign="top"><b>Aftermarket conversion rates<b></td><td style="padding-left:10px;" class="fieldarea">
-	<p style="margin-top:0px;">Aftermarket Premium Domains are charged in USD. A currency conversion rate is required in order to display the price in your selling currencies.<br>
-	If your WHMCS default currency is set to USD you don\'t need to fill the conversion rates here.</p>';
-
-	$select = mysql_query("SELECT * FROM ispapi_tblaftermarketcurrencies");
-	while ($data = mysql_fetch_array($select)) {
-			echo "1 USD =  <input name='".$data["currency"]."' size='10' type='text' value='".$data["rate"]."'> ".$data["currency"]."<br>";
-	}
-
-	echo '</td></tr>';
-
-	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Registry Premium Domains</td></tr>';
-
-	echo '<tr><td width="50%" class="fieldlabel"><b>Show registry premium domains</b></td><td class="fieldarea"><input type="radio" name="registry_premium" value="1" '.(($registry==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;<input type="radio" name="registry_premium" value="0" '.(($registry!=1)?"checked":"").'> No</td></tr>';
-
-	####################################
 	echo '<tr><td colspan="2" style="font-size:14px;color:#111111;"><b>Domain Suggestion Mode</td></tr>';
-
 	echo '<tr><td width="50%" class="fieldlabel"><b>suggestions</b></td><td class="fieldarea"><input type="radio" name="suggestion_mode" value="suggestions" '.(($suggestion_mode==1)?"checked":"").' ></td></tr>';
 	echo '<tr><td width="50%" class="fieldlabel"><b>normal</b></td><td class="fieldarea"><input type="radio" id="radioButton" name="suggestion_mode"  value="normalsuggestions" '.(($normal_mode==1)?"checked":"").'></td></tr>';
-
-// 	echo '<tr><td width="50%" class="fieldlabel"><b>normal</b></td><td class="fieldarea"><input type="radio" id="radioButton" name="suggestion_mode"  value="normalsuggestions"
-// </td></tr>';
-// 	echo '<tr><td width="50%" class="fieldlabel"><b>suggestions</b></td><td class="fieldarea"><input type="radio" name="suggestion_mode" value="suggestions" '.(($suggestion_mode==1)?"checked":"").'> Yes &nbsp;&nbsp;&nbsp;</td></tr>';
-
-	####################################
-
 	echo '</tbody></table></div>';
 	echo '<p align="center"><input class="btn" name="savegeneralsettings" type="submit" value="Save Changes"></p>';
 	echo '</form>';
