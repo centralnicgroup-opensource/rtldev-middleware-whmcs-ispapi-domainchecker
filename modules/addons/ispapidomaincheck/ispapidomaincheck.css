@@ -234,6 +234,7 @@ span.taken{
     color: #939598;
     text-transform: uppercase;
     font-size: 12px;
+    font-weight: bold;
 }
 .first-line{
     color: #939598;
