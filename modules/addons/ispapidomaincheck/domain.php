@@ -17,9 +17,7 @@ use WHMCS\Database\Capsule;
 use WHMCS\Domains\Pricing\Premium;
 
 
-//WORKARROUND: Get a list of all HEXONET registrar modules and include the registrar files
-//For some users we need this hack. This is normally done in the ispapidomaincheck file.
-//###########################################################################################
+//Get a list of all HEXONET registrar modules and include the registrar files
 if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])){
 	$registrars = DomainCheck::SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
 	foreach($registrars as $registrar){
@@ -32,7 +30,6 @@ if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])
 		}
 	}
 }
-//###########################################################################################
 
 
 /**
@@ -54,7 +51,8 @@ class DomainCheck
      *  Constructor
      *
      *  @param string $domain The searched domain
-     *  @param string $tldgroup The searched tldgroup
+     *  @param string $domains The list of domains to check
+     *  @param string $tldgroup Restrict the search to the given tldgroups
      *  @param string $action The action
      *  @param array $registrar The configured registrars (can be more than one)
      *  @param array $currency The selected currency
@@ -66,16 +64,13 @@ class DomainCheck
 		$this->action = $action;
 		$this->registrar = $registrar;
 		$this->currency = $currency;
+
 		$this->doDomainCheck();
     }
 
     /*
      * This function is called on each instantiation
-     * Call the right method for an given action
-     *
-     * Allowed actions:
-     *  - getList: returns the complete list of domains
-     *  - if empty -> startDomainCheck
+     * Calls the right method for a given action
      */
     private function doDomainCheck(){
     	if(isset($this->action) && ($this->action == "getList")){
@@ -87,7 +82,7 @@ class DomainCheck
     }
 
     /*
-     * Split the TLD list in 2 lists, the first one with the TLDs configured with HEXONET, the second one with all others.
+     * Splits the complete WHMCS TLDs in 2 lists, the first one with the TLDs configured with HEXONET, the second one with all others.
      *
      * @return array an array with 2 keys: ispapi and no_ispapi
      */
@@ -110,21 +105,7 @@ class DomainCheck
     }
 
 	/*
-     * Helper to delete an element from an array.
-	 *
-     * @param string $element The element to delete
-     * @param array &$array The array
-	 *
-     */
-	public static function deleteElement($element, &$array){
-	    $index = array_search($element, $array);
-	    if($index !== false){
-	        unset($array[$index]);
-	    }
-	}
-
-	/*
-     * Send an API command to the registrar and returns the response
+     * Sends API command to the registrar and returns the response
 	 *
 	 * @param string $registrar The registrar
      * @param string $command The API command to send
@@ -139,7 +120,6 @@ class DomainCheck
 
     /*
      * Returns the list of domains that have to be checked.
-     * First the domains configured with HEXONET, then the others.
      */
     private function getDomainList(){
 
@@ -158,9 +138,6 @@ class DomainCheck
 
     	$this->domain = strtolower($this->domain);
 
-		//TODO remove that !!!
-		$_SESSION["domain"] = $this->domain;
-
     	$feedback = array();
     	$do_not_search = false;
     	$domainlist = array();
@@ -173,6 +150,13 @@ class DomainCheck
 
 		if( $this->domainSuggestionModeActivated() ){
 			//SUGGESTIONS MODE
+
+			//use the first ispapi registrar to query the suggestion list
+			$registrar = $this->registrar[0];
+
+			//first convert the search from IDN to Punycode as this is requested by QueryDomainSuggestionList command.
+			$searched_label = $this->convertToPunycode($searched_label, $registrar);
+
 			$command = array(
 				"COMMAND" => "QueryDomainSuggestionList",
 				"KEYWORD" => $searched_label,
@@ -180,12 +164,12 @@ class DomainCheck
 				"SOURCE" => "ISPAPI-SUGGESTIONS",
 			);
 
-			//use the first ispapi registrar to query the suggestion list
-			$suggestions = $this->sendAPICommand($this->registrar[0], $command);
+			$suggestions = $this->sendAPICommand($registrar, $command);
 
-			$domainlist = $suggestions['PROPERTY']['DOMAIN'];
+			//convert the domainlist to IDN again
+			$domainlist = $this->convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
 
-			//TODO: check if we need to add the TLDs which we are not supporting at hexonet to the list also...
+			//TODO: add the TLDs which we are not supported at HEXONET to the list
 		}
 		else{
 			//REGULAR MODE
@@ -272,9 +256,9 @@ class DomainCheck
 	}
 
 	/*
-     * Start the domain check procedure.
+     * Starts the domain check procedure.
      * Handle the check domain with the configured ispapi registrar account configured in WHMCS
-     * return a JSON list of all domains with the availability
+     * returns a JSON list of all domains with the availability
      */
     private function startDomainCheck(){
     	$feedback = array();
@@ -344,7 +328,7 @@ class DomainCheck
 
 					$status = "available";
 				}
-				elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index])){ //IT IS A PREMIUMDOMAIN // || !empty($check["PROPERTY"]["CLASS"][$index])
+				elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index])){ //IT IS A PREMIUMDOMAIN
 					if($premiumEnabled){
 						//IF PREMIUM DOMAIN ENABLED IN WHMCS - DISPLAY AVAILABLE + PRICE
 
@@ -439,19 +423,19 @@ class DomainCheck
 
     	}
 
-		//Handle the displaying of the backorder button in the search response TODO: rewrite that
+		//Handle the displaying of the backorder button in the search response
 		$response = $this->handleBackorderButton($response);
 
 		// Feedback for the template
 		$searched_domain_object = array();
 		foreach($response as $item){
-			if($item["id"] == $_SESSION["domain"]){
+			if($item["id"] == $this->domain){
 				$searched_domain_object = $item;
 				continue;
 			}
 		}
 
-		if(isset($_SESSION["domain"]) && $_SESSION["domain"] == $searched_domain_object["id"]){
+		if(isset($this->domain) && $this->domain == $searched_domain_object["id"]){
 			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
 				$feedback = array_merge(array("f_type" => "backorder", "f_message" => "Backorder Available!"), $searched_domain_object);
 			}
@@ -469,7 +453,7 @@ class DomainCheck
     }
 
 	/*
-     * Add the backorder functionality ẃhen module installed.
+     * Add the backorder functionality when ISPAPI Backorder module installed.
      */
 	private function handleBackorderButton($response){
 		//Check if backorder module is installed
@@ -522,13 +506,16 @@ class DomainCheck
 	}
 
     /*
-     * Returns the price for a given tld for registration
+     * Returns the registration price for a given tld
      *
      * @param string $tld The domain extension
+
      * @return array An array with price for 1 to 10 years
      *
      */
 	private function getTLDprice($tld) {
+		$domainprices = array();
+
 		//get the selected currency
 		$selected_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 
@@ -542,7 +529,6 @@ class DomainCheck
 
 		$list = DomainCheck::SQLCall($sql, array($selected_currency_array["id"], ".".$tld), "fetchall");
 
-		$domainprices = array();
 		foreach($list as $item) {
 			if(!empty($item)){
 				for ( $i = 1; $i <= 10; $i++ ) {
@@ -557,6 +543,10 @@ class DomainCheck
 
 	/*
      * Returns the backorder price for a domain
+	 *
+	 * @param string $domain The domain
+
+     * @return string The backorder price well formatted in the selected currency
 	 */
 	private function getBackorderPrice($domain) {
 		//get the selected currency
@@ -575,6 +565,7 @@ class DomainCheck
      *
      * @param string $registrarprice The domain registration price asked by the registrar
      * @param string $registrarpriceCurrency The currency of this price
+
      * @return string The price well formatted
 	 *
 	 * TODO: Sometimes we are getting rounding problems (1 cent), not exactly the same price than with the standard lookup.
@@ -585,10 +576,14 @@ class DomainCheck
 		return $this->convertPriceToSelectedCurrency($registrarprice, $registrarpriceCurrency);
 	}
 
-
 	/*
-	 * Convert the price in the selected currency and add the markup.
+	 * Converts the price in the selected currency and add the markup.
 	 * Selected currency is taken from the session.
+	 *
+	 * @param string $price A price
+     * @param string $currency A currency
+
+     * @return string The price converted and well formatted
 	 */
 	private function convertPriceToSelectedCurrency($price, $currency) {
 		//get the markup from the WHMCS backend and add it to the registrar price
@@ -633,14 +628,12 @@ class DomainCheck
 		return "";
 	}
 
-
-
-
 	/*
-     * Returns the price for a premiumdomain renewal. (This function adds the markup)
+     * Returns the price for a premiumdomain renewal.
      *
      * @param string $registrarprice The domain registration price asked by the registrar
      * @param string $registrarpriceCurrency The currency of this price
+
      * @return string The price well formatted
 	 *
      */
@@ -664,13 +657,13 @@ class DomainCheck
 
 
 	/*
-	 * Returns the formated price
+	 * Returns the formatted price
 	 * (10.00 -> $10.00 USD)
 	 *
 	 * @param integer $number The price
 	 * @param array $cur The currency array
 	 *
-	 * @return string The formated price with the right unit at the right place
+	 * @return string The formatted price with the right unit at the right place
 	 *
 	 */
 	private function formatPrice($number, $cur) {
@@ -749,7 +742,18 @@ class DomainCheck
     	return $newlist;
     }
 
+	/*
+     * Helper to send SQL call to the Database with Capsule
+	 * Set $debug = true in the function to have DEBUG output in the JSON string
+     *
+     * @param string $sql The SQL query
+     * @param array $params The parameters of the query
+     * @param $fetchmode The fetching mode of the query (fetch or fetchall) - DEFAULT = fetch
+
+     * @return json|array The SQL query response or JSON string with error message.
+     */
 	public static function SQLCall($sql, $params, $fetchmode = "fetch"){
+		$debug = false;
 
 		try {
 			$pdo = Capsule::connection()->getPdo();
@@ -761,20 +765,20 @@ class DomainCheck
 			}else{
 				return $stmt->fetchAll(PDO::FETCH_ASSOC);
 			}
-
 		} catch (\Exception $e) {
-			//echo "SQL ERROR: {$e->getMessage()}<br>";
-			echo "QUERY: ".$sql;
-			print_r($params);
+			if($debug){
+				echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => "An error occured, please contact the support.", "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ) );
+			}else{
+				echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => "An error occured, please contact the support.") ) );
+			}
+			die();
 		}
-
-
 	}
 
     /*
-     * Get all domains of a TLD group
+     * Get all domains of a categorie
      *
-     * @return array An array with all TLDs of the current group.
+     * @return array An array with all TLDs of the selected categories.
      */
 	 private function getTLDGroups(){
 		 $groups = explode(',', $this->tldgroup);
@@ -819,6 +823,62 @@ class DomainCheck
 		}
     }
 
+	/*
+	 * Convert the domain from IDN to Punycode (müller.com => xn--mller-kva.com)
+	 *
+	 * @param string|array $domain The domain name or an array of domains
+	 * @param IspApiConnection object $ispapi The IspApiConnection object to send API Requests
+	 * @return string|array Punycode of the domain name or array of Punycodes
+	 */
+	private function convertToPunycode($domain, $registrar){
+		$command = array(
+				"COMMAND" => "convertIDN",
+				"DOMAIN" => $domain
+		);
+		$response = $this->sendAPICommand($registrar, $command);
+
+		if(!is_array($domain)){
+			return $response["PROPERTY"]["ACE"][0];
+		}else{
+			return $response["PROPERTY"]["ACE"];
+		}
+	}
+
+	/*
+	 * Convert the domain from Punycode to IDN (xn--mller-kva.com => müller.com)
+	 *
+	 * @param string|array $domain The domain name or an array of domains
+	 * @param IspApiConnection object $ispapi The IspApiConnection object to send API Requests
+	 * @return string|array IDN of the domain name or array of IDNs.
+	 */
+	private function convertToIDN($domain, $registrar){
+		$command = array(
+				"COMMAND" => "convertIDN",
+				"DOMAIN" => $domain
+		);
+		$response = $this->sendAPICommand($registrar, $command);
+
+		if(!is_array($domain)){
+			return $response["PROPERTY"]["IDN"][0];
+		}else{
+			return $response["PROPERTY"]["IDN"];
+		}
+	}
+
+	/*
+     * Helper to delete an element from an array.
+	 *
+     * @param string $element The element to delete
+     * @param array &$array The array
+	 *
+     */
+	public static function deleteElement($element, &$array){
+	    $index = array_search($element, $array);
+	    if($index !== false){
+	        unset($array[$index]);
+	    }
+	}
+
     /*
      * Get the domain label.
      * (testdomain.net => testdomain)
@@ -855,19 +915,17 @@ class DomainCheck
 
 $action = (isset($_REQUEST["action"])) ? $_REQUEST["action"] : "";
 
-
-//Currency session will be send on the first ajax call
+$currency = $_SESSION["currency"];
 if(isset($_REQUEST["currency"])){
-	$_SESSION["currency"] = $_REQUEST["currency"];
+	$currency = $_REQUEST["currency"];
 
-	//if customer logged in, check the configured currency.
+	//if customer logged in, set the configured currency.
 	$ca = new WHMCS_ClientArea();
 	$ca->initPage();
 	if ($ca->isLoggedIn()) {
-		$result = mysql_query("SELECT currency FROM tblclients WHERE id=".$ca->getUserID());
-		$data = mysql_fetch_array($result);
-		$_SESSION["currency"] = $data["currency"];
-		$_SESSION["userid"] = $ca->getUserID();
+		$user = DomainCheck::SQLCall("SELECT currency FROM tblclients WHERE id=?", array($ca->getUserID()));
+		$currency = $user["currency"];
+		//$_SESSION["userid"] = $ca->getUserID();
 	}
 }
 
@@ -879,7 +937,7 @@ $domaincheck = new DomainCheck( $_REQUEST["domain"],
 								$_REQUEST["tldgroup"],
 								$action,
 								$_SESSION["ispapi_registrar"],
-								$_SESSION["currency"]);
+								$currency);
 $domaincheck->send();
 
 ?>
