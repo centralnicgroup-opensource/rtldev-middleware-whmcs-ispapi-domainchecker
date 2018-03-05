@@ -75,11 +75,35 @@ class DomainCheck
     private function doDomainCheck(){
     	if(isset($this->action) && ($this->action == "getList")){
     		$this->getDomainList();
-    	}else{
+    	}elseif(isset($this->action) && ($this->action == "removeFromCart")){
+    		$this->removeFromCart();
+		}elseif(isset($this->action) && ($this->action == "addToCart")){
+    		$this->addToCart();
+		}else{
     		$this->startDomainCheck();
     	}
     	$this->send();
     }
+
+	private function removeFromCart(){
+		$response = array();
+
+		if(isset($this->domain)){
+			foreach ($_SESSION["cart"]["domains"] as $index => $domain) {
+				if(in_array($this->domain, $domain)){
+					 unset($_SESSION["cart"]["domains"][$index]);
+					 $response["feedback"] = "The domain has been removed fronm the cart.";
+				}
+			}
+		}
+		$this->response = json_encode($response);
+	}
+
+	private function addToCart(){
+		$response = array();
+
+		$this->response = json_encode($response);
+	}
 
     /*
      * Splits the complete WHMCS TLDs in 2 lists, the first one with the TLDs configured with HEXONET, the second one with all others.

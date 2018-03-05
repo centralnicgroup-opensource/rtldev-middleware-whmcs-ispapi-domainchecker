@@ -125,6 +125,7 @@ ul.sub li.active {
 .first-line .tld-zone {
     font-weight: bold;
     font-size: 15px;
+    text-transform: lowercase;
 }
 .first-line .domain-label{
     font-weight: 500;
@@ -133,6 +134,7 @@ ul.sub li.active {
     font-size: 15px;
     margin-left: 30px;
     margin-right: 1px;
+    text-transform: lowercase;
 }
 .fa.fa-square-o{
     position:absolute;
@@ -149,7 +151,7 @@ ul.sub li.active {
     padding: 20px 20px 10px;
     border: 3px solid #00a651;
     margin: 20px 8px;
-    color: #0033a0;
+    color: #000;
     line-height: 1.45;
 }
 .domainlabel {
@@ -230,6 +232,8 @@ span.renewal{
 }
 span.taken{
     color: #939598;
+    text-transform: uppercase;
+    font-size: 12px;
 }
 .first-line{
     color: #939598;
@@ -276,15 +280,16 @@ span.spanelement{
     text-align: justify
 }
 .available {
-    font-size: 11px;
+    font-size: 12px;
     color: #00a850;
     font-weight: 700;
+    text-transform: uppercase;
 }
 .backorder.added{
     color: #00a850;
 }
 .backorder {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: capitalize;
     color: #0033a0;
@@ -293,11 +298,16 @@ span.spanelement{
     color: #00a850 !important;
 }
 .premium {
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: bold;
     text-transform: capitalize;
     color: #0033a0;
 }
+
+.more {
+    text-transform: capitalize;
+}
+
 .search-form {
   margin-top: 0;
 }

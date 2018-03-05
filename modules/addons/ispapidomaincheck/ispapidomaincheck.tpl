@@ -210,7 +210,7 @@ $( document ).ready(function() {
                                                 '<span class="see-more">'+
                                                     '<i class="more fa fa-caret-down" style="font-size: 14px;color: #939598;"></i>'+
                                                 '</span>'+
-                                                '<span class="taken more" style="font-size: 14px;color: #939598;"> More</span>'+
+                                                '<span class="more" style="font-size: 14px;color: #939598;"> More</span>'+
                                                 '<br><span> <br> </span>'+ //to create a gap in between
                                             '</div>';
                                             //
@@ -241,7 +241,7 @@ $( document ).ready(function() {
                                 $( "#" + id).find('span.domainname.domain-label').addClass('added');
                                 $( "#" + id).find('span.domainname.tld-zone').addClass('added');
                                 $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
-                                $( "#" + id + " div.availability").html("<span class='taken added' style='font-size: 11px; font-weight: 700;'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder added'> - BACKORDER</span>");
+                                $( "#" + id + " div.availability").html("<span class='taken added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder added'> - BACKORDER</span>");
                                 //hide the display register and renewprice as before
                                 $("#" + id).find('div.search-result-price').addClass('details hide');
                                 $("#" + id).find('div.search-result-price').eq(1).removeClass('details hide');
@@ -249,7 +249,7 @@ $( document ).ready(function() {
                             } else if(element.backorder_available == "1"){
                                 // when backorder available, display More option
                                 $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
-                                $( "#" + id + " div.availability").html("<span class='taken' style='font-size: 11px; font-weight: 700;'>{/literal}{$LANG.domaincheckertaken}{literal}</span> "  + "<span class='backorder '> - BACKORDER</span>");
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span> "  + "<span class='backorder '> - BACKORDER</span>");
                             } else {//backorder not available
                                 $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
                                 $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
