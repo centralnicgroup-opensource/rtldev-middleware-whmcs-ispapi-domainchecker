@@ -617,7 +617,7 @@ class DomainCheck
 					//FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
 					//get the default currency set in WHMCS
-					$default_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE default=? LIMIT 1", array(1));
+					$default_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE `default` = 1", array());
 					$default_currency_code = $default_currency_array["code"];
 
 					//get the price in the default currency
@@ -750,14 +750,25 @@ class DomainCheck
     }
 
 	public static function SQLCall($sql, $params, $fetchmode = "fetch"){
-		$pdo = Capsule::connection()->getPdo();
-		$stmt = $pdo->prepare($sql);
-		$stmt->execute($params);
-		if($fetchmode == "fetch"){
-			return $stmt->fetch(PDO::FETCH_ASSOC);
-		}else{
-			return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		try {
+			$pdo = Capsule::connection()->getPdo();
+			$stmt = $pdo->prepare($sql);
+			$stmt->execute($params);
+
+			if($fetchmode == "fetch"){
+				return $stmt->fetch(PDO::FETCH_ASSOC);
+			}else{
+				return $stmt->fetchAll(PDO::FETCH_ASSOC);
+			}
+
+		} catch (\Exception $e) {
+			//echo "SQL ERROR: {$e->getMessage()}<br>";
+			echo "QUERY: ".$sql;
+			print_r($params);
 		}
+
+
 	}
 
     /*
