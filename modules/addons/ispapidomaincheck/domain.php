@@ -123,32 +123,32 @@ class DomainCheck
 					$register_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
 					$renew_price = $this->getPremiumRenewPrice($registrar, $check["PROPERTY"]["CLASS"][0], $registrarpriceCurrency, $this->domain);
 
-					//echo "Register: ".$register_price;
-					//echo "Renew: ".$renew_price;
+					//if the prices we get from $_REQUEST are the same than the ones we have calculate, then we can add the dommain to the cart
+					if($_REQUEST['registerprice'] == $register_price && $_REQUEST['renewalprice'] == $renew_price){
 
-					//TODO: compare and then add to the cart.
+						//get the domain currency id
+						$domain_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarpriceCurrency));
+						$domain_currency_id = $domain_currency_array["id"];
 
-					// //get the domain currency id
-					// $domain_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarPriceCurrency));
-					// $domain_currency_id = $domain_currency_array["id"];
+						if(!is_array($_SESSION["cart"]["domains"])){
+							$_SESSION["cart"]["domains"] = array();
+						}
 
+						//TODO: check if we need to calculate the renew price also...
+						$premiumdomain = array( "type" => "register",
+												"domain" => $this->domain,
+												"regperiod" => "1",
+												"isPremium" => "1",
+												"domainpriceoverride" => $_REQUEST['registerprice'],
+												"registrarCostPrice" => $registrarprice,
+												"registrarCurrency" => $domain_currency_id,
+												"domainrenewoverride" =>  $_REQUEST['renewalprice'],
+												"registrarRenewalCostPrice" => $_REQUEST['renewalprice']
+											);
+						array_push($_SESSION["cart"]["domains"], $premiumdomain);
+						$response["feedback"] = "The domain has been added to the cart.";
 
-					if(!is_array($_SESSION["cart"]["domains"])){
-						$_SESSION["cart"]["domains"] = array();
 					}
-
-					$premiumdomain = array( "type" => "register",
-											"domain" => $this->domain,
-											"regperiod" => "1",
-											"isPremium" => "1",
-											"domainpriceoverride" => $_REQUEST['registerprice'],
-											"registrarCostPrice" => $_REQUEST['registerprice'],
-											"registrarCurrency" => 1,
-											"domainrenewoverride" =>  $_REQUEST['renewalprice'],
-											"registrarRenewalCostPrice" => $_REQUEST['renewalprice']
-										);
-					array_push($_SESSION["cart"]["domains"], $premiumdomain);
-					$response["feedback"] = "The domain has been added to the cart.";
 				}
 			}
 		}
@@ -507,6 +507,8 @@ class DomainCheck
 										"premiumtype" => "",
 										"registerprice" => $register_price,
 										"renewprice" => $renew_price,
+										"registerprice_unformatted" => $register_price_unformatted,
+										"renewprice_unformatted" => $renew_price_unformatted,
 										"status" => $status,
 										"cart" => $_SESSION["cart"]));
 
