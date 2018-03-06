@@ -85,6 +85,9 @@ class DomainCheck
     	$this->send();
     }
 
+	/*
+     * Removes the domain from the cart
+     */
 	private function removeFromCart(){
 		$response = array();
 
@@ -99,6 +102,9 @@ class DomainCheck
 		$this->response = json_encode($response);
 	}
 
+	/*
+     * Adds the Premium domain to the cart
+     */
 	private function addPremiumToCart(){
 		$response = array();
 
@@ -123,8 +129,8 @@ class DomainCheck
 					$register_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
 					$renew_price = $this->getPremiumRenewPrice($registrar, $check["PROPERTY"]["CLASS"][0], $registrarpriceCurrency, $this->domain);
 
-					//if the prices we get from $_REQUEST are the same than the ones we have calculate, then we can add the dommain to the cart
-					if($_REQUEST['registerprice'] == $register_price && $_REQUEST['renewalprice'] == $renew_price){
+					//if the registration price we get from $_REQUEST is the same than the one we calculated, then we can add the dommain to the cart
+					if(abs($_REQUEST['registerprice'] - $register_price) < 0.1 ){ //due to roundings, we are not comparing with simple =
 
 						//get the domain currency id
 						$domain_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarpriceCurrency));
@@ -134,17 +140,17 @@ class DomainCheck
 							$_SESSION["cart"]["domains"] = array();
 						}
 
-						//TODO: check if we need to calculate the renew price also...
 						$premiumdomain = array( "type" => "register",
 												"domain" => $this->domain,
 												"regperiod" => "1",
 												"isPremium" => "1",
-												"domainpriceoverride" => $_REQUEST['registerprice'],
+												"domainpriceoverride" => $register_price,
 												"registrarCostPrice" => $registrarprice,
 												"registrarCurrency" => $domain_currency_id,
-												"domainrenewoverride" =>  $_REQUEST['renewalprice'],
-												"registrarRenewalCostPrice" => $_REQUEST['renewalprice']
+												"domainrenewoverride" =>  $renew_price,
+												//"registrarRenewalCostPrice" => //NOT REQUIRED
 											);
+
 						array_push($_SESSION["cart"]["domains"], $premiumdomain);
 						$response["feedback"] = "The domain has been added to the cart.";
 
