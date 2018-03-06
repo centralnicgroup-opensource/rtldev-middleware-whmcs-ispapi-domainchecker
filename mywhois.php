@@ -1,4 +1,5 @@
 <?php
+
 require(dirname(__FILE__)."/init.php");
 require(dirname(__FILE__)."/includes/functions.php");
 require(dirname(__FILE__)."/includes/clientareafunctions.php");
