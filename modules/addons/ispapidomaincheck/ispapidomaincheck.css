@@ -260,7 +260,7 @@ span.spanelement{
 }
 .search-result-price {
     text-align: right; !important;
-    margin-bottom: 30px;
+    /*margin-bottom: 30px;*/
 }
 .added {
     font-weight: bold;
@@ -370,4 +370,12 @@ span.spanelement{
   font-size: 80%;
   font-weight: 600;
   margin-top: 10px;
+}
+
+.domainbox{
+    margin-bottom:12px;
+}
+
+.clear{
+    clear: both;
 }

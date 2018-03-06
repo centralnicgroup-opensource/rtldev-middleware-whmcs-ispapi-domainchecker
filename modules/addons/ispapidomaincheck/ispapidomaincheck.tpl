@@ -357,7 +357,7 @@ $( document ).ready(function() {
                     var domainLabel = domain.substr(0, index);
                     var tldZone = domain.substr(index + 0);
                     $('#searchresults').append(
-                        '<div id="' + domain + '">'+
+                        '<div class="domainbox" id="' + domain + '">'+
                             '<div class="col-xs-7 search-result-info clickable">'+
                                 '<div class="first-line">'+
                                     '<span class="checkboxarea"></span>'+
@@ -377,6 +377,7 @@ $( document ).ready(function() {
                                     '<span class="renewalprice added"></span>'+
                                 '</div>'+
                             '</div>'+
+                            '<div class="clear"></div>'+
                         '</div>'
                     );
 
@@ -483,7 +484,7 @@ $( document ).ready(function() {
                 var regex = /[\d|,|.|e|E|\+]+/g;
                 var registerprice = price.match(regex);
                 var renewprice = renewalprice.match(regex);
-                paramspremium['action'] = 'addPremiumDomainToCart';
+                paramspremium['action'] = 'addPremiumToCart';
                 paramspremium['domain'] = $(this).find('label').attr("value");
                 paramspremium['registerprice']= registerprice[0];
                 paramspremium['renewalprice']= renewprice[2];
@@ -493,7 +494,7 @@ $( document ).ready(function() {
                       type: "GET",
                       data: paramspremium,
                       async: false,
-                      url: "{/literal}{$modulepath}{literal}ajax.php?"
+                      url: "{/literal}{$modulepath}{literal}domain.php?"
                 });
             }else{
                 //normal domain in cart
@@ -517,7 +518,7 @@ $( document ).ready(function() {
             $.ajax({
                   type: "GET",
                   async: false,
-                  url: "{/literal}{$modulepath}{literal}ajax.php?action=removeFromCart&domain="+domainInCart
+                  url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainInCart
             });
         }
         // handling backorder domains on click
