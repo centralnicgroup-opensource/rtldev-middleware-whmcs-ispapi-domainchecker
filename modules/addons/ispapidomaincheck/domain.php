@@ -77,8 +77,8 @@ class DomainCheck
     		$this->getDomainList();
     	}elseif(isset($this->action) && ($this->action == "removeFromCart")){
     		$this->removeFromCart();
-		}elseif(isset($this->action) && ($this->action == "addToCart")){
-    		$this->addToCart();
+		}elseif(isset($this->action) && ($this->action == "addPremiumToCart")){
+    		$this->addPremiumToCart();
 		}else{
     		$this->startDomainCheck();
     	}
@@ -92,16 +92,66 @@ class DomainCheck
 			foreach ($_SESSION["cart"]["domains"] as $index => $domain) {
 				if(in_array($this->domain, $domain)){
 					 unset($_SESSION["cart"]["domains"][$index]);
-					 $response["feedback"] = "The domain has been removed fronm the cart.";
+					 $response["feedback"] = "The domain has been removed from the cart.";
 				}
 			}
 		}
 		$this->response = json_encode($response);
 	}
 
-	private function addToCart(){
+	private function addPremiumToCart(){
 		$response = array();
 
+		if(isset($this->domain)){
+			//get the registrarCostPrice, registrarRenewalCostPrice and registrarCurrency of the domain name
+			//calculate the customer price and compare with the price we get from $_REQUEST, if they match, add to the cart
+			$registrar_array = DomainCheck::SQLCall("SELECT autoreg FROM tbldomainpricing where extension = ?", array(".".$this->getDomainExtension($this->domain)));
+			$registrar = $registrar_array["autoreg"];
+			if(isset($registrar)){
+
+				$command = array(
+	    				"COMMAND" => "checkDomains",
+	    				"PREMIUMCHANNELS" => "*",
+	    				"DOMAIN" => array($this->domain)
+	    		);
+				$check = $this->sendAPICommand($registrar, $command);
+
+				if(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][0])){
+					$registrarprice = $check["PROPERTY"]["PRICE"][0];
+					$registrarpriceCurrency = $check["PROPERTY"]["CURRENCY"][0];
+
+					$register_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
+					$renew_price = $this->getPremiumRenewPrice($registrar, $check["PROPERTY"]["CLASS"][0], $registrarpriceCurrency, $this->domain);
+
+					//echo "Register: ".$register_price;
+					//echo "Renew: ".$renew_price;
+
+					//TODO: compare and then add to the cart.
+
+					// //get the domain currency id
+					// $domain_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarPriceCurrency));
+					// $domain_currency_id = $domain_currency_array["id"];
+
+
+					if(!is_array($_SESSION["cart"]["domains"])){
+						$_SESSION["cart"]["domains"] = array();
+					}
+
+					$premiumdomain = array( "type" => "register",
+											"domain" => $this->domain,
+											"regperiod" => "1",
+											"isPremium" => "1",
+											"domainpriceoverride" => $_REQUEST['registerprice'],
+											"registrarCostPrice" => $_REQUEST['registerprice'],
+											"registrarCurrency" => 1,
+											"domainrenewoverride" =>  $_REQUEST['renewalprice'],
+											"registrarRenewalCostPrice" => $_REQUEST['renewalprice']
+										);
+					array_push($_SESSION["cart"]["domains"], $premiumdomain);
+					$response["feedback"] = "The domain has been added to the cart.";
+				}
+			}
+		}
 		$this->response = json_encode($response);
 	}
 
@@ -316,6 +366,9 @@ class DomainCheck
 
     	$response = array();
 
+		//get the selected currency
+		$selected_currency_array = DomainCheck::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+
     	foreach($extendeddomainlist as $listitem){
     		//IDN convert before sending to checkdomain
     		$converted_domains = $this->convertIDN($listitem["domain"], $listitem["registrar"]);
@@ -336,6 +389,8 @@ class DomainCheck
 				$premiumchannel = $check["PROPERTY"]["PREMIUMCHANNEL"][$index];
 				$status="";
 				$premiumtype="";
+				$register_price_unformatted = "";
+				$renew_price_unformatted = "";
 				$register_price = "";
 				$renew_price = "";
 
@@ -350,6 +405,9 @@ class DomainCheck
 	    			$register_price = $whmcspricearray["domainregister"][1];
 				 	$renew_price = $whmcspricearray["domainrenew"][1];
 
+					$register_price = $this->formatPrice($register_price_unformatted, $selected_currency_array);
+					$renew_price = $this->formatPrice($renew_price_unformatted, $selected_currency_array);
+
 					$status = "available";
 				}
 				elseif(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index])){ //IT IS A PREMIUMDOMAIN
@@ -359,9 +417,11 @@ class DomainCheck
 						$registrarprice = $check["PROPERTY"]["PRICE"][$index];
 						$registrarpriceCurrency = $check["PROPERTY"]["CURRENCY"][$index];
 
-						$register_price = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
-						$renew_price = $this->getPremiumRenewPrice($listitem["registrar"], $check["PROPERTY"]["CLASS"][$index], $registrarpriceCurrency, $item);
+						$register_price_unformatted = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
+						$renew_price_unformatted = $this->getPremiumRenewPrice($listitem["registrar"], $check["PROPERTY"]["CLASS"][$index], $registrarpriceCurrency, $item);
 
+						$register_price = $this->formatPrice($register_price_unformatted, $selected_currency_array);
+						$renew_price = $this->formatPrice($renew_price_unformatted, $selected_currency_array);
 
 						if (strpos($check["PROPERTY"]["CLASS"][$index], $check["PROPERTY"]["PREMIUMCHANNEL"][$index]) !== false){
 							$premiumtype = "PREMIUM";
@@ -396,6 +456,8 @@ class DomainCheck
 											"premiumtype" => $premiumtype,
 											"registerprice" => $register_price,
 											"renewprice" => $renew_price,
+											"registerprice_unformatted" => $register_price_unformatted,
+											"renewprice_unformatted" => $renew_price_unformatted,
 											"status" => $status,
 											"cart" => $_SESSION["cart"]));
 
@@ -418,8 +480,12 @@ class DomainCheck
     			$code = "210";
 	    		//get the price for this domain
 				$whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
-				$register_price = $whmcspricearray["domainregister"][1];
-				$renew_price = $whmcspricearray["domainrenew"][1];
+				$register_price_unformatted = $whmcspricearray["domainregister"][1];
+				$renew_price_unformatted = $whmcspricearray["domainrenew"][1];
+
+				$register_price = $this->formatPrice($register_price_unformatted, $selected_currency_array);
+				$renew_price = $this->formatPrice($renew_price_unformatted, $selected_currency_array);
+
 				$status = "available";
     		}else{
     			$code = "211";
@@ -557,7 +623,7 @@ class DomainCheck
 			if(!empty($item)){
 				for ( $i = 1; $i <= 10; $i++ ) {
 					if (($item['year'.$i] > 0)){
-						$domainprices[$item['type']][$i] = $this->formatPrice($item['year'.$i], $selected_currency_array);
+						$domainprices[$item['type']][$i] = $item['year'.$i]; //$this->formatPrice($item['year'.$i], $selected_currency_array);
 					}
 				}
 			}
@@ -607,7 +673,7 @@ class DomainCheck
 	 * @param string $price A price
      * @param string $currency A currency
 
-     * @return string The price converted and well formatted
+     * @return string The price converted BUT NOT FORMATTED
 	 */
 	private function convertPriceToSelectedCurrency($price, $currency) {
 		//get the markup from the WHMCS backend and add it to the registrar price
@@ -626,12 +692,14 @@ class DomainCheck
 			//WE ARE ABLE TO CALCULATE THE PRICE
 			$domain_currency_code = $domain_currency_array["code"];
 			if($selected_currency_code == $domain_currency_code){
-				return $this->formatPrice($markupedprice, $selected_currency_array);
+				//return $this->formatPrice($markupedprice, $selected_currency_array);
+				return $markupedprice;
 			}else{
 				if($domain_currency_array["default"] == 1){
 					//CONVERT THE PRICE IN THE SELECTED CURRENCY
 					$convertedprice = $markupedprice * $selected_currency_array["rate"];
-					return $this->formatPrice($convertedprice, $selected_currency_array);
+					//return $this->formatPrice($convertedprice, $selected_currency_array);
+					return $convertedprice;
 				}else{
 					//FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
@@ -645,7 +713,8 @@ class DomainCheck
 					//get the price in the selected currency
 					$price_selected_currency = $price_default_currency * $selected_currency_array["rate"];
 
-					return $this->formatPrice($price_selected_currency, $selected_currency_array);
+					//return $this->formatPrice($price_selected_currency, $selected_currency_array);
+					return $price_selected_currency;
 				}
 			}
 		}
