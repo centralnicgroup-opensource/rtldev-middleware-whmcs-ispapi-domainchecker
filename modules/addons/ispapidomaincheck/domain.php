@@ -800,12 +800,22 @@ class DomainCheck
 	}
 
     /*
-     * Get all domains of a categorie
+     * Get all domains of the selected categories.
+	 * If not categorie selected, then returns all the categories.
      *
      * @return array An array with all TLDs of the selected categories.
      */
 	 private function getTLDGroups(){
-		 $groups = explode(',', $this->tldgroup);
+		 if(empty($this->tldgroup)){
+			 $groups = array();
+			 $all_categories = DomainCheck::SQLCall("SELECT id FROM ispapi_tblcategories", array(), "fetchall");
+			 foreach($all_categories as $categorie){
+				 array_push($groups, $categorie["id"]);
+			 }
+		 }else{
+			 $groups = explode(',', $this->tldgroup);
+		 }
+
 		 $tlds = array();
 
 		 foreach($groups as $group) {
