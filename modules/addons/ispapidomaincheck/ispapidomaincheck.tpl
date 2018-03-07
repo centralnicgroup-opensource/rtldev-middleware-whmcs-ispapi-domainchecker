@@ -119,9 +119,6 @@ $( document ).ready(function() {
                 $('.renewalprice-of-domain').append("Renewal: "+data.feedback.renewprice);
             }
         }
-        // if(data.feedback.type){
-        //     //TODO Tulsi :)
-        // }
     }
 
     //MAIN FUNCTION: handle the availability checks
@@ -146,11 +143,9 @@ $( document ).ready(function() {
 
                 //handle the feedback message
                 handleFeedbackMessage(data);
-
 				$.each(data["data"], function(index, element) {
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
 					$( "#" + id).addClass(element.checkover);
-                    // TULSI TODO: GO THROUGH EVERY ELEMENTS AND DISPLAY THE CORRECT DESIGN -DONE
                     //prices of the domains
                     var registerprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" registerprice ">'+element.registerprice+'</span>' + '</span>';
                     var hideregisterprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" registerprice added">'+element.registerprice+'</span>' + '</span>';
@@ -282,7 +277,6 @@ $( document ).ready(function() {
 			error: function (jqXHR, textStatus, errorThrown){
 				$("#errorsarea").text(errorThrown);
 				$("#errorsarea").show();
-				$("#resultsarea, #loading").hide();
 			}
 		});
 	}
@@ -309,23 +303,8 @@ $( document ).ready(function() {
 				return;
 			}else{
 				$("#searchform input[name='searched_domain']").attr("value", searched_domain );
-
-                //TODO: explain what is done here
-                //this part is related subcats. We do not have subcats anymore. Even though i would like to keep it for a while
-                // if($("#searchform input[name=tldgroup").attr("value") == ''){
-                //     var idsOfSubCat = $("#searchform").find('li');
-                //     var tmpid = [];
-                //     idsOfSubCat.each(function(){
-                //         var id = $(this).attr("id").substring(2);
-                //         tmpid.push(id);
-                //     });
-                //     $("#searchform input[name=tldgroup").attr("value",tmpid);
-                // }
 			}
 		}
-
-		//$("#loading").show();
-		//$("#pricingTable").hide();
 
         //get the complete list of all domains that should be checked
         // - 2 modes: normal and suggestions
@@ -340,7 +319,7 @@ $( document ).ready(function() {
 			data: getlistparams,
 			dataType:'json',
 			success: function(data, textStatus, jqXHR) {
-				$("#loading, #errorsarea, #successarea").hide();
+				$("#errorsarea, #successarea").hide();
 				$("#errorsarea, #successarea").html("");
 				$("#resultsarea").show();
 				$('#searchresults').find("div").remove();
@@ -349,10 +328,9 @@ $( document ).ready(function() {
                 handleFeedbackMessage(data);
 
 				var nb_results = 0;
-				$.each(data["data"], function(index, element) {
+				$.each(data["checkorder"], function(index, element) {
 					var domain = element; //.replace(/\./g, '');
 
-                    //TODO split and bold the tld - DONE
                     var index = domain.indexOf(".");
                     var domainLabel = domain.substr(0, index);
                     var tldZone = domain.substr(index + 0);
@@ -368,7 +346,7 @@ $( document ).ready(function() {
                                 '</div>'+
                             '</div>'+
                             '<div class="col-xs-5 search-result-price">'+
-                                '<div class="second-line registerprice"></div>'+
+                                '<div class="second-line registerprice"><span><i class="fa fa-refresh fa-spin" style="color:#0033a0;font-size:16px;"></i></span></div>'+
                                 '<div class="second-line renewalprice"></div>'+
                             '</div>'+
                             '<div class="col-xs-5 search-result-price details hide">'+
@@ -388,13 +366,18 @@ $( document ).ready(function() {
 					$("#resultsarea").hide();
 				}
 
-                startChecking(data["checkorder"]);
+				//send only one check for cached data
+				if(data["cache"] == true){
+					checkdomains(new Array(), true);
+					return;
+				}else{
+                    startChecking(data["checkorder"]);
+				}
 
 			},
 			error: function (jqXHR, textStatus, errorThrown){
 				$("#errorsarea").text(errorThrown);
 				$("#errorsarea").show();
-				$("#resultsarea, #loading").hide();
 			}
 		});
 	});
@@ -444,7 +427,7 @@ $( document ).ready(function() {
         //show and hid information when clicked on more
         $(this).parent().parent().siblings().eq(2).toggleClass('hide');
     });
-    //TODO refactor this code and add comments.
+
     $(document).on("click",".search-result-info", function() {
         if($(this).find('label').hasClass('setbackorder')){
             // when user not logged - no need to display change of design - backorder only
@@ -686,11 +669,8 @@ $( document ).ready(function() {
 </div>
 </div>
 
-<!-- <div class="alert text-center" id="loading" style="display:none;"><img src="{$modulepath}loading.gif"/></div> -->
 <div class="alert alert-danger text-center" id="errorsarea" style="display:none;"></div>
 <div class="domain-checker-result-headline"><p class="domain-checker-available" id="successarea" style="display:none;"></p></div>
-
-
 
 <div class="result-item" id="resultsarea" style="display:none;">
 <!-- <div>Search Results</div><br /> -->
@@ -698,7 +678,7 @@ $( document ).ready(function() {
 
         <div class="row row1" id="searchresults">
         </div>
-		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.gif"/></p>
+		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.svg"/></p>
 		<p align="center"><input id="orderbutton" type="button" value="{$LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
 		<br>
 	</form>
