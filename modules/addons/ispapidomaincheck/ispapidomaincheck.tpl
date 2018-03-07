@@ -349,7 +349,7 @@ $( document ).ready(function() {
                 handleFeedbackMessage(data);
 
 				var nb_results = 0;
-				$.each(data["checkorder"], function(index, element) {
+				$.each(data["data"], function(index, element) {
 					var domain = element; //.replace(/\./g, '');
 
                     //TODO split and bold the tld - DONE
@@ -388,13 +388,7 @@ $( document ).ready(function() {
 					$("#resultsarea").hide();
 				}
 
-				//send only one check for cached data
-				if(data["cache"] == true){
-					checkdomains(new Array(), true);
-					return;
-				}else{
-                    startChecking(data["checkorder"]);
-				}
+                startChecking(data["checkorder"]);
 
 			},
 			error: function (jqXHR, textStatus, errorThrown){
