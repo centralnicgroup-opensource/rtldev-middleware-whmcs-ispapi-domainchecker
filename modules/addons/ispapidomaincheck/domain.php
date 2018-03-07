@@ -228,7 +228,8 @@ class DomainCheck
     	$searched_label = $this->getDomainLabel($this->domain);
 		$searched_tld = $this->getDomainExtension($this->domain);
 
-		if( $this->domainSuggestionModeActivated() ){
+		// if( $this->domainSuggestionModeActivated() ){  TODO - remove
+		if( $_SESSION["suggestion_mode"] ){
 			//SUGGESTIONS MODE
 
 			//use the first ispapi registrar to query the suggestion list
@@ -326,7 +327,7 @@ class DomainCheck
 	*
 	* @return boulean TRUE if "suggestions" mode is activated in the domainchecker configuration
 	*/
-	private function domainSuggestionModeActivated() {
+	private function domainSuggestionModeActivated() {//TODO -remove
 		$dc_settings = DomainCheck::SQLCall("SELECT * FROM ispapi_tblsettings WHERE id = ? LIMIT 1", array(1));
 		if($dc_settings && $dc_settings["suggestion_mode"] == 1){
 			return true;

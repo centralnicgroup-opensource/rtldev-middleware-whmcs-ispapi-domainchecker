@@ -675,7 +675,7 @@ $( document ).ready(function() {
                                 <div class="catcontainer" > <!-- id="container_cat" -->
                                     <ul class="sub" style="text-align:center;">
                                         {foreach from=$categories item=cat}
-                                            {foreach from=$cat.subcategories item=sub}
+                                            {foreach from=$cat item=sub}
                                                 <li class="subCat" style="margin-right:10px;display:inline-block;" id="s_{$sub.id}">{$sub.name}</li>
                                             {/foreach}
                                         {/foreach}
