@@ -122,6 +122,16 @@ ul.sub li.active {
 .click {
      cursor: pointer;
 }
+.viewWhois.added{
+    color: #00a850;
+    text-decoration: none;
+}
+a.viewWhois{
+    color:#808080; !important;
+    font-weight:bold;
+    text-decoration: none;
+    cursor: pointer;
+}
 .first-line .tld-zone {
     font-weight: bold;
     font-size: 15px;

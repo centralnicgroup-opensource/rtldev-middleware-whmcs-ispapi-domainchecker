@@ -236,7 +236,7 @@ $( document ).ready(function() {
                                 $( "#" + id).find('span.domainname.domain-label').addClass('added');
                                 $( "#" + id).find('span.domainname.tld-zone').addClass('added');
                                 $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
-                                $( "#" + id + " div.availability").html("<span class='taken added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span class='backorder added'> - BACKORDER</span>");
+                                $( "#" + id + " div.availability").html("<span class='taken added'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<a class='viewWhois added' id='WHOIS|"+element.id+"'> - WHOIS</a>"+"<span class='backorder added'> - BACKORDER</span>");
                                 //hide the display register and renewprice as before
                                 $("#" + id).find('div.search-result-price').addClass('details hide');
                                 $("#" + id).find('div.search-result-price').eq(1).removeClass('details hide');
@@ -244,9 +244,9 @@ $( document ).ready(function() {
                             } else if(element.backorder_available == "1"){
                                 // when backorder available, display More option
                                 $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
-                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span> "  + "<span class='backorder '> - BACKORDER</span>");
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span> "  + "<a class='viewWhois ' id='WHOIS|"+element.id+"'> - WHOIS</a>"+ "<span class='backorder '> - BACKORDER</span>");
                             } else {//backorder not available
-                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>");
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$LANG.domaincheckertaken}{literal}</span>"+ "<a class='viewWhois ' id='WHOIS|"+element.id+"'> - WHOIS</a>");
                                 $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
                                 // for taken => to display —
                                 var spanelement = '<span style="font-size: 14px;color: #939598;font-weight:bold;">—</span>'+
@@ -257,9 +257,12 @@ $( document ).ready(function() {
                     }
 				});
 
-                //handle the click on the WHOIS button //TODO : there is no use of WHOIS. isnt it?
+                //handle the click on the WHOIS button
 				$(".viewWhois").unbind();
-				$(".viewWhois").bind("click", function(){
+				$(".viewWhois").bind("click", function(e){
+                    // to prevent parent div from toggling classes to other elements
+                    e.stopPropagation();
+
 					var domain = $(this).attr("id").substring(6);
 				    $("#modalWhoisLoader").removeClass('hidden').show();
 				    $("#modalWhoisBody").hide();
@@ -512,6 +515,8 @@ $( document ).ready(function() {
             var iconLabel = $(this).find('label.setbackorder');
             var command = "CreateBackorder";
             //display domain design when user logged in - backorder domains
+            //whois link
+            var whoisLink = $(this).find('a.viewWhois');
             //toggle checkbox
             var checkbox = $(this).find('i.fa-square-o');
             //toggle domain name and tld zone
@@ -545,6 +550,7 @@ $( document ).ready(function() {
                         domainname.addClass('added');
                         backorder.addClass('added');
                         taken.addClass('added');
+                        whoisLink.addClass('added');
                         sib0.addClass('details hide');
                         sib1.removeClass('details hide');
 
@@ -557,6 +563,7 @@ $( document ).ready(function() {
                         domainname.removeClass('added');
                         backorder.removeClass('added');
                         taken.removeClass('added');
+                        whoisLink.removeClass('added');
                         sib0.removeClass('details hide');
                         sib1.addClass('details hide');
 
