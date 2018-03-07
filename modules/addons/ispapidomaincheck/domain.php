@@ -19,12 +19,14 @@ use WHMCS\Domains\Pricing\Premium;
 
 //Get a list of all HEXONET registrar modules and include the registrar files
 if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])){
+	$_SESSION["ispapi_registrar"] = array();
 	$registrars = DomainCheck::SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
 	foreach($registrars as $registrar){
 		$autoreg = $registrar["autoreg"];
 		if(!empty($autoreg)){
 			require_once(dirname(__FILE__)."/../../../modules/registrars/".$autoreg."/".$autoreg.".php");
 			if(function_exists($autoreg.'_GetISPAPIModuleVersion')){
+
 				array_push($_SESSION["ispapi_registrar"], $autoreg);
 			}
 		}
@@ -228,8 +230,7 @@ class DomainCheck
     	$searched_label = $this->getDomainLabel($this->domain);
 		$searched_tld = $this->getDomainExtension($this->domain);
 
-		// if( $this->domainSuggestionModeActivated() ){  TODO - remove
-		if( $_SESSION["suggestion_mode"] ){
+		if( $this->getDomaincheckerMode() == "Suggestions" ){
 			//SUGGESTIONS MODE
 
 			//use the first ispapi registrar to query the suggestion list
@@ -323,17 +324,16 @@ class DomainCheck
     }
 
    /*
-	* Returns TRUE if the "suggestions" mode is activated
+	* Returns the domainchecker mode. (Suggestions or Regular)
 	*
-	* @return boulean TRUE if "suggestions" mode is activated in the domainchecker configuration
+	* @return string The domainchecker mode
 	*/
-	private function domainSuggestionModeActivated() {//TODO -remove
-		$dc_settings = DomainCheck::SQLCall("SELECT * FROM ispapi_tblsettings WHERE id = ? LIMIT 1", array(1));
-		if($dc_settings && $dc_settings["suggestion_mode"] == 1){
-			return true;
-		}else{
-			return false;
+	private function getDomaincheckerMode() {
+		$dc_settings = DomainCheck::SQLCall("SELECT value FROM tbladdonmodules WHERE module = 'ispapidomaincheck' AND setting = 'domainchecker_mode' LIMIT 1", array());
+		if(isset($dc_settings["value"])){
+			return $dc_settings["value"];
 		}
+		return "";
 	}
 
 	/*
@@ -755,8 +755,6 @@ class DomainCheck
 		//the renew price has to be converted to the selected currency
 		return $this->convertPriceToSelectedCurrency($registrarRenewPrice, $registrarPriceCurrency);
 	}
-
-
 
 	/*
 	 * Returns the formatted price

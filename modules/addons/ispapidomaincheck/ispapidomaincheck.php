@@ -1,20 +1,21 @@
 <?php
 use WHMCS\Database\Capsule;
 $module_version = "7.3";
-$configarray = array();
+
 /*
  * Configuration of the addon module.
  */
 function ispapidomaincheck_config() {
 	global $module_version;
     $configarray = array(
-	    "name" => "ISPAPI High Performance DomainChecker",
-	    "description" => "This addon provides a new domainchecker interface with high speed checks and premium support.",
+	    "name" => "ISPAPI HP DomainChecker",
+	    "description" => "This addon provides a new domainchecker interface with high speed checks, suggestions and premium support.",
 	    "version" => $module_version,
 	    "author" => "HEXONET",
 	    "language" => "english",
 		"fields" => array(
-			"suggestion_mode" => array ("FriendlyName" => "Mode", "Type" => "radio",'Options' => 'Suggestions,Normal','Description' => 'Choose your option!',)),
+			"domainchecker_mode" => array ("FriendlyName" => "Domainchecker Mode", "Type" => "dropdown", 'Options' => 'Suggestions,Regular')
+		),
 	);
     return $configarray;
 }
