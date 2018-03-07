@@ -1024,20 +1024,16 @@ class DomainCheck
 }
 
 
-$action = (isset($_REQUEST["action"])) ? $_REQUEST["action"] : "";
+$action = isset($_REQUEST["action"]) ? $_REQUEST["action"] : "";
+$currency = isset($_REQUEST["currency"]) ? $_REQUEST["currency"] : $_SESSION["currency"];
 
-$currency = $_SESSION["currency"];
-if(isset($_REQUEST["currency"])){
-	$currency = $_REQUEST["currency"];
-
-	//if customer logged in, set the configured currency.
-	$ca = new WHMCS_ClientArea();
-	$ca->initPage();
-	if ($ca->isLoggedIn()) {
-		$user = DomainCheck::SQLCall("SELECT currency FROM tblclients WHERE id=?", array($ca->getUserID()));
-		$currency = $user["currency"];
-		//$_SESSION["userid"] = $ca->getUserID();
-	}
+//if customer logged in, set the configured currency.
+$ca = new WHMCS_ClientArea();
+$ca->initPage();
+if ($ca->isLoggedIn()) {
+	$user = DomainCheck::SQLCall("SELECT currency FROM tblclients WHERE id=?", array($ca->getUserID()));
+	$currency = $user["currency"];
+	//$_SESSION["userid"] = $ca->getUserID();
 }
 
 $domains = (isset($_REQUEST["domains"])) ? $_REQUEST["domains"] : "";
