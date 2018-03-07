@@ -2,6 +2,7 @@
 use WHMCS\Database\Capsule;
 $module_version = "7.3.0";
 
+
 /*
  * Configuration of the addon module.
  */
@@ -24,37 +25,44 @@ function ispapidomaincheck_config() {
  * This function will be called with the activation of the add-on module.
  */
 function ispapidomaincheck_activate() {
-	//IF NOT EXISTS Create ispapi_tblcategories table
 	try {
 	    $pdo = Capsule::connection()->getPdo();
+
+		//IF NOT EXISTS Create ispapi_tblcategories table
 		$query = $pdo->prepare("CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)");
 		$query->execute();
+
+		//TODO TULSI: import the default categories when empty
 		//Insert example categories if table empty (just the first time)
-		$query = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
-		$query->execute();
-		$data = $query->fetchAll(PDO::FETCH_ASSOC);
-
-		if ( empty($data) ) {
-			$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories(name, tlds) VALUES ('Popular', 'com diamonds domains email guru land sexy tattoo singles'), ('Business', 'camera company computer enterprises equipment holdings management solutions support'), ('Europe', 'fr de it nl lu')");
-			$insert_stmt->execute();
-		}
+		// $query = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
+		// $query->execute();
+		// $data = $query->fetchAll(PDO::FETCH_ASSOC);
+		//
+		// if ( empty($data) ) {
+		// 	$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories(name, tlds) VALUES ('Popular', 'com diamonds domains email guru land sexy tattoo singles'), ('Business', 'camera company computer enterprises equipment holdings management solutions support'), ('Europe', 'fr de it nl lu')");
+		// 	$insert_stmt->execute();
+		// }
 	} catch (\Exception $e) {
-		return array('status'=>'error','description'=>$e->getMessage());
+		return array('status'=>'error', 'description'=>$e->getMessage());
     }
-
-    return array('status'=>'success','description'=>'The ISPAPI Domaincheck Addon was successfully installed.');
+    return array('status'=>'success', 'description'=>'The ISPAPI HP DomainChecker was successfully installed.');
 }
-//to update existing database on new version installation
+
+/*
+ * This function will update the database when upgrading.
+*/
 function ispapidomaincheck_upgrade($vars) {
 	$version = $vars['version'];
 	try {
 	    $pdo = Capsule::connection()->getPdo();
 
+		//TODO TULSI: $version is = 7.3.0 but you said it is only working with 7.3 so please cut the everything after the last point
+
 		if($version < 7.3) {
 			// 1. DROP ispapi_tblaftermarketcurrencies if exists
 			$query = $pdo->prepare("DROP TABLE IF EXISTS ispapi_tblaftermarketcurrencies");
 		   	$query->execute();
-			//2. DROP ispapi_tblsettings if exists
+			// 2. DROP ispapi_tblsettings if exists
 			$query = $pdo->prepare("DROP TABLE IF EXISTS ispapi_tblsettings");
 			$query->execute();
 			// 3. ALTER ispapi_tblcategories
@@ -65,75 +73,39 @@ function ispapidomaincheck_upgrade($vars) {
 			$query->execute();
 		}
 	} catch (\Exception $e) {
-		return array('status'=>'error','description'=>$e->getMessage());
+		return array('status'=>'error', 'description'=>$e->getMessage());
     }
+    return array('status'=>'success', 'description'=>'The ISPAPI HP DomainChecker was successfully upgraded.');
 }
 
 /*
  * This function will be called with the deactivation of the add-on module.
 */
 function ispapidomaincheck_deactivate() {
-
-    return array('status'=>'success','description'=>'The ISPAPI Domaincheck Addon was successfully uninstalled.');
+	//NOTHING TO DO
+    return array('status'=>'success','description'=>'The ISPAPI HP DomainChecker was successfully uninstalled.');
 }
 
 /*
- * This function ist the startpoint of the add-on module
+ * This function is the startpoint of the add-on module
  * <#WHMCS_URL#>/index.php?m=ispapidomaincheck
  * <#WHMCS_URL#>/mydomainchecker.php
  */
 function ispapidomaincheck_clientarea($vars) {
-	//for transfer
-	//###############
-	if (isset($_REQUEST["transfer"])) {
-		if ($_REQUEST["domain"] != $_LANG["domaincheckerdomainexample"]) {
-			$parts = explode(".", $_REQUEST["domain"], 2);
-			if(isset($parts[0]) && isset($parts[1])){
-				redir( "a=add&domain=transfer&sld=" . $parts[0] . "&tld=." . $parts[1], "cart.php" );
-			}else{
-				redir( "a=add&domain=transfer", "cart.php" );
-			}
-		}
-		else {
-			redir( "a=add&domain=transfer", "cart.php" );
-		}
-	}
-	//###############
 
-	//for hosting
-	//###############
-	if (isset($_REQUEST["hosting"])) {
-		if ($_REQUEST["domain"] != $_LANG["domaincheckerdomainexample"]) {
-			$parts = explode(".", $_REQUEST["domain"], 2);
-			if(isset($parts[0]) && isset($parts[1])){
-				redir( "sld=" . $parts[0] . "&tld=." . $parts[1], "cart.php" );
-			}else{
-				redir( "", "cart.php" );
-			}
-		}
-		else {
-			redir( "", "cart.php" );
-		}
-	}
-	//###############
-
+	//include registrarfunctions file from WHMCS
 	require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
+
+	//save the language in the session if not already set
 	if(!isset($_SESSION["Language"])){
-		try {
-		    $pdo = Capsule::connection()->getPdo();
-			$query = $pdo->prepare("SELECT value FROM tblconfiguration WHERE setting='Language'");
-			$query->execute();
-			$data = $query->fetch(PDO::FETCH_ASSOC);
-			if($data){
-				$language = $data["value"];
-			}
-			$_SESSION["Language"] = strtolower($language);
-		} catch (\Exception $e) {
-		    die($e->getMessage());
-		}
+		$language_array = SQLCall("SELECT value FROM tblconfiguration WHERE setting='Language'", array());
+		$_SESSION["Language"] = strtolower($language_array["value"]);
 	}
+
+	//include the WHMCS language file
 	require(dirname(__FILE__)."/../../../lang/".$_SESSION["Language"].".php");
 
+	################################################## TODO ANTHONY REWRITE
 	//Check if the ISPAPI Registrar Module available, load it, raise error if not existing
 	//ISPAPI DomainChecker require the ISPAPI Registrar Module
 	$error = false;
@@ -223,38 +195,22 @@ function ispapidomaincheck_clientarea($vars) {
 			}
 		}
 	}
+	################################################## TODO REWRITE
 
-	//for the domain.php file
+
+	//required by domain.php
 	$_SESSION["ispapi_registrar"] = $registrar;
 
 	//Set currency session if not set.
 	if ( !$_SESSION["currency"] ) {
-		try {
-		    $pdo = Capsule::connection()->getPdo();
-			$query = $pdo->prepare("SELECT id FROM tblcurrencies WHERE `default`='1'");
-			$query->execute();
-			$data = $query->fetch(PDO::FETCH_ASSOC);
-			$_SESSION["currency"] = $data["id"];
-		} catch (\Exception $e) {
-	        die($e->getMessage());
-	    }
+		$currency_array = SQLCall("SELECT id FROM tblcurrencies WHERE `default` = 1 LIMIT 1", array());
+		$_SESSION["currency"] = $currency_array["id"];
 	}
 
 	//set the domain with the post data if filled
-	if(isset($_POST["domain"]))
-		$domain = $_POST["domain"];
-	else
-		$domain = "";
-
-	//empty the cache on all reload
-	if(isset($_SESSION["cache"])){
-		unset($_SESSION["cache"]);
-	}
+	$domain = isset($_POST["domain"]) ? $_POST["domain"] : "";
 
 	//get the module name
-	//$parts = Explode("/", __FILE__);
-	//$parts = Explode(".", $parts[count($parts) - 1]);
-	//$modulename = $parts[0];
 	$modulename = "ispapidomaincheck";
 	$path_to_domain_file = "modules/addons/".$modulename."/domain.php";
 	$modulepath = "modules/addons/".$modulename."/";
@@ -263,22 +219,9 @@ function ispapidomaincheck_clientarea($vars) {
 	$backordermoduleinstalled = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
 	$backordermodulepath = "modules/addons/ispapibackorder/";
 
-	//get all categories with subgategories for the template
-	$categories = array();
-	try {
-		$pdo = Capsule::connection()->getPdo();
-		$query = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
-		$query->execute();
-		$data = $query->fetchAll(PDO::FETCH_ASSOC);
-		if($data){
-			array_push($categories, $data);
-		}
+	//get all categories
+	$categories = SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
 
-	} catch (\Exception $e) {
-		die($e->getMessage());
-	}
-
-	$_SESSION["adminuser"] = $vars["username"];
 	return array(
 			'pagetitle' => $_LANG['domaintitle'],
 			'breadcrumb' => array('index.php?m=ispapidomaincheck'=>$_LANG["domaintitle"]),
@@ -293,11 +236,11 @@ function ispapidomaincheck_clientarea($vars) {
 					'backorder_module_path' => $backordermodulepath,
 					'path_to_domain_file' => $path_to_domain_file,
 					'domain' => $domain,
-					// 'tldpricelist' => $tldpricelist,
 					'currency' => $_SESSION["currency"]
 			),
 	);
 }
+
 
 /*
  * Backend module
@@ -346,9 +289,7 @@ function ispapidomaincheck_output($vars) {
 			</li>
 		</ul>
 	</div>
-
 	';
-
 	ispapidomaincheck_categoryeditorcontent($modulelink."&tab=0");
 }
 
@@ -358,100 +299,57 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 
 	echo '<div id="tab0box" class="tabbox tab-content">';
 
-	//Delete categories
-	###############################################################################
+	//delete category
 	if(isset($_REQUEST["delete"])){
-		try {
-		    $pdo = Capsule::connection()->getPdo();
-			$query = $pdo->prepare("DELETE FROM ispapi_tblcategories WHERE id=?");
-			$query->execute(array($_REQUEST["delete"]));
-
-		} catch (\Exception $e) {
-	        die($e->getMessage());
-	    }
-		echo '<div class="infobox"><strong><span class="title">Deletion Successfully!</span></strong><br>Your category has been deleted.</div>';
+		$currency_array = SQLCall("DELETE FROM ispapi_tblcategories WHERE id=? LIMIT 1", array($_REQUEST["delete"]), "execute");
+		echo '<div class="infobox"><strong><span class="title">Successfully deleted!</span></strong><br>The category has been deleted.</div>';
 	}
-	###############################################################################
 
-	//Import Default categories
-	###############################################################################
+	//import default categories
 	if(isset($_REQUEST["importdefaultcategories"])){
 		$category_not_found_in_categorieslib = array();
-		try{
-        	$pdo = Capsule::connection()->getPdo();
-			$request = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
-			$request->execute();
-			$data = $request->fetchAll(PDO::FETCH_ASSOC);
-			if(empty($data)){
-				foreach ($categorieslib as $category => $tlds) {
-					$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)");
-					$insert_stmt->execute(array( $category, implode(" ", $tlds)));
-				}
-			}else{
-				foreach ($categorieslib as $key => $value) {
-					in_array_r($key, $data) ? '' : $category_not_found_in_categorieslib[$key] = $value;
-				}
-				if(!empty($category_not_found_in_categorieslib)){
-					foreach ($category_not_found_in_categorieslib as $category => $tlds) {
-						$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)");
-						$insert_stmt->execute(array( $category, implode(" ", $tlds)));
-					}
+		$data = SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
+		if(empty($data)){
+			foreach ($categorieslib as $category => $tlds) {
+				$insert_stmt = SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
+			}
+		}else{
+			foreach ($categorieslib as $key => $value) {
+				in_array_r($key, $data) ? '' : $category_not_found_in_categorieslib[$key] = $value;
+			}
+			if(!empty($category_not_found_in_categorieslib)){
+				foreach ($category_not_found_in_categorieslib as $category => $tlds) {
+					SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
 				}
 			}
-        } catch (Exception $e) {
-        	die($e->getMessage());
-        }
-		// echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
-	}
-	###############################################################################
-	//Save categories
-	###############################################################################
-	if(isset($_REQUEST["savecategories"])){
-		try {
-	    	$pdo = Capsule::connection()->getPdo();
-			//update the category and tlds
-			foreach($_POST["CAT"] as $id => $category){
-				$update_query = $pdo->prepare("UPDATE ispapi_tblcategories SET name=?, tlds=? WHERE id=?");
-				$update_query->execute(array($category['NAME'], $category['TLDS'], $id));
-			}
-			//insert when added new category
-			if($_POST['NEWCAT']['NAME']){
-				$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)");
-				$insert_stmt->execute(array( $_POST["NEWCAT"]["NAME"], $_POST["NEWCAT"]["TLDS"]));
-			}
-		} catch (\Exception $e) {
-			die($e->getMessage());
 		}
-		echo '<div class="infobox"><strong><span class="title">Changes Saved Successfully!</span></strong><br>Your changes have been saved.</div>';
+		echo '<div class="infobox"><strong><span class="title">Successfully imported!</span></strong><br>The categories have been sucessfully imported.</div>';
+	}
+
+	//save changes
+	if(isset($_REQUEST["savecategories"])){
+		//update the category and tlds
+		foreach($_POST["CAT"] as $id => $category){
+			SQLCall("UPDATE ispapi_tblcategories SET name=?, tlds=? WHERE id=?", array($category['NAME'], $category['TLDS'], $id), "execute");
+		}
+		//insert when added new category
+		if($_POST['NEWCAT']['NAME']){
+			SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($_POST["NEWCAT"]["NAME"], $_POST["NEWCAT"]["TLDS"]), "execute");
+		}
+		echo '<div class="infobox"><strong><span class="title">Successfully saved!</span></strong><br>The changes have been saved.</div>';
 	}
 	###############################################################################
 
 	//get all categories with tlds for displaying
-	###############################################################################
-	$categories = array();
-	try {
-	    $pdo = Capsule::connection()->getPdo();
-		$query = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
-		$query->execute();
-		$data = $query->fetchAll(PDO::FETCH_ASSOC);
-		if($data){
-			array_push($categories, $data);
-		}
-
-	} catch (\Exception $e) {
-        die($e->getMessage());
-    }
-	###############################################################################
+	$categories = SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%"><tbody>';
 	echo '<tr><th>Categories</th>';
 	echo '<th>TLDs</th>';
 	echo '<th width="20"></th></tr>';
-	foreach($categories as $category){
-		foreach ($category as $cat) {
-			echo '<tr><td width="220"><input style="width:210px;font-weight:bold" type="text" name="CAT['.$cat["id"].'][NAME]" value="'.$cat["name"].'"/></td><td><input style="width:650px;" type="text" name="CAT['.$cat["id"].'][TLDS]" value="'.$cat["tlds"].'"/></td><td width="20"><a href="'.$modulelink."&delete=".$cat["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
-		}
+	foreach($categories as $cat){
+		echo '<tr><td width="220"><input style="width:210px;font-weight:bold" type="text" name="CAT['.$cat["id"].'][NAME]" value="'.$cat["name"].'"/></td><td><input style="width:650px;" type="text" name="CAT['.$cat["id"].'][TLDS]" value="'.$cat["tlds"].'"/></td><td width="20"><a href="'.$modulelink."&delete=".$cat["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
 	}
 	echo '<tr><td><input style="width:210px;" type="text" name="NEWCAT[NAME]" value=""/></td><td><input style="width:650px;" type="text" name="NEWCAT[TLDS]" value=""/></td><td></td></tr>';
 	echo '</tbody></table></div>';
@@ -462,13 +360,38 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 	echo '</div>';
 }
 
-//import default categories helper
+
+/*
+ * Helper to import default categories
+ */
 function in_array_r($key, $dataarray, $strict = false) {
     foreach ($dataarray as $item) {
         if (($strict ? $item === $key : $item == $key) || (is_array($item) && in_array_r($key, $item, $strict))) {
             return true;
         }
     }
-
     return false;
+}
+
+/*
+ * Helper to send SQL call to the Database with Capsule
+ */
+function SQLCall($sql, $params, $fetchmode = "fetch"){
+	try {
+		$pdo = Capsule::connection()->getPdo();
+		$stmt = $pdo->prepare($sql);
+		$result = $stmt->execute($params);
+
+		if($fetchmode == "fetch"){
+			return $stmt->fetch(PDO::FETCH_ASSOC);
+		}elseif($fetchmode == "fetchall"){
+			return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		}elseif($fetchmode == "execute"){
+			return $result;
+		}else{
+			return $result;
+		}
+	} catch (\Exception $e) {
+		die($e->getMessage());
+	}
 }
