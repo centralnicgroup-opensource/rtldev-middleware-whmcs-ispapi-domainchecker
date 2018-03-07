@@ -885,12 +885,20 @@ class DomainCheck
 	}
 
     /*
-     * Get all domains of the selected categories.
+     * Get all domains of the selected categories if they are configured in WHMCS
 	 * If not categorie selected, then returns all the categories.
      *
      * @return array An array with all TLDs of the selected categories.
      */
 	 private function getTLDGroups(){
+		 //get all the tlds configured in WHMCS
+		 $tlds_configured_in_whmcs = array();
+		 $tlds_configured_in_whmcs_array = DomainCheck::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
+		 foreach($tlds_configured_in_whmcs_array as $tld){
+			 array_push($tlds_configured_in_whmcs, substr($tld["extension"], 1));
+		 }
+
+		 //if $this->tldgroup empty, it means no category selected, so return all the caterogies
 		 if(empty($this->tldgroup)){
 			 $groups = array();
 			 $all_categories = DomainCheck::SQLCall("SELECT id FROM ispapi_tblcategories", array(), "fetchall");
@@ -907,14 +915,16 @@ class DomainCheck
 			 $tlds_of_the_group = DomainCheck::SQLCall("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id = ? LIMIT 1", array($group));
 			 if($tlds_of_the_group){
 				 $tlds_of_the_group_array = explode(' ', $tlds_of_the_group["tlds"]);
-				 //remove all empty elements (yes it happens)
+
+				 //remove all empty elements (yes it happens) and all tlds which are not configured in WHMCS
 				 $i=0;
 				 foreach($tlds_of_the_group_array as $tld){
-					 if(empty($tld)){
+					 if( empty($tld) || (!in_array($tld, $tlds_configured_in_whmcs)) ){
 						 unset($tlds_of_the_group_array[$i]);
 					 }
 					 $i++;
 				 }
+
 				 $tlds = array_merge($tlds, $tlds_of_the_group_array);
 			 }
 		 }
