@@ -649,12 +649,10 @@ $( document ).ready(function() {
                     <div class="domain-checker-container2">
                         <div class="domain-checker-bg2">
                             <div class="well2">
-                                <div class="catcontainer" > <!-- id="container_cat" -->
+                                <div class="catcontainer" >
                                     <ul class="sub" style="text-align:center;">
                                         {foreach from=$categories item=cat}
-                                            {foreach from=$cat item=sub}
-                                                <li class="subCat" style="margin-right:10px;display:inline-block;" id="s_{$sub.id}">{$sub.name}</li>
-                                            {/foreach}
+                                            <li class="subCat" style="margin-right:10px;display:inline-block;" id="s_{$cat.id}">{$cat.name}</li>
                                         {/foreach}
                                     </ul>
                                 </div>
