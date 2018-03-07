@@ -65,7 +65,7 @@ $( document ).ready(function() {
         tmpid = jQuery.unique( tmpid );
         $("#searchform input[name=tldgroup]").attr("value", tmpid);
         $("#searchbutton").trigger("click");
-	})
+	});
 
     // to remove data from the div elements
     function removeAppendDataFromDivs(){
@@ -297,7 +297,6 @@ $( document ).ready(function() {
 			}
 		}else{
 			var searched_domain = $("#searchfield").val();
-
 			//stop the request when domainfield is not filled
 			if(searched_domain == ""){
 				return;
@@ -420,6 +419,15 @@ $( document ).ready(function() {
 		}
 
 	}
+
+    //When search in url along with cat id, activate the category under categories button
+    if("{/literal}{$smarty.get.search}{literal}"){
+        if("{/literal}{$smarty.get.cat}{literal}"){
+            var catid = "{/literal}{$smarty.get.cat}{literal}";
+            $("#s_" + catid).addClass("active");
+        }
+    }
+
 
     $(document).on("click",".click", function() {
         //more information - More
