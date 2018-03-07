@@ -1,5 +1,4 @@
 <?php
-
 require_once(dirname(__FILE__)."/../../../init.php");
 require_once(dirname(__FILE__)."/../../../includes/domainfunctions.php");
 require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
@@ -16,14 +15,15 @@ if(file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backe
 use WHMCS\Database\Capsule;
 use WHMCS\Domains\Pricing\Premium;
 
+
 /*
- * Adds the registrar to the session if it's a HEXONET registrar.
+ * Adds the registrar to the array if it's a HEXONET registrar.
  */
-function addISPAPIRegistrarToSession($registrar) {
-	if(isset($registrar)){
+function addRegistrar($registrar, &$myarray) {
+	if(!empty($registrar) && !in_array($registrar, $myarray)){
 		include_once(dirname(__FILE__)."/../../../modules/registrars/".$registrar."/".$registrar.".php");
 		if(function_exists($registrar.'_GetISPAPIModuleVersion')){
-			array_push($_SESSION["ispapi_registrar"], $registrar);
+			array_push($myarray, $registrar);
 		}
 	}
 }
@@ -31,16 +31,18 @@ function addISPAPIRegistrarToSession($registrar) {
 //Get a list of all HEXONET registrar modules and include the registrar files
 if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])){
 	$_SESSION["ispapi_registrar"] = array();
+
 	$registrars = DomainCheck::SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
 	foreach($registrars as $registrar){
-		addISPAPIRegistrarToSession($registrar["autoreg"]);
+		addRegistrar($registrar["autoreg"], $_SESSION["ispapi_registrar"]);
 	}
 	//if no TLD configured with HEXONET then try to add hexonet and ispapi
 	if( empty($_SESSION["ispapi_registrar"]) ){
-		addISPAPIRegistrarToSession("hexonet");
-		addISPAPIRegistrarToSession("ispapi");
+		addRegistrar("hexonet", $_SESSION["ispapi_registrar"]);
+		addRegistrar("ispapi", $_SESSION["ispapi_registrar"]);
 	}
 }
+
 
 
 /**

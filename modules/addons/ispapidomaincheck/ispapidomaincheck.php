@@ -105,101 +105,26 @@ function ispapidomaincheck_clientarea($vars) {
 	//include the WHMCS language file
 	require(dirname(__FILE__)."/../../../lang/".$_SESSION["Language"].".php");
 
-	################################################## TODO ANTHONY REWRITE
-	//Check if the ISPAPI Registrar Module available, load it, raise error if not existing
-	//ISPAPI DomainChecker require the ISPAPI Registrar Module
-	$error = false;
-	$modulelist = array();
-	if(file_exists(dirname(__FILE__)."/../../../modules/registrars/ispapi/ispapi.php")){
-		$file = "ispapi";
-		require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
-		$funcname = $file.'_GetISPAPIModuleVersion';
-		if(function_exists($file.'_GetISPAPIModuleVersion')){
 
-			$version = call_user_func($file.'_GetISPAPIModuleVersion');
-			//check if version = 1.0.15 or higher
-			if( version_compare($version, '1.0.15') >= 0 ){
-				//check authentication
-				$registrarconfigoptions = getregistrarconfigoptions($file);
-				$ispapi_config = ispapi_config($registrarconfigoptions);
-				$command =  $command = array(
-						"command" => "CheckAuthentication",
-						"subuser" => $ispapi_config["login"],
-						"password" => $ispapi_config["password"],
-				);
-				$checkAuthentication = ispapi_call($command, $ispapi_config);
-				if($checkAuthentication["CODE"] != "200"){
-					die("The \"".$file."\" registrar authentication failed! Please verify your registrar credentials and try again.");
-				}else{
-					array_push($modulelist, $file);
-				}
-			}else{
-				$error = true;
-			}
-		}else{
-			$error = true;
-		}
-	}else{
-		$error = true;
+
+
+	//TODO: ANTHONY CHECKAUTHENTICATION AND VERSION NUMBER AND ONLY THEN INSERT IT
+	//ISPAPI DomainChecker require the ISPAPI Registrar Module, check if at least one HEXONET Registrar Module available.
+	$_SESSION["ispapi_registrar"] = array(); //this needs to be done to reload the registrars in the domain.php
+	$registrars = SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
+	foreach($registrars as $registrar){
+		addRegistrar($registrar["autoreg"], $_SESSION["ispapi_registrar"]);
 	}
-
-	if($error){
-		die("The ISPAPI DomainCheck Module requires ISPAPI Registrar Module v1.0.15 or higher!");
+	//if no TLD configured with HEXONET then try to add hexonet and ispapi
+	if( empty($_SESSION["ispapi_registrar"]) ){
+		addRegistrar("hexonet", $_SESSION["ispapi_registrar"]);
+		addRegistrar("ispapi", $_SESSION["ispapi_registrar"]);
 	}
+	//print_r($_SESSION["ispapi_registrar"]);
 
 
-	//Get the list of all used registrar modules
-	try {
-	    $pdo = Capsule::connection()->getPdo();
-		$query = $pdo->prepare("SELECT extension, autoreg FROM tbldomainpricing");
-		$query->execute();
-		$data = $query->fetchAll(PDO::FETCH_ASSOC);
-		foreach ($data as $key => $value) {
-			if(!empty($value["autoreg"])){
-				if(!in_array($value["autoreg"], $modulelist)){
-					array_push($modulelist, $value["autoreg"]);
-				}
-			}
-		}
-
-	} catch (\Exception $e) {
-        die($e->getMessage());
-    }
-
-	//filter the whole list to catch only the HEXONET registars
-	foreach($modulelist as $file){
-		if(file_exists(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php")){
-			require_once(dirname(__FILE__)."/../../../modules/registrars/".$file."/".$file.".php");
-			$funcname = $file.'_GetISPAPIModuleVersion';
-			if(function_exists($file.'_GetISPAPIModuleVersion')){
-
-				$version = call_user_func($file.'_GetISPAPIModuleVersion');
-				//check if version = 1.0.15 or higher
-				if( version_compare($version, '1.0.15') >= 0 ){
-					array_push($registrar, $file);
-					//check authentication
-					$registrarconfigoptions = getregistrarconfigoptions($file);
-					$ispapi_config = ispapi_config($registrarconfigoptions);
-					$command =  $command = array(
-							"command" => "CheckAuthentication",
-							"subuser" => $ispapi_config["login"],
-							"password" => $ispapi_config["password"],
-					);
-					$checkAuthentication = ispapi_call($command, $ispapi_config);
-					if($checkAuthentication["CODE"] != "200"){
-						die("The \"".$file."\" registrar authentication failed! Please verify your registrar credentials and try again.");
-					}
-				}else{
-					die("The ISPAPI DomainCheck Module requires \"".$file."\" Registrar Module v1.0.15 or higher!");
-				}
-			}
-		}
-	}
-	################################################## TODO REWRITE
 
 
-	//required by domain.php
-	$_SESSION["ispapi_registrar"] = $registrar;
 
 	//Set currency session if not set.
 	if ( !$_SESSION["currency"] ) {
@@ -393,5 +318,18 @@ function SQLCall($sql, $params, $fetchmode = "fetch"){
 		}
 	} catch (\Exception $e) {
 		die($e->getMessage());
+	}
+}
+
+
+/*
+ * Adds the registrar to the array if it's a HEXONET registrar.
+ */
+function addRegistrar($registrar, &$myarray) {
+	if(!empty($registrar) && !in_array($registrar, $myarray)){
+		include_once(dirname(__FILE__)."/../../../modules/registrars/".$registrar."/".$registrar.".php");
+		if(function_exists($registrar.'_GetISPAPIModuleVersion')){
+			array_push($myarray, $registrar);
+		}
 	}
 }
