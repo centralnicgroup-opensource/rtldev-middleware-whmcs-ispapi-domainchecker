@@ -354,7 +354,7 @@ function ispapidomaincheck_output($vars) {
 
 function ispapidomaincheck_categoryeditorcontent($modulelink){
 
-	include(dirname(__FILE__)."/categorieslib.php");
+	include(dirname(__FILE__)."/categories.php");
 
 	echo '<div id="tab0box" class="tabbox tab-content">';
 
