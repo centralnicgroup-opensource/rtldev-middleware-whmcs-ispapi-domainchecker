@@ -1,6 +1,6 @@
 <?php
 use WHMCS\Database\Capsule;
-$module_version = "7.3";
+$module_version = "7.3.0";
 
 /*
  * Configuration of the addon module.
@@ -39,7 +39,7 @@ function ispapidomaincheck_activate() {
 			$insert_stmt->execute();
 		}
 	} catch (\Exception $e) {
-        die($e->getMessage());
+		return array('status'=>'error','description'=>$e->getMessage());
     }
 
     return array('status'=>'success','description'=>'The ISPAPI Domaincheck Addon was successfully installed.');
@@ -57,7 +57,7 @@ function ispapidomaincheck_upgrade($vars) {
 			//2. DROP ispapi_tblsettings if exists
 			$query = $pdo->prepare("DROP TABLE IF EXISTS ispapi_tblsettings");
 			$query->execute();
-			// 3. ALTER ispapi_tblcategories if exists
+			// 3. ALTER ispapi_tblcategories
 			$query = $pdo->prepare("ALTER TABLE ispapi_tblcategories DROP COLUMN parent");
 			$query->execute();
 			// This one deletes the row and does not complain if it can't.
@@ -65,7 +65,7 @@ function ispapidomaincheck_upgrade($vars) {
 			$query->execute();
 		}
 	} catch (\Exception $e) {
-        die($e->getMessage());
+		return array('status'=>'error','description'=>$e->getMessage());
     }
 }
 
@@ -73,19 +73,6 @@ function ispapidomaincheck_upgrade($vars) {
  * This function will be called with the deactivation of the add-on module.
 */
 function ispapidomaincheck_deactivate() {
-	// Remove ispapi_tblcategories DB table
-	//$query = "DROP TABLE ispapi_tblcategories;";
-	//$result = full_query($query);
-
-	// Remove ispapi_tblsettings DB table
-	try {
-		$pdo = Capsule::connection()->getPdo();
-		$query = $pdo->prepare("DROP TABLE ispapi_tblsettings");
-		$query->execute();
-	} catch (\Exception $e) {
-		die($e->getMessage());
-	}
-	//For easier updates, the tables won't be dropped.
 
     return array('status'=>'success','description'=>'The ISPAPI Domaincheck Addon was successfully uninstalled.');
 }
@@ -96,12 +83,6 @@ function ispapidomaincheck_deactivate() {
  * <#WHMCS_URL#>/mydomainchecker.php
  */
 function ispapidomaincheck_clientarea($vars) {
-	//suggestion mode - for the domain.php file
-	if($vars['suggestion_mode'] == 'Suggestions'){
-		$_SESSION["suggestion_mode"] = 'on';
-	}else{
-		$_SESSION["suggestion_mode"] = '';
-	}
 	//for transfer
 	//###############
 	if (isset($_REQUEST["transfer"])) {
@@ -297,9 +278,6 @@ function ispapidomaincheck_clientarea($vars) {
 		die($e->getMessage());
 	}
 
-	$prices = ispapi_domainchecker_get_domainprices ($_SESSION["currency"]);
-	$tldpricelist = ispapi_domainchecker_tldpricelist( $prices, $_SESSION["currency"] ); //TODO - $tldpricelist is given to tpl file -for this variable data, used the help functions listed in this file
-
 	$_SESSION["adminuser"] = $vars["username"];
 	return array(
 			'pagetitle' => $_LANG['domaintitle'],
@@ -315,7 +293,7 @@ function ispapidomaincheck_clientarea($vars) {
 					'backorder_module_path' => $backordermodulepath,
 					'path_to_domain_file' => $path_to_domain_file,
 					'domain' => $domain,
-					'tldpricelist' => $tldpricelist,
+					// 'tldpricelist' => $tldpricelist,
 					'currency' => $_SESSION["currency"]
 			),
 	);
@@ -331,30 +309,6 @@ function ispapidomaincheck_output($vars) {
 	$modulelink = $vars['modulelink'];
 
 	echo'
-	<script>
-	$( document ).ready(function() {
-
-		$(".tabbox").css("display","none");
-			var selectedTab;
-			$(".tab").click(function(){
-				var elid = $(this).attr("id");
-				$(".tab").removeClass("tabselected");
-				$("#"+elid).addClass("tabselected");
-				if (elid != selectedTab) {
-					$(".tabbox").slideUp();
-					$("#"+elid+"box").slideDown();
-					selectedTab = elid;
-				}
-			$("#tab").val(elid.substr(3));
-		});
-
-		selectedTab = "tab'.$_GET["tab"].'";
-		$("#" + selectedTab).addClass("tabselected");
-		$("#" + selectedTab + "box").css("display","");
-
-	});
-	</script>
-
 	<style>
 
 	.tablebg td.fieldlabel {
@@ -387,7 +341,7 @@ function ispapidomaincheck_output($vars) {
 
 	<div id="tabs">
 		<ul class="nav nav-tabs admin-tabs" role="tablist">
-			<li id="tab1" class="tab" data-toggle="tab" role="tab" aria-expanded="true">
+			<li id="tab0" class="tab active" data-toggle="tab" role="tab" aria-expanded="true">
 				<a href="javascript:;">Category Editor</a>
 			</li>
 		</ul>
@@ -395,14 +349,14 @@ function ispapidomaincheck_output($vars) {
 
 	';
 
-	ispapidomaincheck_categoryeditorcontent($modulelink."&tab=1");
+	ispapidomaincheck_categoryeditorcontent($modulelink."&tab=0");
 }
 
 function ispapidomaincheck_categoryeditorcontent($modulelink){
 
 	include(dirname(__FILE__)."/categorieslib.php");
 
-	echo '<div id="tab1box" class="tabbox tab-content">';
+	echo '<div id="tab0box" class="tabbox tab-content">';
 
 	//Delete categories
 	###############################################################################
@@ -518,111 +472,3 @@ function in_array_r($key, $dataarray, $strict = false) {
 
     return false;
 }
-
-//domain pricing helpers
-//#######################################
-function ispapi_domainchecker_price( $number, $cur ) {
-
-	$format = $cur["format"];
-	if ( $format == 1 ) {
-		$number = number_format($number, 2, '.', '');
-	}
-	if ( $format == 2 ) {
-		$number = number_format($number, 2, '.', ',');
-	}
-	if ( $format == 3 ) {
-		$number = number_format($number, 2, ',', '.');
-	}
-	if ( $format == 4 ) {
-		$number = preg_replace('/\.?0+$/', '', number_format($number, 2, '.', ','));
-	}
-	return $cur["prefix"].$number.$cur["suffix"];
-}
-
-function ispapi_domainchecker_tldpricelist( $prices, $currencyid ) {
-
-	try {
-	    $pdo = Capsule::connection()->getPdo();
-		$query = $pdo->prepare("SELECT * FROM tblcurrencies WHERE id=?");
-		$query->execute(array($currencyid));
-		$cur = $query->fetch(PDO::FETCH_ASSOC);
-	} catch (\Exception $e) {
-        die($e->getMessage());
-    }
-	$list = array();
-	$i = 1;
-
-	foreach ( $prices as $tld => $values ) {
-		$item = array();
-		$item['tld'] = $tld;
-
-		$keys = array_keys($values["domainregister"]);
-		if ( count($keys) ) {
-			$item['period'] = $keys[0];
-			$item['register'] = ispapi_domainchecker_price($values["domainregister"][$keys[0]], $cur);
-		}
-
-		$keys = array_keys($values["domaintransfer"]);
-
-		if ( count($keys) ) {
-			if($keys[0] != 1){
-				$item['transfer'] = "";
-			}else{
-				$item['transfer'] = ispapi_domainchecker_price($values["domaintransfer"][$keys[0]], $cur);
-			}
-		}
-
-		$keys = (is_array($values["domainrenew"]))? array_keys($values["domainrenew"]) : array();
-		if ( count($keys) ) {
-			if($keys[0] != 1){
-				$item['renew'] = "";
-			}else{
-				$item['renew'] = ispapi_domainchecker_price($values["domainrenew"][$keys[0]], $cur);
-			}
-		}
-
-		$list[$i++] = $item;
-	}
-	return $list;
-}
-
-function ispapi_domainchecker_tldslist( $prices ) {
-	$tlds = array();
-	$i = 1;
-	foreach ( $prices as $tld => $values ) {
-		$tlds[$i++] = $tld;
-	}
-	return $tlds;
-}
-
-function ispapi_domainchecker_get_domainprices ( $currencyid ) {
-	try {
-	    $pdo = Capsule::connection()->getPdo();
-		$query = $pdo->prepare("SELECT tdp.extension, tp.type, msetupfee year1, qsetupfee year2, ssetupfee year3, asetupfee year4, bsetupfee year5, monthly year6, quarterly year7, semiannually year8, annually year9, biennially year10
-				FROM tbldomainpricing tdp, tblpricing tp
-				WHERE tp.relid = tdp.id
-				AND tp.tsetupfee = 0
-				AND tp.currency=?
-				ORDER BY tdp.order");
-		$query->execute(array($currencyid));
-		$row = $query->fetchAll(PDO::FETCH_ASSOC);
-
-		foreach ($row as $key => $value) {
-			for ( $i = 1; $i <= 10; $i++ ) {
-				if (($value['year'.$i] > 0) && ($value['type'] != 'domaintransfer')) $domainprices[$value['extension']][$value['type']][$i] = $value['year'.$i];
-				if (($value['year'.$i] >= 0) && ($value['type'] == 'domaintransfer')) $domainprices[$value['extension']][$value['type']][$i] = $value['year'.$i];
-			}
-		}
-	} catch (\Exception $e) {
-        die($e->getMessage());
-    }
-
-	foreach ( $domainprices as $tld => $values ) {
-		if ( !isset($values['domainregister']) ) {
-			unset($domainprices[$tld]);
-		}
-	}
-
-	return $domainprices;
-}
-//#######################################
