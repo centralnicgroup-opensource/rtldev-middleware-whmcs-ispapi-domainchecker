@@ -106,9 +106,7 @@ function ispapidomaincheck_clientarea($vars) {
 	require(dirname(__FILE__)."/../../../lang/".$_SESSION["Language"].".php");
 
 
-
-
-	//TODO: ANTHONY CHECKAUTHENTICATION AND VERSION NUMBER AND ONLY THEN INSERT IT
+	//TODO: Anthony: check if we can refactor those checks in an external php classe
 	//ISPAPI DomainChecker require the ISPAPI Registrar Module, check if at least one HEXONET Registrar Module available.
 	$_SESSION["ispapi_registrar"] = array(); //this needs to be done to reload the registrars in the domain.php
 	$registrars = SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
@@ -120,11 +118,9 @@ function ispapidomaincheck_clientarea($vars) {
 		addRegistrar("hexonet", $_SESSION["ispapi_registrar"]);
 		addRegistrar("ispapi", $_SESSION["ispapi_registrar"]);
 	}
-	//print_r($_SESSION["ispapi_registrar"]);
-
-
-
-
+	if( empty($_SESSION["ispapi_registrar"]) ){
+		die("The ISPAPI HP DomainCheck Module requires HEXONET/ISPAPI Registrar Module v1.0.53 or higher!");
+	}
 
 	//Set currency session if not set.
 	if ( !$_SESSION["currency"] ) {
@@ -323,13 +319,34 @@ function SQLCall($sql, $params, $fetchmode = "fetch"){
 
 
 /*
- * Adds the registrar to the array if it's a HEXONET registrar.
+ * Adds the registrar to the array if:
+ * - it is an HEXONET registrar module
+ * - registrar module >= 1.0.53
+ * - registrar module authentication successful
  */
 function addRegistrar($registrar, &$myarray) {
 	if(!empty($registrar) && !in_array($registrar, $myarray)){
 		include_once(dirname(__FILE__)."/../../../modules/registrars/".$registrar."/".$registrar.".php");
 		if(function_exists($registrar.'_GetISPAPIModuleVersion')){
-			array_push($myarray, $registrar);
+			$registrar_module_version = call_user_func($registrar.'_GetISPAPIModuleVersion');
+			//check if registrar module version >= 1.0.53
+			if( version_compare($registrar_module_version, '1.0.53') >= 0 ){
+				//check registrar module authentication
+				$ispapi_config = ispapi_config(getregistrarconfigoptions($registrar));
+				$command =  $command = array(
+						"command" => "CheckAuthentication",
+						"subuser" => $ispapi_config["login"],
+						"password" => $ispapi_config["password"],
+				);
+				$checkAuthentication = ispapi_call($command, $ispapi_config);
+				if($checkAuthentication["CODE"] == "200"){
+					array_push($myarray, $registrar);
+				}else{
+					die("The \"".$registrar."\" Registrar Module authentication failed! Please verify your registrar credentials and try again.");
+				}
+			}else{
+				die("The ISPAPI HP DomainCheck Module requires \"".$registrar."\" Registrar Module v1.0.53 or higher!");
+			}
 		}
 	}
 }

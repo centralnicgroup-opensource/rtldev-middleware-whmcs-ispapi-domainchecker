@@ -16,33 +16,33 @@ use WHMCS\Database\Capsule;
 use WHMCS\Domains\Pricing\Premium;
 
 
-/*
- * Adds the registrar to the array if it's a HEXONET registrar.
- */
-function addRegistrar($registrar, &$myarray) {
-	if(!empty($registrar) && !in_array($registrar, $myarray)){
-		include_once(dirname(__FILE__)."/../../../modules/registrars/".$registrar."/".$registrar.".php");
-		if(function_exists($registrar.'_GetISPAPIModuleVersion')){
-			array_push($myarray, $registrar);
-		}
-	}
-}
-
-//Get a list of all HEXONET registrar modules and include the registrar files
-if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])){
-	$_SESSION["ispapi_registrar"] = array();
-
-	$registrars = DomainCheck::SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
-	foreach($registrars as $registrar){
-		addRegistrar($registrar["autoreg"], $_SESSION["ispapi_registrar"]);
-	}
-	//if no TLD configured with HEXONET then try to add hexonet and ispapi
-	if( empty($_SESSION["ispapi_registrar"]) ){
-		addRegistrar("hexonet", $_SESSION["ispapi_registrar"]);
-		addRegistrar("ispapi", $_SESSION["ispapi_registrar"]);
-	}
-}
-
+// /*
+//  * Adds the registrar to the array if it's a HEXONET registrar.
+//  */
+// function addRegistrar($registrar, &$myarray) {
+// 	if(!empty($registrar) && !in_array($registrar, $myarray)){
+// 		include_once(dirname(__FILE__)."/../../../modules/registrars/".$registrar."/".$registrar.".php");
+// 		if(function_exists($registrar.'_GetISPAPIModuleVersion')){
+// 			array_push($myarray, $registrar);
+// 		}
+// 	}
+// }
+//
+// //Get a list of all HEXONET registrar modules and include the registrar files
+// if(!isset($_SESSION["ispapi_registrar"]) || empty($_SESSION["ispapi_registrar"])){
+// 	$_SESSION["ispapi_registrar"] = array();
+//
+// 	$registrars = DomainCheck::SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
+// 	foreach($registrars as $registrar){
+// 		addRegistrar($registrar["autoreg"], $_SESSION["ispapi_registrar"]);
+// 	}
+// 	//if no TLD configured with HEXONET then try to add hexonet and ispapi
+// 	if( empty($_SESSION["ispapi_registrar"]) ){
+// 		addRegistrar("hexonet", $_SESSION["ispapi_registrar"]);
+// 		addRegistrar("ispapi", $_SESSION["ispapi_registrar"]);
+// 	}
+// }
+// //print_r($_SESSION["ispapi_registrar"]);
 
 
 /**
