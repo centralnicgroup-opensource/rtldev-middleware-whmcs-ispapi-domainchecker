@@ -526,8 +526,8 @@ $( document ).ready(function() {
             //toggle - taken -availability
             var taken = $(this).find('span.taken');
             // to toggle hide on the second div items
-            var sib0 = $(this).siblings().eq(0);
-            var sib1 = $(this).siblings().eq(1);
+            var div0 = $(this).siblings().eq(0);
+            var div1 = $(this).siblings().eq(1);
 
             if ($(this).find('label.setbackorder').hasClass("added")){
                 command = "DeleteBackorder";
@@ -551,8 +551,8 @@ $( document ).ready(function() {
                         backorder.addClass('added');
                         taken.addClass('added');
                         whoisLink.addClass('added');
-                        sib0.addClass('details hide');
-                        sib1.removeClass('details hide');
+                        div0.addClass('details hide');
+                        div1.removeClass('details hide');
 
                         noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
                     }
@@ -564,8 +564,8 @@ $( document ).ready(function() {
                         backorder.removeClass('added');
                         taken.removeClass('added');
                         whoisLink.removeClass('added');
-                        sib0.removeClass('details hide');
-                        sib1.addClass('details hide');
+                        div0.removeClass('details hide');
+                        div1.addClass('details hide');
 
                         noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
                     }
@@ -626,7 +626,7 @@ $( document ).ready(function() {
     <!-- CATEGORY and searched domain in box-->
     <div id="categories" class="row1 row collapse-category">
         <!-- To display searched domain in a box with feedback message  -->
-        <div id="domain-in-box" style="display:none">
+        <div id="domain-in-box" class="domain-box" style="display:none">
             <div class="status-text"></div>
             <div class="label-text">
                 <span class="domainlabel"></span>
