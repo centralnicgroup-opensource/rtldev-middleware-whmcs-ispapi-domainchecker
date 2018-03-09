@@ -597,11 +597,9 @@ $( document ).ready(function() {
 
 
 <!-- HTML PART OF THE DOMAINCHECKER -->
-
 {if $backorder_module_installed}
     <script src="../modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
 {/if}
-
 
 
 <div class="domain-checker-container2">
@@ -619,12 +617,16 @@ $( document ).ready(function() {
     <div class="row search-input-bar">
         <div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
             <div class="input-group input-group-lg input-group-box">
+<<<<<<< HEAD
                 <input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;margin-left:50px; width:230%;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
                     <button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go </button>
+=======
+                <input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;margin-left:50px;width:230%;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
+                    <button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-51px;margin-top:6px;z-index:1000;" type="button">{$LANG.go_search} </button>
+>>>>>>> c223d95cf1668631945671a8c58adc2a17a4de39
              </div>
         </div>
     </div>
-
 
     <!-- CATEGORY and searched domain in box-->
     <div id="categories" class="row1 row collapse-category">
@@ -650,7 +652,7 @@ $( document ).ready(function() {
         <br/>
         <div class="col-xs-12 category-setting">
             <button class="category-button" type="button" data-toggle="collapse" data-target="#category" >
-                <span>CATEGORIES</span>
+                <span>{$LANG.categories_label}</span>
                 <br />
                 <i class="category fa fa-angle-down"></i>
             </button>
@@ -689,7 +691,7 @@ $( document ).ready(function() {
 <!-- <div>Search Results</div><br /> -->
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
 
-        <div class="row row1 search-results" id="searchresults">
+        <div class="row row1" id="searchresults">
         </div>
 		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.svg"/></p>
 		<p align="center"><input id="orderbutton" type="button" value="{$LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
@@ -710,5 +712,6 @@ $( document ).ready(function() {
     </div>
     <div class="clearfix"></div>
 {/if}
+
 
 {include file="$template/includes/modal.tpl" name="Whois" title=$LANG.whoisresults|cat:' <span id="whoisDomainName"></span>'}

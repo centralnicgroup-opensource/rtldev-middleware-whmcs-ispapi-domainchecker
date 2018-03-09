@@ -102,9 +102,14 @@ function ispapidomaincheck_clientarea($vars) {
 		$_SESSION["Language"] = strtolower($language_array["value"]);
 	}
 
-	//include the WHMCS language file
-	require(dirname(__FILE__)."/../../../lang/".$_SESSION["Language"].".php");
+	// //include the WHMCS language file
+	// require(dirname(__FILE__)."/../../../lang/".$_SESSION["Language"].".php");
 
+	// //include the module language files
+	// $file_backorder = getcwd()."/modules/addons/ispapidomaincheck/lang/".$_SESSION["Language".".php";
+	// if ( file_exists($file_backorder) ) {
+	// 	include($file_backorder);
+	// }
 
 	//TODO: Anthony: check if we can refactor those checks in an external php classe
 	//ISPAPI DomainChecker require the ISPAPI Registrar Module, check if at least one HEXONET Registrar Module available.

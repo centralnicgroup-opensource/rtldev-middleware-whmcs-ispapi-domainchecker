@@ -59,6 +59,7 @@ class DomainCheck
     private $registrar;
 	private $currency;
 	private $response;
+	private $translations;
 
     /*
      *  Constructor
@@ -70,13 +71,14 @@ class DomainCheck
      *  @param array $registrar The configured registrars (can be more than one)
      *  @param array $currency The selected currency
      */
-    public function __construct($domain, $domains, $tldgroup, $action, $registrar, $currency){
+    public function __construct($domain, $domains, $tldgroup, $action, $registrar, $currency, $translations){
     	$this->domain = $domain;
 		$this->domains = $domains;
 		$this->tldgroup = $tldgroup;
 		$this->action = $action;
 		$this->registrar = $registrar;
 		$this->currency = $currency;
+		$this->translations = $translations;
 
 		$this->doDomainCheck();
     }
@@ -99,6 +101,17 @@ class DomainCheck
     }
 
 	/*
+     * Returns the value of the translation for a given key
+	 *
+	 * @param string $key The key
+	 *
+     * @return string The value if found, the key if the value is not existing
+     */
+	private function getTranslation($key){
+		return (isset($this->translations[$key])) ? $this->translations[$key] : "<#".$key."#>";
+    }
+
+	/*
      * Removes the domain from the cart
      */
 	private function removeFromCart(){
@@ -108,7 +121,7 @@ class DomainCheck
 			foreach ($_SESSION["cart"]["domains"] as $index => $domain) {
 				if(in_array($this->domain, $domain)){
 					 unset($_SESSION["cart"]["domains"][$index]);
-					 $response["feedback"] = "The domain has been removed from the cart.";
+					 $response["feedback"] = $this->getTranslation("remove_from_cart");
 				}
 			}
 		}
@@ -165,7 +178,7 @@ class DomainCheck
 											);
 
 						array_push($_SESSION["cart"]["domains"], $premiumdomain);
-						$response["feedback"] = "The domain has been added to the cart.";
+						$response["feedback"] = $this->getTranslation("add_to_cart");
 
 					}
 				}
@@ -294,7 +307,7 @@ class DomainCheck
 		}else{
 			//if $searched_tld not empty display feedback message
 			if(!empty($searched_tld)){
-				$feedback = array("f_type" => "error", "f_message" => "Extension .$searched_tld not supported !", "id" => $this->domain);
+				$feedback = array("f_type" => "error", "f_message" => $this->getTranslation("domain_not_supported_feedback"), "id" => $this->domain);
 				$do_not_search = true;
 			}
 		}
@@ -547,13 +560,13 @@ class DomainCheck
 
 		if(isset($this->domain) && $this->domain == $searched_domain_object["id"]){
 			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
-				$feedback = array_merge(array("f_type" => "backorder", "f_message" => "Backorder Available!"), $searched_domain_object);
+				$feedback = array_merge(array("f_type" => "backorder", "f_message" => $this->getTranslation("backorder_available_feedback")), $searched_domain_object);
 			}
 			elseif($searched_domain_object["status"] == "taken"){
-				$feedback = array_merge(array("f_type" => "taken", "f_message" => "Domain already taken!"), $searched_domain_object);
+				$feedback = array_merge(array("f_type" => "taken", "f_message" => $this->getTranslation("domain_taken_feedback")), $searched_domain_object);
 			}
 			elseif($searched_domain_object["status"] == "available"){
-				$feedback = array_merge(array("f_type" => "available", "f_message" => "Your domain is available!"), $searched_domain_object);
+				$feedback = array_merge(array("f_type" => "available", "f_message" => $this->getTranslation("domain_available_feedback")), $searched_domain_object);
 			}
 		}
     	$response_array = array("data" => $response, "feedback" => $feedback);
@@ -591,7 +604,7 @@ class DomainCheck
 		foreach($response as $item){
 			$tmp = $item;
 			$tmp["backorder_available"] = $tmp["backordered"] = 0;
-			if($item["code"]==211){
+			if($item["code"]==211 && empty($item["premiumchannel"])){ //we are not supporting premium backorders, so we don't add them here.
 				//In this case, backorder module is installed
 
 				//Check if pricing set for this TLD
@@ -643,7 +656,7 @@ class DomainCheck
 			if(!empty($item)){
 				for ( $i = 1; $i <= 10; $i++ ) {
 					if (($item['year'.$i] > 0)){
-						$domainprices[$item['type']][$i] = $item['year'.$i]; //$this->formatPrice($item['year'.$i], $selected_currency_array);
+						$domainprices[$item['type']][$i] = number_format($item['year'.$i], 2); //$this->formatPrice($item['year'.$i], $selected_currency_array);
 					}
 				}
 			}
@@ -713,13 +726,13 @@ class DomainCheck
 			$domain_currency_code = $domain_currency_array["code"];
 			if($selected_currency_code == $domain_currency_code){
 				//return $this->formatPrice($markupedprice, $selected_currency_array);
-				return $markupedprice;
+				return number_format($markupedprice, 2);
 			}else{
 				if($domain_currency_array["default"] == 1){
 					//CONVERT THE PRICE IN THE SELECTED CURRENCY
 					$convertedprice = $markupedprice * $selected_currency_array["rate"];
 					//return $this->formatPrice($convertedprice, $selected_currency_array);
-					return $convertedprice;
+					return number_format($convertedprice, 2);
 				}else{
 					//FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
@@ -734,7 +747,7 @@ class DomainCheck
 					$price_selected_currency = $price_default_currency * $selected_currency_array["rate"];
 
 					//return $this->formatPrice($price_selected_currency, $selected_currency_array);
-					return $price_selected_currency;
+					return number_format($price_selected_currency, 2);
 				}
 			}
 		}
@@ -878,9 +891,9 @@ class DomainCheck
 			}
 		} catch (\Exception $e) {
 			if($debug){
-				echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => "An error occured, please contact the support.", "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ) );
+				echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => $this->getTranslation("error_feedback"), "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ) );
 			}else{
-				echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => "An error occured, please contact the support.") ) );
+				echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => $this->getTranslation("error_feedback")) ) );
 			}
 			die();
 		}
@@ -1053,10 +1066,16 @@ $ca->initPage();
 if ($ca->isLoggedIn()) {
 	$user = DomainCheck::SQLCall("SELECT currency FROM tblclients WHERE id=?", array($ca->getUserID()));
 	$currency = $user["currency"];
-	//$_SESSION["userid"] = $ca->getUserID();
 }
 
 $domains = (isset($_REQUEST["domains"])) ? $_REQUEST["domains"] : "";
+
+//add the module language file if existing
+$module_language_file = dirname(__FILE__)."/lang/".$_SESSION["Language"].".php";
+if(file_exists($module_language_file)){
+	require($module_language_file);
+	// $_LANG is now available
+}
 
 //Instanciate .the DomainCheck class and send the request
 $domaincheck = new DomainCheck( $_REQUEST["domain"],
@@ -1064,7 +1083,8 @@ $domaincheck = new DomainCheck( $_REQUEST["domain"],
 								$_REQUEST["tldgroup"],
 								$action,
 								$_SESSION["ispapi_registrar"],
-								$currency);
+								$currency,
+								$_LANG);
 $domaincheck->send();
 
 ?>
