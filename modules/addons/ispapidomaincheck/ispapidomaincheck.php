@@ -216,6 +216,11 @@ function ispapidomaincheck_output($vars) {
 		</ul>
 	</div>
 	';
+	echo '<br>';
+	echo '<form action="'.$modulelink.'" method="post">';
+	echo '<p>A list of categories and their TLDs can be imported here: <input style="margin-left:10px;" class="btn" name="importdefaultcategories" type="submit" value="import default categories"></p>';
+	echo '</form>';
+
 	ispapidomaincheck_categoryeditorcontent($modulelink."&tab=0");
 }
 
@@ -275,12 +280,12 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 	echo '<th>TLDs</th>';
 	echo '<th width="20"></th></tr>';
 	foreach($categories as $cat){
-		echo '<tr><td width="220"><input style="width:210px;font-weight:bold" type="text" name="CAT['.$cat["id"].'][NAME]" value="'.$cat["name"].'"/></td><td><input style="width:650px;" type="text" name="CAT['.$cat["id"].'][TLDS]" value="'.$cat["tlds"].'"/></td><td width="20"><a href="'.$modulelink."&delete=".$cat["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
+		echo '<tr><td width="220"><input style="width:210px;font-weight:bold" type="text" name="CAT['.$cat["id"].'][NAME]" value="'.$cat["name"].'"/></td><td><textarea style="width:650px;" type="text" name="CAT['.$cat["id"].'][TLDS]" value="'.$cat["tlds"].'">'.$cat["tlds"].'</textarea></td><td width="20"><a href="'.$modulelink."&delete=".$cat["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
 	}
-	echo '<tr><td><input style="width:210px;" type="text" name="NEWCAT[NAME]" value=""/></td><td><input style="width:650px;" type="text" name="NEWCAT[TLDS]" value=""/></td><td></td></tr>';
+	echo '<tr><td><input style="width:210px;" type="text" name="NEWCAT[NAME]" value=""/></td><td><textarea style="width:650px;" type="text" name="NEWCAT[TLDS]" value=""></textarea></td><td></td></tr>';
 	echo '</tbody></table></div>';
 	echo '<p align="center"><input class="btn" name="savecategories" type="submit" value="Save Changes">';
-	echo '<input style="margin-left:10px;" class="btn" name="importdefaultcategories" type="submit" value="import default categories"></p>';
+	// echo '<input style="margin-left:10px;" class="btn" name="importdefaultcategories" type="submit" value="import default categories"></p>';
 	echo '</form>';
 
 	echo '</div>';
