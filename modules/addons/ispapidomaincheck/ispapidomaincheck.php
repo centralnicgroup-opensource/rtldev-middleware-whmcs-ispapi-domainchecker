@@ -1,5 +1,10 @@
 <?php
 use WHMCS\Database\Capsule;
+use ISPAPI\LoadRegistrars;
+
+require_once(dirname(__FILE__)."/lib/LoadRegistrars.class.php");
+require_once(dirname(__FILE__)."/lib/Helper.class.php");
+
 $module_version = "7.3.0";
 
 
@@ -110,35 +115,10 @@ function ispapidomaincheck_clientarea($vars) {
 		$_SESSION["Language"] = strtolower($language_array["value"]);
 	}
 
-	// //include the WHMCS language file
-	// require(dirname(__FILE__)."/../../../lang/".$_SESSION["Language"].".php");
-
-	// //include the module language files
-	// $file_backorder = getcwd()."/modules/addons/ispapidomaincheck/lang/".$_SESSION["Language".".php";
-	// if ( file_exists($file_backorder) ) {
-	// 	include($file_backorder);
-	// }
-
-	//TODO: Anthony: check if we can refactor those checks in an external php classe
-	//ISPAPI DomainChecker require the ISPAPI Registrar Module, check if at least one HEXONET Registrar Module available.
-	$_SESSION["ispapi_registrar"] = array(); //this needs to be done to reload the registrars in the domain.php
-	$registrars = SQLCall("SELECT extension, autoreg FROM tbldomainpricing GROUP BY autoreg", array(), "fetchall");
-	foreach($registrars as $registrar){
-		addRegistrar($registrar["autoreg"], $_SESSION["ispapi_registrar"]);
-	}
-	//if no TLD configured with HEXONET then try to add hexonet and ispapi
-	if( empty($_SESSION["ispapi_registrar"]) ){
-		addRegistrar("hexonet", $_SESSION["ispapi_registrar"]);
-		addRegistrar("ispapi", $_SESSION["ispapi_registrar"]);
-	}
-	if( empty($_SESSION["ispapi_registrar"]) ){
+	//load all the ISPAPI registrars
+	$load = new LoadRegistrars();
+	if(empty($load->getLoadedRegistars())){
 		die("The ISPAPI HP DomainCheck Module requires HEXONET/ISPAPI Registrar Module v1.0.53 or higher!");
-	}
-
-	//Set currency session if not set.
-	if ( !$_SESSION["currency"] ) {
-		$currency_array = SQLCall("SELECT id FROM tblcurrencies WHERE `default` = 1 LIMIT 1", array());
-		$_SESSION["currency"] = $currency_array["id"];
 	}
 
 	//set the domain with the post data if filled
