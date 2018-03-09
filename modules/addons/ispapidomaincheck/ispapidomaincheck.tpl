@@ -147,9 +147,9 @@ $( document ).ready(function() {
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
 					$( "#" + id).addClass(element.checkover);
                     //prices of the domains
-                    var registerprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" registerprice ">'+element.registerprice+'</span>' + '</span>';
-                    var hideregisterprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" registerprice added">'+element.registerprice+'</span>' + '</span>';
-                    var renewprice = '<span name="domainsregperiod['+element.id+']">'+ '<span class="renewal">Renewal: '+element.renewprice+'</span>'+ '</span>';
+                    var registerprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" registerprice " value='+element.registerprice_unformatted+'>'+element.registerprice+'</span>' + '</span>';
+                    var hideregisterprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" registerprice added" value='+element.registerprice_unformatted+'>'+element.registerprice+'</span>' + '</span>';
+                    var renewprice = '<span name="domainsregperiod['+element.id+']">'+ '<span class="renewal" value='+element.renewprice_unformatted+'>Renewal: '+element.renewprice+'</span>'+ '</span>';
                     var backorderprice = '<span name="domainsregperiod['+element.id+']">'+ '<span class=" renewalprice ">'+element.backorderprice+'</span>'+ '</span>';
                     //ALL THE DOMAINS IN THE CART
                     var domainsInCart = [];
@@ -466,16 +466,13 @@ $( document ).ready(function() {
             //handling premium domains in cart
             if($(this).find('span').hasClass('premium')){
                 var paramspremium = {};
-                var price = $(this).siblings().find('span.registerprice').text();
-                var renewalprice = $(this).siblings().find('span.renewal').text();
-                // remove 'USD' from the price before adding it to cart
-                var regex = /[\d|,|.|e|E|\+]+/g;
-                var registerprice = price.match(regex);
-                var renewprice = renewalprice.match(regex);
+                
+                var registerprice = $(this).siblings().find('span.registerprice.added').eq(1).attr("value");
+                var renewalprice = $(this).siblings().find('span.renewal').attr("value");
                 paramspremium['action'] = 'addPremiumToCart';
                 paramspremium['domain'] = $(this).find('label').attr("value");
-                paramspremium['registerprice']= registerprice[0];
-                paramspremium['renewalprice']= renewprice[2];
+                paramspremium['registerprice']= registerprice;
+                paramspremium['renewalprice']= renewalprice;
 
                 $.ajax({
                     //premium domain in cart
