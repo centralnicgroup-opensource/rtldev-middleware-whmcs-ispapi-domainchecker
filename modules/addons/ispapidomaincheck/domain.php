@@ -57,7 +57,7 @@ if(file_exists($module_language_file)){
 	// $_LANG is now available
 }
 
-//Instanciate .the DomainCheck class and send the request
+//instantiate the DomainCheck class and send the request
 $domaincheck = new DomainCheck( $_REQUEST["domain"],
 								$domains,
 								$_REQUEST["tldgroup"],
