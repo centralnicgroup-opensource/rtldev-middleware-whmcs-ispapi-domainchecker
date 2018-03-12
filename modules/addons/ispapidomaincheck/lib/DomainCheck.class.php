@@ -603,7 +603,7 @@ class DomainCheck
 			if(!empty($item)){
 				for ( $i = 1; $i <= 10; $i++ ) {
 					if (($item['year'.$i] > 0)){
-						$domainprices[$item['type']][$i] = number_format($item['year'.$i], 2); //$this->formatPrice($item['year'.$i], $selected_currency_array);
+						$domainprices[$item['type']][$i] = round($item['year'.$i], 2); //$this->formatPrice($item['year'.$i], $selected_currency_array);
 					}
 				}
 			}
@@ -673,13 +673,13 @@ class DomainCheck
 			$domain_currency_code = $domain_currency_array["code"];
 			if($selected_currency_code == $domain_currency_code){
 				//return $this->formatPrice($markupedprice, $selected_currency_array);
-				return number_format($markupedprice, 2);
+				return round($markupedprice, 2);
 			}else{
 				if($domain_currency_array["default"] == 1){
 					//CONVERT THE PRICE IN THE SELECTED CURRENCY
 					$convertedprice = $markupedprice * $selected_currency_array["rate"];
 					//return $this->formatPrice($convertedprice, $selected_currency_array);
-					return number_format($convertedprice, 2);
+					return round($convertedprice, 2);
 				}else{
 					//FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
@@ -694,7 +694,7 @@ class DomainCheck
 					$price_selected_currency = $price_default_currency * $selected_currency_array["rate"];
 
 					//return $this->formatPrice($price_selected_currency, $selected_currency_array);
-					return number_format($price_selected_currency, 2);
+					return round($price_selected_currency, 2);
 				}
 			}
 		}
