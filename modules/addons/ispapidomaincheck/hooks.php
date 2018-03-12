@@ -9,7 +9,7 @@ add_hook('ClientAreaPage', 1, function($templateVariables)
     $module_language_file = getcwd()."/modules/addons/".$modulename."/lang/".$language.".php";
     if(file_exists($module_language_file)){
 		include($module_language_file);
-        return array("LANG" => $_LANG);
+        return array("_LANG" => $_LANG);
 	}
 });
 
