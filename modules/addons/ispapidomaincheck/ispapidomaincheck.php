@@ -100,18 +100,11 @@ function ispapidomaincheck_deactivate() {
  */
 function ispapidomaincheck_clientarea($vars) {
 
-	//include registrarfunctions file from WHMCS
-	require_once(dirname(__FILE__)."/../../../includes/registrarfunctions.php");
-
 	//save the language in the session if not already set
 	if(!isset($_SESSION["Language"])){
 		$language_array = SQLCall("SELECT value FROM tblconfiguration WHERE setting='Language'", array());
 		$_SESSION["Language"] = strtolower($language_array["value"]);
 	}
-
-	//load all the ISPAPI registrars
-	$load = new LoadRegistrars();
-	print_r($load->getLoadedRegistars());
 
 	//set the domain with the post data if filled
 	$domain = isset($_POST["domain"]) ? $_POST["domain"] : "";
