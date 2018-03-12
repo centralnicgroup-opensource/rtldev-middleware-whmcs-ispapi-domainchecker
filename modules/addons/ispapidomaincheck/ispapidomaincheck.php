@@ -30,29 +30,23 @@ function ispapidomaincheck_config() {
  * This function will be called with the activation of the add-on module.
  */
 function ispapidomaincheck_activate() {
+	include(dirname(__FILE__)."/categories.php");
 	try {
 	    $pdo = Capsule::connection()->getPdo();
-
 		//IF NOT EXISTS Create ispapi_tblcategories table
 		$query = $pdo->prepare("CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)");
 		$query->execute();
 
-		//TODO TULSI: import the default categories when empty
-		//Insert example categories if table empty (just the first time)
-		// $query = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
-		// $query->execute();
-		// $data = $query->fetchAll(PDO::FETCH_ASSOC);
+		// import the default categories when empty
+		$query = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
+		$query->execute();
+		$data = $query->fetchAll(PDO::FETCH_ASSOC);
 		//
-		// if ( empty($data) ) {
-		// 	$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories(name, tlds) VALUES ('Popular', 'com diamonds domains email guru land sexy tattoo singles'), ('Business', 'camera company computer enterprises equipment holdings management solutions support'), ('Europe', 'fr de it nl lu')");
-		// 	$insert_stmt->execute();
-		// }
-
-		########################################## tulsi - use this 
-		// foreach ($categorieslib as $category => $tlds) {
-		// 	$insert_stmt = SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
-		// }
-		#######################################
+		if ( empty($data) ) {
+			foreach ($categorieslib as $category => $tlds) {
+				$insert_stmt = SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
+			}
+		}
 	} catch (\Exception $e) {
 		return array('status'=>'error', 'description'=>$e->getMessage());
     }
