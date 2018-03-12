@@ -12,6 +12,7 @@ class LoadRegistrars
 {
 	private $registrars;
 
+	const REGISTRAR_MIN_VERSION = '1.0.53';
     /*
      *  Constructor
      */
@@ -53,9 +54,9 @@ class LoadRegistrars
 		if(isset($registrar)){
 			include_once(dirname(__FILE__)."/../../../../modules/registrars/".$registrar."/".$registrar.".php");
 			if(function_exists($registrar.'_GetISPAPIModuleVersion')){
-				//compare version number MINIMUM: 1.0.53
+				//compare version number
 				$version = call_user_func($registrar.'_GetISPAPIModuleVersion');
-				if( version_compare($version, '1.0.53') >= 0 ){
+				if( version_compare($version, self::REGISTRAR_MIN_VERSION) >= 0 ){
 					//check authentication
 					$checkAuthentication = Helper::APICall($registrar, array("COMMAND" => "CheckAuthentication"));
 					if($checkAuthentication["CODE"] == "200"){
