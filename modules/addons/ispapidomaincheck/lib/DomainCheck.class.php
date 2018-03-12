@@ -492,7 +492,7 @@ class DomainCheck
 			array_push($response, array("id" => $item,
 										"checkover" => "whois",
 										"code" => $code,
-										"availability" => $check["result"],
+										"availability" => $check["message"],
 										"class" => "",
 										"premiumchannel" => "",
 										"premiumtype" => "",
@@ -540,7 +540,7 @@ class DomainCheck
      */
 	private function handleBackorderButton($response){
 		//Check if backorder module is installed
-		$backorder_mod_installed = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
+		$backorder_mod_installed = (file_exists(dirname(__FILE__)."/../../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
 		if(!$backorder_mod_installed)
 			return $response;
 
