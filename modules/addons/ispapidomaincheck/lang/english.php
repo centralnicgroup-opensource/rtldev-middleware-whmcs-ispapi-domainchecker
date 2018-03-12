@@ -9,13 +9,6 @@ $_LANG['domaincheckertaken'] = "TAKEN";
 $_LANG['domaincheckerdomainexample'] = "Search for your domain...";
 $_LANG['whoisresults'] = "WHOIS Results for";
 $_LANG['go_search'] = "GO";
-$_LANG['remove_from_cart'] = "The domain has been removed from the cart.";
-$_LANG['add_to_cart'] = "The domain has been added to the cart.";
-$_LANG['domain_not_supported_feedback'] = "Currently we do not support this domain";
-$_LANG['backorder_available_feedback'] = "This domain is registered but it can still be yours!";
-$_LANG['domain_taken_feedback'] = "This domain is not available";
-$_LANG['domain_available_feedback'] = "Your domain is available!";
-$_LANG['error_feedback'] = "An error occured, please contact the support.";
 $_LANG['price_of_domain_text'] = " upon successful registration";
 $_LANG['add_to_cart_button'] = "Add to cart";
 $_LANG['premium'] = "PREMIUM";
@@ -29,10 +22,18 @@ $_LANG['more'] = "More";
 $_LANG['domain_added_to_cart'] = "Added";
 $_LANG['backorder_deleted'] = "Backorder successfully deleted.";
 $_LANG['login_required'] = "Login Required";
-$_LANG['error_occured'] = "An error occured";
+$_LANG['error_occured'] = "An error occurred";
 $_LANG['backorder_created'] = "Backorder successfully created.";
 
-$_LANG[''] = "";
 
+//The following are not used in tpl file
+$_LANG['add_to_cart'] = "The domain has been added to the cart.";
+$_LANG['remove_from_cart'] = "The domain has been removed from the cart.";
+$_LANG['domain_not_supported_feedback'] = "Currently we do not support this domain";
+$_LANG['backorder_available_feedback'] = "This domain is registered but it can still be yours!";
+$_LANG['domain_taken_feedback'] = "This domain is not available";
+$_LANG['domain_available_feedback'] = "Your domain is available!";
+$_LANG['error_feedback'] = "An error occured, please contact the support.";
+$_LANG[''] = "";
 
 ?>
