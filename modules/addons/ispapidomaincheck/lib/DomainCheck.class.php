@@ -393,8 +393,8 @@ class DomainCheck
 				elseif(preg_match('/210/', $check["PROPERTY"]["DOMAINCHECK"][$index])){
 					//DOMAIN AVAILABLE
 					$whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
-	    			$register_price = $whmcspricearray["domainregister"][1];
-				 	$renew_price = $whmcspricearray["domainrenew"][1];
+	    			$register_price_unformatted = $whmcspricearray["domainregister"][1];
+				 	$renew_price_unformatted = $whmcspricearray["domainrenew"][1];
 
 					$register_price = $this->formatPrice($register_price_unformatted, $selected_currency_array);
 					$renew_price = $this->formatPrice($renew_price_unformatted, $selected_currency_array);
