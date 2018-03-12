@@ -111,9 +111,7 @@ function ispapidomaincheck_clientarea($vars) {
 
 	//load all the ISPAPI registrars
 	$load = new LoadRegistrars();
-	if(empty($load->getLoadedRegistars())){
-		die("The ISPAPI HP DomainCheck Module requires HEXONET/ISPAPI Registrar Module v1.0.53 or higher!");
-	}
+	print_r($load->getLoadedRegistars());
 
 	//set the domain with the post data if filled
 	$domain = isset($_POST["domain"]) ? $_POST["domain"] : "";

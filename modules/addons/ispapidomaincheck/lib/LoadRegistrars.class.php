@@ -31,15 +31,31 @@ class LoadRegistrars
 
 	/*
 	 * Loads all the ISPAPI Registrars.
-	 * ISPAPI registrar = ISPAPI like registrar module >= 1.0.53 AND registrar module authentication successful
      */
 	private function loadISPAPIRegistrars(){
 		foreach($this->getAllConfiguredRegistrars() as $registrar){
+			$this->loadSingleISPAPIRegistrar($registrar);
+		}
+		//if no registrar configured in the pricelist, then try to add hexonet and ispapi
+		if(empty($this->registrars)){
+			$this->loadSingleISPAPIRegistrar("hexonet");
+			$this->loadSingleISPAPIRegistrar("ispapi");
+		}
+	}
+
+	/*
+	 * Loads a single ISPAPI Registrar
+	 * ISPAPI registrar = ISPAPI like registrar module >= 1.0.53 AND registrar module authentication successful
+
+     * @param string $registrar The name of the registrar
+     */
+	private function loadSingleISPAPIRegistrar($registrar){
+		if(isset($registrar)){
 			include_once(dirname(__FILE__)."/../../../../modules/registrars/".$registrar."/".$registrar.".php");
 			if(function_exists($registrar.'_GetISPAPIModuleVersion')){
 				//compare version number MINIMUM: 1.0.53
 				$version = call_user_func($registrar.'_GetISPAPIModuleVersion');
- 				if( version_compare($version, '1.0.53') >= 0 ){
+				if( version_compare($version, '1.0.53') >= 0 ){
 					//check authentication
 					$checkAuthentication = Helper::APICall($registrar, array("COMMAND" => "CheckAuthentication"));
 					if($checkAuthentication["CODE"] == "200"){

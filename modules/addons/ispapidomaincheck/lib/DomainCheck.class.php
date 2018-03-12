@@ -200,7 +200,7 @@ class DomainCheck
     	$searched_label = $this->getDomainLabel($this->domain);
 		$searched_tld = $this->getDomainExtension($this->domain);
 
-		if( $this->getDomaincheckerMode() == "Suggestions" ){
+		if( $this->getDomaincheckerMode() == "Suggestions" && !empty($this->registrar)){ //if no registrar module found, use regular mode
 			//SUGGESTIONS MODE
 
 			//use the first ispapi registrar to query the suggestion list
