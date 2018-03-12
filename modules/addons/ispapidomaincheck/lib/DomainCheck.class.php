@@ -214,6 +214,7 @@ class DomainCheck
 				"KEYWORD" => $searched_label,
 				"ZONE" => $tldgroups,
 				"SOURCE" => "ISPAPI-SUGGESTIONS",
+				"LIMIT" => "60"
 			);
 
 			$suggestions = Helper::APICall($registrar, $command);
