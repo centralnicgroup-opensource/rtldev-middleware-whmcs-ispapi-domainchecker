@@ -47,6 +47,12 @@ function ispapidomaincheck_activate() {
 		// 	$insert_stmt = $pdo->prepare("INSERT INTO ispapi_tblcategories(name, tlds) VALUES ('Popular', 'com diamonds domains email guru land sexy tattoo singles'), ('Business', 'camera company computer enterprises equipment holdings management solutions support'), ('Europe', 'fr de it nl lu')");
 		// 	$insert_stmt->execute();
 		// }
+
+		########################################## tulsi - use this 
+		// foreach ($categorieslib as $category => $tlds) {
+		// 	$insert_stmt = SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
+		// }
+		#######################################
 	} catch (\Exception $e) {
 		return array('status'=>'error', 'description'=>$e->getMessage());
     }
@@ -62,6 +68,8 @@ function ispapidomaincheck_upgrade($vars) {
 	    $pdo = Capsule::connection()->getPdo();
 
 		//TODO TULSI: $version is = 7.3.0 but you said it is only working with 7.3 so please cut the everything after the last point
+		// NOTE ANTHONY : I checked and it is working fine even if I have any number format in the version. Problem is here: if($version < 7.3)  ==> if I use -> if($version < 7.3.0), module breaks.
+		// the following code just works fine.
 
 		if($version < 7.3) {
 			// 1. DROP ispapi_tblaftermarketcurrencies if exists
