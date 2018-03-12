@@ -106,7 +106,7 @@ class DomainCheck
 	    				"PREMIUMCHANNELS" => "*",
 	    				"DOMAIN" => array($this->domain)
 	    		);
-				$check = $this->sendAPICommand($registrar, $command);
+				$check = Helper::APICall($registrar, $command);
 
 				if(!empty($check["PROPERTY"]["PREMIUMCHANNEL"][0])){
 					$registrarprice = $check["PROPERTY"]["PRICE"][0];
@@ -170,20 +170,6 @@ class DomainCheck
     	return $tldconfiguration;
     }
 
-	/*
-     * Sends API command to the registrar and returns the response
-	 *
-	 * @param string $registrar The registrar
-     * @param string $command The API command to send
-	 *
-     * @return array The response from the API
-     */
-	private function sendAPICommand($registrar, $command){
-		$registrarconfigoptions = getregistrarconfigoptions($registrar);
-		$ispapi_config = ispapi_config($registrarconfigoptions);
-		return ispapi_call($command, $ispapi_config);
-	}
-
     /*
      * Returns the list of domains that have to be checked.
      */
@@ -230,7 +216,7 @@ class DomainCheck
 				"SOURCE" => "ISPAPI-SUGGESTIONS",
 			);
 
-			$suggestions = $this->sendAPICommand($registrar, $command);
+			$suggestions = Helper::APICall($registrar, $command);
 
 			//convert the domainlist to IDN again
 			$domainlist = $this->convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
@@ -369,7 +355,7 @@ class DomainCheck
     				"PREMIUMCHANNELS" => "*",
     				"DOMAIN" => $converted_domains
     		);
-			$check = $this->sendAPICommand($listitem["registrar"], $command);
+			$check = Helper::APICall($listitem["registrar"], $command);
 
     		$index = 0;
     		foreach($listitem["domain"] as $item){
@@ -733,8 +719,9 @@ class DomainCheck
 		//get domain extension
 		$tld = $this->getDomainExtension($domain);
 
-		//here we reuse the code from the registrar module
-		$registrarRenewPrice = ispapi_getRenewPrice(getregistrarconfigoptions($registrar), $class, $domain_currency_id, $tld);
+		//here we are calling the getRenewPrice from the respective registar module
+		//$registrarRenewPrice = ispapi_getRenewPrice(getregistrarconfigoptions($registrar), $class, $domain_currency_id, $tld);
+		$registrarRenewPrice = call_user_func($registrar."_getRenewPrice", getregistrarconfigoptions($registrar), $class, $domain_currency_id, $tld);
 
 		//the renew price has to be converted to the selected currency
 		return $this->convertPriceToSelectedCurrency($registrarRenewPrice, $registrarPriceCurrency);
@@ -885,7 +872,7 @@ class DomainCheck
 				"COMMAND" => "convertIDN",
 				"DOMAIN" => $domain
 		);
-		$response = $this->sendAPICommand($registrar, $command);
+		$response = Helper::APICall($registrar, $command);
 
 		if(!is_array($domain)){
 	    	return $response["PROPERTY"]["ACE"][0];
@@ -906,7 +893,7 @@ class DomainCheck
 				"COMMAND" => "convertIDN",
 				"DOMAIN" => $domain
 		);
-		$response = $this->sendAPICommand($registrar, $command);
+		$response = Helper::APICall($registrar, $command);
 
 		if(!is_array($domain)){
 			return $response["PROPERTY"]["ACE"][0];
@@ -927,7 +914,7 @@ class DomainCheck
 				"COMMAND" => "convertIDN",
 				"DOMAIN" => $domain
 		);
-		$response = $this->sendAPICommand($registrar, $command);
+		$response = Helper::APICall($registrar, $command);
 
 		if(!is_array($domain)){
 			return $response["PROPERTY"]["IDN"][0];

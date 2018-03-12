@@ -30,16 +30,22 @@ class LoadRegistrars
 	}
 
 	/*
-	 * Loads all the ISPAPI Registrars
+	 * Loads all the ISPAPI Registrars.
+	 * ISPAPI registrar = ISPAPI like registrar module >= 1.0.53 AND registrar module authentication successful
      */
 	private function loadISPAPIRegistrars(){
 		foreach($this->getAllConfiguredRegistrars() as $registrar){
 			include_once(dirname(__FILE__)."/../../../../modules/registrars/".$registrar."/".$registrar.".php");
 			if(function_exists($registrar.'_GetISPAPIModuleVersion')){
-
-				//TODO check authentication
-
-				array_push($this->registrars, $registrar);
+				//compare version number MINIMUM: 1.0.53
+				$version = call_user_func($registrar.'_GetISPAPIModuleVersion');
+ 				if( version_compare($version, '1.0.53') >= 0 ){
+					//check authentication
+					$checkAuthentication = Helper::APICall($registrar, array("COMMAND" => "CheckAuthentication"));
+					if($checkAuthentication["CODE"] == "200"){
+						array_push($this->registrars, $registrar);
+					}
+				}
 			}
 		}
 	}
