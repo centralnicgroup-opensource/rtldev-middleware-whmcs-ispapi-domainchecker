@@ -152,10 +152,6 @@ function ispapidomaincheck_output($vars) {
 		</ul>
 	</div>
 	';
-	echo '<br>';
-	echo '<form action="'.$modulelink.'" method="post">';
-	echo '<p>A list of categories and their TLDs can be imported here: <input style="margin-left:10px;" class="btn" name="importdefaultcategories" type="submit" value="import default categories"></p>';
-	echo '</form>';
 
 	ispapidomaincheck_categoryeditorcontent($modulelink."&tab=0");
 }
@@ -169,7 +165,6 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 	//delete category
 	if(isset($_REQUEST["delete"])){
 		$currency_array = Helper::SQLCall("DELETE FROM ispapi_tblcategories WHERE id=? LIMIT 1", array($_REQUEST["delete"]), "execute");
-
 		echo '<div class="infobox"><strong><span class="title">Successfully deleted!</span></strong><br>The category has been deleted.</div>';
 	}
 
@@ -206,6 +201,14 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 		}
 		echo '<div class="infobox"><strong><span class="title">Successfully saved!</span></strong><br>The changes have been saved.</div>';
 	}
+
+
+	//import default categories button
+	echo '<form action="'.$modulelink.'" method="post">';
+	echo '<input style="margin-top:5px;" class="btn btn-danger" name="importdefaultcategories" type="submit" value="Import Default Categories">';
+	echo '</form>';
+	echo "<br>";
+
 	###############################################################################
 
 	//get all categories with tlds for displaying
@@ -213,13 +216,13 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%"><tbody>';
-	echo '<tr><th>Categories</th>';
-	echo '<th>TLDs</th>';
+	echo '<tr><th>Categorie Name</th>';
+	echo '<th>TLDs <span style="font-weight:100;">(space separated list of TLDs)</span></th>';
 	echo '<th width="20"></th></tr>';
 	foreach($categories as $cat){
-		echo '<tr><td width="220"><input style="width:210px;font-weight:bold" type="text" name="CAT['.$cat["id"].'][NAME]" value="'.$cat["name"].'"/></td><td><textarea style="width:650px;" type="text" name="CAT['.$cat["id"].'][TLDS]" value="'.$cat["tlds"].'">'.$cat["tlds"].'</textarea></td><td width="20"><a href="'.$modulelink."&delete=".$cat["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
+		echo '<tr><td width="220" valign="top"><input style="width:210px;font-weight:bold" type="text" name="CAT['.$cat["id"].'][NAME]" value="'.$cat["name"].'"/></td><td><textarea style="width:100%;height:70px;" type="text" name="CAT['.$cat["id"].'][TLDS]" value="'.$cat["tlds"].'">'.$cat["tlds"].'</textarea></td><td width="20"><a href="'.$modulelink."&delete=".$cat["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
 	}
-	echo '<tr><td><input style="width:210px;" type="text" name="NEWCAT[NAME]" value=""/></td><td><textarea style="width:650px;" type="text" name="NEWCAT[TLDS]" value=""></textarea></td><td></td></tr>';
+	echo '<tr><td><input style="width:210px;" type="text" name="NEWCAT[NAME]" value=""/></td><td><textarea style="width:100%;" type="text" name="NEWCAT[TLDS]" value=""></textarea></td><td></td></tr>';
 	echo '</tbody></table></div>';
 	echo '<p align="center"><input class="btn" name="savecategories" type="submit" value="Save Changes">';
 	// echo '<input style="margin-left:10px;" class="btn" name="importdefaultcategories" type="submit" value="import default categories"></p>';
