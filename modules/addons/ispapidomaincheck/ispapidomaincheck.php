@@ -1,6 +1,7 @@
 <?php
 use WHMCS\Database\Capsule;
 use ISPAPI\LoadRegistrars;
+use ISPAPI\Helper;
 
 require_once(dirname(__FILE__)."/lib/LoadRegistrars.class.php");
 require_once(dirname(__FILE__)."/lib/Helper.class.php");
@@ -31,25 +32,17 @@ function ispapidomaincheck_config() {
  */
 function ispapidomaincheck_activate() {
 	include(dirname(__FILE__)."/categories.php");
-	try {
-	    $pdo = Capsule::connection()->getPdo();
-		//IF NOT EXISTS Create ispapi_tblcategories table
-		$query = $pdo->prepare("CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)");
-		$query->execute();
+	//IF NOT EXISTS Create ispapi_tblcategories table
+	$query = Helper::SQLCall("CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)", array(), "execute");
 
-		// import the default categories when empty
-		$query = $pdo->prepare("SELECT * FROM ispapi_tblcategories");
-		$query->execute();
-		$data = $query->fetchAll(PDO::FETCH_ASSOC);
-		//
-		if ( empty($data) ) {
-			foreach ($categorieslib as $category => $tlds) {
-				$insert_stmt = SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
-			}
+	// import the default categories when empty
+	$data = Helper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
+
+	if ( empty($data) ) {
+		foreach ($categorieslib as $category => $tlds) {
+			$insert_stmt = Helper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
 		}
-	} catch (\Exception $e) {
-		return array('status'=>'error', 'description'=>$e->getMessage());
-    }
+	}
     return array('status'=>'success', 'description'=>'The ISPAPI HP DomainChecker was successfully installed.');
 }
 
@@ -58,30 +51,18 @@ function ispapidomaincheck_activate() {
 */
 function ispapidomaincheck_upgrade($vars) {
 	$version = $vars['version'];
-	try {
-	    $pdo = Capsule::connection()->getPdo();
-
-		//TODO TULSI: $version is = 7.3.0 but you said it is only working with 7.3 so please cut the everything after the last point
-		// NOTE ANTHONY : I checked and it is working fine even if I have any number format in the version. Problem is here: if($version < 7.3)  ==> if I use -> if($version < 7.3.0), module breaks.
-		// the following code just works fine.
-
+	// $version = substr($version, 0, strrpos( $version, '.') );
 		if($version < 7.3) {
 			// 1. DROP ispapi_tblaftermarketcurrencies if exists
-			$query = $pdo->prepare("DROP TABLE IF EXISTS ispapi_tblaftermarketcurrencies");
-		   	$query->execute();
+			$query = Helper::SQLCall("DROP TABLE IF EXISTS ispapi_tblaftermarketcurrencies", array(), "execute");
 			// 2. DROP ispapi_tblsettings if exists
-			$query = $pdo->prepare("DROP TABLE IF EXISTS ispapi_tblsettings");
-			$query->execute();
-			// 3. ALTER ispapi_tblcategories
-			$query = $pdo->prepare("ALTER TABLE ispapi_tblcategories DROP COLUMN parent");
-			$query->execute();
-			// This one deletes the row and does not complain if it can't.
-			$query = $pdo->prepare("DELETE IGNORE FROM ispapi_tblcategories WHERE tlds=''");
-			$query->execute();
+			$query = Helper::SQLCall("DROP TABLE IF EXISTS ispapi_tblsettings", array(), "execute");
+			// // 3. ALTER ispapi_tblcategories
+			$query = Helper::SQLCall("ALTER TABLE ispapi_tblcategories DROP COLUMN parent", array(), "execute");
+			// // This one deletes the row and does not complain if it can't.
+			$query = Helper::SQLCall("DELETE IGNORE FROM ispapi_tblcategories WHERE tlds=''", array(), "execute");
 		}
-	} catch (\Exception $e) {
-		return array('status'=>'error', 'description'=>$e->getMessage());
-    }
+
     return array('status'=>'success', 'description'=>'The ISPAPI HP DomainChecker was successfully upgraded.');
 }
 
@@ -102,7 +83,7 @@ function ispapidomaincheck_clientarea($vars) {
 
 	//save the language in the session if not already set
 	if(!isset($_SESSION["Language"])){
-		$language_array = SQLCall("SELECT value FROM tblconfiguration WHERE setting='Language'", array());
+		$language_array = Helper::SQLCall("SELECT value FROM tblconfiguration WHERE setting='Language'", array(), "fetch");
 		$_SESSION["Language"] = strtolower($language_array["value"]);
 	}
 
@@ -119,7 +100,7 @@ function ispapidomaincheck_clientarea($vars) {
 	$backordermodulepath = "modules/addons/ispapibackorder/";
 
 	//get all categories
-	$categories = SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
+	$categories = Helper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
 
 	return array(
 			'pagetitle' => $_LANG['domaintitle'],
@@ -205,17 +186,18 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 
 	//delete category
 	if(isset($_REQUEST["delete"])){
-		$currency_array = SQLCall("DELETE FROM ispapi_tblcategories WHERE id=? LIMIT 1", array($_REQUEST["delete"]), "execute");
+		$currency_array = Helper::SQLCall("DELETE FROM ispapi_tblcategories WHERE id=? LIMIT 1", array($_REQUEST["delete"]), "execute");
+
 		echo '<div class="infobox"><strong><span class="title">Successfully deleted!</span></strong><br>The category has been deleted.</div>';
 	}
 
 	//import default categories
 	if(isset($_REQUEST["importdefaultcategories"])){
 		$category_not_found_in_categorieslib = array();
-		$data = SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
+		$data = Helper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
 		if(empty($data)){
 			foreach ($categorieslib as $category => $tlds) {
-				$insert_stmt = SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
+				$insert_stmt = Helper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
 			}
 		}else{
 			foreach ($categorieslib as $key => $value) {
@@ -223,7 +205,7 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 			}
 			if(!empty($category_not_found_in_categorieslib)){
 				foreach ($category_not_found_in_categorieslib as $category => $tlds) {
-					SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
+					Helper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
 				}
 			}
 		}
@@ -234,18 +216,18 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 	if(isset($_REQUEST["savecategories"])){
 		//update the category and tlds
 		foreach($_POST["CAT"] as $id => $category){
-			SQLCall("UPDATE ispapi_tblcategories SET name=?, tlds=? WHERE id=?", array($category['NAME'], $category['TLDS'], $id), "execute");
+			Helper::SQLCall("UPDATE ispapi_tblcategories SET name=?, tlds=? WHERE id=?", array($category['NAME'], $category['TLDS'], $id), "execute");
 		}
 		//insert when added new category
 		if($_POST['NEWCAT']['NAME']){
-			SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($_POST["NEWCAT"]["NAME"], $_POST["NEWCAT"]["TLDS"]), "execute");
+			Helper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($_POST["NEWCAT"]["NAME"], $_POST["NEWCAT"]["TLDS"]), "execute");
 		}
 		echo '<div class="infobox"><strong><span class="title">Successfully saved!</span></strong><br>The changes have been saved.</div>';
 	}
 	###############################################################################
 
 	//get all categories with tlds for displaying
-	$categories = SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
+	$categories = Helper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%"><tbody>';
@@ -264,7 +246,6 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 	echo '</div>';
 }
 
-
 /*
  * Helper to import default categories
  */
@@ -275,27 +256,4 @@ function in_array_r($key, $dataarray, $strict = false) {
         }
     }
     return false;
-}
-
-/*
- * Helper to send SQL call to the Database with Capsule
- */
-function SQLCall($sql, $params, $fetchmode = "fetch"){
-	try {
-		$pdo = Capsule::connection()->getPdo();
-		$stmt = $pdo->prepare($sql);
-		$result = $stmt->execute($params);
-
-		if($fetchmode == "fetch"){
-			return $stmt->fetch(PDO::FETCH_ASSOC);
-		}elseif($fetchmode == "fetchall"){
-			return $stmt->fetchAll(PDO::FETCH_ASSOC);
-		}elseif($fetchmode == "execute"){
-			return $result;
-		}else{
-			return $result;
-		}
-	} catch (\Exception $e) {
-		die($e->getMessage());
-	}
 }
