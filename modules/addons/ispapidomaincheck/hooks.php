@@ -1,16 +1,14 @@
 <?php
 use WHMCS\Database\Capsule;
+use ISPAPI\i18n;
+
+require_once(dirname(__FILE__)."/lib/i18n.class.php");
 
 add_hook('ClientAreaPage', 1, function($templateVariables)
 {
-    $modulename = $templateVariables["modulename"];
-    $language = (!empty($templateVariables["language"])) ? $templateVariables["language"] : "english";
-
-    $module_language_file = getcwd()."/modules/addons/".$modulename."/lang/".$language.".php";
-    if(file_exists($module_language_file)){
-		include($module_language_file);
-        return array("_LANG" => $_LANG);
-	}
+    $i18n = new i18n();
+    $translations = $i18n->getTranslations();
+    return array("_LANG" => $translations);
 });
 
 ?>

@@ -43,10 +43,11 @@ class Helper
     			return $stmt->fetchAll(PDO::FETCH_ASSOC);
     		}
         } catch (\Exception $e) {
+            $i18n = new i18n();
             if($debug){
-                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => "An error occured, please contact the support.", "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ) );
+                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => $i18n->getText("error_feedback"), "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ) );
             }else{
-                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => "An error occured, please contact the support.") ) );
+                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => $i18n->getText("error_feedback")) ) );
             }
             die();
         }

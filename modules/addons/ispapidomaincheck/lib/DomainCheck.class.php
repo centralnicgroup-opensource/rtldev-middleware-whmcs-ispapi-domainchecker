@@ -19,7 +19,7 @@ class DomainCheck
     private $registrar;
 	private $currency;
 	private $response;
-	private $translations;
+	private $i18n;
 
     /*
      *  Constructor
@@ -31,14 +31,14 @@ class DomainCheck
      *  @param array $registrar The configured registrars (can be more than one)
      *  @param array $currency The selected currency
      */
-    public function __construct($domain, $domains, $tldgroup, $action, $registrar, $currency, $translations){
+    public function __construct($domain, $domains, $tldgroup, $action, $registrar, $currency){
     	$this->domain = $domain;
 		$this->domains = $domains;
 		$this->tldgroup = $tldgroup;
 		$this->action = $action;
 		$this->registrar = $registrar;
 		$this->currency = $currency;
-		$this->translations = $translations;
+		$this->i18n = new i18n();
 
 		$this->doDomainCheck();
     }
@@ -61,17 +61,6 @@ class DomainCheck
     }
 
 	/*
-     * Returns the value of the translation for a given key
-	 *
-	 * @param string $key The key
-	 *
-     * @return string The value if found, the key if the value is not existing
-     */
-	private function getTranslation($key){
-		return (isset($this->translations[$key])) ? $this->translations[$key] : "<#".$key."#>";
-    }
-
-	/*
      * Removes the domain from the cart
      */
 	private function removeFromCart(){
@@ -81,7 +70,7 @@ class DomainCheck
 			foreach ($_SESSION["cart"]["domains"] as $index => $domain) {
 				if(in_array($this->domain, $domain)){
 					 unset($_SESSION["cart"]["domains"][$index]);
-					 $response["feedback"] = $this->getTranslation("remove_from_cart");
+					 $response["feedback"] = $this->i18n->getText("remove_from_cart");
 				}
 			}
 		}
@@ -138,7 +127,7 @@ class DomainCheck
 											);
 
 						array_push($_SESSION["cart"]["domains"], $premiumdomain);
-						$response["feedback"] = $this->getTranslation("add_to_cart");
+						$response["feedback"] = $this->i18n->getText("add_to_cart");
 
 					}
 				}
@@ -254,7 +243,7 @@ class DomainCheck
 		}else{
 			//if $searched_tld not empty display feedback message
 			if(!empty($searched_tld)){
-				$feedback = array("f_type" => "error", "f_message" => $this->getTranslation("domain_not_supported_feedback"), "id" => $this->domain);
+				$feedback = array("f_type" => "error", "f_message" => $this->i18n->getText("domain_not_supported_feedback"), "id" => $this->domain);
 				$do_not_search = true;
 			}
 		}
@@ -507,13 +496,13 @@ class DomainCheck
 
 		if(isset($this->domain) && $this->domain == $searched_domain_object["id"]){
 			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
-				$feedback = array_merge(array("f_type" => "backorder", "f_message" => $this->getTranslation("backorder_available_feedback")), $searched_domain_object);
+				$feedback = array_merge(array("f_type" => "backorder", "f_message" => $this->i18n->getText("backorder_available_feedback")), $searched_domain_object);
 			}
 			elseif($searched_domain_object["status"] == "taken"){
-				$feedback = array_merge(array("f_type" => "taken", "f_message" => $this->getTranslation("domain_taken_feedback")), $searched_domain_object);
+				$feedback = array_merge(array("f_type" => "taken", "f_message" => $this->i18n->getText("domain_taken_feedback")), $searched_domain_object);
 			}
 			elseif($searched_domain_object["status"] == "available"){
-				$feedback = array_merge(array("f_type" => "available", "f_message" => $this->getTranslation("domain_available_feedback")), $searched_domain_object);
+				$feedback = array_merge(array("f_type" => "available", "f_message" => $this->i18n->getText("domain_available_feedback")), $searched_domain_object);
 			}
 		}
     	$response_array = array("data" => $response, "feedback" => $feedback);

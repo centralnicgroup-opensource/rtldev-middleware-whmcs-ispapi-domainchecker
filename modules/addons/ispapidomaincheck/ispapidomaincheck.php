@@ -8,7 +8,6 @@ require_once(dirname(__FILE__)."/lib/Helper.class.php");
 
 $module_version = "7.3.0";
 
-
 /*
  * Configuration of the addon module.
  */
@@ -32,12 +31,12 @@ function ispapidomaincheck_config() {
  */
 function ispapidomaincheck_activate() {
 	include(dirname(__FILE__)."/categories.php");
-	//IF NOT EXISTS Create ispapi_tblcategories table
+
+	//if not existing, create ispapi_tblcategories table
 	$query = Helper::SQLCall("CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)", array(), "execute");
 
-	// import the default categories when empty
+	//import the default categories when empty
 	$data = Helper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
-
 	if ( empty($data) ) {
 		foreach ($categorieslib as $category => $tlds) {
 			$insert_stmt = Helper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
@@ -51,18 +50,16 @@ function ispapidomaincheck_activate() {
 */
 function ispapidomaincheck_upgrade($vars) {
 	$version = $vars['version'];
-	// $version = substr($version, 0, strrpos( $version, '.') );
-		if($version < 7.3) {
-			// 1. DROP ispapi_tblaftermarketcurrencies if exists
-			$query = Helper::SQLCall("DROP TABLE IF EXISTS ispapi_tblaftermarketcurrencies", array(), "execute");
-			// 2. DROP ispapi_tblsettings if exists
-			$query = Helper::SQLCall("DROP TABLE IF EXISTS ispapi_tblsettings", array(), "execute");
-			// // 3. ALTER ispapi_tblcategories
-			$query = Helper::SQLCall("ALTER TABLE ispapi_tblcategories DROP COLUMN parent", array(), "execute");
-			// // This one deletes the row and does not complain if it can't.
-			$query = Helper::SQLCall("DELETE IGNORE FROM ispapi_tblcategories WHERE tlds=''", array(), "execute");
-		}
-
+	if($version < 7.3) {
+		// 1. DROP ispapi_tblaftermarketcurrencies if exists
+		$query = Helper::SQLCall("DROP TABLE IF EXISTS ispapi_tblaftermarketcurrencies", array(), "execute");
+		// 2. DROP ispapi_tblsettings if exists
+		$query = Helper::SQLCall("DROP TABLE IF EXISTS ispapi_tblsettings", array(), "execute");
+		// 3. ALTER ispapi_tblcategories
+		$query = Helper::SQLCall("ALTER TABLE ispapi_tblcategories DROP COLUMN parent", array(), "execute");
+		// This one deletes the row and does not complain if it can't.
+		$query = Helper::SQLCall("DELETE IGNORE FROM ispapi_tblcategories WHERE tlds=''", array(), "execute");
+	}
     return array('status'=>'success', 'description'=>'The ISPAPI HP DomainChecker was successfully upgraded.');
 }
 
