@@ -1,5 +1,6 @@
 <?php
 use WHMCS\Database\Capsule;
+
 use ISPAPI\LoadRegistrars;
 use ISPAPI\Helper;
 
@@ -77,27 +78,11 @@ function ispapidomaincheck_deactivate() {
  * <#WHMCS_URL#>/mydomainchecker.php
  */
 function ispapidomaincheck_clientarea($vars) {
-
 	//save the language in the session if not already set
 	if(!isset($_SESSION["Language"])){
 		$language_array = Helper::SQLCall("SELECT value FROM tblconfiguration WHERE setting='Language'", array(), "fetch");
 		$_SESSION["Language"] = strtolower($language_array["value"]);
 	}
-
-	//set the domain with the post data if filled
-	$domain = isset($_POST["domain"]) ? $_POST["domain"] : "";
-
-	//get the module name
-	$modulename = "ispapidomaincheck";
-	$path_to_domain_file = "modules/addons/".$modulename."/domain.php";
-	$modulepath = "modules/addons/".$modulename."/";
-
-	//check if backordermodule is installed and set the backorder module path
-	$backordermoduleinstalled = (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
-	$backordermodulepath = "modules/addons/ispapibackorder/";
-
-	//get all categories
-	$categories = Helper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
 
 	return array(
 			'pagetitle' => $_LANG['domaintitle'],
@@ -105,14 +90,14 @@ function ispapidomaincheck_clientarea($vars) {
 			'templatefile' => 'ispapidomaincheck',
 			'requirelogin' => false,
 			'vars' => array(
-					'categories' => $categories,
+					'categories' => Helper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall"),
 					'startsequence' => 4,
-					'modulename' => $modulename,
-					'modulepath' => $modulepath,
-					'backorder_module_installed' => $backordermoduleinstalled,
-					'backorder_module_path' => $backordermodulepath,
-					'path_to_domain_file' => $path_to_domain_file,
-					'domain' => $domain,
+					'modulename' => "ispapidomaincheck",
+					'modulepath' => "modules/addons/ispapidomaincheck/",
+					'backorder_module_installed' => (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false,
+					'backorder_module_path' => "modules/addons/ispapibackorder/",
+					'path_to_domain_file' => "modules/addons/ispapidomaincheck/domain.php",
+					'domain' => isset($_POST["domain"]) ? $_POST["domain"] : "",
 					'currency' => $_SESSION["currency"]
 			),
 	);
