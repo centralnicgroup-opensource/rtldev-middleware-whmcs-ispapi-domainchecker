@@ -44,9 +44,9 @@ class Helper
     		}
         } catch (\Exception $e) {
             if($debug){
-                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => $this->getTranslation("error_feedback"), "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ) );
+                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => "An error occured, please contact the support."), "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ) );
             }else{
-                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => $this->getTranslation("error_feedback")) ) );
+                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => "An error occured, please contact the support.") ) );
             }
             die();
         }
