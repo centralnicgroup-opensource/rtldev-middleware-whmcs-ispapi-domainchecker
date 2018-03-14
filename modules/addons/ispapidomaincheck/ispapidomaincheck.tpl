@@ -77,6 +77,7 @@ $( document ).ready(function() {
             $('.premium-label').html('');
             $('.action-button').hide();
             $('.action-button').html('');
+            $(".action-button").removeClass("action-button-added");
             $('.renewalprice-of-domain').html('');
             $("#domain-in-box").removeClass("domaininbox-available");
             $("#domain-in-box").removeClass("domaininbox-taken");
@@ -86,6 +87,20 @@ $( document ).ready(function() {
     function handleFeedbackMessage(data){
         // error, backorder, available, taken
         if(data.feedback.f_type){
+
+            //handle the click envent on the .action-button
+            $(".action-button").unbind();
+            $(".action-button").bind("click", function(e){
+                if($(this).attr("type") == "backorder"){
+                    var createbackorder = createBackorder($(this).attr("value"));
+                    if(createbackorder.CODE == 200){
+                        $(this).addClass("action-button-added");
+                        $(this).html("Added");
+                        $(this).unbind("click");
+                    }
+                }
+            });
+
             var domainName = data.feedback.id;
             var index = domainName.indexOf(".");
             var domainLabel = domainName.substr(0, index);
@@ -111,10 +126,10 @@ $( document ).ready(function() {
                 $('.action-button').append("Backorder");
                 $('.domain-description').append("{/literal}{$_LANG.domain_description_backorder}{literal}");
                 $('.price-of-domain').append("<br>"+data.feedback.backorderprice+"{/literal}{$_LANG.price_of_domain_text}{literal}<br>");
-                if(data.feedback.backordered){
+                if(data.feedback.backordered == 1){
                     $('.action-button').addClass("action-button-added");
                     $('.action-button').html("Added");
-                    $(document).off("click",".action-button");
+                    $('.action-button').unbind("click");
                 }
             }
             if(data.feedback.f_type == "available"){ //premium - anthony.blog /normal-testi234.com
@@ -131,17 +146,6 @@ $( document ).ready(function() {
             }
         }
     }
-
-    $(document).on("click",".action-button", function() {
-        if($(this).attr("type") == "backorder"){
-            var createbackorder = createBackorder($(this).attr("value"));
-            if(createbackorder.CODE == 200){
-                $(this).addClass("action-button-added");
-                $(this).html("Added");
-                $(document).off("click",".action-button");
-            }
-        }
-    });
 
     //MAIN FUNCTION: handle the availability checks
 	function checkdomains(domains, cached_data){
