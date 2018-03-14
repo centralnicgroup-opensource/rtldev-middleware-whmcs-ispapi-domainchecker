@@ -56,7 +56,7 @@ $( document ).ready(function() {
     $(".subCat").bind("click", function(){
         $(this).toggleClass('active');
         var tmpid = [];
-        $(".sub").find("li").each(function() {
+        $(".cat").find("li").each(function() {
             if($(this).hasClass('active')){
                 var id = $(this).attr("id").substring(2);
                 tmpid.push(id);
@@ -721,7 +721,7 @@ $( document ).ready(function() {
                         <div class="domain-checker-bg2">
                             <div class="well2">
                                 <div class="catcontainer" >
-                                    <ul class="sub" style="text-align:center;">
+                                    <ul class="cat" style="text-align:center;">
                                         {foreach from=$categories item=cat}
                                             <li class="subCat" style="margin-right:10px;display:inline-block;" id="s_{$cat.id}">{$cat.name}</li>
                                         {/foreach}
