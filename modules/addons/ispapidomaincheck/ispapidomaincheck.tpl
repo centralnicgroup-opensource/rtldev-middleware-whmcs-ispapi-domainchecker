@@ -742,12 +742,8 @@ $( document ).ready(function() {
 <div class="domain-checker-result-headline"><p class="domain-checker-available" id="successarea" style="display:none;"></p></div>
 
 <div class="result-item" id="resultsarea" style="display:none;">
-<!-- <div>Search Results</div><br /> -->
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
-
-        <div class="row row1 search-results" id="searchresults">
-        </div>
-		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.svg"/></p>
+        <div class="row row1 search-results" id="searchresults"></div>
 		<p align="center"><input id="orderbutton" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
 		<br>
 	</form>
