@@ -77,6 +77,7 @@ $( document ).ready(function() {
             $('.premium-label').html('');
             $('.action-button').hide();
             $('.action-button').html('');
+            $(".action-button").removeClass("action-button-added");
             $('.renewalprice-of-domain').html('');
             $("#domain-in-box").removeClass("domaininbox-available");
             $("#domain-in-box").removeClass("domaininbox-taken");
@@ -86,6 +87,20 @@ $( document ).ready(function() {
     function handleFeedbackMessage(data){
         // error, backorder, available, taken
         if(data.feedback.f_type){
+
+            //handle the click envent on the .action-button
+            $(".action-button").unbind();
+            $(".action-button").bind("click", function(e){
+                if($(this).attr("type") == "backorder"){
+                    var createbackorder = createBackorder($(this).attr("value"));
+                    if(createbackorder.CODE == 200){
+                        $(this).addClass("action-button-added");
+                        $(this).html("Added");
+                        $(this).unbind("click");
+                    }
+                }
+            });
+
             var domainName = data.feedback.id;
             var index = domainName.indexOf(".");
             var domainLabel = domainName.substr(0, index);
@@ -94,19 +109,31 @@ $( document ).ready(function() {
             $('.status-text').append(data.feedback.f_message);
             $('.domainlabel').append(domainLabel);
             $('.tldzone').append(tldZone);
+            $('.action-button').attr("value", domainName);
+
+            //remove the item from the list if there is a feedback
+            $("#" + jQuery.escapeSelector(domainName)).remove();
+
             if(data.feedback.f_type == "error" || data.feedback.f_type == "taken"){ //anthony.coco //tulsi.co
                 $("#domain-in-box").addClass("domaininbox-taken");
                 $('.domain-description').append("{/literal}{$_LANG.domain_description_taken}{literal}<br>");
                 $('.action-button').hide();
             }
             if(data.feedback.f_type == "backorder"){ //anthony.com
+                $('.action-button').attr("type", "backorder");
                 $('.action-button').show();
                 $("#domain-in-box").addClass("domaininbox-backorder");
                 $('.action-button').append("Backorder");
                 $('.domain-description').append("{/literal}{$_LANG.domain_description_backorder}{literal}");
                 $('.price-of-domain').append("<br>"+data.feedback.backorderprice+"{/literal}{$_LANG.price_of_domain_text}{literal}<br>");
+                if(data.feedback.backordered == 1){
+                    $('.action-button').addClass("action-button-added");
+                    $('.action-button').html("Added");
+                    $('.action-button').unbind("click");
+                }
             }
             if(data.feedback.f_type == "available"){ //premium - anthony.blog /normal-testi234.com
+                $('.action-button').attr("type", "available");
                 $('.action-button').show();
                 $("#domain-in-box").addClass("domaininbox-available");
                 if(data.feedback.premiumtype){
@@ -430,6 +457,59 @@ $( document ).ready(function() {
     });
 
     $(document).on("click",".search-result-info", function() {
+        var backorderevent = false;
+        // handling backorder domains on click
+        if($(this).find('label').hasClass('setbackorder')){
+            backorderevent = true;
+            //the following variables are used to update the frontend design
+            var iconLabel = $(this).find('label.setbackorder');
+            var whoisLink = $(this).find('a.viewWhois');
+            var checkbox = $(this).find('i.fa-square-o');
+            var domainnamespan = $(this).find('span.domainname');
+            var backorder = $(this).find('span.backorder');
+            var taken = $(this).find('span.taken');
+
+            // to toggle hide on the second div items
+            var div0 = $(this).siblings().eq(0);
+            var div1 = $(this).siblings().eq(1);
+
+            var domainname = $(this).find('label.setbackorder').attr("value");
+
+            if ($(this).find('label.setbackorder').hasClass("added")){
+                //delete backorder
+                var deletebackorder = deleteBackorder(domainname);
+                if(deletebackorder.CODE == 200){
+                    iconLabel.removeClass("added");
+                    checkbox.removeClass('fa-check-square');
+                    domainnamespan.removeClass('added');
+                    backorder.removeClass('added');
+                    taken.removeClass('added');
+                    whoisLink.removeClass('added');
+                    div0.removeClass('details hide');
+                    div1.addClass('details hide');
+
+                }
+            }else{
+                //create backorder
+                var createbackorder = createBackorder(domainname);
+                if(createbackorder.CODE == 200){
+                    iconLabel.addClass("added");
+                    checkbox.addClass('fa-check-square');
+                    domainnamespan.addClass('added');
+                    backorder.addClass('added');
+                    taken.addClass('added');
+                    whoisLink.addClass('added');
+                    div0.addClass('details hide');
+                    div1.removeClass('details hide');
+                }
+            }
+        }
+
+        //quit if backorderevent, no need to continue
+        if(backorderevent){
+            return;
+        }
+
         if($(this).find('label').hasClass('setbackorder')){
             // when user not logged - no need to display change of design - backorder only
         }else{
@@ -496,79 +576,73 @@ $( document ).ready(function() {
                   url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainInCart
             });
         }
-        // handling backorder domains on click
-        if($(this).find('label').hasClass('setbackorder')){
 
-            var iconLabel = $(this).find('label.setbackorder');
-            var command = "CreateBackorder";
-            //display domain design when user logged in - backorder domains
-            //whois link
-            var whoisLink = $(this).find('a.viewWhois');
-            //toggle checkbox
-            var checkbox = $(this).find('i.fa-square-o');
-            //toggle domain name and tld zone
-            var domainname = $(this).find('span.domainname');
-            //toggle backorder and premium availability
-            var backorder = $(this).find('span.backorder');
-            //toggle - taken -availability
-            var taken = $(this).find('span.taken');
-            // to toggle hide on the second div items
-            var div0 = $(this).siblings().eq(0);
-            var div1 = $(this).siblings().eq(1);
-
-            if ($(this).find('label.setbackorder').hasClass("added")){
-                command = "DeleteBackorder";
-            }
-            $.ajax({
-                type: "POST",
-                async: true,
-                dataType: "json",
-                url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
-                data: {
-                    COMMAND: command,
-                    DOMAIN:$(this).find('label.setbackorder').attr("value"),
-                    TYPE: "FULL"
-                },
-                success: function(data) {
-                    if(command=="CreateBackorder" && data.CODE==200){
-                        iconLabel.addClass("added");
-
-                        checkbox.addClass('fa-check-square');
-                        domainname.addClass('added');
-                        backorder.addClass('added');
-                        taken.addClass('added');
-                        whoisLink.addClass('added');
-                        div0.addClass('details hide');
-                        div1.removeClass('details hide');
-
-                        noty({text: "{/literal}{$_LANG.backorder_created}{literal}", type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-                    }
-                    else if(command=="DeleteBackorder" && data.CODE==200){
-                        iconLabel.removeClass("added");
-
-                        checkbox.removeClass('fa-check-square');
-                        domainname.removeClass('added');
-                        backorder.removeClass('added');
-                        taken.removeClass('added');
-                        whoisLink.removeClass('added');
-                        div0.removeClass('details hide');
-                        div1.addClass('details hide');
-
-                        noty({text: '{/literal}{$_LANG.backorder_deleted}{literal}', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-                    }
-                    else if(data.CODE==531){
-                        noty({text: '{/literal}{$_LANG.login_required}{literal}', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                    }
-                    else{
-                        noty({text: '{/literal}{$_LANG.error_occured}{literal}: ' + data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                    }
-                },
-                error: function(data) {
-                    noty({text: '{/literal}{$_LANG.error_occured}{literal}', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                }
-            });
-        }
     });
+
+    /*
+     * Sends a request to create a Backorder, returns the result and show the notification to the user with NOTY.
+     */
+    function createBackorder(domainname){
+        var result;
+        $.ajax({
+            type: "POST",
+            async: false,
+            dataType: "json",
+            url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
+            data: {
+                COMMAND: "CreateBackorder",
+                DOMAIN: domainname,
+                TYPE: "FULL"
+            },
+            success: function(data) {
+                result = data;
+                if(data.CODE == 200){
+                    noty({text: '{/literal}{$_LANG.backorder_created}{literal}', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                }else if(data.CODE == 531){
+                    noty({text: '{/literal}{$_LANG.login_required}{literal}', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                }else{
+                    noty({text: '{/literal}{$_LANG.error_occured}{literal}: ', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                }
+            },
+            error: function(data) {
+                result = data;
+                noty({text: '{/literal}{$_LANG.error_occured}{literal}: ', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+            }
+        });
+        return result;
+    }
+
+    /*
+     * Sends a request to delete a Backorder, returns the result and show the notification to the user with NOTY.
+     */
+    function deleteBackorder(domainname){
+        var result;
+        $.ajax({
+            type: "POST",
+            async: false,
+            dataType: "json",
+            url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
+            data: {
+                COMMAND: "DeleteBackorder",
+                DOMAIN: domainname,
+                TYPE: "FULL"
+            },
+            success: function(data) {
+                result = data;
+                if(data.CODE == 200){
+                    noty({text: '{/literal}{$_LANG.backorder_deleted}{literal}', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                }else if(data.CODE == 531){
+                    noty({text: '{/literal}{$_LANG.login_required}{literal}', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                }else{
+                    noty({text: '{/literal}{$_LANG.error_occured}{literal}: ', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                }
+            },
+            error: function(data) {
+                result = data;
+            }
+        });
+        return result
+    }
 
     //handle the click on the order button
 	$("#orderbutton").bind("click", function(e){

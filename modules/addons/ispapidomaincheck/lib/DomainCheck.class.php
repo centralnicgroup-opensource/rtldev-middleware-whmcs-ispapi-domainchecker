@@ -487,15 +487,19 @@ class DomainCheck
 
 		// Feedback for the template
 		$searched_domain_object = array();
+		$i=0;
 		foreach($response as $item){
 			if($item["id"] == $this->domain){
 				$searched_domain_object = $item;
+				//remove domain from the list
+				//unset($response[$i]);
 				continue;
 			}
+			$i++;
 		}
 
 		if(isset($this->domain) && $this->domain == $searched_domain_object["id"]){
-			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 && $searched_domain_object["backordered"] == 0 ){
+			if($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1 ){
 				$feedback = array_merge(array("f_type" => "backorder", "f_message" => $this->i18n->getText("backorder_available_feedback")), $searched_domain_object);
 			}
 			elseif($searched_domain_object["status"] == "taken"){
