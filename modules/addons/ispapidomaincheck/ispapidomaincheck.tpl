@@ -593,8 +593,6 @@ $( document ).ready(function() {
 <div class="domain-checker-bg2">
 <form method="post" action="index.php?m=ispapicheckdomain" id="searchform" class="search-form">
     <head>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-        <link href="style.css" rel="stylesheet" />
         <link rel="stylesheet" href="../modules/addons/ispapidomaincheck/ispapidomaincheck.css">
     </head>
 
