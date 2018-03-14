@@ -297,6 +297,23 @@ class DomainCheck
 	}
 
 	/*
+ 	* Loads the backorder API, returns false if backorder module not installed.
+ 	*
+ 	* @return boolean true if backorder API has been loaded
+ 	*/
+ 	private function loadBackorderAPI() {
+ 		$settings = Helper::SQLCall("SELECT value FROM tbladdonmodules WHERE module = 'ispapibackorder' AND setting = 'access' LIMIT 1", array());
+ 		if(isset($settings["value"])){
+			$backorder_module_api = dirname(__FILE__)."/../../../../modules/addons/ispapibackorder/backend/api.php";
+			if(file_exists($backorder_module_api)){
+				require_once $backorder_module_api;
+				return true;
+			}
+ 		}
+ 		return false;
+ 	}
+
+	/*
      * Starts the domain check procedure.
      * Handle the check domain with the configured ispapi registrar account configured in WHMCS
      * returns a JSON list of all domains with the availability
@@ -519,11 +536,8 @@ class DomainCheck
      * Add the backorder functionality when ISPAPI Backorder module installed.
      */
 	private function handleBackorderButton($response){
-		//Check if backorder module is installed
-		$backorder_mod_installed = (file_exists(dirname(__FILE__)."/../../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
-		if(!$backorder_mod_installed)
+		if(!$this->loadBackorderAPI())
 			return $response;
-
 		$newresponse = array();
 
 		//Get all domains that have already been backordered by the user. If not logged in, array will be empty, this is perfect.

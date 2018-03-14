@@ -2,6 +2,7 @@
 namespace ISPAPI;
 
 use WHMCS\Database\Capsule;
+use WHMCS_ClientArea;
 use PDO;
 
 /**
@@ -66,6 +67,30 @@ class Helper
         $registrarconfigoptions = getregistrarconfigoptions($registrar);
         $registrar_config = call_user_func($registrar."_config", $registrarconfigoptions);
         return call_user_func($registrar."_call", $command, $registrar_config);
+    }
+
+    /*
+     * Returns the customer selected currency id.
+     *
+     * @return string Currency ID of the user.
+     */
+    public static function getCustomerCurrency(){
+    	//first take the currency from the URL or from the session
+    	$currency = isset($_REQUEST["currency"]) ? $_REQUEST["currency"] : $_SESSION["currency"];
+
+    	//if customer logged in, set the configured currency.
+    	$ca = new WHMCS_ClientArea();
+    	if ($ca->isLoggedIn()) {
+    		$user = self::SQLCall("SELECT currency FROM tblclients WHERE id=?", array($ca->getUserID()));
+    		$currency = $user["currency"];
+    	}
+
+    	//not logged in, no currency in the URL and no currency in the SESSION
+    	if(empty($currency)){
+    		$default = self::SQLCall("SELECT id FROM tblcurrencies WHERE `default`=1", array());
+    		$currency = $default["id"];
+    	}
+    	return $currency;
     }
 
 }
