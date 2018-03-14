@@ -219,6 +219,9 @@ class DomainCheck
 				array_push($domainlist, $searched_label.".".$tld);
 			}
 		}
+		
+		//remove duplicate entries in the domainlist
+		$domainlist = array_unique($domainlist);
 
 		//check if the searched keyword contains a configured TLD
 		//example: thebestshop -> thebest.shop should be at the top
