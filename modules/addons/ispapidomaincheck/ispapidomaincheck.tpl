@@ -674,11 +674,15 @@ $( document ).ready(function() {
 	<input type="hidden" name="searched_domain" value="">
 
     <div class="row search-input-bar">
-        <div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
-            <div class="input-group input-group-lg input-group-box">
-                <input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;margin-left:50px;width:230%;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$_LANG.domaincheckerdomainexample}">
-                    <button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-55px;margin-top:6px;z-index:1000;width: 50px !important;" type="button">{$_LANG.go_search} </button>
-             </div>
+        <div class="col-lg-8 col-lg-offset-3 col-md-10 col-md-offset-2">
+            <div class="input-group">
+                <div class="inner-addon right-addon">
+                    <input  id="searchfield" name="domain" class="form-control singlesearch input-box" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$_LANG.domaincheckerdomainexample}"><!--padding-right:380px; -->
+                    <div class="addon">
+                        <button id="searchbutton" class="btn btn-default search-btn" type="button">{$_LANG.go_search}</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
