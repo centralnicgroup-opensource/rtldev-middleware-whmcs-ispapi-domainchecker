@@ -137,8 +137,12 @@ $( document ).ready(function() {
                 $('.action-button').show();
                 $("#domain-in-box").addClass("domaininbox-available");
                 if(data.feedback.premiumtype){
-                    $('.premium-label').append("{/literal}{$_LANG.premium}{literal}");
-                    $('.domain-description').append("{/literal}{$_LANG.domain_description_available}{literal}<br>");
+                    $('.premium-label').append(data.feedback.premiumtype); //{/literal}{$_LANG.premium}{literal}
+                    if(data.feedback.premiumtype == "PREMIUM"){
+                        $('.domain-description').append("{/literal}{$_LANG.domain_description_premium_registry}{literal}");
+                    }else{
+                        $('.domain-description').append("{/literal}{$_LANG.domain_description_premium_aftermarket}{literal}<br>");
+                    }
                 }
                 $('.action-button').append("{/literal}{$_LANG.add_to_cart_button}{literal}");
                 $('.price-of-domain').append(data.feedback.registerprice);
