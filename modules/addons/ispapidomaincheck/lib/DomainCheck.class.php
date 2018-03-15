@@ -219,7 +219,7 @@ class DomainCheck
 				array_push($domainlist, $searched_label.".".$tld);
 			}
 		}
-		
+
 		//remove duplicate entries in the domainlist
 		$domainlist = array_unique($domainlist);
 
@@ -657,6 +657,18 @@ class DomainCheck
 	}
 
 	/*
+	 * Adds the resseler markup to the given price
+	 *
+	 * @param string $price A price
+
+     * @return string The markuped price
+	 */
+	private function addResselerMarkup($price){
+		$markupToAdd = Premium::markupForCost($price);
+		return $price + ($price * $markupToAdd / 100);
+	}
+
+	/*
 	 * Converts the price in the selected currency and add the markup.
 	 * Selected currency is taken from the session.
 	 *
@@ -666,10 +678,6 @@ class DomainCheck
      * @return string The price converted BUT NOT FORMATTED
 	 */
 	private function convertPriceToSelectedCurrency($price, $currency) {
-		//get the markup from the WHMCS backend and add it to the registrar price
-		$markupToAdd = Premium::markupForCost($price, $currency);
-		$markupedprice = $price + ($price * $markupToAdd / 100);
-
 		//get the selected currency
 		$selected_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 		$selected_currency_code = $selected_currency_array["code"];
@@ -677,19 +685,16 @@ class DomainCheck
 		//check if the registrarpriceCurrency is available in WHMCS
 		$domain_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array(strtoupper($currency)));
 
-
 		if($domain_currency_array){
 			//WE ARE ABLE TO CALCULATE THE PRICE
 			$domain_currency_code = $domain_currency_array["code"];
 			if($selected_currency_code == $domain_currency_code){
-				//return $this->formatPrice($markupedprice, $selected_currency_array);
-				return round($markupedprice, 2);
+				return round($this->addResselerMarkup($price), 2);
 			}else{
 				if($domain_currency_array["default"] == 1){
 					//CONVERT THE PRICE IN THE SELECTED CURRENCY
-					$convertedprice = $markupedprice * $selected_currency_array["rate"];
-					//return $this->formatPrice($convertedprice, $selected_currency_array);
-					return round($convertedprice, 2);
+					$convertedprice = $price * $selected_currency_array["rate"];
+					return round($this->addResselerMarkup($convertedprice), 2);
 				}else{
 					//FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
@@ -698,13 +703,12 @@ class DomainCheck
 					$default_currency_code = $default_currency_array["code"];
 
 					//get the price in the default currency
-					$price_default_currency = $markupedprice * ( 1 / $domain_currency_array["rate"] );
+					$price_default_currency = $price * ( 1 / $domain_currency_array["rate"] );
 
 					//get the price in the selected currency
 					$price_selected_currency = $price_default_currency * $selected_currency_array["rate"];
 
-					//return $this->formatPrice($price_selected_currency, $selected_currency_array);
-					return round($price_selected_currency, 2);
+					return round($this->addResselerMarkup($price_selected_currency), 2);
 				}
 			}
 		}
