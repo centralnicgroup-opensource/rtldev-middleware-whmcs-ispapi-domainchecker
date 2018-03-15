@@ -210,8 +210,6 @@ class DomainCheck
 
 			//convert the domainlist to IDN again
 			$domainlist = $this->convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
-
-			//TODO: add the TLDs which we are not supported at HEXONET to the list
 		}
 		else{
 			//REGULAR MODE
@@ -335,7 +333,6 @@ class DomainCheck
     		if( in_array(".".$tld, $tldconfiguration["ispapi"]) ){
     			array_push($ispapi_domain_list, $item);
     		}else{
-				//array_push($ispapi_domain_list, $item);
     			array_push($no_ispapi_domain_list, $item);
     		}
     	}
@@ -507,15 +504,11 @@ class DomainCheck
 
 		// Feedback for the template
 		$searched_domain_object = array();
-		$i=0;
 		foreach($response as $item){
 			if($item["id"] == $this->domain){
 				$searched_domain_object = $item;
-				//remove domain from the list
-				//unset($response[$i]);
 				continue;
 			}
-			$i++;
 		}
 
 		if(isset($this->domain) && $this->domain == $searched_domain_object["id"]){
@@ -648,8 +641,7 @@ class DomainCheck
 
      * @return string The price well formatted
 	 *
-	 * TODO: Sometimes we are getting rounding problems (1 cent), not exactly the same price than with the standard lookup.
-     * TODO: check if markup is done at the beginning or at the end in the standard lookup
+	 * (Sometimes we are getting rounding problems (1 cent), not exactly the same price than with the standard lookup.)
 	 *
      */
 	private function getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency) {
