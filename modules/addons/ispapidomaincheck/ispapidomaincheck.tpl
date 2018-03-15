@@ -125,7 +125,7 @@ $( document ).ready(function() {
                 $("#domain-in-box").addClass("domaininbox-backorder");
                 $('.action-button').append("Backorder");
                 $('.domain-description').append("{/literal}{$_LANG.domain_description_backorder}{literal}");
-                $('.price-of-domain').append("<br>"+data.feedback.backorderprice+"{/literal}{$_LANG.price_of_domain_text}{literal}<br>");
+                $('.price-of-domain').append(data.feedback.backorderprice+"<span style='font-weight:normal;font-size:13px;'>{/literal}{$_LANG.price_of_domain_text}{literal}</style>");
                 if(data.feedback.backordered == 1){
                     $('.action-button').addClass("action-button-added");
                     $('.action-button').html("Added");
@@ -141,7 +141,7 @@ $( document ).ready(function() {
                     $('.domain-description').append("{/literal}{$_LANG.domain_description_available}{literal}<br>");
                 }
                 $('.action-button').append("{/literal}{$_LANG.add_to_cart_button}{literal}");
-                $('.price-of-domain').append("<br>"+data.feedback.registerprice);
+                $('.price-of-domain').append(data.feedback.registerprice);
                 $('.renewalprice-of-domain').append("{/literal}{$_LANG.renewal}{literal}: "+data.feedback.renewprice);
             }
         }
@@ -688,8 +688,7 @@ $( document ).ready(function() {
         <div id="domain-in-box" class="domain-box" style="display:none">
             <div class="status-text"></div>
             <div class="label-text">
-                <span class="domainlabel"></span>
-                <span class="tldzone"></span>
+                <span class="domainlabel"></span><span class="tldzone"></span>
                 <span class="premium-label"></span>
                 <button id="actionbutton" class="action-button"></button>
             </div>
@@ -723,7 +722,7 @@ $( document ).ready(function() {
                                 <div class="catcontainer" >
                                     <ul class="cat" style="text-align:center;">
                                         {foreach from=$categories item=cat}
-                                            <li class="subCat" style="margin-right:10px;display:inline-block;" id="s_{$cat.id}">{$cat.name}</li>
+                                            <li class="subCat" style="display:inline-block;" id="s_{$cat.id}">{$cat.name}</li>
                                         {/foreach}
                                     </ul>
                                 </div>
