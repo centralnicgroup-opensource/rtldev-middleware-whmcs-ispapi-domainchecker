@@ -88,6 +88,14 @@ $( document ).ready(function() {
         // error, backorder, available, taken
         if(data.feedback.f_type){
 
+            //all the domains in the cart
+            var domainsInCart = [];
+            if(data.feedback.cart){
+                $.each(data.feedback.cart.domains, function(n, currentElem) {
+                    domainsInCart.push(currentElem.domain);
+                });
+            }
+
             //handle the click envent on the .action-button
             $(".action-button").unbind();
             $(".action-button").bind("click", function(e){
@@ -98,6 +106,25 @@ $( document ).ready(function() {
                         $(this).html("Added");
                         $(this).unbind("click");
                     }
+                }
+                if($(this).attr("type") == "available"){
+                    var params = {};
+                    if(data.feedback.premiumtype){
+                        params['action'] = 'addPremiumToCart';
+                        params['domain'] = data.feedback.id;
+                        params['registerprice']= data.feedback.registerprice_unformatted;
+                        params['renewalprice']= data.feedback.renewprice_unformatted;
+                        addDomainToCart(params, "premium");
+                    }
+                    else{
+                        params['a'] = 'addToCart';
+                        params['domain'] = data.feedback.id;
+                        params['token'] = $("#domainform").find('input').eq(0).attr("value");
+                        addDomainToCart(params, " ");
+                    }
+                    $(this).addClass("action-button-added");
+                    $(this).html("Added");
+                    $(this).unbind("click");
                 }
             });
 
@@ -147,6 +174,11 @@ $( document ).ready(function() {
                 $('.action-button').append("{/literal}{$_LANG.add_to_cart_button}{literal}");
                 $('.price-of-domain').append(data.feedback.registerprice);
                 $('.renewalprice-of-domain').append("{/literal}{$_LANG.renewal}{literal}: "+data.feedback.renewprice);
+                if (domainsInCart.indexOf(domainName) > -1) {
+                    $('.action-button').addClass("action-button-added");
+                    $('.action-button').html("Added");
+                    $('.action-button').unbind("click");
+                }
             }
         }
     }
@@ -539,6 +571,7 @@ $( document ).ready(function() {
             params['token'] = $("#domainform").find('input').eq(0).attr("value");
             //handling premium domains in cart
             if($(this).find('span').hasClass('premium')){
+
                 var paramspremium = {};
 
                 var registerprice = $(this).siblings().find('span.registerprice.added').eq(1).attr("value");
@@ -547,22 +580,9 @@ $( document ).ready(function() {
                 paramspremium['domain'] = $(this).find('label').attr("value");
                 paramspremium['registerprice']= registerprice;
                 paramspremium['renewalprice']= renewalprice;
-
-                $.ajax({
-                    //premium domain in cart
-                      type: "GET",
-                      data: paramspremium,
-                      async: false,
-                      url: "{/literal}{$modulepath}{literal}domain.php?"
-                });
+                addDomainToCart(paramspremium, "premium");
             }else{
-                //normal domain in cart
-                $.ajax({
-                      url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
-                      type: "POST",
-                      data: params,
-                      async: false
-                });
+                addDomainToCart(params, "");
             }
         }
         else{
@@ -573,12 +593,7 @@ $( document ).ready(function() {
                 $("#domainform input[id=orderbutton]").addClass('hide');
             }
             var domainInCart = $(this).find('label').attr("value");
-            //to remove domains from cart on click
-            $.ajax({
-                  type: "GET",
-                  async: false,
-                  url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainInCart
-            });
+            removeDomainFromCart(domainInCart);
         }
 
     });
@@ -647,6 +662,41 @@ $( document ).ready(function() {
         });
         return result
     }
+
+    /*
+     * Add domain to cart
+     */
+     function addDomainToCart(params, domainType){
+         if(domainType == "premium"){
+             $.ajax({
+                 //premium domain in cart
+                   type: "GET",
+                   data: params,
+                   async: false,
+                   url: "{/literal}{$modulepath}{literal}domain.php?"
+             });
+         }
+         else{
+             $.ajax({
+                   url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
+                   type: "POST",
+                   data: params,
+                   async: false
+             });
+         }
+     }
+
+     /*
+      * Delete domain from cart
+      */
+      function removeDomainFromCart(domainname){
+          //to remove domains from cart on click
+          $.ajax({
+                type: "GET",
+                async: false,
+                url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainname
+          });
+      }
 
     //handle the click on the order button
 	$("#orderbutton").bind("click", function(e){
