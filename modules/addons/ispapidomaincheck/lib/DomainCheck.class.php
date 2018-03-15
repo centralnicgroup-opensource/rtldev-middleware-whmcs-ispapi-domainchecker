@@ -218,9 +218,6 @@ class DomainCheck
 			}
 		}
 
-		//remove duplicate entries in the domainlist
-		$domainlist = array_unique($domainlist);
-
 		//check if the searched keyword contains a configured TLD
 		//example: thebestshop -> thebest.shop should be at the top
 		$extensions = Helper::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
@@ -234,6 +231,9 @@ class DomainCheck
 					$domainlist = array_merge(array($thedomain), $domainlist);
 			}
 		}
+
+		//remove duplicate entries in the domainlist
+		$domainlist = array_unique($domainlist);
 
 		//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
 		$item = Helper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld));
