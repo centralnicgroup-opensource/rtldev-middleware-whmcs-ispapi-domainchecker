@@ -237,10 +237,10 @@ $( document ).ready(function() {
                             var moreinformation = '<div class="text col-xs-12 search-result-details hide">'+'<div class="small-container">'+
                                                     '<small>'+
                                                         '<span></span><span style="color:#0033a0;font-weight:500;">'+element.id+' {/literal}{$_LANG.backorder_info_text}{literal}</span>'+
-                                                        '<br><br><ul style="color:#0033a0; font-weight:700;margin-right:20px;">'+
+                                                        '<br><br><ul style="color:#0033a0; font-weight:700;padding-right:10px;padding-left:0px;margin-left:20px;">'+
                                                             '{/literal}{$_LANG.backorder_info_text_list}{literal}'+
                                                             '<li>'+
-                                                                '<i> {/literal}{$_LANG.backorder_info_text_backorderprice}{literal} '+element.backorderprice+' </i><i> </i>'+
+                                                                '<i>{/literal}{$_LANG.backorder_info_text_backorderprice}{literal} '+element.backorderprice+'</i>'
                                                             '</li>'+
                                                         '</ul>'+
                                                     '</small>'+

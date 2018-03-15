@@ -24,6 +24,11 @@ ul.cat li.active {
     color:#ffffff;
 }
 
+.small-container{
+    padding-left:30px;
+    padding-top:10px;
+}
+
 .domain-checker-container2 {
     border-radius: 10px;
     margin: 20px 0;
