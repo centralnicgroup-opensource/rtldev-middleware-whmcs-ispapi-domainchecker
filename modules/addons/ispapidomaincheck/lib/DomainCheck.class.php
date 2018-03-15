@@ -210,8 +210,6 @@ class DomainCheck
 
 			//convert the domainlist to IDN again
 			$domainlist = $this->convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
-
-			//TODO: add the TLDs which we are not supported at HEXONET to the list
 		}
 		else{
 			//REGULAR MODE
@@ -233,6 +231,9 @@ class DomainCheck
 					$domainlist = array_merge(array($thedomain), $domainlist);
 			}
 		}
+
+		//remove duplicate entries in the domainlist
+		$domainlist = array_unique($domainlist);
 
 		//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
 		$item = Helper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld));
@@ -297,6 +298,23 @@ class DomainCheck
 	}
 
 	/*
+ 	* Loads the backorder API, returns false if backorder module not installed.
+ 	*
+ 	* @return boolean true if backorder API has been loaded
+ 	*/
+ 	private function loadBackorderAPI() {
+ 		$settings = Helper::SQLCall("SELECT value FROM tbladdonmodules WHERE module = 'ispapibackorder' AND setting = 'access' LIMIT 1", array());
+ 		if(isset($settings["value"])){
+			$backorder_module_api = dirname(__FILE__)."/../../../../modules/addons/ispapibackorder/backend/api.php";
+			if(file_exists($backorder_module_api)){
+				require_once $backorder_module_api;
+				return true;
+			}
+ 		}
+ 		return false;
+ 	}
+
+	/*
      * Starts the domain check procedure.
      * Handle the check domain with the configured ispapi registrar account configured in WHMCS
      * returns a JSON list of all domains with the availability
@@ -315,7 +333,6 @@ class DomainCheck
     		if( in_array(".".$tld, $tldconfiguration["ispapi"]) ){
     			array_push($ispapi_domain_list, $item);
     		}else{
-				//array_push($ispapi_domain_list, $item);
     			array_push($no_ispapi_domain_list, $item);
     		}
     	}
@@ -487,15 +504,11 @@ class DomainCheck
 
 		// Feedback for the template
 		$searched_domain_object = array();
-		$i=0;
 		foreach($response as $item){
 			if($item["id"] == $this->domain){
 				$searched_domain_object = $item;
-				//remove domain from the list
-				//unset($response[$i]);
 				continue;
 			}
-			$i++;
 		}
 
 		if(isset($this->domain) && $this->domain == $searched_domain_object["id"]){
@@ -519,11 +532,8 @@ class DomainCheck
      * Add the backorder functionality when ISPAPI Backorder module installed.
      */
 	private function handleBackorderButton($response){
-		//Check if backorder module is installed
-		$backorder_mod_installed = (file_exists(dirname(__FILE__)."/../../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false;
-		if(!$backorder_mod_installed)
+		if(!$this->loadBackorderAPI())
 			return $response;
-
 		$newresponse = array();
 
 		//Get all domains that have already been backordered by the user. If not logged in, array will be empty, this is perfect.
@@ -631,12 +641,23 @@ class DomainCheck
 
      * @return string The price well formatted
 	 *
-	 * TODO: Sometimes we are getting rounding problems (1 cent), not exactly the same price than with the standard lookup.
-     * TODO: check if markup is done at the beginning or at the end in the standard lookup
+	 * (Sometimes we are getting rounding problems (1 cent), not exactly the same price than with the standard lookup.)
 	 *
      */
 	private function getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency) {
 		return $this->convertPriceToSelectedCurrency($registrarprice, $registrarpriceCurrency);
+	}
+
+	/*
+	 * Adds the resseler markup to the given price
+	 *
+	 * @param string $price A price
+
+     * @return string The markuped price
+	 */
+	private function addResselerMarkup($price){
+		$markupToAdd = Premium::markupForCost($price);
+		return $price + ($price * $markupToAdd / 100);
 	}
 
 	/*
@@ -649,10 +670,6 @@ class DomainCheck
      * @return string The price converted BUT NOT FORMATTED
 	 */
 	private function convertPriceToSelectedCurrency($price, $currency) {
-		//get the markup from the WHMCS backend and add it to the registrar price
-		$markupToAdd = Premium::markupForCost($price, $currency);
-		$markupedprice = $price + ($price * $markupToAdd / 100);
-
 		//get the selected currency
 		$selected_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 		$selected_currency_code = $selected_currency_array["code"];
@@ -660,19 +677,16 @@ class DomainCheck
 		//check if the registrarpriceCurrency is available in WHMCS
 		$domain_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array(strtoupper($currency)));
 
-
 		if($domain_currency_array){
 			//WE ARE ABLE TO CALCULATE THE PRICE
 			$domain_currency_code = $domain_currency_array["code"];
 			if($selected_currency_code == $domain_currency_code){
-				//return $this->formatPrice($markupedprice, $selected_currency_array);
-				return round($markupedprice, 2);
+				return round($this->addResselerMarkup($price), 2);
 			}else{
 				if($domain_currency_array["default"] == 1){
 					//CONVERT THE PRICE IN THE SELECTED CURRENCY
-					$convertedprice = $markupedprice * $selected_currency_array["rate"];
-					//return $this->formatPrice($convertedprice, $selected_currency_array);
-					return round($convertedprice, 2);
+					$convertedprice = $price * $selected_currency_array["rate"];
+					return round($this->addResselerMarkup($convertedprice), 2);
 				}else{
 					//FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
@@ -681,13 +695,12 @@ class DomainCheck
 					$default_currency_code = $default_currency_array["code"];
 
 					//get the price in the default currency
-					$price_default_currency = $markupedprice * ( 1 / $domain_currency_array["rate"] );
+					$price_default_currency = $price * ( 1 / $domain_currency_array["rate"] );
 
 					//get the price in the selected currency
 					$price_selected_currency = $price_default_currency * $selected_currency_array["rate"];
 
-					//return $this->formatPrice($price_selected_currency, $selected_currency_array);
-					return round($price_selected_currency, 2);
+					return round($this->addResselerMarkup($price_selected_currency), 2);
 				}
 			}
 		}
