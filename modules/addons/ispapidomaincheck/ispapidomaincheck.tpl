@@ -31,7 +31,6 @@ $( document ).ready(function() {
     jQuery(function(){
         jQuery('#searchbutton').click();
     });
-
     //starts the search when entenkey is pressed
     $('#searchfield').keyup(function(e){
         if(e.keyCode == 13){
@@ -88,7 +87,7 @@ $( document ).ready(function() {
         // error, backorder, available, taken
         if(data.feedback.f_type){
 
-            //all the domains in the cart
+            //the domains in the cart
             var domainsInCart = [];
             if(data.feedback.cart){
                 $.each(data.feedback.cart.domains, function(n, currentElem) {
@@ -96,10 +95,10 @@ $( document ).ready(function() {
                 });
             }
 
-            //handle the click envent on the .action-button
             $(".action-button").unbind();
             $(".action-button").bind("click", function(e){
-                if($(this).attr("type") == "backorder"){
+                //backorder a domain
+                if($(this).attr("class") == "action-button Backorder"){
                     var createbackorder = createBackorder($(this).attr("value"));
                     if(createbackorder.CODE == 200){
                         $(this).addClass("action-button-added");
@@ -107,7 +106,8 @@ $( document ).ready(function() {
                         $(this).unbind("click");
                     }
                 }
-                if($(this).attr("type") == "available"){
+                //add domain to the cart
+                if($(this).attr("class") == "action-button Available"){
                     var params = {};
                     if(data.feedback.premiumtype){
                         params['action'] = 'addPremiumToCart';
@@ -147,7 +147,7 @@ $( document ).ready(function() {
                 $('.action-button').hide();
             }
             if(data.feedback.f_type == "backorder"){ //anthony.com
-                $('.action-button').attr("type", "backorder");
+                $('.action-button').addClass("Backorder");
                 $('.action-button').show();
                 $("#domain-in-box").addClass("domaininbox-backorder");
                 $('.action-button').append("Backorder");
@@ -160,7 +160,7 @@ $( document ).ready(function() {
                 }
             }
             if(data.feedback.f_type == "available"){ //premium - anthony.blog /normal-testi234.com
-                $('.action-button').attr("type", "available");
+                $('.action-button').addClass("Available");
                 $('.action-button').show();
                 $("#domain-in-box").addClass("domaininbox-available");
                 if(data.feedback.premiumtype){
@@ -748,7 +748,7 @@ $( document ).ready(function() {
             <div class="label-text">
                 <span class="domainlabel"></span><span class="tldzone"></span>
                 <span class="premium-label"></span>
-                <button id="actionbutton" class="action-button"></button>
+                <button id="actionbutton" class="action-button" type="button"></button>
             </div>
             <div class="description-text">
                 <span class="domain-description"></span>
