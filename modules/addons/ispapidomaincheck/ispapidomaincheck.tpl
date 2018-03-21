@@ -728,7 +728,6 @@ $( document ).ready(function() {
 	<input type="hidden" name="searched_domain" value="">
 
     <div class="row search-input-bar">
-        <div class="col-lg-8 col-lg-offset-3 col-md-10 col-md-offset-2">
             <div class="input-group">
                 <div class="inner-addon right-addon">
                     <input  id="searchfield" name="domain" class="form-control singlesearch input-box" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$_LANG.domaincheckerdomainexample}"><!--padding-right:380px; -->
@@ -737,7 +736,6 @@ $( document ).ready(function() {
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 
     <!-- CATEGORY and searched domain in box-->
@@ -800,7 +798,7 @@ $( document ).ready(function() {
 
 <div class="result-item" id="resultsarea" style="display:none;">
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
-        <div class="row row1 search-results" id="searchresults"></div>
+        <div class="row row1 search-results" id="searchresults"></div> <!--  search result are appeneded here-->
 		<p align="center"><input id="orderbutton" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
 		<br>
 	</form>
