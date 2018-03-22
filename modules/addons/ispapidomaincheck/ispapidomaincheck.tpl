@@ -615,9 +615,7 @@ $( document ).ready(function() {
             },
             success: function(data) {
                 result = data;
-                if(data.CODE == 200){
-                    //
-                }else if(data.CODE == 531){
+                if(data.CODE == 531){
                     $("#modalError").modal('show');
                     $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
                 }else{
@@ -651,9 +649,7 @@ $( document ).ready(function() {
             },
             success: function(data) {
                 result = data;
-                if(data.CODE == 200){
-                    //
-                }else if(data.CODE == 531){
+                if(data.CODE == 531){
                     $("#modalError").modal('show');
                     $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
                 }else{
@@ -787,6 +783,7 @@ $( document ).ready(function() {
                         </div>
                     </div>
                 </div>
+                <hr>
             </div>
         </div>
 

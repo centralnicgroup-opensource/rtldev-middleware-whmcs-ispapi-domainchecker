@@ -55,7 +55,8 @@ ul.cat li.active {
     text-decoration: none;
 }
 a.viewWhois{
-    color:#808080; !important;
+    color: #939598;!important;
+    font-size: 12px;
     font-weight:bold;
     text-decoration: none;
     cursor: pointer;
@@ -80,9 +81,7 @@ a.viewWhois{
     font-size:21px;
     color: #939598;
 }
-.domain-label:hover {
-    color: #f26522;
-}
+
 .domaininbox-backorder{
     width: 645px;
     text-align: left;
@@ -256,9 +255,7 @@ span.spanelement{
     margin-right:auto;
 }
 .collapse-category {
-
   text-align: center;
-  margin-bottom: 10px;
 }
 .category-button {
   padding: 0;
@@ -335,11 +332,13 @@ span.spanelement{
 }
 
 @media (max-width: 289px) {
-    .tld-zone.available{
+    .tld-zone{
         margin-left: 30px !important;
     }
     .search-result-price{
         margin-left: -20px;
     }
-
+    .first-line.click {
+        margin-right: -10px;
+    }
 }
