@@ -599,7 +599,7 @@ $( document ).ready(function() {
     });
 
     /*
-     * Sends a request to create a Backorder, returns the result and show the notification to the user with NOTY.
+     * Sends a request to create a Backorder, returns the result and show the notification to the user with MODAL.
      */
     function createBackorder(domainname){
         var result;
@@ -616,23 +616,26 @@ $( document ).ready(function() {
             success: function(data) {
                 result = data;
                 if(data.CODE == 200){
-                    noty({text: '{/literal}{$_LANG.backorder_created}{literal}', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                    //
                 }else if(data.CODE == 531){
-                    noty({text: '{/literal}{$_LANG.login_required}{literal}', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                    $("#modalError").modal('show');
+                    $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
                 }else{
-                    noty({text: '{/literal}{$_LANG.error_occured}{literal}: ', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                    $("#modalError").modal('show');
+                    $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
                 }
             },
             error: function(data) {
                 result = data;
-                noty({text: '{/literal}{$_LANG.error_occured}{literal}: ', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                $("#modalError").modal('show');
+                $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}: ');
             }
         });
         return result;
     }
 
     /*
-     * Sends a request to delete a Backorder, returns the result and show the notification to the user with NOTY.
+     * Sends a request to delete a Backorder, returns the result and show the notification to the user with Modal.
      */
     function deleteBackorder(domainname){
         var result;
@@ -649,11 +652,13 @@ $( document ).ready(function() {
             success: function(data) {
                 result = data;
                 if(data.CODE == 200){
-                    noty({text: '{/literal}{$_LANG.backorder_deleted}{literal}', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
+                    //
                 }else if(data.CODE == 531){
-                    noty({text: '{/literal}{$_LANG.login_required}{literal}', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                    $("#modalError").modal('show');
+                    $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
                 }else{
-                    noty({text: '{/literal}{$_LANG.error_occured}{literal}: ', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
+                    $("#modalError").modal('show');
+                    $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}: ');
                 }
             },
             error: function(data) {
@@ -712,10 +717,6 @@ $( document ).ready(function() {
 
 
 <!-- HTML PART OF THE DOMAINCHECKER -->
-{if $backorder_module_installed}
-    <script src="../modules/addons/ispapibackorder/templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
-{/if}
-
 
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
@@ -820,3 +821,4 @@ $( document ).ready(function() {
 
 
 {include file="$template/includes/modal.tpl" name="Whois" title=$_LANG.whoisresults|cat:' <span id="whoisDomainName"></span>'}
+{include file="$template/includes/modal.tpl" name="Error" title="Error"}
