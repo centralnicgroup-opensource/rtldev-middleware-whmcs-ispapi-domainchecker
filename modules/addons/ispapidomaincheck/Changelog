@@ -4,6 +4,15 @@ ______________________________________________________________________________
 Changelog
 ______________________________________________________________________________
 
+v 7.3.0 - 2018-XX-XX
+ - MINIMUM REQUIREMENTS: ISPAPI Registrar Module v1.0.53 at least
+ - relaunch of the user interface
+ - added suggestion engine
+ - premium domains support simplified (Premium domains now supported in WHMCS)
+ - manual adding of pricing for premium domains no more required, prices are taken from the API, markup can be defined in WHMCS directly
+ - removed sub-categories (only categories will be displayed)
+ - added button to add default categories
+
 v 7.2.0 - 2017-08-07
  - added whois fallback to WHMCS's DomainLookup when HEXONET's QueryDomainWhoisInfo API command is limited (special case for .CH and .LI)
 
