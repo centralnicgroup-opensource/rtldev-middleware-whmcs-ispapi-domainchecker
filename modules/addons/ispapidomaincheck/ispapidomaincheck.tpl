@@ -399,7 +399,7 @@ $( document ).ready(function() {
                 handleFeedbackMessage(data);
 
 				var nb_results = 0;
-				$.each(data["checkorder"], function(index, element) {
+				$.each(data["listorder"], function(index, element) {
 					var domain = element; //.replace(/\./g, '');
 
                     var index = domain.indexOf(".");

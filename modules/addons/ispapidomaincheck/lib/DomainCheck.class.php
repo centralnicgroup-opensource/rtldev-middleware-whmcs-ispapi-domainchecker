@@ -257,7 +257,7 @@ class DomainCheck
 			$domainlist_checkorder = array();
 		}
 
-    	$this->response = json_encode( array("data" => $domainlist, "checkorder" => $domainlist_checkorder, "feedback" => $feedback) );
+    	$this->response = json_encode( array("listorder" => $domainlist, "checkorder" => $domainlist_checkorder, "feedback" => $feedback) );
     }
 
     /*
