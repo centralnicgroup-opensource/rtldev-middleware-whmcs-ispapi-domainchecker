@@ -690,7 +690,7 @@ $( document ).ready(function() {
                  //premium domain in cart
                    type: "GET",
                    data: params,
-                   async: false,
+                   async: true,
                    url: "{/literal}{$modulepath}{literal}domain.php?"
              });
          }
@@ -699,7 +699,7 @@ $( document ).ready(function() {
                    url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
                    type: "POST",
                    data: params,
-                   async: false
+                   async: true
              });
          }
      }
@@ -711,7 +711,7 @@ $( document ).ready(function() {
           //to remove domains from cart on click
           $.ajax({
                 type: "GET",
-                async: false,
+                async: true,
                 url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainname
           });
       }
