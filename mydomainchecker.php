@@ -1,36 +1,36 @@
 <?php
-define("CLIENTAREA", true);
-require("init.php");
+use ISPAPI\Helper;
+
+require_once(dirname(__FILE__)."/init.php");
+require_once(dirname(__FILE__)."/modules/addons/ispapidomaincheck/lib/Helper.class.php");
+
 $ca = new WHMCS_ClientArea();
-$pagetitle = $_LANG["domaintitle"];
-$ca->setPageTitle($pagetitle);
+$ca->setPageTitle($_LANG["domaintitle"]);
 $ca->addToBreadCrumb('index.php', $whmcs->get_lang('globalsystemname'));
-$ca->addToBreadCrumb('mydomainchecker.php', $pagetitle);
+$ca->addToBreadCrumb('mydomainchecker.php', $_LANG["domaintitle"]);
 $ca->initPage();
 
-$module = "ispapidomaincheck";
-$modulepath = ROOTDIR . "/modules/addons/" . $module . "/" . $module . ".php";
-
+//include module file
+$modulepath = dirname(__FILE__)."/modules/addons/ispapidomaincheck/ispapidomaincheck.php";
 if (!file_exists( $modulepath )) {
 	exit($modulepath. " not found");
 }
 require $modulepath;
 
+//get module variables
 $modulevars = array();
-$result = select_query( "tbladdonmodules", "", array( "module" => $module ) );
-while ($data = mysql_fetch_array( $result )) {
-	$modulevars[$data["setting"]] = $data["value"];
+foreach (Helper::SQLCall("SELECT * FROM tbladdonmodules WHERE module = 'ispapidomaincheck'", array(), "fetchall") as $var) {
+	$modulevars[$var["setting"]] = $var["value"];
 }
-$results = call_user_func( $module . "_clientarea", $modulevars );
 
-$templatefile = "/modules/addons/" . $module . "/" . $results["templatefile"] . ".tpl";
-
+//call clientarea function
+$results = call_user_func("ispapidomaincheck_clientarea", $modulevars);
 if (is_array( $results["vars"] )) {
 	foreach ($results["vars"] as $k => $v) {
 		$smartyvalues[$k] = $v;
 	}
 }
 
-$ca->setTemplate($templatefile);
+$ca->setTemplate("/modules/addons/ispapidomaincheck/ispapidomaincheck.tpl");
 $ca->output();
 ?>
