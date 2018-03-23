@@ -624,18 +624,21 @@ $( document ).ready(function() {
             },
             success: function(data) {
                 result = data;
-                if(data.CODE == 531){
-                    $("#modalError").modal('show');
-                    $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
-                }else{
-                    $("#modalError").modal('show');
-                    $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
+                if(data.CODE != 200){
+                    if(data.CODE == 531){
+                        $("#modalError").modal('show');
+                        $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
+                    }
+                    else{
+                        $("#modalError").modal('show');
+                        $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
+                    }
                 }
             },
             error: function(data) {
                 result = data;
                 $("#modalError").modal('show');
-                $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}: ');
+                $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
             }
         });
         return result;
@@ -658,19 +661,24 @@ $( document ).ready(function() {
             },
             success: function(data) {
                 result = data;
-                if(data.CODE == 531){
-                    $("#modalError").modal('show');
-                    $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
-                }else{
-                    $("#modalError").modal('show');
-                    $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}: ');
+                if(data.CODE != 200){
+                    if(data.CODE == 531){
+                        $("#modalError").modal('show');
+                        $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
+                    }
+                    else{
+                        $("#modalError").modal('show');
+                        $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
+                    }
                 }
             },
             error: function(data) {
                 result = data;
+                $("#modalError").modal('show');
+                $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
             }
         });
-        return result
+        return result;
     }
 
     /*
