@@ -26,6 +26,8 @@ jQuery.extend(jQuery, {
 
 
 $( document ).ready(function() {
+    //pool of ajax requests
+    var requestpool = [];
 
     //starts the search directly when the page is opened
     jQuery(function(){
@@ -201,6 +203,9 @@ $( document ).ready(function() {
 			url: "{/literal}{$path_to_domain_file}{literal}",
 			data: params + cache + currency + domainlist,
 			dataType:'json',
+            beforeSend: function(jqXHR) {
+                requestpool.push(jqXHR);
+            },
 			success: function(data, textStatus, jqXHR) {
 
                 //handle the feedback message
@@ -332,10 +337,6 @@ $( document ).ready(function() {
 				    });
 				});
 
-			},
-			error: function (jqXHR, textStatus, errorThrown){
-				$("#errorsarea").text(errorThrown);
-				$("#errorsarea").show();
 			}
 		});
 	}
@@ -343,7 +344,14 @@ $( document ).ready(function() {
     //handle the click on the check button
 	var count = 0;
 	$("#searchbutton").click(function() {
-		count++;
+        count++;
+
+        //clean all previous ajax requests
+        $.each(requestpool, function(key, request){
+            request.abort();
+        });
+        //empty request pool
+        requestpool = [];
 
         //handle the following feature: Search can be triggered over the URL (domainchecker.php?search=test.com&cat=5)
 		if("{/literal}{$smarty.get.search}{literal}" && count == 1){
@@ -365,17 +373,22 @@ $( document ).ready(function() {
 		}
 
         //get the complete list of all domains that should be checked
-        // - 2 modes: normal and suggestions
+        //2 modes: normal and suggestions
 		var currency = "&currency={/literal}{$currency}{literal}" ;
 		var params = $("#searchform").serialize();
 		var getlistparams = params + "&action=getList" + currency;
-        //To remove the content from the div element structure of the domain box
+
+        //to remove the content from the div element structure of the domain box
         removeAppendDataFromDivs();
+
 		$.ajax({
 			type: "POST",
 			url: "{/literal}{$path_to_domain_file}{literal}",
 			data: getlistparams,
 			dataType:'json',
+            beforeSend: function(jqXHR) {
+                requestpool.push(jqXHR);
+            },
 			success: function(data, textStatus, jqXHR) {
 				$("#errorsarea, #successarea").hide();
 				$("#errorsarea, #successarea").html("");
@@ -431,10 +444,6 @@ $( document ).ready(function() {
 				}else{
                     startChecking(data["checkorder"]);
 				}
-			},
-			error: function (jqXHR, textStatus, errorThrown){
-				$("#errorsarea").text(errorThrown);
-				$("#errorsarea").show();
 			}
 		});
 	});
