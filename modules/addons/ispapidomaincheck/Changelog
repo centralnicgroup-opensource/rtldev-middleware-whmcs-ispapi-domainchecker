@@ -4,7 +4,7 @@ ______________________________________________________________________________
 Changelog
 ______________________________________________________________________________
 
-v 7.3.0 - 2018-XX-XX 
+v 7.3.0 - 2018-XX-XX
  - MINIMUM REQUIREMENTS: ISPAPI Registrar Module v1.0.53 at least
  - complete relaunch of the user interface
  - integration of API Suggestion Engine
@@ -14,6 +14,7 @@ v 7.3.0 - 2018-XX-XX
  - added button to add default categories
  - adding/removing of elements to/from the cart instantly possible in the search results
  - renewal pricing displayed in the search results
+ - Language files have been updated
 
 v 7.2.0 - 2017-08-07
  - added whois fallback to WHMCS's DomainLookup when HEXONET's QueryDomainWhoisInfo API command is limited (special case for .CH and .LI)
