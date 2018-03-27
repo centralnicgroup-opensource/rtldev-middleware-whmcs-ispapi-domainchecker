@@ -55,12 +55,17 @@ ul.cat li.active {
     text-decoration: none;
 }
 a.viewWhois{
-    color: #939598;!important;
+    color: #0033a0;!important;
     font-size: 12px;
     font-weight:bold;
     text-decoration: none;
     cursor: pointer;
 }
+a.viewWhois:hover{
+    color: #f26522;;!important;
+    /*text-decoration: underline;*/
+}
+
 .first-line .tld-zone {
     font-weight: bold;
     font-size: 14px;
@@ -231,11 +236,15 @@ span.spanelement{
 .backorder.added{
     color: #00a850;
 }
-.backorder {
+.backorder{
     font-size: 12px;
     font-weight: 700;
     text-transform: capitalize;
     color: #0033a0;
+}
+.backorder:hover{
+    color: #f26522;;!important;
+    /*text-decoration: underline;*/
 }
 .premium.added{
     color: #00a850 !important;

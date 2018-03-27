@@ -177,7 +177,10 @@ class DomainCheck
     		$this->domain = substr($this->domain, 4);
     	}
 
+		//lowercase
     	$this->domain = strtolower($this->domain);
+		//remove all white spaces
+		$this->domain = preg_replace('/\s+/', '', $this->domain);
 
     	$feedback = array();
     	$do_not_search = false;
