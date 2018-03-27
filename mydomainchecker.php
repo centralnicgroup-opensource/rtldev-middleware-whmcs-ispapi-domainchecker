@@ -1,4 +1,5 @@
 <?php
+define("CLIENTAREA", true);
 use ISPAPI\Helper;
 
 require_once(dirname(__FILE__)."/init.php");
@@ -11,7 +12,7 @@ $ca->addToBreadCrumb('mydomainchecker.php', $_LANG["domaintitle"]);
 $ca->initPage();
 
 //include module file
-$modulepath = dirname(__FILE__)."/modules/addons/ispapidomaincheck/ispapidomaincheck.php";
+$modulepath = ROOTDIR . "/modules/addons/ispapidomaincheck/ispapidomaincheck.php";
 if (!file_exists( $modulepath )) {
 	exit($modulepath. " not found");
 }
