@@ -216,7 +216,7 @@ function ispapidomaincheck_categoryeditorcontent($modulelink){
 
 	echo '<form action="'.$modulelink.'" method="post">';
 	echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%"><tbody>';
-	echo '<tr><th>Categorie Name</th>';
+	echo '<tr><th>Category Name</th>';
 	echo '<th>TLDs <span style="font-weight:100;">(space separated list of TLDs)</span></th>';
 	echo '<th width="20"></th></tr>';
 	foreach($categories as $cat){
