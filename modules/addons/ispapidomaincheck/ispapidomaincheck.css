@@ -55,17 +55,12 @@ ul.cat li.active {
     text-decoration: none;
 }
 a.viewWhois{
-    color: #0033a0;!important;
+    color: #939598;!important;
     font-size: 12px;
     font-weight:bold;
     text-decoration: none;
     cursor: pointer;
 }
-a.viewWhois:hover{
-    color: #f26522;;!important;
-    /*text-decoration: underline;*/
-}
-
 .first-line .tld-zone {
     font-weight: bold;
     font-size: 14px;
@@ -80,6 +75,9 @@ a.viewWhois:hover{
     font-size: 14px;
     margin-left: 30px;
     text-transform: lowercase;
+}
+.fa.fa-square-o.avail{
+    color: #00a850;
 }
 .fa.fa-square-o{
     position:absolute;
@@ -236,15 +234,11 @@ span.spanelement{
 .backorder.added{
     color: #00a850;
 }
-.backorder{
+.backorder {
     font-size: 12px;
     font-weight: 700;
     text-transform: capitalize;
     color: #0033a0;
-}
-.backorder:hover{
-    color: #f26522;;!important;
-    /*text-decoration: underline;*/
 }
 .premium.added{
     color: #00a850 !important;
