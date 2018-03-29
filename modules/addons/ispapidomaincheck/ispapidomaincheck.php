@@ -20,9 +20,6 @@ function ispapidomaincheck_config() {
 	    "version" => $module_version,
 	    "author" => "HEXONET",
 	    "language" => "english",
-		"fields" => array(
-			"domainchecker_mode" => array ("FriendlyName" => "Domainchecker Mode", "Type" => "dropdown", 'Options' => 'Suggestions,Regular')
-		),
 	);
     return $configarray;
 }

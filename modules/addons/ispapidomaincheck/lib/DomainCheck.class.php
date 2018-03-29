@@ -192,7 +192,7 @@ class DomainCheck
     	$searched_label = $this->getDomainLabel($this->domain);
 		$searched_tld = $this->getDomainExtension($this->domain);
 
-		if( $this->getDomaincheckerMode() == "Suggestions" && !empty($this->registrar)){ //if no registrar module found, use regular mode
+		if( $this->getDomaincheckerMode() == "on" && !empty($this->registrar)){ //if no registrar module found, use regular mode
 			//SUGGESTIONS MODE
 
 			//use the first ispapi registrar to query the suggestion list
@@ -293,9 +293,12 @@ class DomainCheck
 	* @return string The domainchecker mode
 	*/
 	private function getDomaincheckerMode() {
-		$dc_settings = Helper::SQLCall("SELECT value FROM tbladdonmodules WHERE module = 'ispapidomaincheck' AND setting = 'domainchecker_mode' LIMIT 1", array());
-		if(isset($dc_settings["value"])){
-			return $dc_settings["value"];
+		$domainLookupRegistrar = Helper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'domainLookupRegistrar' LIMIT 1", array());
+		if($domainLookupRegistrar["value"] == "ispapi"){
+			$dc_settings = Helper::SQLCall("SELECT value FROM tbldomain_lookup_configuration WHERE registrar = 'ispapi' AND setting = 'suggestions' LIMIT 1", array());
+			if(isset($dc_settings["value"])){
+				return $dc_settings["value"];
+			}
 		}
 		return "";
 	}
