@@ -372,22 +372,41 @@ $( document ).ready(function() {
 			}
 		}
 
-        //get the complete list of all domains that should be checked
-        //2 modes: normal and suggestions
-		var currency = "&currency={/literal}{$currency}{literal}" ;
-		var params = $("#searchform").serialize();
-		var getlistparams = params + "&action=getList" + currency;
-
         //to remove the content from the div element structure of the domain box
         removeAppendDataFromDivs();
 
-		$.ajax({
+        //get the complete list of all domains that should be checked.
+        // This is based on the selected mode. Fallback to regular mode if timeout.
+        getDomainListAndStartSearch(requestpool);
+
+	});
+
+    function getDomainListAndStartSearch(requestpool, forcemode){
+        var currency = "&currency={/literal}{$currency}{literal}" ;
+		var params = $("#searchform").serialize();
+        var action = "&action=getList";
+        if(forcemode == "REGULAR"){
+            action = "&action=getRegularList";
+        }
+		var getlistparams = params + currency + action;
+
+        var req = $.ajax({
 			type: "POST",
 			url: "{/literal}{$path_to_domain_file}{literal}",
 			data: getlistparams,
 			dataType:'json',
+            timeout: 3000,
             beforeSend: function(jqXHR) {
-                requestpool.push(jqXHR);
+                console.log(action);
+                //requestpool.push(jqXHR);
+            },
+            error: function(data, textStatus, jqXHR) {
+                if(jqXHR == "timeout" && forcemode != "REGULAR"){
+                    //force to get list with regular mode.
+                    //req.abort();
+                    console.log("aborded");
+                    getDomainListAndStartSearch(requestpool, "REGULAR")
+                }
             },
 			success: function(data, textStatus, jqXHR) {
 				$("#errorsarea, #successarea").hide();
@@ -446,7 +465,7 @@ $( document ).ready(function() {
 				}
 			}
 		});
-	});
+    }
 
     //This function get the complete list of domains to check and
     //split the checks in 2, then 4, then 8, then 16 checks at once.

@@ -50,6 +50,8 @@ class DomainCheck
     private function doDomainCheck(){
     	if(isset($this->action) && ($this->action == "getList")){
     		$this->getDomainList();
+    	}elseif(isset($this->action) && ($this->action == "getRegularList")){
+    		$this->getDomainList("REGULAR");
     	}elseif(isset($this->action) && ($this->action == "removeFromCart")){
     		$this->removeFromCart();
 		}elseif(isset($this->action) && ($this->action == "addPremiumToCart")){
@@ -162,7 +164,7 @@ class DomainCheck
     /*
      * Returns the list of domains that have to be checked.
      */
-    private function getDomainList(){
+    private function getDomainList($forcemode){
 
     	//delete HTTP:// if domain's starting with it
     	if (preg_match('/^http\:\/\//i', $this->domain)) {
@@ -192,9 +194,9 @@ class DomainCheck
     	$searched_label = $this->getDomainLabel($this->domain);
 		$searched_tld = $this->getDomainExtension($this->domain);
 
-		if( $this->getDomaincheckerMode() == "on" && !empty($this->registrar)){ //if no registrar module found, use regular mode
+		if( $this->getDomaincheckerMode() == "on" && !empty($this->registrar) && $forcemode != "REGULAR"){ //if no registrar module found, use regular mode
 			//SUGGESTIONS MODE
-
+			// mail("anthonys@hexonet.net", "debug1", "ok");
 			//use the first ispapi registrar to query the suggestion list
 			$registrar = $this->registrar[0];
 
@@ -213,6 +215,10 @@ class DomainCheck
 
 			//convert the domainlist to IDN again
 			$domainlist = $this->convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
+			// sleep(4);
+			// foreach($tldgroups as $tld){
+			// 	array_push($domainlist, $searched_label.".".$tld);
+			// }
 		}
 		else{
 			//REGULAR MODE
