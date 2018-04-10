@@ -373,7 +373,7 @@ $( document ).ready(function() {
 		}
 
         $("#loading").show();
-
+        $("#resultsarea").hide();
         //get the complete list of all domains that should be checked
         //2 modes: normal and suggestions
 		var currency = "&currency={/literal}{$currency}{literal}" ;
