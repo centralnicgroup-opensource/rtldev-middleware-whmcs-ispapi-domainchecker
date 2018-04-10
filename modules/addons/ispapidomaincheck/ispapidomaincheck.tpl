@@ -372,6 +372,8 @@ $( document ).ready(function() {
 			}
 		}
 
+        $("#loading").show();
+
         //get the complete list of all domains that should be checked
         //2 modes: normal and suggestions
 		var currency = "&currency={/literal}{$currency}{literal}" ;
@@ -390,6 +392,7 @@ $( document ).ready(function() {
                 requestpool.push(jqXHR);
             },
 			success: function(data, textStatus, jqXHR) {
+                $("#loading").hide();
 				$("#errorsarea, #successarea").hide();
 				$("#errorsarea, #successarea").html("");
 				$("#resultsarea").show();
@@ -810,7 +813,7 @@ $( document ).ready(function() {
 
 <div class="alert alert-danger text-center" id="errorsarea" style="display:none;"></div>
 <div class="domain-checker-result-headline"><p class="domain-checker-available" id="successarea" style="display:none;"></p></div>
-
+<div id="loading" style="display:none;text-align: center;"><span><i class="fa fa-refresh fa-spin" style="color:#0033a0;font-size:22px;"></i></span></div>
 <div class="result-item" id="resultsarea" style="display:none;">
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
         <div class="row row1 search-results" id="searchresults"></div> <!--  search result are appeneded here-->
