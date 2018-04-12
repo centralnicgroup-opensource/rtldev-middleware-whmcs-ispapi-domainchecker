@@ -134,6 +134,10 @@ $( document ).ready(function() {
             var index = domainName.indexOf(".");
             var domainLabel = domainName.substr(0, index);
             var tldZone = domainName.substr(index + 0);
+            if(!domainLabel){
+                tldZone='';
+                domainLabel ='';
+            }
             $("#domain-in-box").removeAttr('style');
             $('.status-text').append(data.feedback.f_message);
             $('.domainlabel').append(domainLabel);
@@ -141,11 +145,18 @@ $( document ).ready(function() {
             $('.action-button').attr("value", domainName);
 
             //remove the item from the list if there is a feedback
-            $("#" + jQuery.escapeSelector(domainName)).remove();
+            // $("#" + jQuery.escapeSelector(domainName)).remove();
 
-            if(data.feedback.f_type == "error" || data.feedback.f_type == "taken"){ //anthony.coco //tulsi.co
+            if(data.feedback.f_type == "error" || data.feedback.f_type == "taken" || data.feedback.f_type == "invalidChar"){ //anthony.coco //tulsi.co
                 $("#domain-in-box").addClass("domaininbox-taken");
-                $('.domain-description').append("{/literal}{$_LANG.domain_description_taken}{literal}<br>");
+                if(data.feedback.f_type == "invalidChar"){
+                    $('.status-text').html('');
+                    $('.domainlabel').html('');
+                    $('.domainlabel').append(data.feedback.id);
+                    $('.status-text').append("Identified an invalid Character <br>");
+                }else{
+                    $('.domain-description').append("{/literal}{$_LANG.domain_description_taken}{literal}<br>");
+                }
                 $('.action-button').hide();
             }
             if(data.feedback.f_type == "backorder"){ //anthony.com

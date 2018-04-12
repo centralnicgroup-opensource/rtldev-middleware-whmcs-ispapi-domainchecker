@@ -186,6 +186,13 @@ class DomainCheck
     	$do_not_search = false;
     	$domainlist = array();
 
+		//when special character is used
+		if(preg_match('/[\W]+/i', $this->domain)){
+			//TODO
+			$feedback = array("f_type" => "invalidChar", "f_message" => $this->i18n->getText("domain_not_supported_feedback"), "id" => $this->domain);
+			$do_not_search = true;
+		}
+
     	$tldconfiguration = $this->sortTLDs();
     	$tldgroups = $this->getTLDGroups();
 
