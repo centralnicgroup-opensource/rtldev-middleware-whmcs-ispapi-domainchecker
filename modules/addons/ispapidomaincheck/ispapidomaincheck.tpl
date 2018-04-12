@@ -134,6 +134,7 @@ $( document ).ready(function() {
             var index = domainName.indexOf(".");
             var domainLabel = domainName.substr(0, index);
             var tldZone = domainName.substr(index + 0);
+            //to display the searched term (if not a domain name)
             if(!domainLabel){
                 tldZone='';
                 domainLabel ='';
@@ -150,10 +151,9 @@ $( document ).ready(function() {
             if(data.feedback.f_type == "error" || data.feedback.f_type == "taken" || data.feedback.f_type == "invalidChar"){ //anthony.coco //tulsi.co
                 $("#domain-in-box").addClass("domaininbox-taken");
                 if(data.feedback.f_type == "invalidChar"){
-                    $('.status-text').html('');
-                    $('.domainlabel').html('');
-                    $('.domainlabel').append(data.feedback.id);
-                    $('.status-text').append("Identified an invalid Character <br>");
+                    if(!domainLabel){
+                        $('.domainlabel').append(data.feedback.id);
+                    }
                 }else{
                     $('.domain-description').append("{/literal}{$_LANG.domain_description_taken}{literal}<br>");
                 }

@@ -188,8 +188,7 @@ class DomainCheck
 
 		//when special character is used
 		if(preg_match('/[\W]+/i', $this->domain)){
-			//TODO
-			$feedback = array("f_type" => "invalidChar", "f_message" => $this->i18n->getText("domain_not_supported_feedback"), "id" => $this->domain);
+			$feedback = array("f_type" => "invalidChar", "f_message" => $this->i18n->getText("invalid_character_feedback"), "id" => $this->domain);
 			$do_not_search = true;
 		}
 

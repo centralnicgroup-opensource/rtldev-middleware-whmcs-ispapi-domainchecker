@@ -32,5 +32,6 @@ $_LANG['backorder_available_feedback'] = "This domain is registered but it can s
 $_LANG['domain_taken_feedback'] = "This domain is not available";
 $_LANG['domain_available_feedback'] = "Your domain is available!";
 $_LANG['error_feedback'] = "An error occured, please contact the support.";
+$_LANG['invalid_character_feedback'] = "Identified an invalid character";
 $_LANG[''] = "";
 ?>
