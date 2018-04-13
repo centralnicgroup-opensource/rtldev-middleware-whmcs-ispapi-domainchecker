@@ -83,6 +83,7 @@ $( document ).ready(function() {
             $("#domain-in-box").removeClass("domaininbox-available");
             $("#domain-in-box").removeClass("domaininbox-taken");
             $("#domain-in-box").removeClass("domaininbox-backorder");
+            $("#domain-in-box").hide();
     }
     //handle the feedback message for a searched domain
     function handleFeedbackMessage(data){
