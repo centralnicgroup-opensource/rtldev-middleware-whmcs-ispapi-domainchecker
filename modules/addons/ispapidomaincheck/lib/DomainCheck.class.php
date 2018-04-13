@@ -186,9 +186,9 @@ class DomainCheck
     	$do_not_search = false;
     	$domainlist = array();
 
-		//when special character is used
-		if(preg_match('/[\W]+/i', $this->domain)){
-			$feedback = array("f_type" => "invalidChar", "f_message" => $this->i18n->getText("invalid_character_feedback"), "id" => $this->domain);
+		//when special character is used in searched term/domain name
+		if(preg_match('/[^A-Za-z0-9\-\. ]/i', $this->domain)){
+			$feedback = array("f_type" => "error", "f_message" => $this->i18n->getText("invalid_character_feedback"), "id" => $this->domain);
 			$do_not_search = true;
 		}
 

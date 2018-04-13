@@ -146,11 +146,11 @@ $( document ).ready(function() {
             $('.action-button').attr("value", domainName);
 
             //remove the item from the list if there is a feedback
-            // $("#" + jQuery.escapeSelector(domainName)).remove();
+            $("#" + jqSelector(domainName)).remove();
 
-            if(data.feedback.f_type == "error" || data.feedback.f_type == "taken" || data.feedback.f_type == "invalidChar"){ //anthony.coco //tulsi.co
+            if(data.feedback.f_type == "error" || data.feedback.f_type == "taken"){ //anthony.coco //tulsi.co
                 $("#domain-in-box").addClass("domaininbox-taken");
-                if(data.feedback.f_type == "invalidChar"){
+                if(data.feedback.f_message == "{/literal}{$_LANG.invalid_character_feedback}{literal}"){
                     if(!domainLabel){
                         $('.domainlabel').append(data.feedback.id);
                     }
@@ -729,6 +729,13 @@ $( document ).ready(function() {
                 url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainname
           });
       }
+      /*
+       * Escape special characters
+       */
+      function jqSelector(str)
+        {
+          return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, '\\$1');
+        }
 
     //handle the click on the order button
 	$("#orderbutton").bind("click", function(e){
