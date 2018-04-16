@@ -4,14 +4,17 @@ ______________________________________________________________________________
 Changelog
 ______________________________________________________________________________
 
-v 7.2.3 - 2018-02-08
- - workflow update for Aftermarket Premium Domains (They were not added properly to the cart)
-
-v 7.2.2 - 2018-01-11
- - fix for special characters in user password
-
-v 7.2.1 - 2017-10-20
- - minor fixes in the domainchecker template
+v 7.3.0 - 2018-04-16
+ - MINIMUM REQUIREMENTS: ISPAPI Registrar Module v1.0.53 at least
+ - complete relaunch of the user interface
+ - integration of API Suggestion Engine
+ - premium domains support simplified (Premium domains now supported in WHMCS)
+ - manual adding of pricing for premium domains no more required, prices are taken from the API, markup (in %) can be defined by the reseller in WHMCS directly
+ - removed sub-categories (only 1 level of categories will be displayed)
+ - added button to add default categories
+ - adding/removing of elements to/from the cart instantly possible in the search results
+ - renewal pricing displayed in the search results
+ - Language files have been updated
 
 v 7.2.0 - 2017-08-07
  - added whois fallback to WHMCS's DomainLookup when HEXONET's QueryDomainWhoisInfo API command is limited (special case for .CH and .LI)

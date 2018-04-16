@@ -1,17 +1,15 @@
 {literal}
-
-
 <script>
+
+/**
+ * Escape all special jQuery CSS selector characters in *selector*.
+ * Useful when you have a class or id which contains special characters
+ * which you need to include in a selector.
+ */
 jQuery.extend(jQuery, {
-  /**
-   * Escape all special jQuery CSS selector characters in *selector*.
-   * Useful when you have a class or id which contains special characters
-   * which you need to include in a selector.
-   */
   escapeSelector: (function() {
     var specials = [
-      '#', '&', '~', '=', '>',
-      "'", ':', '"', '!', ';', ','
+      '#', '&', '~', '=', '>', "'", ':', '"', '!', ';', ','
     ];
     var regexSpecials = [
       '.', '*', '+', '|', '[', ']', '(', ')', '/', '^', '$'
@@ -19,257 +17,323 @@ jQuery.extend(jQuery, {
     var sRE = new RegExp(
       '(' + specials.join('|') + '|\\' + regexSpecials.join('|\\') + ')', 'g'
     );
-
     return function(selector) {
       return selector.replace(sRE, '\\$1');
     }
   })()
 });
 
-$( document ).ready(function() {
-	var count = 0;
 
-	$("#orderbutton").bind("click", function(e){
-		$("#orderbutton").hide();
-		$("#orderbuttonloading").show();
-		addSelectedpremiumDomainsToCart();
-		addSelectedSimpleDomainsToCart();
-		location.href = "{/literal}{$modulepath}{literal}../../../cart.php?a=confdomains";
+$( document ).ready(function() {
+    //pool of ajax requests
+    var requestpool = [];
+
+    //starts the search directly when the page is opened
+    jQuery(function(){
+        jQuery('#searchbutton').click();
+    });
+    //starts the search when entenkey is pressed
+    $('#searchfield').keyup(function(e){
+        if(e.keyCode == 13){
+            $(this).trigger("enterKey");
+	    }
+	});
+	$('#searchfield').bind("enterKey",function(e){
+		$("#searchbutton").trigger("click");
 	});
 
-	function addAftermarketPremiumToCart(id){
-		$.ajax({
-              url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&skipconfig=1&pid=" + id,
-			  type: "POST",
-			  async: false,
-		});
-	}
-
-	function addRegistryPremiumToCart(id,domain){
-		$.ajax({
-			  type: "POST",
-			  async: false,
-			  url: encodeURI("{/literal}{$modulepath}{literal}../../../cart.php?a=add&ajax=1&domains[]="+domain+"&domainselect=1&pid="+id)
-		});
-	}
-
-	function addSelectedSimpleDomainsToCart(){
-		var params = $("#domainform").serialize();
-		$.ajax({
-			  url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
-			  type: "POST",
-			  data: params,
-			  async: false
-		});
-	}
-
-	function addSelectedpremiumDomainsToCart(){
-		$("#domainform input[name='premiumdomains[]']:checked").each(function() {
-
-			var premiumarray = $(this).attr("value").split(":");
-			var domain = premiumarray[0];
-			var class_ = premiumarray[1];
-
-			if (class_ == "PREMIUM_NAMEMEDIA") {
-				$.ajax({
-					  type: "POST",
-					  async: false,
-					  dataType:'json',
-					  url: "{/literal}{$modulepath}{literal}product.php?page=create&domain=" +  domain + "&class=" + encodeURIComponent(class_) ,
-					  success: function(data, textStatus, jqXHR) {
-						  if(data["status"] == "ok"){
-							  addAftermarketPremiumToCart(data["productid"]);
-						  }
-					  }
-				});
-			} else if (class_.indexOf("PREMIUM") !=-1) {
-				$.ajax({
-					  type: "GET",
-					  async: false,
-					  url: "{/literal}{$modulepath}{literal}ajax.php?action=getproduct&class=" + encodeURIComponent(class_),
-					  dataType:'json',
-					  success: function(data, textStatus, jqXHR) {
-							if(data["id"]){
-								addRegistryPremiumToCart(data["id"],domain);
-							}
-					  }
-				});
-			}
-
-		});
-	}
-
+    //prevent the page reload when form is submitted
 	$('#searchform').submit(function(e){
 	    e.preventDefault();
 	});
 
-	$('#searchfield').bind("enterKey",function(e){
-		$("#searchbutton").trigger("click");
+    //handle the click on the category-button
+    $('.category-button').click(function(){
+        $(this).find('i.category').toggleClass('fa-angle-up fa-angle-down');
+    });
+
+    //handle the categories events
+    $(".subCat").bind("click", function(){
+        $(this).toggleClass('active');
+        var tmpid = [];
+        $(".cat").find("li").each(function() {
+            if($(this).hasClass('active')){
+                var id = $(this).attr("id").substring(2);
+                tmpid.push(id);
+            }
+        });
+        tmpid = jQuery.unique( tmpid );
+        $("#searchform input[name=tldgroup]").attr("value", tmpid);
+        $("#searchbutton").trigger("click");
 	});
-	$('#searchfield').keyup(function(e){
-	    if(e.keyCode == 13)
-	    {
-	        $(this).trigger("enterKey");
-	    }
-	});
 
-	$(".cat li").bind("click", function(e){
-		var id = $(this).attr("id");
-		$(".cat li").each(function() {
-			$(this).removeClass("active");
-		});
-		$(this).addClass("active");
+    // to remove data from the div elements
+    function removeAppendDataFromDivs(){
+            $('.status-text').html('');
+            $('.domainlabel').html('');
+            $('.tldzone').html('');
+            $('.domain-description').html('');
+            $('.price-of-domain').html('');
+            $('.premium-label').html('');
+            $('.action-button').hide();
+            $('.action-button').html('');
+            $(".action-button").removeClass("action-button-added");
+            $('.renewalprice-of-domain').html('');
+            $("#domain-in-box").removeClass("domaininbox-available");
+            $("#domain-in-box").removeClass("domaininbox-taken");
+            $("#domain-in-box").removeClass("domaininbox-backorder");
+            $("#domain-in-box").hide();
+    }
+    //handle the feedback message for a searched domain
+    function handleFeedbackMessage(data){
+        // error, backorder, available, taken
+        if(data.feedback.f_type){
 
-		$(".catcontainer").each(function(){
-			$(this).hide();
-		});
-		$("div[id='container_" + id + "']").show();
-		$("div[id='container_" + id + "'] ul li").first().trigger("click");
-	})
+            //the domains in the cart
+            var domainsInCart = [];
+            if(data.feedback.cart){
+                $.each(data.feedback.cart.domains, function(n, currentElem) {
+                    domainsInCart.push(currentElem.domain);
+                });
+            }
 
+            $(".action-button").unbind();
+            $(".action-button").bind("click", function(e){
+                //backorder a domain
+                if($(this).attr("class") == "action-button Backorder"){
+                    var createbackorder = createBackorder($(this).attr("value"));
+                    if(createbackorder.CODE == 200){
+                        $(this).addClass("action-button-added");
+                        $(this).html("Added");
+                        $(this).unbind("click");
+                    }
+                }
+                //add domain to the cart
+                if($(this).attr("class") == "action-button Available"){
+                    var params = {};
+                    if(data.feedback.premiumtype){
+                        params['action'] = 'addPremiumToCart';
+                        params['domain'] = data.feedback.id;
+                        params['registerprice']= data.feedback.registerprice_unformatted;
+                        params['renewalprice']= data.feedback.renewprice_unformatted;
+                        addDomainToCart(params, "premium");
+                    }
+                    else{
+                        params['a'] = 'addToCart';
+                        params['domain'] = data.feedback.id;
+                        params['token'] = $("#domainform").find('input').eq(0).attr("value");
+                        addDomainToCart(params, " ");
+                    }
+                    $(this).addClass("action-button-added");
+                    $(this).html("Added");
+                    $(this).unbind("click");
+                }
+            });
 
-	$(".sub li").bind("click", function(e){
-		$(".sub li").each(function() {
-			$(this).removeClass("active");
-		});
-		$(this).addClass("active");
-		var tmpid = $(this).attr("id");
-		var id = tmpid.substring(2);
-		$("#searchform input[name=tldgroup]").attr("value", id);
-		$("#searchbutton").trigger("click");
-	})
+            var domainName = data.feedback.id;
+            var index = domainName.indexOf(".");
+            var domainLabel = domainName.substr(0, index);
+            var tldZone = domainName.substr(index + 0);
 
+            $("#domain-in-box").removeAttr('style');
+            $('.status-text').append(data.feedback.f_message);
+            $('.domainlabel').append(domainLabel);
+            $('.tldzone').append(tldZone);
+            $('.action-button').attr("value", domainName);
+
+            //removes the item from the list if there is a feedback
+            try{
+                $("#" + jQuery.escapeSelector(domainName)).remove();
+            }catch(err){
+                //nothing to do
+            }
+
+            if(data.feedback.f_type == "error" || data.feedback.f_type == "taken"){ //anthony.coco //tulsi.co
+                if(!domainLabel || !tldZone){
+                    $('.tldzone').html("");
+                    $('.domainlabel').append(data.feedback.id);
+                }
+
+                $("#domain-in-box").addClass("domaininbox-taken");
+                $('.domain-description').append("{/literal}{$_LANG.domain_description_taken}{literal}<br>");
+                $('.action-button').hide();
+            }
+            if(data.feedback.f_type == "backorder"){ //anthony.com
+                $('.action-button').addClass("Backorder");
+                $('.action-button').show();
+                $("#domain-in-box").addClass("domaininbox-backorder");
+                $('.action-button').append("Backorder");
+                $('.domain-description').append("{/literal}{$_LANG.domain_description_backorder}{literal}");
+                $('.price-of-domain').append(data.feedback.backorderprice+"<span style='font-weight:normal;font-size:13px;'>{/literal}{$_LANG.price_of_domain_text}{literal}</style>");
+                if(data.feedback.backordered == 1){
+                    $('.action-button').addClass("action-button-added");
+                    $('.action-button').html("Added");
+                    $('.action-button').unbind("click");
+                }
+            }
+            if(data.feedback.f_type == "available"){ //premium - anthony.blog /normal-testi234.com
+                $('.action-button').addClass("Available");
+                $('.action-button').show();
+                $("#domain-in-box").addClass("domaininbox-available");
+                if(data.feedback.premiumtype){
+                    $('.premium-label').append(data.feedback.premiumtype); //{/literal}{$_LANG.premium}{literal}
+                    if(data.feedback.premiumtype == "PREMIUM"){
+                        $('.domain-description').append("{/literal}{$_LANG.domain_description_premium_registry}{literal}");
+                    }else{
+                        $('.domain-description').append("{/literal}{$_LANG.domain_description_premium_aftermarket}{literal}<br>");
+                    }
+                }
+                $('.action-button').append("{/literal}{$_LANG.add_to_cart_button}{literal}");
+                $('.price-of-domain').append(data.feedback.registerprice);
+                $('.renewalprice-of-domain').append("{/literal}{$_LANG.renewal}{literal}: "+data.feedback.renewprice);
+                if (domainsInCart.indexOf(domainName) > -1) {
+                    $('.action-button').addClass("action-button-added");
+                    $('.action-button').html("Added");
+                    $('.action-button').unbind("click");
+                }
+            }
+        }
+    }
+
+    //MAIN FUNCTION: handle the availability checks
 	function checkdomains(domains, cached_data){
 		var currency = "&currency={/literal}{$currency}{literal}" ;
-
 		var cache = "";
 		if(cached_data){
 			cache = "&cache=1";
 		}
-
 		var domainlist = "";
 		$.each(domains, function(index, element) {
-			domainlist += "&domain[]=" + element;
+			domainlist += "&domains[]=" + element;
 		});
 
-		var params = $("#searchform").serialize();
+        var params = $("#searchform").serialize();
 		$.ajax({
 			type: "POST",
 			url: "{/literal}{$path_to_domain_file}{literal}",
 			data: params + cache + currency + domainlist,
 			dataType:'json',
+            beforeSend: function(jqXHR) {
+                requestpool.push(jqXHR);
+            },
 			success: function(data, textStatus, jqXHR) {
 
-				if(data["feedback"]){
-					if(data["feedback"]["status"] == true){
-						$("#successarea").html(data["feedback"]["message"]);
-						$("#successarea").show();
-					}
-					if(data["feedback"]["status"] == false){
-						$("#errorsarea").html(data["feedback"]["message"]);
-						$("#errorsarea").show();
-					}
-				}
-
+                //handle the feedback message
+                handleFeedbackMessage(data);
 				$.each(data["data"], function(index, element) {
 					var id = jQuery.escapeSelector(element.id); //.replace(/\./g, '');
 					$( "#" + id).addClass(element.checkover);
-
-					//create selectbox with the price
-					if(element.price.domainregister && element.price.domainregister[1] != -1){
-						var price = '<select name="domainsregperiod['+element.id+']">';
-						$.each(element.price.domainregister, function(index, p){
-							if(element.premiumchannel == "NAMEMEDIA"){
-								price = price + '<option value="'+index+'">Price: '+p+'</option>';
-							}else{
-								price = price + '<option value="'+index+'">'+index+' {/literal}{$LANG.orderyears}{literal} @ '+p+'</option>';
-							}
-						});
-						price = price + '</select>';
-						var priceavailable = true;
-					}else{
-						var price = "Pricing not found";
-						var priceavailable = false;
-					}
-
-					if(element.code == "210"){
-						$( "#" + id + " td.checkboxarea").html('<input type="checkbox" value="'+element.id+'" name="domains[]">');
-						$( "#" + id + " td.period").html(price);
-						$( "#" + id + " td.availability").html("<span class='label label-success'>{/literal}{$LANG.domaincheckeravailable}{literal}</span>").addClass("domcheckersuccess");
-					}else if(element.code == "423"){
-						$( "#" + id + " td.availability").html("<span class='label label-warning'>SERVICE OFFLINE</span>").addClass("domcheckererror");
-					}else if(element.code == "541"){
-						$( "#" + id + " td.availability").html("<span class='label label-warning'>Invalid domain name</span>").addClass("domcheckererror");
-					}else if(element.code == "549"){
-						$( "#" + id + " td.availability").html("<span class='label label-warning'>Unsupported TLD</span>").addClass("domcheckererror");
-					}
-					else{
-						//if premium class
-						if(element.class){
-							if(priceavailable){
-								$( "#" + id + " td.checkboxarea").html('<input type="checkbox" value="'+element.id+":"+element.class+'" name="premiumdomains[]">');
-							}
-							$( "#" + id + " td.period").html(price);
-							$( "#" + id + " td.availability").html('<span class="label label-info">'+element.premiumchannel+' PREMIUM</span>').addClass("domcheckersuccess");
-						}else{
-
-                            $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>").addClass("domcheckererror");
-
-							var res = element.id.replace('.', ' ');
-							var transfer = res.split(" ");
-
-                            var backorder_button = "";
-                            if(element.backorder_installed == "1" && element.backorder_available == 1){
-                                var backorder_button_class = ((element.backordered=="1") ? "active": "btn-default");
-                                $( "#" + id + " td.availability").html("<span class='label label-danger'>{/literal}{$LANG.domaincheckertaken}{literal}</span>" + "<span style='border-left:1px solid white;' class='label label-backorder'>Backorder available</span>").addClass("domcheckererror");
-                                 backorder_button = "<a class='setbackorder btn btn-sm "+backorder_button_class+"' id='createnewbackorderbutton|"+element.id+"' value='"+element.id+"' >BACKORDER</a>";
-                            }
-
-							$( "#" + id + " td.period").html("<a class='btn btn-sm btn-default' href='http://"+element.id+"' target='_blank'>WWW</a> <a class='btn btn-default btn-sm viewWhois' id='WHOIS|"+element.id+"'>WHOIS</a> <a class='btn btn-default btn-sm' href='cart.php?a=add&domain=transfer&sld="+transfer[0]+"&tld=."+transfer[1]+"' target='_blank'>"+"{/literal}{$LANG.domainstransfer}{literal}".toUpperCase()+"</a> "+backorder_button);
-						}
-					}
-
-                    $('.setbackorder').unbind().click(function() {
-                        var button = $(this);
-                        var command = "CreateBackorder";
-                        if ($(this).hasClass("active"))
-                            command = "DeleteBackorder";
-
-                        $.ajax({
-                            type: "POST",
-                            async: true,
-                            dataType: "json",
-                            url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
-                            data: {
-                                COMMAND: command,
-                                DOMAIN:$(this).attr("value"),
-                                TYPE: "FULL"
-                            },
-                            success: function(data) {
-                                if(command=="CreateBackorder" && data.CODE==200){
-                                    button.addClass("active").removeClass("btn-default");;
-                                    noty({text: 'Backorder successfully created.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-                                }
-                                else if(command=="DeleteBackorder" && data.CODE==200){
-                                    button.addClass("btn-default").removeClass("active");;
-                                    noty({text: 'Backorder successfully deleted.', type: 'success', layout: 'bottomRight'}).setTimeout(3000);
-                                }
-                                else if(data.CODE==531){
-                                    noty({text: 'Login Required', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                                }
-                                else{
-                                    noty({text: 'An error occured: ' + data.DESCRIPTION, type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                                }
-                            },
-                            error: function(data) {
-                                noty({text: 'An error occured.', type: 'error', layout: 'bottomRight'}).setTimeout(3000);
-                            }
+                    //prices of the domains
+                    var registerprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" registerprice " value='+element.registerprice_unformatted+'>'+element.registerprice+'</span>' + '</span>';
+                    var hideregisterprice = '<span name="domainsregperiod['+element.id+']">' + '<span class=" registerprice added" value='+element.registerprice_unformatted+'>'+element.registerprice+'</span>' + '</span>';
+                    var renewprice = '<span name="domainsregperiod['+element.id+']">'+ '<span class="renewal" value='+element.renewprice_unformatted+'>{/literal}{$_LANG.renewal}{literal}: '+element.renewprice+'</span>'+ '</span>';
+                    var backorderprice = '<span name="domainsregperiod['+element.id+']">'+ '<span class=" renewalprice ">'+element.backorderprice+'</span>'+ '</span>';
+                    //ALL THE DOMAINS IN THE CART
+                    var domainsInCart = [];
+                    if(element.cart){
+                        $.each(element.cart.domains, function(n, currentElem) {
+                            domainsInCart.push(currentElem.domain);
                         });
-                    });
+                    }
+                    //IF THE DOMAIN IS PRESENT IN CART:
+                    if (domainsInCart.indexOf(element.id) > -1) {
+                            $("#domainform input[id=orderbutton]").removeClass('hide');
+                            $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o fa-check-square avail" aria-hidden="true"></i></label>');
+                            $( "#" + id).find('span.domainname.domain-label').addClass('available added');
+                            $( "#" + id).find('span.domainname.tld-zone').addClass('available added');
+                            if(element.status == "available"){
+                                if(element.premiumtype == "") {
+                                    $( "#" + id + " div.availability").html("<span>{/literal}{$_LANG.domaincheckeravailable}{literal}</span>").addClass("available");
+                                }else{
+                                    $( "#" + id + " div.availability").html('<span class="available added">{/literal}{$_LANG.domaincheckeravailable}{literal}</span><span class="premium added" value="'+element.id+'"> - '+element.premiumtype+'</span>');
+                                }
+                            }
+                            //to display register and renewprice as before
+                            $("#" + id).find('div.second-line.registerprice').html(registerprice);
+                            $("#" + id).find('div.second-line.renewalprice').html(renewprice);
+                            //to ad Added and only register price
+                            hideregisterprice =  '<span>{/literal}{$_LANG.domain_added_to_cart}{literal}</span><br/>'+hideregisterprice;
+                            $("#" + id).find('span.registerprice.added').html(hideregisterprice);
+                            //hide the display register and renewprice as before
+                            $("#" + id).find('div.search-result-price').addClass('details hide');
+                            $("#" + id).find('div.search-result-price').eq(1).removeClass('details hide');
+                    } else {
+                        //IF DOMAIN IS AVAILABLE => IT CAN BE PREMIUM OR NORMAL
+                        if(element.status == "available"){
+                            if(element.premiumtype == "") {
+                                    $( "#" + id).find('span.domainname.domain-label').addClass('available');
+                                    $( "#" + id).find('span.domainname.tld-zone').addClass('available');
+                                    $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o avail " aria-hidden="true"></i></label>');
+                                    $( "#" + id + " div.availability").html("<span>{/literal}{$_LANG.domaincheckeravailable}{literal}</span>").addClass("available");
+                                } else {
+                                    $( "#" + id).find('span.domainname.domain-label').addClass('available');
+                                    $( "#" + id).find('span.domainname.tld-zone').addClass('available');
+                                    $( "#" + id + " span.checkboxarea").html('<label value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o avail " aria-hidden="true"></i></label>');
+                                    $( "#" + id + " div.availability").html('<span class="available">{/literal}{$_LANG.domaincheckeravailable}{literal}</span><span class="premium " value="'+element.id+'"> - '+element.premiumtype+'</span>');
+                                }
+                                //display prices
+                                $("#" + id).find('div.second-line.registerprice').html(registerprice);
+                                $("#" + id).find('div.second-line.renewalprice').html(renewprice);
+                                //add ADDED  and price to the hidden div
+                                hideregisterprice =  '<span>{/literal}{$_LANG.domain_added_to_cart}{literal}</span><br/>'+hideregisterprice;
+                                $("#" + id).find('span.registerprice.added').html(hideregisterprice);
+                        }else if(element.status == "taken"){ //taken or taken and backorder
+                            var moreelement ='<div class="first-line click">'+
+                                                '<span class="see-more">'+
+                                                    '<i class="more fa fa-caret-down" style="font-size: 14px;color: #939598;"></i>'+
+                                                '</span>'+
+                                                '<span class="more" style="font-size: 14px;color: #939598;"> {/literal}{$_LANG.more}{literal}</span>'+
+                                                '<br><span> <br> </span>'+ //to create a gap in between
+                                            '</div>';
+                            var moreinformation = '<div class="text col-xs-12 search-result-details hide">'+'<div class="small-container">'+
+                                                    '<small>'+
+                                                        '<span></span><span style="color:#0033a0;font-weight:500;">'+element.id+' {/literal}{$_LANG.backorder_info_text}{literal}</span>'+
+                                                        '<br><br><ul style="color:#0033a0; font-weight:700;padding-right:10px;padding-left:0px;margin-left:20px;">'+
+                                                            '{/literal}{$_LANG.backorder_info_text_list}{literal}'+
+                                                            '<li>'+
+                                                                '<i>{/literal}{$_LANG.backorder_info_text_backorderprice}{literal} '+element.backorderprice+'</i>'
+                                                            '</li>'+
+                                                        '</ul>'+
+                                                    '</small>'+
+                                                '</div></div>';
+                            //to add Added and backorder price
+                            backorderprice =  '<span>{/literal}{$_LANG.domain_added_to_cart}{literal}</span><br/>'+backorderprice;
+                            $("#" + id).find('span.registerprice.added').html(backorderprice);
+                            //to display More and information
+                            $("#" + id).find('div.second-line.registerprice').html(moreelement);
+                            $("#" + id).find('div.search-result-price').eq(1).after(moreinformation);
+
+                            if(element.backordered == "1"){
+                                $( "#" + id).find('span.domainname.domain-label').addClass('added');
+                                $( "#" + id).find('span.domainname.tld-zone').addClass('added');
+                                $( "#" + id + " span.checkboxarea").html('<label class="added setbackorder" value="' +element.id+'"><i class=" fa fa-square-o fa-check-square" aria-hidden="true"></i></label>');
+                                $( "#" + id + " div.availability").html("<span class='taken added'>{/literal}{$_LANG.domaincheckertaken}{literal}</span>" + "<a class='viewWhois added' id='WHOIS|"+element.id+"'> - {/literal}{$_LANG.whois}{literal}</a>"+"<span class='backorder added'> - {/literal}{$_LANG.backorder}{literal}</span>");
+                                //hide the display register and renewprice as before
+                                $("#" + id).find('div.search-result-price').addClass('details hide');
+                                $("#" + id).find('div.search-result-price').eq(1).removeClass('details hide');
+                                // IF DOMAIN IS TAKEN => BACKORDER MAYBE AVAILABLE
+                            } else if(element.backorder_available == "1"){
+                                // when backorder available, display More option
+                                $( "#" + id + " span.checkboxarea").html('<label class="setbackorder" value="'+element.id+'" name="domains[]" id="checkboxId'+element.id+'"><i class=" fa fa-square-o " aria-hidden="true"></i></label>');
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$_LANG.domaincheckertaken}{literal}</span> "  + "<a class='viewWhois ' id='WHOIS|"+element.id+"'> - {/literal}{$_LANG.whois}{literal}</a>"+ "<span class='backorder '> - {/literal}{$_LANG.backorder}{literal}</span>");
+                            } else {//backorder not available
+                                $( "#" + id + " div.availability").html("<span class='taken'>{/literal}{$_LANG.domaincheckertaken}{literal}</span>"+ "<a class='viewWhois ' id='WHOIS|"+element.id+"'> - {/literal}{$_LANG.whois}{literal}</a>");
+                                $( "#" + id).find('div.col-xs-7').removeClass("search-result-info clickable");
+                                // for taken => to display —
+                                var spanelement = '<span style="font-size: 14px;color: #939598;font-weight:bold;">—</span>'+
+                                '<br><span><br></span>'; //to create a gap in between;
+                                $("#" + id).find('div.second-line.registerprice').html(spanelement);
+                            }
+                        }
+                    }
 				});
 
+                //handle the click on the WHOIS button
 				$(".viewWhois").unbind();
-				$(".viewWhois").bind("click", function(){
+				$(".viewWhois").bind("click", function(e){
+                    // to prevent parent div from toggling classes to other elements
+                    e.stopPropagation();
+
 					var domain = $(this).attr("id").substring(6);
 				    $("#modalWhoisLoader").removeClass('hidden').show();
 				    $("#modalWhoisBody").hide();
@@ -283,28 +347,34 @@ $( document ).ready(function() {
 				    });
 				});
 
-			},
-			error: function (jqXHR, textStatus, errorThrown){
-				$("#errorsarea").text(errorThrown);
-				$("#errorsarea").show();
-				$("#resultsarea, #loading").hide();
 			}
 		});
 	}
 
+    //handle the click on the check button
+	var count = 0;
 	$("#searchbutton").click(function() {
+        count++;
 
-		count++;
+        //clean all previous ajax requests
+        $.each(requestpool, function(key, request){
+            request.abort();
+        });
+        //empty request pool
+        requestpool = [];
 
-		if("{/literal}{$smarty.get.search}{literal}" && count==1){
+        //handle the following feature: Search can be triggered over the URL (domainchecker.php?search=test.com&cat=5)
+		if("{/literal}{$smarty.get.search}{literal}" && count == 1){
+            //pass the search term from the URL to the form
 			$("#searchform input[name='searched_domain']").attr("value", "{/literal}{$smarty.get.search}{literal}" );
 			$("#searchfield").attr("value", "{/literal}{$smarty.get.search}{literal}" );
+            //pass the category id fromt the URL to the form
 			if("{/literal}{$smarty.get.cat}{literal}"){
 				$("#searchform input[name=tldgroup]").attr("value", "{/literal}{$smarty.get.cat}{literal}");
 			}
 		}else{
 			var searched_domain = $("#searchfield").val();
-			//Stop the request when domainfield is not filled
+			//stop the request when domainfield is not filled
 			if(searched_domain == ""){
 				return;
 			}else{
@@ -312,42 +382,67 @@ $( document ).ready(function() {
 			}
 		}
 
-		$("#loading").show();
-		$("#pricingTable").hide();
-
+        $("#loading").show();
+        $("#resultsarea").hide();
+        //get the complete list of all domains that should be checked
+        //2 modes: normal and suggestions
 		var currency = "&currency={/literal}{$currency}{literal}" ;
 		var params = $("#searchform").serialize();
 		var getlistparams = params + "&action=getList" + currency;
+
+        //to remove the content from the div element structure of the domain box
+        removeAppendDataFromDivs();
+
 		$.ajax({
 			type: "POST",
 			url: "{/literal}{$path_to_domain_file}{literal}",
 			data: getlistparams,
 			dataType:'json',
+            beforeSend: function(jqXHR) {
+                requestpool.push(jqXHR);
+            },
 			success: function(data, textStatus, jqXHR) {
-				$("#loading, #errorsarea, #successarea").hide();
+                $("#loading").hide();
+				$("#errorsarea, #successarea").hide();
 				$("#errorsarea, #successarea").html("");
-
 				$("#resultsarea").show();
-				$('#searchresults').find("tr").remove();
+				$('#searchresults').find("div").remove();
 
-				if(data["feedback"]){
-					if(data["feedback"]["status"] == true){
-						$("#successarea").html(data["feedback"]["message"]);
-						$("#successarea").show();
-					}
-					if(data["feedback"]["status"] == false){
-						$("#errorsarea").html(data["feedback"]["message"]);
-						$("#errorsarea").show();
-						$("#resultsarea").hide();
-						return;
-					}
-				}
+                //handle the feedback message
+                handleFeedbackMessage(data);
 
 				var nb_results = 0;
-				$.each(data["data"], function(index, element) {
-					var id = element;//.replace(/\./g, '');
+				$.each(data["checkorder"], function(index, element) {
+					var domain = element; //.replace(/\./g, '');
 
-					$('#searchresults').append( '<tr id="' + id + '"><td class="text-center checkboxarea"></td><td><strong>' + element + '</strong></td><td class="text-center availability"><span style="color:#cdcdcd;">{/literal}{$LANG.loading}{literal}</span></td><td class="text-center period"></td></tr>' );
+                    var index = domain.indexOf(".");
+                    var domainLabel = domain.substr(0, index);
+                    var tldZone = domain.substr(index + 0);
+                    $('#searchresults').append(
+                        '<div class="domainbox" id="' + domain + '">'+
+                            '<div class="col-xs-7 search-result-info clickable">'+
+                                '<div class="first-line">'+
+                                    '<span class="checkboxarea"></span>'+
+                                    '<span class=" domainname domain-label ">'+domainLabel+'</span>'+'<span class=" domainname tld-zone ">'+tldZone+'</span>'+
+                                '</div>'+
+                                '<div class="second-line availability">'+
+                                    '<span></span>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="col-xs-5 search-result-price">'+
+                                '<div class="second-line registerprice"><span><i class="fa fa-refresh fa-spin" style="color:#0033a0;font-size:16px;"></i></span></div>'+
+                                '<div class="second-line renewalprice"></div>'+
+                            '</div>'+
+                            '<div class="col-xs-5 search-result-price details hide">'+
+                                '<div class="second-line price">'+
+                                    '<span class="registerprice added"></span>'+
+                                    '<span class="renewalprice added"></span>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="clear"></div>'+
+                        '</div>'
+                    );
+
 					nb_results++;
 				});
 
@@ -358,38 +453,20 @@ $( document ).ready(function() {
 				//send only one check for cached data
 				if(data["cache"] == true){
 					checkdomains(new Array(), true);
-
-					{/literal}{if $show_aftermarket_premium_domains eq "1"}{literal}
-                        showPremiumDomains();
-					{/literal}{/if}{literal}
 					return;
 				}else{
-					var getsortedlistparams = params + "&action=getSortedList" + currency;
-					$.ajax({
-						type: "POST",
-						url: "{/literal}{$path_to_domain_file}{literal}",
-						data: getsortedlistparams,
-						dataType:'json',
-						success: function(sorteddata, textStatus, jqXHR) {
-							startChecking(sorteddata["data"]);
-						}
-					});
+                    startChecking(data["checkorder"]);
 				}
-
-			},
-			error: function (jqXHR, textStatus, errorThrown){
-				$("#errorsarea").text(errorThrown);
-				$("#errorsarea").show();
-				$("#resultsarea, #loading").hide();
 			}
 		});
 	});
 
+    //This function get the complete list of domains to check and
+    //split the checks in 2, then 4, then 8, then 16 checks at once.
+    //In this way the customer is getting faster feedback.
 	function startChecking(domainlist){
-
 		var nb_results = domainlist.length;
 		var startwith = {/literal}{$startsequence}{literal};
-
 		var i = 1;
 		var step = startwith;
 		var j = 0;
@@ -421,381 +498,338 @@ $( document ).ready(function() {
 			checkdomains(domains, false);
 		}
 
-		{/literal}{if $show_aftermarket_premium_domains eq "1"}{literal}
-			showPremiumDomains();
-		{/literal}{/if}{literal}
 	}
+    //When search in url along with cat id, activate the category under categories button
+    if("{/literal}{$smarty.get.search}{literal}"){
+        if("{/literal}{$smarty.get.cat}{literal}"){
+            var catid = "{/literal}{$smarty.get.cat}{literal}";
+            $("#s_" + catid).addClass("active");
+        }
+    }
 
-	function showPremiumDomains(){
-		var currency = "&currency={/literal}{$currency}{literal}" ;
-		var params = $("#searchform").serialize();
-		var getsuggestionsparams = params + "&action=getSuggestions" + currency;
-		$.ajax({
-			type: "POST",
-			url: "{/literal}{$path_to_domain_file}{literal}",
-			data: getsuggestionsparams,
-			dataType:'json',
-			success: function(data, textStatus, jqXHR) {
+    $(document).on("click",".click", function() {
+        //more information - More
+        $(this).find('i.more').toggleClass('fa-caret-up');
+        //show and hid information when clicked on more
+        $(this).parent().parent().siblings().eq(2).toggleClass('hide');
+    });
 
-				if(data["feedback"]){
-					if(data["feedback"]["status"] == false){
-						$("#errorsarea").html("PREMIUM: " + data["feedback"]["message"]);
-						$("#errorsarea").show();
-					}
-				}
+    $(document).on("click",".search-result-info", function() {
+        var backorderevent = false;
+        // handling backorder domains on click
+        if($(this).find('label').hasClass('setbackorder')){
+            backorderevent = true;
+            //the following variables are used to update the frontend design
+            var iconLabel = $(this).find('label.setbackorder');
+            var whoisLink = $(this).find('a.viewWhois');
+            var checkbox = $(this).find('i.fa-square-o');
+            var domainnamespan = $(this).find('span.domainname');
+            var backorder = $(this).find('span.backorder');
+            var taken = $(this).find('span.taken');
 
-				if(data["data"].length != 0){
-					var i = 2;
-					var j = 0;
-					var selector = "";
-					$.each(data["data"], function(index, element) {
-						//var id = element.id.toLowerCase(); //.replace(/\./g, '').toLowerCase();
-						//var id = jQuery.escapeSelector(element.id.toLowerCase()); //.replace(/\./g, '');
-						var id = element.id.toLowerCase().replace("/\./g",'');
+            // to toggle hide on the second div items
+            var div0 = $(this).siblings().eq(0);
+            var div1 = $(this).siblings().eq(1);
 
-						var already_existing = false;
-						if($("#"+id).length != 0){
-							//if exists - do not display
-							already_existing = true;
-						}
+            var domainname = $(this).find('label.setbackorder').attr("value");
 
-						//create selectbox with the price
-						if(element.price.domainregister && element.price.domainregister[1] != -1){
-							var price = '<select name="domainsregperiod['+element.id+']">';
-							$.each(element.price.domainregister, function(index, element){
-								price = price + '<option value="'+index+'">Price: '+element+'</option>';
-							});
-							price = price + '</select>';
-							var pricing_available = true;
-						}else{
-							var price = "Pricing not found";
-							var pricing_available = false;
-						}
+            if ($(this).find('label.setbackorder').hasClass("added")){
+                //delete backorder
+                var deletebackorder = deleteBackorder(domainname);
+                if(deletebackorder.CODE == 200){
+                    iconLabel.removeClass("added");
+                    checkbox.removeClass('fa-check-square');
+                    domainnamespan.removeClass('added');
+                    backorder.removeClass('added');
+                    taken.removeClass('added');
+                    whoisLink.removeClass('added');
+                    div0.removeClass('details hide');
+                    div1.addClass('details hide');
 
-						//place 2 rows each 2 rows
-						if(j<2){
-							j++;
-						}else{
-							j=1;
-							i=i+4;
-						}
-						if(i > $('#searchresults tr').length)
-							selector = '#searchresults tr:last';
-						else
-							selector = '#searchresults tr:nth-child(' + i + ')';
+                }
+            }else{
+                //create backorder
+                var createbackorder = createBackorder(domainname);
+                if(createbackorder.CODE == 200){
+                    iconLabel.addClass("added");
+                    checkbox.addClass('fa-check-square');
+                    domainnamespan.addClass('added');
+                    backorder.addClass('added');
+                    taken.addClass('added');
+                    whoisLink.addClass('added');
+                    div0.addClass('details hide');
+                    div1.removeClass('details hide');
+                }
+            }
+        }
 
-						if(!already_existing){
-							if(pricing_available){
-								$(selector).after( '<tr id="' + id + '" class="api"><td class="text-center checkboxarea"><input type="checkbox" value="'+element.id+":"+element.class+'" name="premiumdomains[]"></td><td><strong>' + element.id + '</strong></td><td class="text-center availability"><span class="label label-info">NAMEMEDIA PREMIUM</span></td><td class="text-center period">'+price+'</td></tr>');
-							}else{
-								$(selector).after( '<tr id="' + id + '" class="api"><td class="text-center checkboxarea"></td><td><strong>' + element.id + '</strong></td><td class="text-center availability"><span class="label label-info">NAMEMEDIA PREMIUM</span></td><td class="text-center period">'+price+'</td></tr>');
-							}
-						}
+        //quit if backorderevent, no need to continue
+        if(backorderevent){
+            return;
+        }
 
-					});
-				}
+        if($(this).find('label').hasClass('setbackorder')){
+            // when user not logged - no need to display change of design - backorder only
+        }else{
+            //toggle checkbox
+            $(this).find('i.fa-square-o').toggleClass('fa-check-square');
+            //toggle domain name and tld zone
+            $(this).find('span.domainname').toggleClass('added');
+            //toggle backorder and premium availability
+            $(this).find('span.backorder').toggleClass('added');
+            $(this).find('span.premium').toggleClass('added');
+            // to toggle hide on the second div items
+            $(this).siblings().eq(0).toggleClass('details hide');
+            $(this).siblings().eq(1).toggleClass('details hide');
+        }
 
-			},
-			error: function (jqXHR, textStatus, errorThrown){
-				$("#errorsarea").text(errorThrown);
-				$("#errorsarea").show();
-				$("#resultsarea, #loading").hide();
-			}
-		});
-	}
+        if($(this).find('span.domainname.domain-label').hasClass('available added')){
+            //show checkout button
+            $("#domainform input[id=orderbutton]").removeClass('hide');
+            //prepare params array with action, domain name and token to put it in cart
+            var params = {};
+            params['a'] = 'addToCart';
+            params['domain'] = $(this).find('label').attr("value");
+            params['token'] = $("#domainform").find('input').eq(0).attr("value");
+            //handling premium domains in cart
+            if($(this).find('span').hasClass('premium')){
 
-	if("{/literal}{$smarty.get.search}{literal}"){
-		if("{/literal}{$smarty.get.cat}{literal}"){
-			var subid = "{/literal}{$smarty.get.cat}{literal}";
-			var catid = $("#s_" + subid).parent().parent().attr("id").substring(14);
-			$(".cat li").each(function() {
-				$(this).removeClass("active");
-			});
-			$("#cat_" + catid).addClass("active");
-			$(".catcontainer").each(function(){
-				$(this).hide();
-			});
-			$("div[id='container_cat_" + catid + "']").show();
+                var paramspremium = {};
 
-			$("#s_" + subid).trigger("click");
-		}else{
-			$(".cat li").first().trigger("click");
-		}
-	}else{
-		$(".cat li").first().trigger("click");
-	}
+                var registerprice = $(this).siblings().find('span.registerprice.added').eq(1).attr("value");
+                var renewalprice = $(this).siblings().find('span.renewal').attr("value");
+                paramspremium['action'] = 'addPremiumToCart';
+                paramspremium['domain'] = $(this).find('label').attr("value");
+                paramspremium['registerprice']= registerprice;
+                paramspremium['renewalprice']= renewalprice;
+                addDomainToCart(paramspremium, "premium");
+            }else{
+                addDomainToCart(params, "");
+            }
+        }
+        else{
+            if($("#domainform").find('span.t.domain-label').hasClass('added') && $("#domainform").find('span.t.domain-label').hasClass('available')){
+                //
+            }else{
+                //hide checkout button when no domain added in cart
+                $("#domainform input[id=orderbutton]").addClass('hide');
+            }
+            var domainInCart = $(this).find('label').attr("value");
+            removeDomainFromCart(domainInCart);
+        }
+
+    });
+
+    /*
+     * Sends a request to create a Backorder, returns the result and show the notification to the user with MODAL.
+     */
+    function createBackorder(domainname){
+        var result;
+        $.ajax({
+            type: "POST",
+            async: false,
+            dataType: "json",
+            url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
+            data: {
+                COMMAND: "CreateBackorder",
+                DOMAIN: domainname,
+                TYPE: "FULL"
+            },
+            success: function(data) {
+                result = data;
+                if(data.CODE != 200){
+                    if(data.CODE == 531){
+                        $("#modalError").modal('show');
+                        $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
+                    }
+                    else{
+                        $("#modalError").modal('show');
+                        $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
+                    }
+                }
+            },
+            error: function(data) {
+                result = data;
+                $("#modalError").modal('show');
+                $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
+            }
+        });
+        return result;
+    }
+
+    /*
+     * Sends a request to delete a Backorder, returns the result and show the notification to the user with Modal.
+     */
+    function deleteBackorder(domainname){
+        var result;
+        $.ajax({
+            type: "POST",
+            async: false,
+            dataType: "json",
+            url: "{/literal}{$backorder_module_path}{literal}backend/call.php",
+            data: {
+                COMMAND: "DeleteBackorder",
+                DOMAIN: domainname,
+                TYPE: "FULL"
+            },
+            success: function(data) {
+                result = data;
+                if(data.CODE != 200){
+                    if(data.CODE == 531){
+                        $("#modalError").modal('show');
+                        $("#modalErrorBody").html('{/literal}{$_LANG.login_required}{literal}');
+                    }
+                    else{
+                        $("#modalError").modal('show');
+                        $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
+                    }
+                }
+            },
+            error: function(data) {
+                result = data;
+                $("#modalError").modal('show');
+                $("#modalErrorBody").html('{/literal}{$_LANG.error_occured}{literal}');
+            }
+        });
+        return result;
+    }
+
+    /*
+     * Add domain to cart
+     */
+    function addDomainToCart(params, domainType){
+        if(domainType == "premium"){
+            $.ajax({
+                //premium domain in cart
+                type: "GET",
+                data: params,
+                async: false,
+                url: "{/literal}{$modulepath}{literal}domain.php?"
+            });
+        }
+        else{
+            $.ajax({
+                url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
+                type: "POST",
+                data: params,
+                async: false
+            });
+        }
+    }
+
+    /*
+     * Delete domain from cart
+     */
+     function removeDomainFromCart(domainname){
+         //to remove domains from cart on click
+         $.ajax({
+             type: "GET",
+             async: false,
+             url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainname
+         });
+     }
+
+    //handle the click on the order button
+	$("#orderbutton").bind("click", function(e){
+		$("#orderbutton").hide();
+		$("#orderbuttonloading").show();
+		location.href = "{/literal}{$modulepath}{literal}../../../cart.php?a=confdomains";
+	});
 
 });
+
 </script>
-<style>
-    .setbackorder.active{
-        color:white;
-        background-color:#0059b3;
-    }
-
-    .label-backorder{
-        color:white;
-        background-color:#0059b3;
-    }
-
-	#filter {
-		background-color:#e6e6e6;
-		-webkit-border-radius: 3px;
-		-webkit-border-top-left-radius: 0;
-		-moz-border-radius: 3px;
-		-moz-border-radius-topleft: 0;
-		border-radius: 3px;
-		border-top-left-radius: 0;
-		border: none; /*1px solid #e6e6e6*/;
-		padding-top:20px;
-		padding-bottom:25px;
-		padding-right:20px;
-        background: linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        background: -moz-linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        background: -webkit-linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        background: -ms-linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        background: -o-linear-gradient(top, #e6e6e6 0%, #e6e6e6 22%, #f2f2f2 100%);
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#e6e6e6, endColorstr=#f2f2f2,GradientType=1);
-    }
-
-	ul.cat {
-		margin:0px;
-		padding:0px;
-	}
-
-	ul.cat li {
-		display:inline;
-		float:left;
-		background-color: #ffffff;
-		color: #111111;
-		padding:7px 12px 7px 12px;
-		margin-right:5px;
-		-webkit-border-top-left-radius: 3px;
-		-webkit-border-top-right-radius: 3px;
-		-moz-border-radius-topleft: 3px;
-		-moz-border-radius-topright: 3px;
-		border-top-left-radius: 3px;
-		border-top-right-radius: 3px;
-		cursor:pointer;
-	}
-
-	ul.cat li.active {
-		background-color: #e6e6e6;
-		border: 1px solid #e6e6e6;
-		border-bottom-color: #e6e6e6;
-		margin-bottom:-1px;
-		font-weight:bold;
-	}
-
-	ul.sub {
-		margin:0px;
-		padding:0px;
-	}
-
-	ul.sub li {
-		display:inline;
-		float:left;
-		background-color: #939598;
-		color: #ffffff;
-		padding:7px 12px 7px 12px;
-		margin-left:10px;
-		margin-bottom:10px;
-		cursor:pointer;
-		-webkit-border-radius: 3px;
-		-moz-border-radius: 3px;
-		border-radius: 3px;
-	}
-
-	ul.sub li.active {
-		background-color: #f26522;
-		color:#ffffff;
-	}
-
-	td.availability p {
-		font-weight:bold;
-		font-size: 80%;
-	}
-
-	.domain-checker-container2 {
-	    /*background: rgba(0, 0, 0, 0) -moz-linear-gradient(center top , #ffd960, #ffb201) repeat scroll 0 0;*/
-	    border-radius: 10px;
-	    margin: 20px 0;
-	    padding: 0;
-	}
-
-	.domain-checker-bg2 {
-	    /*background-image: url("../img/globe.png");
-	    background-position: 110% -5px;
-	    background-repeat: no-repeat;*/
-	    margin: 0;
-	    padding: 10px 0;
-	}
-
-	.clear {
-		clear:both;
-	}
-
-	@media (max-width:991px) {
-
-        #searchfield {
-            width:600px;
-        }
-
-		div.well2 {
-			margin-left:auto;
-			margin-right:auto;
-		}
-
-		ul.cat li{
-			display:block;
-			float:left;
-			width: 100%;
-			text-align:center;
-			background-color:#e6e6e6;
-		}
-
-		ul.cat li.active {
-		 	border-width: 0px;
-		    font-weight: normal;
-		    margin-bottom: 0px;
-		    background-color:#f26522;
-            color:#ffffff;
-		}
-	}
-
-    @media (min-width:1200px) {
-        #searchfield {
-            width:750px;
-        }
-    }
-
-    @media (max-width:1200px) {
-        #searchfield {
-            width:600px;
-        }
-    }
-
-    @media (max-width:767px){
-        #searchfield {
-            width:250px;
-        }
-    }
-
-</style>
 {/literal}
 
-{if $backorder_module_installed}
-    <script src="{$backorder_module_path}templates/lib/noty-2.4.1/jquery.noty.packaged.min.js"></script>
-{/if}
+
+<!-- HTML PART OF THE DOMAINCHECKER -->
 
 <div class="domain-checker-container2">
 <div class="domain-checker-bg2">
-<form method="post" action="index.php?m=ispapicheckdomain" class="form-horizontal" id="searchform">
+<form method="post" action="index.php?m=ispapicheckdomain" id="searchform" class="search-form">
+    <head>
+        <link rel="stylesheet" href="../modules/addons/ispapidomaincheck/ispapidomaincheck.css">
+    </head>
+
 	<input type="hidden" name="tldgroup" value="">
 	<input type="hidden" name="searched_domain" value="">
 
-	<div class="well2">
-	    <ul class="cat">
-	    {foreach from=$categories item=cat}
-	    	<li id="cat_{$cat.id}">{$cat.name}</li>
-	    {/foreach}
-	    </ul>
-	    <div class="clear"></div>
-	    <div id="filter">
-		    {foreach from=$categories item=cat}
-		    <div class="catcontainer" id="container_cat_{$cat.id}" style="display:none;">
-		    	<ul class="sub">
-			    	 {foreach from=$cat.subcategories item=sub}
-			    	 	<li id="s_{$sub.id}">{$sub.name}</li>
-			    	 {/foreach}
-			    </ul>
-		    </div>
-		    {/foreach}
-
-		    <div class="clear"></div>
-
-			<br>
-
-		    <div class="text-center">
-				<div class="row">
-					<div class="col-md-8 col-md-offset-2 col-xs-10 col-xs-offset-1">
-						<div class="input-group input-group-lg input-group-box">
-							<input style="background:white;border:3px solid #0033a0;border-radius:10px;font-size:16px;" id="searchfield" name="domain" class="form-control" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$LANG.domaincheckerdomainexample}">
-							<!--<span class="input-group-btn">-->
-								<button id="searchbutton" class="btn btn-primary" style="line-height:22px;background-color:#f26522;border:none;position:absolute;font-size:14px;margin-left:-48px;margin-top:6px;z-index:1000;" type="button">Go<!--{$LANG.checkavailability}--></button>
-							<!--</span>-->
-						</div>
-					</div>
-				</div>
-		    </div>
-	    </div>
-	</div>
-
-</form>
-</div>
-</div>
-
-<div class="alert text-center" id="loading" style="display:none;"><img src="{$modulepath}loading.gif"/></div>
-<div class="alert alert-danger text-center" id="errorsarea" style="display:none;"></div>
-<div class="domain-checker-result-headline"><p class="domain-checker-available" id="successarea" style="display:none;"></p></div>
-
-
-<div class="domainresults" id="resultsarea" style="display:none;">
-<div>Search Results</div>
-	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
-		<table class="table table-curved table-hover">
-			<tbody id="searchresults"></tbody>
-		</table>
-		<p align="center" id="orderbuttonloading" style="display:none;"><img src="{$modulepath}loading.gif"/></p>
-		<p align="center"><input id="orderbutton" type="button" value="{$LANG.ordernowbutton} &raquo;" class="btn btn-danger" /></p>
-		<br>
-	</form>
-</div>
-
-
-
-<div id="pricingTable" style="display:visible;">
-    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-        <div class="panel panel-default">
-            <div class="panel-heading" role="tab" id="heading{$tldCategory->id}">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAll" aria-expanded="false" aria-controls="collapseAll" class="domain-tld-pricing-category">
-                        {$LANG.alltldpricing}
-                    </a>
-                </h4>
-            </div>
-            <div id="collapseAll" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingAll">
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2 table-responsive domain-tld-pricing-table-responsive">
-                            <table class="table table-striped table-framed">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">{$LANG.domaintld}</th>
-                                        <th class="text-center">{$LANG.domainminyears}</th>
-                                        <th class="text-center">{$LANG.domainsregister}</th>
-                                        <th class="text-center">{$LANG.domainstransfer}</th>
-                                        <th class="text-center">{$LANG.domainsrenew}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {foreach $tldpricelist as $tld}
-                                        <tr>
-                                            <td>{$tld.tld}</td>
-                                            <td class="text-center">{$tld.period}</td>
-                                            <td class="text-center">{if $tld.register}{$tld.register}{else}{$LANG.domainregnotavailable}{/if}</td>
-                                            <td class="text-center">{if $tld.transfer}{$tld.transfer}{else}{$LANG.domainregnotavailable}{/if}</td>
-                                            <td class="text-center">{if $tld.renew}{$tld.renew}{else}{$LANG.domainregnotavailable}{/if}</td>
-                                        </tr>
-                                    {/foreach}
-                                </tbody>
-                            </table>
-                        </div>
+    <div class="row search-input-bar">
+            <div class="input-group">
+                <div class="inner-addon right-addon">
+                    <input  id="searchfield" name="domain" class="form-control singlesearch input-box" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$_LANG.domaincheckerdomainexample}"><!--padding-right:380px; -->
+                    <div class="addon">
+                        <button id="searchbutton" class="btn btn-default search-btn" type="button">{$_LANG.go_search}</button>
                     </div>
                 </div>
             </div>
-        </div>
     </div>
+
+    <!-- CATEGORY and searched domain in box-->
+    <div id="categories" class="row1 row collapse-category">
+        <!-- To display searched domain in a box with feedback message  -->
+        <div id="domain-in-box" class="domain-box" style="display:none">
+            <div class="status-text"></div>
+            <div class="label-text">
+                <span class="domainlabel"></span><span class="tldzone"></span>
+                <span class="premium-label"></span>
+                <button id="actionbutton" class="action-button" type="button"></button>
+            </div>
+            <div class="description-text">
+                <span class="domain-description"></span>
+            </div>
+            <div class="price-text">
+                <span class="price-of-domain"></span>
+                <span class="renewalprice-of-domain"></span>
+            </div>
+        </div>
+
+        <!--  CATEGORY-->
+        <br/>
+        <div class="col-xs-12 category-setting">
+            <button class="category-button" type="button" data-toggle="collapse" data-target="#category" >
+                <span>{$_LANG.categories_label}</span>
+                <br />
+                <i class="category fa fa-angle-down"></i>
+            </button>
+        </div>
+
+        <div class="col-xs-12">
+
+            <div class="collapse" id="category">
+
+                <div class="category-item icon">
+                    <div class="domain-checker-container2">
+                        <div class="domain-checker-bg2">
+                            <div class="well2">
+                                <div class="catcontainer" >
+                                    <ul class="cat" style="text-align:center;">
+                                        {foreach from=$categories item=cat}
+                                            <li class="subCat" style="display:inline-block;" id="s_{$cat.id}">{$cat.name}</li>
+                                        {/foreach}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+            </div>
+        </div>
+
+    </form>
+</div>
+</div>
+
+<div class="alert alert-danger text-center" id="errorsarea" style="display:none;"></div>
+<div class="domain-checker-result-headline"><p class="domain-checker-available" id="successarea" style="display:none;"></p></div>
+<div id="loading" style="display:none;text-align: center;"><span><i class="fa fa-refresh fa-spin" style="color:#0033a0;font-size:22px;"></i></span></div>
+<div class="result-item" id="resultsarea" style="display:none;">
+	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
+        <div class="row row1 search-results" id="searchresults"></div> <!--  search result are appeneded here-->
+		<p align="center"><input id="orderbutton" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
+		<br>
+	</form>
 </div>
 
 {if !$loggedin && $currencies}
@@ -811,4 +845,7 @@ $( document ).ready(function() {
     </div>
     <div class="clearfix"></div>
 {/if}
-{include file="$template/includes/modal.tpl" name="Whois" title=$LANG.whoisresults|cat:' <span id="whoisDomainName"></span>'}
+
+
+{include file="$template/includes/modal.tpl" name="Whois" title=$_LANG.whoisresults|cat:' <span id="whoisDomainName"></span>'}
+{include file="$template/includes/modal.tpl" name="Error" title="Error"}

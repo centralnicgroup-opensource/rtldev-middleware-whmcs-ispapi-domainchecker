@@ -1,10 +1,14 @@
 <?php
+use WHMCS\Database\Capsule;
+use ISPAPI\i18n;
 
-if (!defined("WHMCS"))
-    die("This file cannot be accessed directly");
+require_once(dirname(__FILE__)."/lib/i18n.class.php");
 
-function ispapidomaincheck_hook_premiumcron($vars) {
-	include 'premiumcron.php';
-}
+add_hook('ClientAreaPage', 1, function($templateVariables)
+{
+    $i18n = new i18n();
+    $translations = $i18n->getTranslations();
+    return array("_LANG" => $translations);
+});
 
-add_hook("DailyCronJob",1,"ispapidomaincheck_hook_premiumcron");
+?>

@@ -1,0 +1,347 @@
+ul.cat {
+    margin:0px;
+    padding:0px;
+}
+
+ul.cat li {
+    display:inline;
+    float:center;
+    background-color: #939598;
+    color: #ffffff;
+    padding:7px 10px 7px 10px;
+    margin-left:2px;
+    margin-right:2px;
+    margin-top:3px;
+    margin-bottom:3px;
+    cursor:pointer;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+ul.cat li.active {
+    background-color: #f26522;
+    color:#ffffff;
+}
+
+.small-container{
+    padding-left:30px;
+    padding-top:10px;
+}
+
+.domain-checker-container2 {
+    border-radius: 10px;
+    margin: 20px 0;
+    padding: 0;
+}
+.domain-checker-bg2 {
+    margin: 0;
+    padding: 10px 0;
+}
+
+.fa.fa-square-o.fa-check-square{
+    /*position:absolute;*/
+    font-size:21px;
+    color: #00a850;
+}
+.clickable {
+   cursor: pointer;
+}
+.click {
+    cursor: pointer;
+}
+.viewWhois.added{
+    color: #00a850;
+    text-decoration: none;
+}
+a.viewWhois{
+    color: #939598;!important;
+    font-size: 12px;
+    font-weight:bold;
+    text-decoration: none;
+    cursor: pointer;
+}
+.first-line .tld-zone {
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: lowercase;
+}
+.first-line .domain-label{
+    display: inline-block;
+
+    font-weight: 500;
+    color: #939598;
+    line-height: 1.45;
+    font-size: 14px;
+    margin-left: 30px;
+    text-transform: lowercase;
+}
+.fa.fa-square-o.avail{
+    color: #00a850;
+}
+.fa.fa-square-o{
+    position:absolute;
+    font-size:21px;
+    color: #939598;
+}
+
+.domaininbox-backorder{
+    width: 645px;
+    text-align: left;
+    font-size: 15px;
+    padding: 20px 20px 10px;
+    border: 3px solid #00a651;
+    margin: 20px 8px;
+    color: #0033a0;
+    line-height: 1.45;
+}
+.domainlabel {
+    line-height: 38px;
+    font-size: 20px;
+}
+.tldzone{
+    font-weight: bold;
+    font-size: 20px;
+}
+.action-button{
+    background-color: #00a651;
+    border: none;
+    color: white;
+    padding: 10px;
+    float: right;
+    font-size: 13px;
+    min-width: 120px;
+}
+.domain-description{
+    font-size:13px;
+    padding-right:10px;
+}
+.price-text {
+    margin-top:10px;
+}
+.price-of-domain{
+    font-weight:bold;
+    font-size: 14px;
+}
+.renewalprice-of-domain{
+    color: #939598;
+    font-size:13px;
+}
+.domaininbox-taken{
+    width: 645px;
+    text-align: left;
+    font-size: 15px;
+    padding: 20px 20px 10px;
+    border: 3px solid #939598;
+    margin: 20px 8px;
+    color: #0033a0;
+    line-height: 1.45;
+}
+.domaininbox-available{
+    width: 645px;
+    text-align: left;
+    font-size: 15px;
+    padding: 20px 20px 10px;
+    border: 3px solid #00a651;
+    margin: 20px 8px;
+    color: #0033a0;
+    line-height: 1.45;
+}
+.premium-label{
+    color: #00b1df;
+    font-weight: bold;
+    margin-left: 10px;
+    line-height: 1.45;
+}
+.action-button-added{
+    background-color: #939598;
+    cursor: default;
+}
+.clicked .domain-label {
+    padding-left: 30px;
+    color: white;
+}
+.domain-label.available.added {
+    color: #00a850;
+}
+.domain-label.available{
+    font-weight: 500;
+    color: #0033a0;
+}
+.tld-zone.available.added {
+    font-weight: bold;
+    color: #00a850;
+}
+.tld-zone.available{
+    font-weight: bold;
+    color: #0033a0;
+}
+div.second-line{
+    margin-left: 30px;
+}
+span.renewal{
+    font-size: 12px;
+    color: #939598;
+}
+span.taken{
+    color: #939598;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+}
+.first-line{
+
+    color: #939598;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+span.taken.added{
+    color: #00a850;
+}
+
+span.registerprice {
+    font-size: 14px;
+    color: #f26522;
+    font-weight: 700;
+}
+span.spanelement{
+    color: white;
+}
+.search-result-price {
+    text-align: right; !important;
+}
+.added {
+    font-weight: bold;
+    color: #00a850; !important;
+}
+.domain-label.added{
+    color: #00a850; !important;
+}
+
+.details.hide {
+    display:none;
+}
+.registerprice.added{
+    color: #00a850;
+    text-align: right;
+}
+.available {
+    font-size: 12px;
+    color: #00a850;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.backorder.added{
+    color: #00a850;
+}
+.backorder {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: capitalize;
+    color: #0033a0;
+}
+.premium.added{
+    color: #00a850 !important;
+}
+.premium {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+    color: #00b1df;
+}
+.more {
+    text-transform: capitalize;
+}
+.row1{
+    max-width: 600px;
+    margin-left:auto;
+    margin-right:auto;
+}
+.collapse-category {
+  text-align: center;
+}
+.category-button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #939598;
+}
+.category-button i {
+  font-size: 24px;
+}
+.collapse-category .category-item {
+  display: inline-block;
+}
+.collapse-category .category-item.continents {
+  margin-top: 0;
+  cursor: pointer;
+}
+.domainbox{
+    margin-bottom:12px;
+}
+
+.clear{
+    clear: both;
+}
+
+.domain-box{
+    max-width: 100%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.search-form .search-input-bar .input-group {
+  width: 600px;
+  max-width: 100%;
+  color: #939598;
+
+  margin-left:auto;
+  margin-right:auto;
+}
+.search-form .search-input-bar .input-group .search-btn {
+  background-color: #f26522;
+  color: #fff;
+  border-radius: 5px;
+  border: none;
+}
+.search-form .search-input-bar .input-group .singlesearch {
+  background: transparent;
+  border: 3px solid #0033a0;
+  border-radius: 10px;
+  font-size: 18px;
+}
+.search-form .search-input-bar .input-group .singlesearch {
+  margin-left: 0;
+  height: 44px;
+}
+.input-group .inner-addon {
+  position: relative;
+}
+.input-group .inner-addon .addon {
+  position: absolute;
+  padding: 6px;
+}
+.input-group .inner-addon .input-box {
+  z-index: 0;
+}
+.input-group .inner-addon.right-addon .addon {
+  right: 0;
+}
+.input-group .inner-addon.right-addon .input-box {
+  padding-right: 50px;
+}
+
+@media (max-width: 289px) {
+    .tld-zone{
+        margin-left: 30px !important;
+    }
+    .search-result-price{
+        margin-left: -20px;
+    }
+    .first-line.click {
+        margin-right: -10px;
+    }
+}
