@@ -4,12 +4,12 @@ ______________________________________________________________________________
 Changelog
 ______________________________________________________________________________
 
-v 7.3.0 - 2018-XX-XX
+v 7.3.0 - 2018-04-16
  - MINIMUM REQUIREMENTS: ISPAPI Registrar Module v1.0.53 at least
  - complete relaunch of the user interface
  - integration of API Suggestion Engine
  - premium domains support simplified (Premium domains now supported in WHMCS)
- - manual adding of pricing for premium domains no more required, prices are taken from the API, markup can be defined in WHMCS directly
+ - manual adding of pricing for premium domains no more required, prices are taken from the API, markup (in %) can be defined by the reseller in WHMCS directly
  - removed sub-categories (only 1 level of categories will be displayed)
  - added button to add default categories
  - adding/removing of elements to/from the cart instantly possible in the search results
