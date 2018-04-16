@@ -9,8 +9,7 @@
 jQuery.extend(jQuery, {
   escapeSelector: (function() {
     var specials = [
-      '#', '&', '~', '=', '>',
-      "'", ':', '"', '!', ';', ','
+      '#', '&', '~', '=', '>', "'", ':', '"', '!', ';', ','
     ];
     var regexSpecials = [
       '.', '*', '+', '|', '[', ']', '(', ')', '/', '^', '$'
@@ -146,8 +145,12 @@ $( document ).ready(function() {
             $('.tldzone').append(tldZone);
             $('.action-button').attr("value", domainName);
 
-            //remove the item from the list if there is a feedback
-            $("#" + jqSelector(domainName)).remove();
+            //removes the item from the list if there is a feedback
+            try{
+                $("#" + jQuery.escapeSelector(domainName)).remove();
+            }catch(err){
+                //nothing to do
+            }
 
             if(data.feedback.f_type == "error" || data.feedback.f_type == "taken"){ //anthony.coco //tulsi.co
                 $("#domain-in-box").addClass("domaininbox-taken");
@@ -699,44 +702,37 @@ $( document ).ready(function() {
     /*
      * Add domain to cart
      */
-     function addDomainToCart(params, domainType){
-         if(domainType == "premium"){
-             $.ajax({
-                 //premium domain in cart
-                   type: "GET",
-                   data: params,
-                   async: false,
-                   url: "{/literal}{$modulepath}{literal}domain.php?"
-             });
-         }
-         else{
-             $.ajax({
-                   url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
-                   type: "POST",
-                   data: params,
-                   async: false
-             });
-         }
-     }
-
-     /*
-      * Delete domain from cart
-      */
-      function removeDomainFromCart(domainname){
-          //to remove domains from cart on click
-          $.ajax({
+    function addDomainToCart(params, domainType){
+        if(domainType == "premium"){
+            $.ajax({
+                //premium domain in cart
                 type: "GET",
+                data: params,
                 async: false,
-                url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainname
-          });
-      }
-      /*
-       * Escape special characters
-       */
-      function jqSelector(str)
-        {
-          return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, '\\$1');
+                url: "{/literal}{$modulepath}{literal}domain.php?"
+            });
         }
+        else{
+            $.ajax({
+                url: "{/literal}{$modulepath}{literal}../../../cart.php?a=add&domain=register",
+                type: "POST",
+                data: params,
+                async: false
+            });
+        }
+    }
+
+    /*
+     * Delete domain from cart
+     */
+     function removeDomainFromCart(domainname){
+         //to remove domains from cart on click
+         $.ajax({
+             type: "GET",
+             async: false,
+             url: "{/literal}{$modulepath}{literal}domain.php?action=removeFromCart&domain="+domainname
+         });
+     }
 
     //handle the click on the order button
 	$("#orderbutton").bind("click", function(e){
