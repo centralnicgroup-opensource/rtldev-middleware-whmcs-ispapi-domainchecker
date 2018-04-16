@@ -134,11 +134,7 @@ $( document ).ready(function() {
             var index = domainName.indexOf(".");
             var domainLabel = domainName.substr(0, index);
             var tldZone = domainName.substr(index + 0);
-            //to display the searched term (if not a domain name)
-            if(!domainLabel){
-                tldZone='';
-                domainLabel ='';
-            }
+
             $("#domain-in-box").removeAttr('style');
             $('.status-text').append(data.feedback.f_message);
             $('.domainlabel').append(domainLabel);
@@ -153,14 +149,13 @@ $( document ).ready(function() {
             }
 
             if(data.feedback.f_type == "error" || data.feedback.f_type == "taken"){ //anthony.coco //tulsi.co
-                $("#domain-in-box").addClass("domaininbox-taken");
-                if(data.feedback.f_message == "{/literal}{$_LANG.invalid_character_feedback}{literal}"){
-                    if(!domainLabel){
-                        $('.domainlabel').append(data.feedback.id);
-                    }
-                }else{
-                    $('.domain-description').append("{/literal}{$_LANG.domain_description_taken}{literal}<br>");
+                if(!domainLabel || !tldZone){
+                    $('.tldzone').html("");
+                    $('.domainlabel').append(data.feedback.id);
                 }
+
+                $("#domain-in-box").addClass("domaininbox-taken");
+                $('.domain-description').append("{/literal}{$_LANG.domain_description_taken}{literal}<br>");
                 $('.action-button').hide();
             }
             if(data.feedback.f_type == "backorder"){ //anthony.com
