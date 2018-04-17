@@ -110,6 +110,8 @@ $( document ).ready(function() {
                 }
                 //add domain to the cart
                 if($(this).attr("class") == "action-button Available"){
+                    $(this).addClass("action-button-added");
+                    $(this).html("Added");
                     var params = {};
                     if(data.feedback.premiumtype){
                         params['action'] = 'addPremiumToCart';
@@ -124,8 +126,6 @@ $( document ).ready(function() {
                         params['token'] = $("#domainform").find('input').eq(0).attr("value");
                         addDomainToCart(params, " ");
                     }
-                    $(this).addClass("action-button-added");
-                    $(this).html("Added");
                     $(this).unbind("click");
                 }
             });
