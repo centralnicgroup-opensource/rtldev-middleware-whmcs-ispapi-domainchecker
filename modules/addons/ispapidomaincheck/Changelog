@@ -17,10 +17,10 @@ v 7.3.0 - 2018-04-16
  - Language files have been updated
 
 v 7.2.2 - 2018-01-11
-    fix for special characters in user password
+ - fix for special characters in user password
 
 v 7.2.1 - 2017-10-20
-    minor fixes in the domainchecker template
+ - minor fixes in the domainchecker template
 
 v 7.2.0 - 2017-08-07
  - added whois fallback to WHMCS's DomainLookup when HEXONET's QueryDomainWhoisInfo API command is limited (special case for .CH and .LI)
