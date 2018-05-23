@@ -745,7 +745,7 @@ $( document ).ready(function() {
 <div class="domain-checker-bg2">
 <form method="post" action="index.php?m=ispapicheckdomain" id="searchform" class="search-form">
     <head>
-        <link rel="stylesheet" href="../modules/addons/ispapidomaincheck/ispapidomaincheck.css">
+        <link rel="stylesheet" href="{$modulepath}ispapidomaincheck.css">
     </head>
 
 	<input type="hidden" name="tldgroup" value="">
