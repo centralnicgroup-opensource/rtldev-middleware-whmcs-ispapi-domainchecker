@@ -746,12 +746,14 @@ $( document ).ready(function() {
 <form method="post" action="index.php?m=ispapicheckdomain" id="searchform" class="search-form">
     <head>
         <link rel="stylesheet" href="{$modulepath}ispapidomaincheck.css">
+
+         <meta name="viewport" content="width=device-width, user-scalable=no" /> {*<-- user-scalable=yes if you want user to allow zoom --> *}
     </head>
 
 	<input type="hidden" name="tldgroup" value="">
 	<input type="hidden" name="searched_domain" value="">
 
-    <div class="row search-input-bar">
+    <div class=" search-input-bar">
             <div class="input-group">
                 <div class="inner-addon right-addon">
                     <input  id="searchfield" name="domain" class="form-control singlesearch input-box" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$_LANG.domaincheckerdomainexample}"><!--padding-right:380px; -->

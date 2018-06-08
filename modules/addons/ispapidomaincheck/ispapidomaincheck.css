@@ -317,6 +317,7 @@ span.spanelement{
   margin-left: 0;
   height: 44px;
 }
+
 .input-group .inner-addon {
   position: relative;
 }
@@ -345,3 +346,41 @@ span.spanelement{
         margin-right: -10px;
     }
 }
+
+/* Small Devices, Tablets */
+ @media only screen and (max-width : 651px) {
+     .search-form .search-input-bar .input-group {
+       width: 600px;
+       color: black;
+     }
+ }
+ @media only screen and (max-width : 640px) {
+     .search-form .search-input-bar .input-group {
+       width: 550px;
+     }
+ }
+ @media only screen and (max-width : 605px) {
+     .search-form .search-input-bar .input-group {
+       width: 500px;
+     }
+ }
+ @media only screen and (max-width : 559px) {
+     .search-form .search-input-bar .input-group {
+       width: 450px;
+     }
+ }
+ @media only screen and (max-width : 528px) {
+     .search-form .search-input-bar .input-group {
+       width: 400px;
+     }
+ }
+ @media only screen and (max-width : 456px) {
+     .search-form .search-input-bar .input-group {
+       width: 350px;
+     }
+ }
+ @media only screen and (max-width : 409px) {
+     .search-form .search-input-bar .input-group {
+       width: 300px;
+     }
+ }
