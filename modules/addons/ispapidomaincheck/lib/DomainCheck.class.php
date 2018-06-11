@@ -137,29 +137,6 @@ class DomainCheck
 	}
 
     /*
-     * Splits the complete WHMCS TLDs in 2 lists, the first one with the TLDs configured with HEXONET, the second one with all others.
-     *
-     * @return array an array with 2 keys: ispapi and no_ispapi
-     */
-    private function sortTLDs(){
-    	$tldconfiguration = array();
-    	$tldconfiguration["ispapi"] = array();
-    	$tldconfiguration["no_ispapi"] = array();
-
-		$extensions = Helper::SQLCall("SELECT extension, autoreg FROM tbldomainpricing", array(), "fetchall");
-
-		foreach($extensions as $extension){
-			if(in_array($extension["autoreg"], $this->registrar)){
-    			array_push($tldconfiguration["ispapi"], $extension["extension"]);
-    		}else{
-    			array_push($tldconfiguration["no_ispapi"], $extension["extension"]);
-    		}
-		}
-
-    	return $tldconfiguration;
-    }
-
-    /*
      * Returns the list of domains that have to be checked.
      */
     private function getDomainList(){
@@ -192,7 +169,6 @@ class DomainCheck
 			$do_not_search = true;
 		}
 
-    	$tldconfiguration = $this->sortTLDs();
     	$tldgroups = $this->getTLDGroups();
 
     	$searched_label = $this->getDomainLabel($this->domain);
@@ -258,7 +234,7 @@ class DomainCheck
 			}
 		}
 
-		$domainlist_checkorder = $this->getSortedDomainList($domainlist);
+		$domainlist_checkorder = $domainlist; //$this->getSortedDomainList($domainlist); #removed, now we are checking all TLDs with API even if not configured with ISPAPI.
 
 		//if there is an issue with the search, do not start checking
 		if($do_not_search){
@@ -267,30 +243,6 @@ class DomainCheck
 		}
 
     	$this->response = json_encode( array("listorder" => $domainlist, "checkorder" => $domainlist_checkorder, "feedback" => $feedback) );
-    }
-
-    /*
-     * Returns the list sorted. HEXONET domains at first place, then the others
-
-	 * @param array $domainlist The original domain list
-	 *
-     * @return array The sorted domain list
-     */
-    private function getSortedDomainList($domainlist){
-    	$tldconfiguration = $this->sortTLDs();
-    	$ispapi_domain_list = array();
-    	$no_ispapi_domain_list = array();
-
-    	foreach($domainlist as $item){
-    		$tld = $this->getDomainExtension($item);
-    		if( in_array(".".$tld, $tldconfiguration["ispapi"]) ){
-    			array_push($ispapi_domain_list, $item);
-    		}else{
-    			array_push($no_ispapi_domain_list, $item);
-    		}
-    	}
-
-    	return array_merge($ispapi_domain_list,$no_ispapi_domain_list);
     }
 
    /*
@@ -333,23 +285,17 @@ class DomainCheck
      */
     private function startDomainCheck(){
     	$feedback = array();
-    	$tldconfiguration = $this->sortTLDs();
 
-    	// create 2 domain lists
-    	// 1: domains that use our registrar module
-    	// 2: domains that don't use our registrar module
+    	// In the past we had 2 different lists:
+    	// 1: $ispapi_domain_list  domains that use our registrar module
+    	// 2: $no_ispapi_domain_list  domains that don't use our registrar module
+		// Since we are now allowing all registrar to use our API for checks, we will put all the domains in $ispapi_domain_list.
+		// If we are not supporting this TLD, we will add the domain to the $no_ispapi_domain_list after we got an error from the checkdomain. (549)
     	$ispapi_domain_list = array();
     	$no_ispapi_domain_list = array();
     	foreach($this->domains as $item){
-    		$tld = $this->getDomainExtension($item);
-    		if( in_array(".".$tld, $tldconfiguration["ispapi"]) ){
-    			array_push($ispapi_domain_list, $item);
-    		}else{
-    			array_push($no_ispapi_domain_list, $item);
-    		}
+			array_push($ispapi_domain_list, $item);
     	}
-
-    	//for ispapi_domain_list (domains that use our registrar module)
     	$extendeddomainlist = $this->getExtendedDomainlist($ispapi_domain_list);
 
 		//check if premium domains are activated in WHMCS
@@ -366,14 +312,25 @@ class DomainCheck
 		$selected_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 
     	foreach($extendeddomainlist as $listitem){
-    		//IDN convert before sending to checkdomain
-    		$converted_domains = $this->convertIDN($listitem["domain"], $listitem["registrar"]);
+
+			//THIS IS NEEDED IN ORDER TO AVOID RETURNING PREMIUM DOMAINS TO "-nopremium" regisrars
+			$nopremium = false;
+			if (preg_match("/^(.*)-nopremium$/i", $listitem["registrar"], $m)) {
+				//replace for example "ispapi-nopremium" with "ispapi"
+				$listitem["registrar"] = $m[1];
+				$nopremium = true;
+			}
 
     		$command = array(
     				"COMMAND" => "checkDomains",
     				"PREMIUMCHANNELS" => "*",
-    				"DOMAIN" => $converted_domains
+    				"DOMAIN" => $this->convertIDN($listitem["domain"], $listitem["registrar"])
     		);
+			if($nopremium){
+				//remove PREMIUMCHANNELS=*
+				unset($command["PREMIUMCHANNELS"]);
+			}
+
 			$check = Helper::APICall($listitem["registrar"], $command);
 
     		$index = 0;
@@ -799,21 +756,28 @@ class DomainCheck
     	$whmcsdomainlist["extension"] = array();
     	$whmcsdomainlist["autoreg"] = array();
 
-    	//create an array with extension and autoreg (autoreg = the configured resgistrar for this extension)
+    	//create an array with extension and autoreg (autoreg = the configured registrar for this extension)
 		$list = Helper::SQLCall("SELECT extension, autoreg  FROM tbldomainpricing", array(), "fetchall");
 		foreach($list as $item){
-			if(!empty($item["autoreg"])){
     			array_push($whmcsdomainlist["extension"], $item["extension"]);
-    			array_push($whmcsdomainlist["autoreg"],$item["autoreg"]);
-    		}
+    			array_push($whmcsdomainlist["autoreg"], $item["autoreg"]);
 		}
+
 
 		$extendeddomainlist = array();
 		$ispapiobject = array();
 
     	foreach($domainlist as $domain){
+
     		$tld = ".".$this->getDomainExtension($domain);
     		$index = array_search($tld, $whmcsdomainlist["extension"]);
+
+			//if the registrar is not an ISPAPI registrar, then we OVERWRITE the configured registrar
+			//with the first registrar of the ISPAPI registrar list. It is required since we allow all TLDs to be checked with our API from now on.
+			if(!in_array($whmcsdomainlist["autoreg"][$index], $this->registrar)){
+				$whmcsdomainlist["autoreg"][$index] = $this->registrar[0]."-nopremium";
+			}
+
     		array_push($extendeddomainlist, array("domain"=>$domain,
     											  "extension" => $whmcsdomainlist["extension"][$index],
     											  "autoreg" => $whmcsdomainlist["autoreg"][$index]));
