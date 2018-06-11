@@ -1,4 +1,9 @@
 <?php
+//handle "Transfer" button from the WHMCS default Homepage
+if(isset($_POST["transfer"])){
+	header("Location: cart.php?a=add&domain=transfer&query=".$_POST["domain"]);
+}
+
 define("CLIENTAREA", true);
 use ISPAPI\Helper;
 
