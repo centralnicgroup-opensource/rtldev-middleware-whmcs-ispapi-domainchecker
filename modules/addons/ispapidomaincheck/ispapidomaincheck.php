@@ -7,7 +7,7 @@ use ISPAPI\Helper;
 require_once(dirname(__FILE__)."/lib/LoadRegistrars.class.php");
 require_once(dirname(__FILE__)."/lib/Helper.class.php");
 
-$module_version = "7.3.2";
+$module_version = "7.3.3";
 
 /*
  * Configuration of the addon module.
