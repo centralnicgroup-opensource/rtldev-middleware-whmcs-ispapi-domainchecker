@@ -82,6 +82,8 @@ $( document ).ready(function() {
             $("#domain-in-box").removeClass("domaininbox-available");
             $("#domain-in-box").removeClass("domaininbox-taken");
             $("#domain-in-box").removeClass("domaininbox-backorder");
+            $(".btn-danger").addClass("hide");
+            // $(".btn-danger").hide();
             $("#domain-in-box").hide();
     }
     //handle the feedback message for a searched domain
@@ -110,6 +112,10 @@ $( document ).ready(function() {
                 }
                 //add domain to the cart
                 if($(this).attr("class") == "action-button Available"){
+
+                    //Display checkout button when domain added to the cart from domainbox
+                    $("#domainform input[id=orderbutton]").removeClass('hide');
+                    //
                     var params = {};
                     if(data.feedback.premiumtype){
                         params['action'] = 'addPremiumToCart';
@@ -124,8 +130,10 @@ $( document ).ready(function() {
                         params['token'] = $("#domainform").find('input').eq(0).attr("value");
                         addDomainToCart(params, " ");
                     }
-                    $(this).addClass("action-button-added");
-                    $(this).html("Added");
+                    //when clicked replace the add to cart button with checkout
+                    $('.action-button').hide();
+                    $(".btn-danger").removeClass("hide");
+
                     $(this).unbind("click");
                 }
             });
@@ -187,9 +195,9 @@ $( document ).ready(function() {
                 $('.price-of-domain').append(data.feedback.registerprice);
                 $('.renewalprice-of-domain').append("{/literal}{$_LANG.renewal}{literal}: "+data.feedback.renewprice);
                 if (domainsInCart.indexOf(domainName) > -1) {
-                    $('.action-button').addClass("action-button-added");
-                    $('.action-button').html("Added");
-                    $('.action-button').unbind("click");
+                    //show checkout button when the domain is in cart
+                    $('.action-button').hide();
+                    $(".btn-danger").removeClass("hide");
                 }
             }
         }
@@ -234,6 +242,10 @@ $( document ).ready(function() {
                         $.each(element.cart.domains, function(n, currentElem) {
                             domainsInCart.push(currentElem.domain);
                         });
+                    }
+                    // show the checkout button if cart is not empty
+                    if(domainsInCart.length != 0){
+                        $("#domainform input[id=orderbutton]").removeClass('hide');
                     }
                     //IF THE DOMAIN IS PRESENT IN CART:
                     if (domainsInCart.indexOf(element.id) > -1) {
@@ -608,7 +620,7 @@ $( document ).ready(function() {
             }
         }
         else{
-            if($("#domainform").find('span.t.domain-label').hasClass('added') && $("#domainform").find('span.t.domain-label').hasClass('available')){
+            if($("#domainform").find('span.domainname.domain-label').hasClass('added') && $("#domainform").find('span.domainname.domain-label').hasClass('available')){
                 //
             }else{
                 //hide checkout button when no domain added in cart
@@ -726,9 +738,10 @@ $( document ).ready(function() {
          });
      }
 
-    //handle the click on the order button
-	$("#orderbutton").bind("click", function(e){
+    //handle the click on the order button & order button inside the domain box
+	$("#orderbutton, #orderbuttondomainbox").bind("click", function(e){
 		$("#orderbutton").hide();
+        $("#orderbuttondomainbox").hide();
 		$("#orderbuttonloading").show();
 		location.href = "{/literal}{$modulepath}{literal}../../../cart.php?a=confdomains";
 	});
@@ -773,6 +786,8 @@ $( document ).ready(function() {
                 <span class="domainlabel"></span><span class="tldzone"></span>
                 <span class="premium-label"></span>
                 <button id="actionbutton" class="action-button" type="button"></button>
+                {*  added checkout button inside the domain box*}
+                <p align="center"><input id="orderbuttondomainbox" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="orderbuttondomainbox btn btn-danger" /></p>
             </div>
             <div class="description-text">
                 <span class="domain-description"></span>
