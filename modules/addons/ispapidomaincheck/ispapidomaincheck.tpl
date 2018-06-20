@@ -121,7 +121,6 @@ $( document ).ready(function() {
                     //show checkout button after categories when domain added from domain box
                     $(".btn-danger").removeClass("hide");
 
-                    //
                     var params = {};
                     if(data.feedback.premiumtype){
                         params['action'] = 'addPremiumToCart';
@@ -754,7 +753,7 @@ $( document ).ready(function() {
      }
 
     //handle the click on the order button & order button inside the domain box
-	$("#orderbutton, #orderbuttondomainbox").bind("click", function(e){
+	$("#orderbutton").bind("click", function(e){
 		$("#orderbutton").hide();
         $("#orderbuttondomainbox").hide();
 		$("#orderbuttonloading").show();
