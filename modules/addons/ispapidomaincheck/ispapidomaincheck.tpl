@@ -69,22 +69,24 @@ $( document ).ready(function() {
 
     // to remove data from the div elements
     function removeAppendDataFromDivs(){
-            $('.status-text').html('');
-            $('.domainlabel').html('');
-            $('.tldzone').html('');
-            $('.domain-description').html('');
-            $('.price-of-domain').html('');
-            $('.premium-label').html('');
-            $('.action-button').hide();
-            $('.action-button').html('');
-            $(".action-button").removeClass("action-button-added");
-            $('.renewalprice-of-domain').html('');
-            $("#domain-in-box").removeClass("domaininbox-available");
-            $("#domain-in-box").removeClass("domaininbox-taken");
-            $("#domain-in-box").removeClass("domaininbox-backorder");
-            $(".btn-danger").addClass("hide");
-            // $(".btn-danger").hide();
-            $("#domain-in-box").hide();
+        $('.status-text').html('');
+        $('.domainlabel').html('');
+        $('.tldzone').html('');
+        $('.domain-description').html('');
+        $('.price-of-domain').html('');
+        $('.premium-label').html('');
+        $('.action-button').hide();
+        $('.action-button').html('');
+        // action-button to work when searched without page refresh
+        $('.action-button').removeClass("Available");
+        $('.action-button').removeClass("Backorder");
+
+        $(".action-button").removeClass("action-button-added");
+        $('.renewalprice-of-domain').html('');
+        $("#domain-in-box").removeClass("domaininbox-available");
+        $("#domain-in-box").removeClass("domaininbox-taken");
+        $("#domain-in-box").removeClass("domaininbox-backorder");
+        $("#domain-in-box").hide();
     }
     //handle the feedback message for a searched domain
     function handleFeedbackMessage(data){
@@ -115,6 +117,10 @@ $( document ).ready(function() {
 
                     //Display checkout button when domain added to the cart from domainbox
                     $("#domainform input[id=orderbutton]").removeClass('hide');
+
+                    //show checkout button after categories when domain added from domain box
+                    $(".btn-danger").removeClass("hide");
+
                     //
                     var params = {};
                     if(data.feedback.premiumtype){
@@ -130,11 +136,10 @@ $( document ).ready(function() {
                         params['token'] = $("#domainform").find('input').eq(0).attr("value");
                         addDomainToCart(params, " ");
                     }
-                    //when clicked replace the add to cart button with checkout
-                    $('.action-button').hide();
-                    $(".btn-danger").removeClass("hide");
-
+                    $(this).addClass("action-button-added");
+                    $(this).html("Added");
                     $(this).unbind("click");
+
                 }
             });
 
@@ -195,9 +200,13 @@ $( document ).ready(function() {
                 $('.price-of-domain').append(data.feedback.registerprice);
                 $('.renewalprice-of-domain').append("{/literal}{$_LANG.renewal}{literal}: "+data.feedback.renewprice);
                 if (domainsInCart.indexOf(domainName) > -1) {
-                    //show checkout button when the domain is in cart
-                    $('.action-button').hide();
+                    $('.action-button').addClass("action-button-added");
+                    $('.action-button').html("Added");
+                    $('.action-button').unbind("click");
+
+                    //show checkout button on page reload if the domain is added from domainbox
                     $(".btn-danger").removeClass("hide");
+
                 }
             }
         }
@@ -246,6 +255,10 @@ $( document ).ready(function() {
                     // show the checkout button if cart is not empty
                     if(domainsInCart.length != 0){
                         $("#domainform input[id=orderbutton]").removeClass('hide');
+
+                        //if there are any domains in the cart, do not remove the checkout button
+                        // add class name cartIsNotEmpty if cart is not empty
+                        $( "#" + id + " div.clear").addClass('cartIsNotEmpty');
                     }
                     //IF THE DOMAIN IS PRESENT IN CART:
                     if (domainsInCart.indexOf(element.id) > -1) {
@@ -622,6 +635,8 @@ $( document ).ready(function() {
         else{
             if($("#domainform").find('span.domainname.domain-label').hasClass('added') && $("#domainform").find('span.domainname.domain-label').hasClass('available')){
                 //
+            }else if($("#domainform").find('div.clear').hasClass('cartIsNotEmpty')){
+                //if there are any domains in the cart, do not remove the checkout button
             }else{
                 //hide checkout button when no domain added in cart
                 $("#domainform input[id=orderbutton]").addClass('hide');
@@ -786,8 +801,6 @@ $( document ).ready(function() {
                 <span class="domainlabel"></span><span class="tldzone"></span>
                 <span class="premium-label"></span>
                 <button id="actionbutton" class="action-button" type="button"></button>
-                {*  added checkout button inside the domain box*}
-                <p align="center"><input id="orderbuttondomainbox" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="orderbuttondomainbox btn btn-danger" /></p>
             </div>
             <div class="description-text">
                 <span class="domain-description"></span>
@@ -830,7 +843,8 @@ $( document ).ready(function() {
                 <hr>
             </div>
         </div>
-
+        {*  checkout button after categories when domain added from domain boy *}
+        <p align="center"><input id="orderbutton" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
     </form>
 </div>
 </div>

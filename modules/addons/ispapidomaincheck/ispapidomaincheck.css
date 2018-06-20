@@ -112,13 +112,6 @@ a.viewWhois{
     font-size: 13px;
     min-width: 120px;
 }
-/*  checkout button inside the domain box*/
-.orderbuttondomainbox{
-    float: right;
-    font-size: 13px;
-    min-width: 100px;
-}
-
 .domain-description{
     font-size:13px;
     padding-right:10px;
