@@ -753,9 +753,9 @@ $( document ).ready(function() {
      }
 
     //handle the click on the order button & order button inside the domain box
-	$("#orderbutton").bind("click", function(e){
+	$("#orderbutton, #orderbuttonDomainbox").bind("click", function(e){
 		$("#orderbutton").hide();
-        $("#orderbuttondomainbox").hide();
+        $("#orderbuttonDomainbox").hide();
 		$("#orderbuttonloading").show();
 		location.href = "{/literal}{$modulepath}{literal}../../../cart.php?a=confdomains";
 	});
@@ -843,7 +843,7 @@ $( document ).ready(function() {
             </div>
         </div>
         {*  checkout button after categories when domain added from domain boy *}
-        <p align="center"><input id="orderbutton" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
+        <p align="center"><input id="orderbuttonDomainbox" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
     </form>
 </div>
 </div>
