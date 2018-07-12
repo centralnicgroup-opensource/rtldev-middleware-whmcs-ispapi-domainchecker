@@ -140,7 +140,6 @@ class DomainCheck
      * Returns the list of domains that have to be checked.
      */
     private function getDomainList(){
-
     	//delete HTTP:// if domain's starting with it
     	if (preg_match('/^http\:\/\//i', $this->domain)) {
     		$this->domain = substr($this->domain, 7);
@@ -156,7 +155,6 @@ class DomainCheck
 
 		//lowercase
     	$this->domain = strtolower($this->domain);
-		//remove all white spaces
 		$this->domain = preg_replace('/\s+/', '', $this->domain);
 
     	$feedback = array();
@@ -233,7 +231,6 @@ class DomainCheck
 				$do_not_search = true;
 			}
 		}
-
 		$domainlist_checkorder = $domainlist; //$this->getSortedDomainList($domainlist); #removed, now we are checking all TLDs with API even if not configured with ISPAPI.
 
 		//if there is an issue with the search, do not start checking
@@ -297,7 +294,7 @@ class DomainCheck
 			array_push($ispapi_domain_list, $item);
     	}
     	$extendeddomainlist = $this->getExtendedDomainlist($ispapi_domain_list);
-
+		
 		//check if premium domains are activated in WHMCS
 		$premium_settings = Helper::SQLCall("SELECT * FROM tblconfiguration WHERE setting = 'PremiumDomains' LIMIT 1", array());
 		if($premium_settings && $premium_settings["value"] == 1){
@@ -312,12 +309,16 @@ class DomainCheck
 		$selected_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 
     	foreach($extendeddomainlist as $listitem){
-
+			
 			//THIS IS NEEDED IN ORDER TO AVOID RETURNING PREMIUM DOMAINS TO "-nopremium" regisrars
 			$nopremium = false;
 			if (preg_match("/^(.*)-nopremium$/i", $listitem["registrar"], $m)) {
-				//replace for example "ispapi-nopremium" with "ispapi"
-				$listitem["registrar"] = $m[1];
+				//replace for example "ispapi-nopremium" with "ispapi" //NOTE - its only -nopremium not ispapi-nopremium when no registrar configured
+				if(!$m[1]){
+					$listitem["registrar"] = 'ispapi';
+				}else{
+					$listitem["registrar"] = $m[1];
+				}
 				$nopremium = true;
 			}
 
@@ -330,9 +331,8 @@ class DomainCheck
 				//remove PREMIUMCHANNELS=*
 				unset($command["PREMIUMCHANNELS"]);
 			}
-
 			$check = Helper::APICall($listitem["registrar"], $command);
-
+			
     		$index = 0;
     		foreach($listitem["domain"] as $item){
     			$tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
@@ -347,7 +347,7 @@ class DomainCheck
 				$register_price = "";
 				$renew_price = "";
 
-				if(preg_match('/549/', $check["PROPERTY"]["DOMAINCHECK"][$index])){
+				if(preg_match('/549/', $check["PROPERTY"]["DOMAINCHECK"][$index]) || preg_match('/530/', $check["CODE"])){
 					//TLD NOT SUPPORTED AT HEXONET USE A FALLBACK TO THE WHOIS LOOKUP.
 					//Add the domain to the $no_ispapi_domain_list so it will be automatically checked by the WHOIS LOOKUP in the next step.
 					array_push($no_ispapi_domain_list, $item);
@@ -427,7 +427,7 @@ class DomainCheck
 			$command = "domainwhois";
 		    $values["domain"] = $label.".".$tld;
 
-		    $check = localAPI($command, $values);
+			$check = localAPI($command, $values);
 
     		if($check["status"] == "available"){
     			$code = "210";
