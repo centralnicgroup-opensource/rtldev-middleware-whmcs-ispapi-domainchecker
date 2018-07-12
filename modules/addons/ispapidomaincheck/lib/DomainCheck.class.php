@@ -249,8 +249,8 @@ class DomainCheck
 	*/
 	private function getDomaincheckerMode() {
 		$domainLookupRegistrar = Helper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'domainLookupRegistrar' LIMIT 1", array());
-		if($domainLookupRegistrar["value"] == "ispapi"){
-			$dc_settings = Helper::SQLCall("SELECT value FROM tbldomain_lookup_configuration WHERE registrar = 'ispapi' AND setting = 'suggestions' LIMIT 1", array());
+		if($domainLookupRegistrar["value"] == "ispapi" || $domainLookupRegistrar["value"] == "hexonet"){
+			$dc_settings = Helper::SQLCall("SELECT value FROM tbldomain_lookup_configuration WHERE registrar = 'ispapi' OR registrar = 'hexonet' AND setting = 'suggestions' LIMIT 1", array());
 			if(isset($dc_settings["value"])){
 				return $dc_settings["value"];
 			}
@@ -332,7 +332,6 @@ class DomainCheck
 				unset($command["PREMIUMCHANNELS"]);
 			}
 			$check = Helper::APICall($listitem["registrar"], $command);
-			
     		$index = 0;
     		foreach($listitem["domain"] as $item){
     			$tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
@@ -763,15 +762,18 @@ class DomainCheck
     			array_push($whmcsdomainlist["autoreg"], $item["autoreg"]);
 		}
 
-
 		$extendeddomainlist = array();
 		$ispapiobject = array();
 
     	foreach($domainlist as $domain){
 
     		$tld = ".".$this->getDomainExtension($domain);
-    		$index = array_search($tld, $whmcsdomainlist["extension"]);
+			$index = array_search($tld, $whmcsdomainlist["extension"]);
 
+			//if 'Hexonet' is configured, replace it with 'ispapi' for premium domain checks   
+			if($whmcsdomainlist["autoreg"][$index] == "hexonet"){
+				$whmcsdomainlist["autoreg"][$index] = "ispapi";
+			}
 			//if the registrar is not an ISPAPI registrar, then we OVERWRITE the configured registrar
 			//with the first registrar of the ISPAPI registrar list. It is required since we allow all TLDs to be checked with our API from now on.
 			if(!in_array($whmcsdomainlist["autoreg"][$index], $this->registrar)){
@@ -782,7 +784,6 @@ class DomainCheck
     											  "extension" => $whmcsdomainlist["extension"][$index],
     											  "autoreg" => $whmcsdomainlist["autoreg"][$index]));
     	}
-
     	//reorganize the information
     	$newlist = array();
     	foreach($extendeddomainlist as $item){
@@ -792,7 +793,6 @@ class DomainCheck
     		}
     		array_push($newlist[$item["autoreg"]]["domain"], $item["domain"]);
     	}
-
     	return $newlist;
     }
 
