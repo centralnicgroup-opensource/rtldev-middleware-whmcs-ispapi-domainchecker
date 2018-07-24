@@ -212,8 +212,8 @@ class DomainCheck
 			}
 		}
 
-		//remove duplicate entries in the domainlist
-		$domainlist = array_unique($domainlist);
+		//remove duplicate entries in the domainlist and change the keys to keep them consecutive. (array_values)
+		$domainlist = array_values(array_unique($domainlist));
 
 		//add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
 		$item = Helper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld));
