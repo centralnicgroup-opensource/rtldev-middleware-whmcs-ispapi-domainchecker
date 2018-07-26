@@ -3,7 +3,7 @@ ______________________________________________________________________________
 
 Changelog
 ______________________________________________________________________________
-v 7.3.3 - 2018-06-12
+v 7.3.3 - 2018-07-26
  - fix for "Transfer" button issue on the Homepage
  - the domainchecker is now checking all supported TLDs over API, even if the TLD is not configured with ispapi/hexonet
  - minor changes in the template
