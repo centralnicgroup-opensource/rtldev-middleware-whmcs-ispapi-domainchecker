@@ -1,7 +1,7 @@
 <?php
 //handle "Transfer" button from the WHMCS default Homepage
-if(isset($_POST["transfer"])){
-	header("Location: cart.php?a=add&domain=transfer&query=".$_POST["domain"]);
+if (isset($_POST["transfer"])) {
+    header("Location: cart.php?a=add&domain=transfer&query=".$_POST["domain"]);
 }
 
 define("CLIENTAREA", true);
@@ -18,25 +18,24 @@ $ca->initPage();
 
 //include module file
 $modulepath = ROOTDIR . "/modules/addons/ispapidomaincheck/ispapidomaincheck.php";
-if (!file_exists( $modulepath )) {
-	exit($modulepath. " not found");
+if (!file_exists($modulepath)) {
+    exit($modulepath. " not found");
 }
 require $modulepath;
 
 //get module variables
 $modulevars = array();
 foreach (Helper::SQLCall("SELECT * FROM tbladdonmodules WHERE module = 'ispapidomaincheck'", array(), "fetchall") as $var) {
-	$modulevars[$var["setting"]] = $var["value"];
+    $modulevars[$var["setting"]] = $var["value"];
 }
 
 //call clientarea function
 $results = call_user_func("ispapidomaincheck_clientarea", $modulevars);
-if (is_array( $results["vars"] )) {
-	foreach ($results["vars"] as $k => $v) {
-		$smartyvalues[$k] = $v;
-	}
+if (is_array($results["vars"])) {
+    foreach ($results["vars"] as $k => $v) {
+        $smartyvalues[$k] = $v;
+    }
 }
 
 $ca->setTemplate("/modules/addons/ispapidomaincheck/ispapidomaincheck.tpl");
 $ca->output();
-?>
