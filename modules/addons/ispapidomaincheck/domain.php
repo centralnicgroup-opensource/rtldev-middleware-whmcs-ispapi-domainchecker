@@ -19,12 +19,12 @@ $ispapi_registrars = new LoadRegistrars();
 $_SESSION["ispapi_registrar"] = $ispapi_registrars->getLoadedRegistars();
 
 //instantiate the DomainCheck class and send the request
-$domaincheck = new DomainCheck( $_REQUEST["domain"],
-								$_REQUEST["domains"],
-								$_REQUEST["tldgroup"],
-								$_REQUEST["action"],
-								$_SESSION["ispapi_registrar"],
-								Helper::getCustomerCurrency());
+$domaincheck = new DomainCheck(
+    $_REQUEST["domain"],
+    $_REQUEST["domains"],
+    $_REQUEST["tldgroup"],
+    $_REQUEST["action"],
+    $_SESSION["ispapi_registrar"],
+    Helper::getCustomerCurrency()
+);
 $domaincheck->send();
-
-?>

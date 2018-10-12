@@ -16,7 +16,9 @@ class Helper
     /*
      *  Constructor
      */
-    public function __construct(){}
+    public function __construct()
+    {
+    }
 
     /*
      * Helper to send SQL call to the Database with Capsule
@@ -28,7 +30,8 @@ class Helper
 
      * @return json|array The SQL query response or JSON string with error message.
      */
-    public static function SQLCall($sql, $params, $fetchmode = "fetch"){
+    public static function SQLCall($sql, $params, $fetchmode = "fetch")
+    {
         $debug = false;
 
         try {
@@ -36,19 +39,19 @@ class Helper
             $stmt = $pdo->prepare($sql);
             $result = $stmt->execute($params);
 
-            if($fetchmode == "fetch"){
-    			return $stmt->fetch(PDO::FETCH_ASSOC);
-    		}elseif($fetchmode == "execute"){
-    			return $result;
-    		}else{ //ELSE returns fetchall
-    			return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    		}
+            if ($fetchmode == "fetch") {
+                return $stmt->fetch(PDO::FETCH_ASSOC);
+            } elseif ($fetchmode == "execute") {
+                return $result;
+            } else { //ELSE returns fetchall
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
         } catch (\Exception $e) {
-            $i18n = new i18n();
-            if($debug){
-                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => $i18n->getText("error_feedback"), "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ) );
-            }else{
-                echo json_encode( array("feedback" => array( "f_type" => "sqlerror", "f_message" => $i18n->getText("error_feedback")) ) );
+            $i18n = new I18n();
+            if ($debug) {
+                echo json_encode(array("feedback" => array( "f_type" => "sqlerror", "f_message" => $i18n->getText("error_feedback"), "sqlmessage" => $e->getMessage(), "sqlquery" => $sql) ));
+            } else {
+                echo json_encode(array("feedback" => array( "f_type" => "sqlerror", "f_message" => $i18n->getText("error_feedback")) ));
             }
             die();
         }
@@ -63,7 +66,8 @@ class Helper
      *
      * @return array The response from the API
      */
-    public static function APICall($registrar, $command){
+    public static function APICall($registrar, $command)
+    {
         $registrarconfigoptions = getregistrarconfigoptions($registrar);
         $registrar_config = call_user_func($registrar."_config", $registrarconfigoptions);
         return call_user_func($registrar."_call", $command, $registrar_config);
@@ -74,25 +78,23 @@ class Helper
      *
      * @return string Currency ID of the user.
      */
-    public static function getCustomerCurrency(){
-    	//first take the currency from the URL or from the session
-    	$currency = isset($_REQUEST["currency"]) ? $_REQUEST["currency"] : $_SESSION["currency"];
+    public static function getCustomerCurrency()
+    {
+        //first take the currency from the URL or from the session
+        $currency = isset($_REQUEST["currency"]) ? $_REQUEST["currency"] : $_SESSION["currency"];
 
-    	//if customer logged in, set the configured currency.
-    	$ca = new WHMCS_ClientArea();
-    	if ($ca->isLoggedIn()) {
-    		$user = self::SQLCall("SELECT currency FROM tblclients WHERE id=?", array($ca->getUserID()));
-    		$currency = $user["currency"];
-    	}
+        //if customer logged in, set the configured currency.
+        $ca = new WHMCS_ClientArea();
+        if ($ca->isLoggedIn()) {
+            $user = self::SQLCall("SELECT currency FROM tblclients WHERE id=?", array($ca->getUserID()));
+            $currency = $user["currency"];
+        }
 
-    	//not logged in, no currency in the URL and no currency in the SESSION
-    	if(empty($currency)){
-    		$default = self::SQLCall("SELECT id FROM tblcurrencies WHERE `default`=1", array());
-    		$currency = $default["id"];
-    	}
-    	return $currency;
+        //not logged in, no currency in the URL and no currency in the SESSION
+        if (empty($currency)) {
+            $default = self::SQLCall("SELECT id FROM tblcurrencies WHERE `default`=1", array());
+            $currency = $default["id"];
+        }
+        return $currency;
     }
-
 }
-
-?>

@@ -34,4 +34,3 @@ $_LANG['domain_available_feedback'] = "Ihre Domain ist verfügbar!";
 $_LANG['error_feedback'] = "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie den Support.";
 $_LANG['invalid_character_feedback'] = "Identifizierte ein ungültiges Zeichen";
 $_LANG[''] = "";
-?>
