@@ -36,9 +36,9 @@ us)
 
 ## Resources ##
 
-* [Usage Guide](blob/master/README.md#usage-guide)
-* [Release Notes](releases)
-* [Development Guide](wiki/Development-Guide)
+* [Usage Guide](https://github.com/hexonet/whmcs-ispapi-domainchecker/blob/master/README.md#usage-guide)
+* [Release Notes](https://github.com/hexonet/whmcs-ispapi-domainchecker/releases)
+* [Development Guide](https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Development-Guide)
 
 NOTE: We introduced sematic-release starting with v8.0.0. This is why older Release Versions do not appear in the [current changelog](https://github.com/hexonet/whmcs-ispapi-domainchecker/blob/master/HISTORY.md). But these versions appear in the [release overview](https://github.com/hexonet/whmcs-ispapi-domainchecker/releases) and in the [old changelog](https://github.com/hexonet/whmcs-ispapi-domainchecker/blob/master/HISTORY.old).
 
