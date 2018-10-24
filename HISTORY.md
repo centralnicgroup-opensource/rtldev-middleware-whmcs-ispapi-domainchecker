@@ -1,3 +1,5 @@
+# [8.2.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.1.0...v8.2.0) (2018-10-24)
+
 # [8.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.0.0...v8.1.0) (2018-10-19)
 
 
