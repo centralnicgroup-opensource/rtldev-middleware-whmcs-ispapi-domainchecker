@@ -81,7 +81,7 @@
           "HISTORY.md",
           "package.json",
           "composer.json",
-          "registrars/ispapi/ispapi.php",
+          "modules/addons/ispapidomaincheck/ispapidomaincheck.php",
           "whmcs-ispapi-domainchecker-latest.zip",
           "release.json"
         ],
