@@ -4,8 +4,8 @@ use WHMCS\Database\Capsule;
 use ISPAPI\LoadRegistrars;
 use ISPAPI\Helper;
 
-require_once(dirname(__FILE__)."/lib/LoadRegistrars.class.php");
-require_once(dirname(__FILE__)."/lib/Helper.class.php");
+require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","LoadRegistrars.class.php")));
+require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","Helper.class.php")));
 
 $module_version = "8.2.1";
 
@@ -30,7 +30,7 @@ function ispapidomaincheck_config()
  */
 function ispapidomaincheck_activate()
 {
-    include(dirname(__FILE__)."/categories.php");
+    include(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"categories.php")));
 
     //if not existing, create ispapi_tblcategories table
     $query = Helper::SQLCall("CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)", array(), "execute");
@@ -96,7 +96,7 @@ function ispapidomaincheck_clientarea($vars)
                     'startsequence' => 4,
                     'modulename' => "ispapidomaincheck",
                     'modulepath' => "modules/addons/ispapidomaincheck/",
-                    'backorder_module_installed' => (file_exists(dirname(__FILE__)."/../../../modules/addons/ispapibackorder/backend/api.php")) ? true : false,
+                    'backorder_module_installed' => (file_exists(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapibackorder","backend","api.php")))) ? true : false,
                     'backorder_module_path' => "modules/addons/ispapibackorder/",
                     'path_to_domain_file' => "modules/addons/ispapidomaincheck/domain.php",
                     'domain' => isset($_POST["domain"]) ? $_POST["domain"] : "",
@@ -162,7 +162,7 @@ function ispapidomaincheck_output($vars)
 function ispapidomaincheck_categoryeditorcontent($modulelink)
 {
 
-    include(dirname(__FILE__)."/categories.php");
+    include(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"categories.php")));
 
     echo '<div id="tab0box" class="tabbox tab-content">';
 

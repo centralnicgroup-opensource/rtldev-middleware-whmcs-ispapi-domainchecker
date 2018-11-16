@@ -45,7 +45,7 @@ class I18n
     {
         $loaded = false;
         if (isset($_SESSION["Language"])) {
-            $module_language_file = dirname(__FILE__)."/../lang/".$_SESSION["Language"].".php";
+            $module_language_file = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"..","lang", $_SESSION["Language"].".php"));
             if (file_exists($module_language_file)) {
                 require($module_language_file);
                 $loaded = true;
@@ -54,7 +54,7 @@ class I18n
 
         //in case no language has been loaded, load english fallback
         if (!$loaded) {
-            $english_module_language_file = dirname(__FILE__)."/../lang/english.php";
+            $english_module_language_file = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"..","lang","english.php"));
             if (file_exists($english_module_language_file)) {
                 require($english_module_language_file);
                 $loaded = true;
