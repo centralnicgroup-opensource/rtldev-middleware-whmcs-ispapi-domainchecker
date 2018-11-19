@@ -1,3 +1,10 @@
+## [8.2.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.2.1...v8.2.2) (2018-11-19)
+
+
+### Bug Fixes
+
+* **symlinks:** added support for integration of the module via symlinks ([b082b60](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/b082b60))
+
 ## [8.2.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.2.0...v8.2.1) (2018-11-05)
 
 
