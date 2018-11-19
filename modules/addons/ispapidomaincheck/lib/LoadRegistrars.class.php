@@ -56,7 +56,7 @@ class LoadRegistrars
     private function loadSingleISPAPIRegistrar($registrar)
     {
         if (isset($registrar)) {
-            include_once(dirname(__FILE__)."/../../../../modules/registrars/".$registrar."/".$registrar.".php");
+            include_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars",$registrar,$registrar.".php")));
             if (function_exists($registrar.'_GetISPAPIModuleVersion')) {
                 //compare version number
                 $version = call_user_func($registrar.'_GetISPAPIModuleVersion');

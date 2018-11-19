@@ -268,7 +268,7 @@ class DomainCheck
     {
         $settings = Helper::SQLCall("SELECT value FROM tbladdonmodules WHERE module = 'ispapibackorder' AND setting = 'access' LIMIT 1", array());
         if (isset($settings["value"])) {
-            $backorder_module_api = dirname(__FILE__)."/../../../../modules/addons/ispapibackorder/backend/api.php";
+            $backorder_module_api = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapibackorder","backend","api.php"));
             if (file_exists($backorder_module_api)) {
                 require_once $backorder_module_api;
                 return true;
