@@ -39,11 +39,6 @@ ul.cat li.active {
     padding: 10px 0;
 }
 
-.fa.fa-square-o.fa-check-square{
-    /*position:absolute;*/
-    font-size:21px;
-    color: #00a850;
-}
 .clickable {
    cursor: pointer;
 }
@@ -76,15 +71,20 @@ a.viewWhois{
     margin-left: 30px;
     text-transform: lowercase;
 }
-.fa.fa-square-o.avail{
-    color: #00a850;
-}
-.fa.fa-square-o{
+.far.fa-square{
     position:absolute;
     font-size:21px;
-    color: #939598;
 }
-
+.far.fa-square.avail{
+    color: #00a850;
+}
+.fas.fa-check-square{
+    position:absolute;
+    font-size:21px;
+}
+.fas.fa-check-square.avail{
+    color: #00a850;
+}
 .domaininbox-backorder{
     width: 645px;
     text-align: left;
