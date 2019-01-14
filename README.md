@@ -37,7 +37,7 @@ us)
 
 ## Resources ##
 
-* [Usage Guide](https://github.com/hexonet/whmcs-ispapi-domainchecker/blob/master/README.md#usage-guide)
+* [Usage Guide](https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Usage-Guide)
 * [Release Notes](https://github.com/hexonet/whmcs-ispapi-domainchecker/releases)
 * [Development Guide](https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Development-Guide)
 
@@ -47,12 +47,10 @@ NOTE: We introduced sematic-release starting with v8.0.0. This is why older Rele
 
 Download the ZIP archive including the latest release version [here](https://github.com/hexonet/whmcs-ispapi-domainchecker/raw/master/whmcs-ispapi-domainchecker-latest.zip).
 
-For a new installation: Unzip the downloaded Archive and upload the content of the "install" folder to your WHMCS root directory.
-For an update: Unzip the downloaded Archive and upload the content of the "install" folder to your WHMCS root directory. Then go to "Setup > Addon Modules > ISPAPI HP DomainChecker > Configure" and click on the "Save Changes" button.
+Read the following to get more information ...
 
-NOTE: The WHMCS root directory is the folder that contains the "configuration.php" file.
+* [Getting started](https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Usage-Guide#getting-started)
 
-Login to the WHMCS Admin Area and navigate to `Setup > Addon Modules` to activate.
 
 ## Minimum Requirements ##
 
