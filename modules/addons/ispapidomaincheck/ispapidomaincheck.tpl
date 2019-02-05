@@ -375,9 +375,14 @@ $( document ).ready(function() {
 		});
 	}
 
+    //to handle load more button 
+    var checkorder_length = 0; //total number of domain names
+    var max = 10; //display 10 domain names at a time
+
     //handle the click on the check button
 	var count = 0;
 	$("#searchbutton").click(function() {
+
         count++;
 
         //clean all previous ajax requests
@@ -435,15 +440,31 @@ $( document ).ready(function() {
                 //handle the feedback message
                 handleFeedbackMessage(data);
 
-				var nb_results = 0;
-				$.each(data["checkorder"], function(index, element) {
-					var domain = element; //.replace(/\./g, '');
+                //handle load more button
+                checkorder_length = data["checkorder"].length;
+                //display load more button if the list of domain is more than 10
+                if(data["checkorder"].length > 10){
+                    $("#domainform input[id=loadmorebutton]").removeClass('hide');
+                }
 
+				var nb_results = 0;
+                //to hide divs with class when max limit exeeded
+                var hide = '';
+
+				$.each(data["checkorder"], function(index, element) {
+
+					var domain = element; //.replace(/\./g, '');
                     var index = domain.indexOf(".");
                     var domainLabel = domain.substr(0, index);
                     var tldZone = domain.substr(index + 0);
+                    
+                    //to hide divs with class when max limit exeeded
+                    if(nb_results == max){
+                        hide = 'hide';
+                    }
+
                     $('#searchresults').append(
-                        '<div class="domainbox" id="' + domain + '">'+
+                        '<div class="domainbox '+hide+'" id="' + domain + '">'+
                             '<div class="col-xs-7 search-result-info clickable">'+
                                 '<div class="first-line">'+
                                     '<span class="checkboxarea"></span>'+
@@ -466,14 +487,12 @@ $( document ).ready(function() {
                             '<div class="clear"></div>'+
                         '</div>'
                     );
-
 					nb_results++;
 				});
 
 				if(nb_results == 0){
 					$("#resultsarea").hide();
 				}
-
 				//send only one check for cached data
 				if(data["cache"] == true){
 					checkdomains(new Array(), true);
@@ -484,6 +503,21 @@ $( document ).ready(function() {
 			}
 		});
 	});
+
+    //load more button handling
+    $('#loadmorebutton').click(function() {
+        checkorder_length = checkorder_length - max;
+        max = max+10;
+        //display 10 div items at a time
+        $('#searchresults').find("div.domainbox.hide:lt(10)").removeClass('hide');
+        if(checkorder_length < 0){
+            //reset the values 
+            checkorder_length = 0;
+            max = 10;
+            //hide loadmore button when the list of domains empty
+            $("#domainform input[id=loadmorebutton]").addClass('hide');
+        }
+    });
 
     //This function get the complete list of domains to check and
     //split the checks in 2, then 4, then 8, then 16 checks at once.
@@ -841,7 +875,7 @@ $( document ).ready(function() {
                 <hr>
             </div>
         </div>
-        {*  checkout button after categories when domain added from domain boy *}
+        {*  checkout button after categories when domain added from domain box *}
         <p align="center"><input id="orderbuttonDomainbox" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
     </form>
 </div>
@@ -853,8 +887,12 @@ $( document ).ready(function() {
 <div class="result-item" id="resultsarea" style="display:none;">
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
         <div class="row row1 search-results" id="searchresults"></div> <!--  search result are appeneded here-->
-		<p align="center"><input id="orderbutton" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
+        {* load more button *}
+        <p align="center"><input id="loadmorebutton" type="button" value="{$_LANG.loadmorebutton} &raquo;" class="hide btn btn-secondary" /></p> 
 		<br>
+        {* checkout button *}
+        <hr>
+		<p align="center"><input id="orderbutton" type="button" value="{$_LANG.checkoutbutton} &raquo;" class="hide btn btn-danger" /></p>
 	</form>
 </div>
 
