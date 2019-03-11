@@ -4,14 +4,16 @@ use ISPAPI\Helper;
 use ISPAPI\DomainCheck;
 use ISPAPI\i18n;
 
-$init_path_symlink = implode(DIRECTORY_SEPARATOR, array($_SERVER["DOCUMENT_ROOT"],"init.php"));
-$init_path = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"init.php"));
+$root_path = $_SERVER["DOCUMENT_ROOT"];
+$script_path = preg_replace("/.modules.addons..+$/", "", dirname($_SERVER["SCRIPT_NAME"]));
+if (!empty($script_path)) {
+    $root_path .= $script_path;
+}
+$init_path = implode(DIRECTORY_SEPARATOR, array($root_path,"init.php"));
 if (file_exists($init_path)) {
     require_once($init_path);
-} elseif (file_exists($init_path_symlink)) {
-    require_once($init_path_symlink);
 } else {
-    exit("cannot found init.php");
+    exit("cannot find init.php");
 }
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"includes","domainfunctions.php")));
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"includes","registrarfunctions.php")));

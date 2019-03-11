@@ -8,17 +8,16 @@ define("CLIENTAREA", true);
 use ISPAPI\Helper;
 
 // Find the correct path of the init.php file, based on the way we are integrating the module (via symlinks or copy/paste), the path is different.
-// THIS WILL NOT WORK when WHMCS is installed in a sub directory, see below)
-// WHMCS is available at: www.yourwhmcsinstallation.com => WORKS
-// WHMCS is available at: www.yourwhmcsinstallation.com/whmcs/ => WILL NOT WORK, IN THIS CASE COPY/PASTE IS REQUIRED
-$init_path_symlink = implode(DIRECTORY_SEPARATOR, array($_SERVER["DOCUMENT_ROOT"],"init.php"));
-$init_path = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"init.php"));
+$root_path = $_SERVER["DOCUMENT_ROOT"];
+$script_path = preg_replace("/.modules.addons..+$/", "", dirname($_SERVER["SCRIPT_NAME"]));
+if (!empty($script_path)) {
+    $root_path .= $script_path;
+}
+$init_path = implode(DIRECTORY_SEPARATOR, array($root_path,"init.php"));
 if (file_exists($init_path)) {
     require_once($init_path);
-} elseif (file_exists($init_path_symlink)) {
-    require_once($init_path_symlink);
 } else {
-    exit("cannot found init.php");
+    exit("cannot find init.php");
 }
 $helperclass_path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapidomaincheck","lib","Helper.class.php"));
 require_once($helperclass_path);
