@@ -1,3 +1,10 @@
+## [8.2.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.2.2...v8.2.3) (2019-03-11)
+
+
+### Bug Fixes
+
+* **init.php:** review path detection ([b59edde](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/b59edde))
+
 ## [8.2.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.2.1...v8.2.2) (2018-11-19)
 
 
