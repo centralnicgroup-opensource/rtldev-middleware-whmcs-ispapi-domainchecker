@@ -7,10 +7,13 @@ if (!empty($script_path)) {
     $root_path .= $script_path;
 }
 $init_path = implode(DIRECTORY_SEPARATOR, array($root_path,"init.php"));
+if (isset($GLOBALS["customadminpath"])) {
+    $init_path = preg_replace("/(\/|\\\)" . $GLOBALS["customadminpath"] . "(\/|\\\)init.php$/", DIRECTORY_SEPARATOR . "init.php", $init_path);
+}
 if (file_exists($init_path)) {
     require_once($init_path);
 } else {
-    exit("cannot fiund init.php");
+    exit("cannot find init.php");
 }
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"includes","registrarfunctions.php")));
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapidomaincheck","lib","Helper.class.php")));
