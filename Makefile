@@ -1,4 +1,4 @@
-VERSION := $(shell php -r 'include "modules/addons/ispapidomaincheck/ispapidomaincheck.php"; print $$module_version;')
+VERSION := $(shell node -p "require('./release.json').version")
 REPOID := whmcs-ispapi-domainchecker
 FOLDER := pkg/$(REPOID)-$(VERSION)
 
