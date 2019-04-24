@@ -17,7 +17,6 @@ cache:
    - node_modules
 php:
  - 5.6
- - 7.1
  - 7.2
  - 7.3
 # Trigger a push build on master and dependabot branches + PRs build on every branches
