@@ -1,10 +1,6 @@
-# PHPStorm
-.idea
-
 # Composer
 composer.phar
-composer.lock
-vendor/*
+vendor
 
 # npm
 node_modules
