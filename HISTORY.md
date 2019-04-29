@@ -1,3 +1,10 @@
+# [8.3.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.2.4...v8.3.0) (2019-04-29)
+
+
+### Features
+
+* **IDN:** review IDN domain check and whois ([2f7c8fc](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/2f7c8fc))
+
 ## [8.2.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.2.3...v8.2.4) (2019-03-14)
 
 
