@@ -161,11 +161,12 @@ class DomainCheck
         $do_not_search = false;
         $domainlist = array();
 
+        //Deactivated because of: FTASKS-2442
         //returns error feedback when special characters are used in searched term/domain name
-        if (preg_match('/[^äöüa-z0-9\-\. ]/i', $this->domain)) {
-            $feedback = array("f_type" => "error", "f_message" => $this->i18n->getText("invalid_character_feedback"), "id" => $this->domain);
-            $do_not_search = true;
-        }
+        //if (preg_match('/[^äöüa-z0-9\-\. ]/i', $this->domain)) {
+        //    $feedback = array("f_type" => "error", "f_message" => $this->i18n->getText("invalid_character_feedback"), "id" => $this->domain);
+        //    $do_not_search = true;
+        //}
 
         $tldgroups = $this->getTLDGroups();
 
@@ -178,8 +179,10 @@ class DomainCheck
             $registrar = $this->registrar[0];
 
             //first convert the search from IDN to Punycode as this is requested by QueryDomainSuggestionList command.
-            $searched_label = $this->convertToPunycode($searched_label, $registrar);
-
+            //Deactivated because of: FTASKS-2442
+            //KEYWORD has to use the IDN form
+            //$searched_label = $this->convertToPunycode($searched_label, $registrar);
+            $searched_label = $this->convertToIDN($searched_label, $registrar);
             $command = array(
                 "COMMAND" => "QueryDomainSuggestionList",
                 "KEYWORD" => $searched_label,
@@ -187,7 +190,6 @@ class DomainCheck
                 "SOURCE" => "ISPAPI-SUGGESTIONS",
                 "LIMIT" => "60"
             );
-
             $suggestions = Helper::APICall($registrar, $command);
 
             //convert the domainlist to IDN again
@@ -304,7 +306,7 @@ class DomainCheck
             $command = array(
                     "COMMAND" => "checkDomains",
                     "PREMIUMCHANNELS" => "*",
-                    "DOMAIN" => $this->convertIDN($listitem["domain"], $listitem["registrar"])
+                    "DOMAIN" => $this->convertToPunycode($listitem["domain"], $listitem["registrar"])
             );
 
             //removes PREMIUMCHANNELS=* if premium domains should not be displayed
@@ -359,7 +361,7 @@ class DomainCheck
                         //DOMAIN TAKEN
                         $status = "taken";
                     }
-
+                    
                     //for security reasons, if one of the prices is not set, then display the domain as taken
                     if (empty($register_price) || empty($renew_price)) {
                         $status = "taken";
@@ -855,28 +857,6 @@ class DomainCheck
     }
 
     /*
-     * Convert the domain into an IDN code
-     *
-     * @param string|array $domain The domain name or an array of domains
-     * @param IspApiConnection object $ispapi The IspApiConnection object to send API Requests
-     * @return string|array IDN code of the domain name or array of IDN codes (saarbrücken.de => xn--saarbrcken-feb.de )
-     */
-    private function convertIDN($domain, $registrar)
-    {
-        $command = array(
-                "COMMAND" => "convertIDN",
-                "DOMAIN" => $domain
-        );
-        $response = Helper::APICall($registrar, $command);
-
-        if (!is_array($domain)) {
-            return $response["PROPERTY"]["ACE"][0];
-        } else {
-            return $response["PROPERTY"]["ACE"];
-        }
-    }
-
-    /*
      * Convert the domain from IDN to Punycode (müller.com => xn--mller-kva.com)
      *
      * @param string|array $domain The domain name or an array of domains
@@ -886,7 +866,7 @@ class DomainCheck
     private function convertToPunycode($domain, $registrar)
     {
         $command = array(
-                "COMMAND" => "convertIDN",
+                "COMMAND" => "ConvertIDN",
                 "DOMAIN" => $domain
         );
         $response = Helper::APICall($registrar, $command);
@@ -908,7 +888,7 @@ class DomainCheck
     private function convertToIDN($domain, $registrar)
     {
         $command = array(
-                "COMMAND" => "convertIDN",
+                "COMMAND" => "ConvertIDN",
                 "DOMAIN" => $domain
         );
         $response = Helper::APICall($registrar, $command);

@@ -40,10 +40,18 @@ if (strpos($_REQUEST["domain"], ".")) {
 $extension = Helper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array($tld), "fetch");
 if (in_array($extension["autoreg"], $_SESSION["ispapi_registrar"])) {
     //use API
+    $domain_ace = $_REQUEST["domain"];
+    $r = Helper::APICall(extension["autoreg"], array(
+        "COMMAND" => "ConvertIDN",
+        "DOMAIN0" => $_REQUEST["domain"]
+    ));
+    if ($r["CODE"] == "200") {
+        $domain_ace = $r["PROPERTY"]["ACE"][0];
+    }
     $registrar=true;
     $command = array(
-            "COMMAND" => "QueryDomainWhoisInfo",
-            "DOMAIN" => $_REQUEST["domain"]
+        "COMMAND" => "QueryDomainWhoisInfo",
+        "DOMAIN" => $domain_ace
     );
     $response = Helper::APICall($extension["autoreg"], $command);
 }
@@ -56,8 +64,10 @@ if ((in_array($tld, array(".ch", ".li")) && ($response["CODE"] != 200)) || preg_
 }
 
 ?>
+<!doctype html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>ISPAPI - WHOIS Results</title>
 </head>
 <body bgcolor="#F9F9F9">
