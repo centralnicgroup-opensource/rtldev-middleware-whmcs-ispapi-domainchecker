@@ -1,3 +1,21 @@
+# [9.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.3.0...v9.0.0) (2019-05-03)
+
+
+### Bug Fixes
+
+* **test:** deactivated structure tests ([1567127](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/1567127))
+
+
+### Code Refactoring
+
+* **restructure:** by using our shared libraries ([3f41020](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/3f41020))
+
+
+### BREAKING CHANGES
+
+* **restructure:** Moved classes LoadRegistrars and Helper to shared folder. Depending now on ispapi
+registrar module v1.7.1 or higher.
+
 # [8.3.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.2.4...v8.3.0) (2019-04-29)
 
 
