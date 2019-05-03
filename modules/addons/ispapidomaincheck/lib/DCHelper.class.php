@@ -1,7 +1,7 @@
 <?php
 namespace ISPAPI;
 
-$path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR, "modules", "registrars", "ispapi", "lib","Helper.class.php"));
+$path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars","ispapi","lib","Helper.class.php"));
 if (file_exists($path)) {
     require_once($path);
 } else {

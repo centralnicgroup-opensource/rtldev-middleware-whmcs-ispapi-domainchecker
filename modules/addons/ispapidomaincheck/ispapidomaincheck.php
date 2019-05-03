@@ -3,7 +3,12 @@ use WHMCS\Database\Capsule;
 use ISPAPI\LoadRegistrars;
 use ISPAPI\DCHelper;
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars", "ispapi", "lib", "LoadRegistrars.class.php")));
+$path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars","ispapi","lib","LoadRegistrars.class.php"));
+if (file_exist($path)) {
+    require_once($path);
+} else {
+    die('Please install our <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">ISPAPI Registrar Module</a> >= v1.7.1');
+}
 require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","DCHelper.class.php")));
 
 $module_version = "8.3.0";
