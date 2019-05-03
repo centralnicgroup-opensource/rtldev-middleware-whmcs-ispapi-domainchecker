@@ -5,9 +5,10 @@ if (isset($_POST["transfer"])) {
 }
 
 define("CLIENTAREA", true);
-use ISPAPI\Helper;
+use ISPAPI\DCHelper;
 
-// Find the correct path of the init.php file, based on the way we are integrating the module (via symlinks or copy/paste), the path is different.
+// Find the correct path of the init.php file, based on the way we are integrating the module
+// (via symlinks or copy/paste), the path is different.
 $root_path = $_SERVER["DOCUMENT_ROOT"];
 $script_path = preg_replace("/.modules.addons..+$/", "", dirname($_SERVER["SCRIPT_NAME"]));
 if (!empty($script_path)) {
@@ -22,8 +23,8 @@ if (file_exists($init_path)) {
 } else {
     exit("cannot find init.php");
 }
-$helperclass_path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapidomaincheck","lib","Helper.class.php"));
-require_once($helperclass_path);
+
+require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "lib","DCHelper.class.php")));
 
 
 $ca = new WHMCS_ClientArea();
@@ -41,7 +42,7 @@ require $modulepath;
 
 // Get module variables
 $modulevars = array();
-foreach (Helper::SQLCall("SELECT * FROM tbladdonmodules WHERE module = 'ispapidomaincheck'", array(), "fetchall") as $var) {
+foreach (DCHelper::SQLCall("SELECT * FROM tbladdonmodules WHERE module = 'ispapidomaincheck'", array(), "fetchall") as $var) {
     $modulevars[$var["setting"]] = $var["value"];
 }
 

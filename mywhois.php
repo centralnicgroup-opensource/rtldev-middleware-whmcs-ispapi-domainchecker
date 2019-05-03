@@ -1,5 +1,5 @@
 <?php
-use ISPAPI\Helper;
+use ISPAPI\DCHelper;
 
 $root_path = $_SERVER["DOCUMENT_ROOT"];
 $script_path = preg_replace("/.modules.addons..+$/", "", dirname($_SERVER["SCRIPT_NAME"]));
@@ -15,8 +15,9 @@ if (file_exists($init_path)) {
 } else {
     exit("cannot find init.php");
 }
+
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"includes","registrarfunctions.php")));
-require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapidomaincheck","lib","Helper.class.php")));
+require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "lib","DCHelper.class.php")));
 
 function WHMCS_LookupDomain($domain)
 {
@@ -37,11 +38,11 @@ if (strpos($_REQUEST["domain"], ".")) {
 }
 
 //Get the WHOIS
-$extension = Helper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array($tld), "fetch");
+$extension = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array($tld), "fetch");
 if (in_array($extension["autoreg"], $_SESSION["ispapi_registrar"])) {
     //use API
     $domain_ace = $_REQUEST["domain"];
-    $r = Helper::APICall(extension["autoreg"], array(
+    $r = DCHelper::APICall(extension["autoreg"], array(
         "COMMAND" => "ConvertIDN",
         "DOMAIN0" => $_REQUEST["domain"]
     ));
@@ -53,7 +54,7 @@ if (in_array($extension["autoreg"], $_SESSION["ispapi_registrar"])) {
         "COMMAND" => "QueryDomainWhoisInfo",
         "DOMAIN" => $domain_ace
     );
-    $response = Helper::APICall($extension["autoreg"], $command);
+    $response = DCHelper::APICall($extension["autoreg"], $command);
 }
 
 //Fallback to WHMCS's lookup for .ch and .li domains and for issues with API

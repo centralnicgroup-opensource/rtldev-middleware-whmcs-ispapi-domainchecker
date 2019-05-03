@@ -43,25 +43,19 @@ class I18n
      */
     private function loadLanguageFile()
     {
-        $loaded = false;
         if (isset($_SESSION["Language"])) {
             $module_language_file = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"..","lang", $_SESSION["Language"].".php"));
             if (file_exists($module_language_file)) {
                 require($module_language_file);
-                $loaded = true;
+                $this->setTranslations($_LANG);
+                return;
             }
         }
 
         //in case no language has been loaded, load english fallback
-        if (!$loaded) {
-            $english_module_language_file = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"..","lang","english.php"));
-            if (file_exists($english_module_language_file)) {
-                require($english_module_language_file);
-                $loaded = true;
-            }
-        }
-
-        if ($loaded) {
+        $english_module_language_file = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"..","lang","english.php"));
+        if (file_exists($english_module_language_file)) {
+            require($english_module_language_file);
             $this->setTranslations($_LANG);
         }
     }

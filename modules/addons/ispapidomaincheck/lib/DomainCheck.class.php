@@ -87,7 +87,7 @@ class DomainCheck
         if (isset($this->domain)) {
             //get the registrarCostPrice, registrarRenewalCostPrice and registrarCurrency of the domain name
             //calculate the customer price and compare with the price we get from $_REQUEST, if they match, add to the cart
-            $registrar_array = Helper::SQLCall("SELECT autoreg FROM tbldomainpricing where extension = ?", array(".".$this->getDomainExtension($this->domain)));
+            $registrar_array = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing where extension = ?", array(".".$this->getDomainExtension($this->domain)));
             $registrar = $registrar_array["autoreg"];
             if (isset($registrar)) {
                 $command = array(
@@ -95,7 +95,7 @@ class DomainCheck
                         "PREMIUMCHANNELS" => "*",
                         "DOMAIN" => array($this->domain)
                 );
-                $check = Helper::APICall($registrar, $command);
+                $check = DCHelper::APICall($registrar, $command);
 
                 if (!empty($check["PROPERTY"]["PREMIUMCHANNEL"][0])) {
                     $registrarprice = $check["PROPERTY"]["PRICE"][0];
@@ -107,7 +107,7 @@ class DomainCheck
                     //if the registration price we get from $_REQUEST is the same than the one we calculated, then we can add the dommain to the cart
                     if (abs($_REQUEST['registerprice'] - $register_price) < 0.1) { //due to roundings, we are not comparing with simple =
                         //get the domain currency id
-                        $domain_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarpriceCurrency));
+                        $domain_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarpriceCurrency));
                         $domain_currency_id = $domain_currency_array["id"];
 
                         if (!is_array($_SESSION["cart"]["domains"])) {
@@ -190,7 +190,7 @@ class DomainCheck
                 "SOURCE" => "ISPAPI-SUGGESTIONS",
                 "LIMIT" => "60"
             );
-            $suggestions = Helper::APICall($registrar, $command);
+            $suggestions = DCHelper::APICall($registrar, $command);
 
             //convert the domainlist to IDN again
             $domainlist = $this->convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
@@ -203,7 +203,7 @@ class DomainCheck
 
         //check if the searched keyword contains a configured TLD
         //example: thebestshop -> thebest.shop should be at the top
-        $extensions = Helper::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
+        $extensions = DCHelper::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
         foreach ($extensions as $extension) {
             $tld = substr($extension["extension"], 1);
             if (preg_match('/'.$tld.'$/i', $searched_label)) {
@@ -220,7 +220,7 @@ class DomainCheck
         $domainlist = array_values(array_unique($domainlist));
 
         //add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
-        $item = Helper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld));
+        $item = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld));
         if (!empty($item)) {
             //put the searched domain at the first place of the domain list
             DomainCheck::deleteElement($this->domain, $domainlist);
@@ -251,9 +251,9 @@ class DomainCheck
     */
     private function getDomaincheckerMode()
     {
-        $domainLookupRegistrar = Helper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'domainLookupRegistrar' LIMIT 1", array());
+        $domainLookupRegistrar = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'domainLookupRegistrar' LIMIT 1", array());
         if ($domainLookupRegistrar["value"] == "ispapi") {
-            $dc_settings = Helper::SQLCall("SELECT value FROM tbldomain_lookup_configuration WHERE registrar = 'ispapi' AND setting = 'suggestions' LIMIT 1", array());
+            $dc_settings = DCHelper::SQLCall("SELECT value FROM tbldomain_lookup_configuration WHERE registrar = 'ispapi' AND setting = 'suggestions' LIMIT 1", array());
             if (isset($dc_settings["value"])) {
                 return $dc_settings["value"];
             }
@@ -268,7 +268,7 @@ class DomainCheck
     */
     private function loadBackorderAPI()
     {
-        $settings = Helper::SQLCall("SELECT value FROM tbladdonmodules WHERE module = 'ispapibackorder' AND setting = 'access' LIMIT 1", array());
+        $settings = DCHelper::SQLCall("SELECT value FROM tbladdonmodules WHERE module = 'ispapibackorder' AND setting = 'access' LIMIT 1", array());
         if (isset($settings["value"])) {
             $backorder_module_api = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapibackorder","backend","api.php"));
             if (file_exists($backorder_module_api)) {
@@ -300,7 +300,7 @@ class DomainCheck
         $response = array();
 
         //get the selected currency
-        $selected_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+        $selected_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 
         foreach ($extendeddomainlist as $listitem) {
             $command = array(
@@ -317,7 +317,7 @@ class DomainCheck
             if ($listitem["registrar"]=="whois") { //use WHOIS to do the checks
                 $no_ispapi_domain_list = array_merge($no_ispapi_domain_list, $listitem["domain"]);
             } else {
-                $check = Helper::APICall($listitem["registrar"], $command);
+                $check = DCHelper::APICall($listitem["registrar"], $command);
                 $index = 0;
                 foreach ($listitem["domain"] as $item) {
                     $tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
@@ -481,7 +481,7 @@ class DomainCheck
 
         //get the list of all TLDs available in the backorder module
         $tlds = "";
-        $backorder_tlds = Helper::SQLCall("SELECT extension FROM backorder_pricing WHERE currency_id = ?", array($this->currency), "fetchall");
+        $backorder_tlds = DCHelper::SQLCall("SELECT extension FROM backorder_pricing WHERE currency_id = ?", array($this->currency), "fetchall");
         foreach ($backorder_tlds as $backorder) {
             $tlds .= "|.".$backorder["extension"];
         }
@@ -527,7 +527,7 @@ class DomainCheck
         $domainprices = array();
 
         //get the selected currency
-        $selected_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+        $selected_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 
         $sql = "SELECT tdp.extension, tp.type, msetupfee year1, qsetupfee year2, ssetupfee year3, asetupfee year4, bsetupfee year5, monthly year6, quarterly year7, semiannually year8, annually year9, biennially year10
 				FROM tbldomainpricing tdp, tblpricing tp
@@ -537,7 +537,7 @@ class DomainCheck
 				AND tp.type IN ('domainregister', 'domainrenew')
 				AND tdp.extension = ?";
 
-        $list = Helper::SQLCall($sql, array($selected_currency_array["id"], ".".$tld), "fetchall");
+        $list = DCHelper::SQLCall($sql, array($selected_currency_array["id"], ".".$tld), "fetchall");
 
         foreach ($list as $item) {
             if (!empty($item)) {
@@ -561,10 +561,10 @@ class DomainCheck
     private function getBackorderPrice($domain)
     {
         //get the selected currency
-        $selected_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+        $selected_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
 
         //get backorder price of the domain
-        $price = Helper::SQLCall("SELECT * FROM backorder_pricing WHERE extension=? AND currency_id=? LIMIT 1", array($this->getDomainExtension($domain), $this->currency));
+        $price = DCHelper::SQLCall("SELECT * FROM backorder_pricing WHERE extension=? AND currency_id=? LIMIT 1", array($this->getDomainExtension($domain), $this->currency));
 
         $backorderprice = isset($price) ? $price["fullprice"] : "";
 
@@ -612,11 +612,11 @@ class DomainCheck
     private function convertPriceToSelectedCurrency($price, $currency)
     {
         //get the selected currency
-        $selected_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+        $selected_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
         $selected_currency_code = $selected_currency_array["code"];
 
         //check if the registrarpriceCurrency is available in WHMCS
-        $domain_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array(strtoupper($currency)));
+        $domain_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array(strtoupper($currency)));
 
         if ($domain_currency_array) {
             //WE ARE ABLE TO CALCULATE THE PRICE
@@ -632,7 +632,7 @@ class DomainCheck
                     //FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
                     //get the default currency set in WHMCS
-                    $default_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE `default` = 1", array());
+                    $default_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE `default` = 1", array());
                     $default_currency_code = $default_currency_array["code"];
 
                     //get the price in the default currency
@@ -662,7 +662,7 @@ class DomainCheck
         $registrarPriceCurrency = strtoupper($registrarPriceCurrency);
 
         //get the domain currency id
-        $domain_currency_array = Helper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarPriceCurrency));
+        $domain_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarPriceCurrency));
         $domain_currency_id = $domain_currency_array["id"];
 
         //get domain extension
@@ -733,20 +733,20 @@ class DomainCheck
 
         //check if premium domains are activated in WHMCS
         $premiumEnabled = false;
-        $premium_settings = Helper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'PremiumDomains' LIMIT 1", array());
+        $premium_settings = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'PremiumDomains' LIMIT 1", array());
         if ($premium_settings && $premium_settings["value"] == 1) {
             $premiumEnabled = true;
         }
 
         //get the configured domain lookup registrar
         $domainlookupregistrar = "";
-        $reg_settings = Helper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'domainLookupRegistrar' LIMIT 1", array());
+        $reg_settings = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'domainLookupRegistrar' LIMIT 1", array());
         if ($premium_settings) {
             $domainlookupregistrar = $reg_settings["value"];
         }
 
         //create an array with extension and autoreg (autoreg = the configured registrar for this extension)
-        $list = Helper::SQLCall("SELECT extension, autoreg  FROM tbldomainpricing", array(), "fetchall");
+        $list = DCHelper::SQLCall("SELECT extension, autoreg  FROM tbldomainpricing", array(), "fetchall");
         foreach ($list as $item) {
                 array_push($whmcsdomainlist["extension"], $item["extension"]);
                 array_push($whmcsdomainlist["autoreg"], $item["autoreg"]);
@@ -820,7 +820,7 @@ class DomainCheck
     {
         //get all the tlds configured in WHMCS
         $tlds_configured_in_whmcs = array();
-        $tlds_configured_in_whmcs_array = Helper::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
+        $tlds_configured_in_whmcs_array = DCHelper::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
         foreach ($tlds_configured_in_whmcs_array as $tld) {
             array_push($tlds_configured_in_whmcs, substr($tld["extension"], 1));
         }
@@ -828,7 +828,7 @@ class DomainCheck
         //if $this->tldgroup empty, it means no category selected, so return all the caterogies
         if (empty($this->tldgroup)) {
             $groups = array();
-            $all_categories = Helper::SQLCall("SELECT id FROM ispapi_tblcategories", array(), "fetchall");
+            $all_categories = DCHelper::SQLCall("SELECT id FROM ispapi_tblcategories", array(), "fetchall");
             foreach ($all_categories as $categorie) {
                 array_push($groups, $categorie["id"]);
             }
@@ -839,7 +839,7 @@ class DomainCheck
         $tlds = array();
 
         foreach ($groups as $group) {
-            $tlds_of_the_group = Helper::SQLCall("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id = ? LIMIT 1", array($group));
+            $tlds_of_the_group = DCHelper::SQLCall("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id = ? LIMIT 1", array($group));
             if ($tlds_of_the_group) {
                 $tlds_of_the_group_array = explode(' ', $tlds_of_the_group["tlds"]);
                 //remove all empty elements (yes it happens) and all tlds which are not configured in WHMCS
@@ -869,7 +869,7 @@ class DomainCheck
                 "COMMAND" => "ConvertIDN",
                 "DOMAIN" => $domain
         );
-        $response = Helper::APICall($registrar, $command);
+        $response = DCHelper::APICall($registrar, $command);
 
         if (!is_array($domain)) {
             return $response["PROPERTY"]["ACE"][0];
@@ -891,7 +891,7 @@ class DomainCheck
                 "COMMAND" => "ConvertIDN",
                 "DOMAIN" => $domain
         );
-        $response = Helper::APICall($registrar, $command);
+        $response = DCHelper::APICall($registrar, $command);
 
         if (!is_array($domain)) {
             return $response["PROPERTY"]["IDN"][0];

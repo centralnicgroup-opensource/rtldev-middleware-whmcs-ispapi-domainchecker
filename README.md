@@ -10,6 +10,7 @@ This Repository covers the "ISPAPI" Domainchecker Add-on for WHMCS. It provides 
 ## Supported Features ##
 
 The ISPAPI DomainChecker addon supports the following functions and features:
+
 * High-performance Domain Availability Checks using our registrar API
 * Support of Premium Domains (Aftermarket and Registry Premium Domains)
 * API Suggestion Engine integrated
@@ -51,15 +52,20 @@ Read the following to get more information ...
 
 * [Getting started](https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Usage-Guide#getting-started)
 
-
 ## Minimum Requirements ##
 
 For the latest WHMCS minimum system requirements, please refer to
 [https://docs.whmcs.com/System_Requirements](https://docs.whmcs.com/System_Requirements)
 
 * WHMCS version 7.0 or higher (we recommend using the latest release)
-* [ISPAPI Registrar Module](https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip) version 1.0.53 or higher
 * Free Signup for a HEXONET [Test Account](https://www.hexonet.net/signup-ote) or [Live Account](https://www.hexonet.net/sign-up)
+
+* [ISPAPI Registrar Module](https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip) version dependency:
+
+| ISPAPI DomainChecker Module | ISPAPI Registrar Module |
+| ---------------------------:| -----------------------:|
+| < v9.x                      | >= 1.0.53               |
+| >= v9.x                     | >= 1.7.1                |
 
 ## Contributing ##
 

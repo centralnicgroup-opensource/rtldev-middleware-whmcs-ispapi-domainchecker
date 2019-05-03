@@ -6,6 +6,5 @@ require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","i18n.cl
 
 add_hook('ClientAreaPage', 1, function ($templateVariables) {
     $i18n = new I18n();
-    $translations = $i18n->getTranslations();
-    return array("_LANG" => $translations);
+    return array("_LANG" => $i18n->getTranslations());
 });

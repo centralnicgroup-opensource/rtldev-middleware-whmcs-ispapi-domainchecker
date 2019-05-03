@@ -1,6 +1,6 @@
 <?php
 use ISPAPI\LoadRegistrars;
-use ISPAPI\Helper;
+use ISPAPI\DCHelper;
 use ISPAPI\DomainCheck;
 use ISPAPI\i18n;
 
@@ -20,10 +20,10 @@ if (file_exists($init_path)) {
 }
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"includes","domainfunctions.php")));
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"includes","registrarfunctions.php")));
+require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR, "modules", "registrars", "ispapi", "lib","LoadRegistrars.class.php")));
 
+require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","DCHelper.class.php")));
 require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","DomainCheck.class.php")));
-require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","LoadRegistrars.class.php")));
-require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","Helper.class.php")));
 require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","i18n.class.php")));
 
 //load all the ISPAPI registrars
@@ -37,6 +37,6 @@ $domaincheck = new DomainCheck(
     $_REQUEST["tldgroup"],
     $_REQUEST["action"],
     $_SESSION["ispapi_registrar"],
-    Helper::getCustomerCurrency()
+    DCHelper::getCustomerCurrency()
 );
 $domaincheck->send();
