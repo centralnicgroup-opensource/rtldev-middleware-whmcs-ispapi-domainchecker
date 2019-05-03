@@ -1,3 +1,10 @@
+## [9.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.0.0...v9.0.1) (2019-05-03)
+
+
+### Bug Fixes
+
+* **pkg:** typo in function call ([cd0670f](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/cd0670f))
+
 # [9.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v8.3.0...v9.0.0) (2019-05-03)
 
 
