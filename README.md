@@ -60,12 +60,7 @@ For the latest WHMCS minimum system requirements, please refer to
 * WHMCS version 7.0 or higher (we recommend using the latest release)
 * Free Signup for a HEXONET [Test Account](https://www.hexonet.net/signup-ote) or [Live Account](https://www.hexonet.net/sign-up)
 
-* [ISPAPI Registrar Module](https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip) version dependency:
-
-| ISPAPI DomainChecker Module | ISPAPI Registrar Module |
-| ---------------------------:| -----------------------:|
-| < v9.x                      | >= 1.0.53               |
-| >= v9.x                     | >= 1.7.1                |
+* [ISPAPI Registrar Module](https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip) version 1.0.53 or higher for v8.3.0 and 1.7.1 or higher for v9.x
 
 ## Contributing ##
 
