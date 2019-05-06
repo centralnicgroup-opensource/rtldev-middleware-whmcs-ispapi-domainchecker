@@ -25,7 +25,7 @@ class DCHelper extends Helper
      * @param $debug Set to true to have the SQL Query in addition returned in case of an error
      * @return json|array The SQL query response or JSON string with error message.
      */
-    public static function SQLCall($sql, $params, $fetchmode = "fetch", $debug = false)
+    public static function SQLCall($sql, $params = null, $fetchmode = "fetch", $debug = false)
     {
         $r = parent::SQLCall($sql, $params, $fetchmode, $debug);
         $i18n = new I18n();

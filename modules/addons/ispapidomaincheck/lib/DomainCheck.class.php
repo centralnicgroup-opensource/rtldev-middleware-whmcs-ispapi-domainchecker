@@ -16,59 +16,64 @@ class DomainCheck
     private $domains;
     private $tldgroup;
     private $action;
-    private $registrar;
+    private $registrars;
     private $currency;
     private $response;
     private $i18n;
 
-    /*
+    /**
      *  Constructor
      *
      *  @param string $domain The searched domain
      *  @param string $domains The list of domains to check
      *  @param string $tldgroup Restrict the search to the given tldgroups
      *  @param string $action The action
-     *  @param array $registrar The configured registrars (can be more than one)
+     *  @param array $registrars The configured registrars (can be more than one)
      *  @param array $currency The selected currency
      */
-    public function __construct($domain, $domains, $tldgroup, $action, $registrar, $currency)
+    public function __construct($domain, $domains, $tldgroup, $action, $registrars, $currency)
     {
         $this->domain = $domain;
         $this->domains = $domains;
         $this->tldgroup = $tldgroup;
         $this->action = $action;
-        $this->registrar = $registrar;
+        $this->registrars = $registrars;
         $this->currency = $currency;
         $this->i18n = new I18n();
 
         $this->doDomainCheck();
     }
 
-    /*
+    /**
      * This function is called on each instantiation and calls the right method for a given action
      */
     private function doDomainCheck()
     {
-        if (isset($this->action) && ($this->action == "getList")) {
-            $this->getDomainList();
-        } elseif (isset($this->action) && ($this->action == "removeFromCart")) {
-            $this->removeFromCart();
-        } elseif (isset($this->action) && ($this->action == "addPremiumToCart")) {
-            $this->addPremiumToCart();
-        } else {
-            $this->startDomainCheck();
+        switch ($this->action) {
+            case "getList":
+                $this->getDomainList();
+                break;
+            case "removeFromCart":
+                $this->removeFromCart();
+                break;
+            case "addPremiumToCart":
+                $this->addPremiumToCart();
+                break;
+            default:
+                $this->startDomainCheck();
+                break;
         }
         $this->send();
     }
 
-    /*
+    /**
      * Removes the domain from the cart
      */
     private function removeFromCart()
     {
         $response = array();
         if (isset($this->domain)) {
-            foreach ($_SESSION["cart"]["domains"] as $index => $domain) {
+            foreach ($_SESSION["cart"]["domains"] as $index => &$domain) {
                 if (in_array($this->domain, $domain)) {
                      unset($_SESSION["cart"]["domains"][$index]);
                      $response["feedback"] = $this->i18n->getText("remove_from_cart");
@@ -78,7 +83,7 @@ class DomainCheck
         $this->response = json_encode($response);
     }
 
-    /*
+    /**
      * Adds the Premium domain to the cart
      */
     private function addPremiumToCart()
@@ -87,16 +92,13 @@ class DomainCheck
         if (isset($this->domain)) {
             //get the registrarCostPrice, registrarRenewalCostPrice and registrarCurrency of the domain name
             //calculate the customer price and compare with the price we get from $_REQUEST, if they match, add to the cart
-            $registrar_array = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing where extension = ?", array(".".$this->getDomainExtension($this->domain)));
-            $registrar = $registrar_array["autoreg"];
+            $registrar = self::getRegistrarForDomain($this->domain);
             if (isset($registrar)) {
-                $command = array(
-                        "COMMAND" => "checkDomains",
-                        "PREMIUMCHANNELS" => "*",
-                        "DOMAIN" => array($this->domain)
-                );
-                $check = DCHelper::APICall($registrar, $command);
-
+                $check = DCHelper::APICall($registrar, array(
+                    "COMMAND" => "checkDomains",
+                    "PREMIUMCHANNELS" => "*",
+                    "DOMAIN" => array($this->domain)
+                ));
                 if (!empty($check["PROPERTY"]["PREMIUMCHANNEL"][0])) {
                     $registrarprice = $check["PROPERTY"]["PRICE"][0];
                     $registrarpriceCurrency = $check["PROPERTY"]["CURRENCY"][0];
@@ -107,25 +109,22 @@ class DomainCheck
                     //if the registration price we get from $_REQUEST is the same than the one we calculated, then we can add the dommain to the cart
                     if (abs($_REQUEST['registerprice'] - $register_price) < 0.1) { //due to roundings, we are not comparing with simple =
                         //get the domain currency id
-                        $domain_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarpriceCurrency));
-                        $domain_currency_id = $domain_currency_array["id"];
-
+                        $domain_currency_id = self::getCurrencyIDByCode($registrarpriceCurrency);
                         if (!is_array($_SESSION["cart"]["domains"])) {
                             $_SESSION["cart"]["domains"] = array();
                         }
-
-                        $premiumdomain = array( "type" => "register",
-                                                "domain" => $this->domain,
-                                                "regperiod" => "1",
-                                                "isPremium" => "1",
-                                                "domainpriceoverride" => $register_price,
-                                                "registrarCostPrice" => $registrarprice,
-                                                "registrarCurrency" => $domain_currency_id,
-                                                "domainrenewoverride" =>  $renew_price,
-                                                //"registrarRenewalCostPrice" => //NOT REQUIRED
-                                            );
-
-                        array_push($_SESSION["cart"]["domains"], $premiumdomain);
+                        
+                        $_SESSION["cart"]["domains"][] = array(
+                            "type" => "register",
+                            "domain" => $this->domain,
+                            "regperiod" => "1",
+                            "isPremium" => "1",
+                            "domainpriceoverride" => $register_price,
+                            "registrarCostPrice" => $registrarprice,
+                            "registrarCurrency" => $domain_currency_id,
+                            "domainrenewoverride" =>  $renew_price,
+                            //"registrarRenewalCostPrice" => //NOT REQUIRED
+                        );
                         $response["feedback"] = $this->i18n->getText("add_to_cart");
                     }
                 }
@@ -134,84 +133,58 @@ class DomainCheck
         $this->response = json_encode($response);
     }
 
-    /*
-     * Returns the list of domains that have to be checked.
+    /**
+     * Set the response to the list of domains that have to be checked.
      */
     private function getDomainList()
     {
-
-        //delete HTTP:// if domain's starting with it
-        if (preg_match('/^http\:\/\//i', $this->domain)) {
-            $this->domain = substr($this->domain, 7);
-        }
-        //delete HTTPS:// if domain's starting with it
-        if (preg_match('/^https\:\/\//i', $this->domain)) {
-            $this->domain = substr($this->domain, 8);
-        }
+        //delete HTTP:// or HTTPS:// if domain's starting with it
+        $this->domain = preg_replace("/^https?:\/\//i", "", $this->domain);
         //delete WWW. if domain's starting with it
-        if (preg_match('/^www[\.]/i', $this->domain)) {
-            $this->domain = substr($this->domain, 4);
-        }
-        //overwrite domain to lowercase
-        $this->domain = strtolower($this->domain);
+        $this->domain = preg_replace("/^www\./i", "", $this->domain);
         //remove all white spaces
-        $this->domain = preg_replace('/\s+/', '', $this->domain);
+        $this->domain = strtolower(preg_replace("/\s+/", "", $this->domain));
 
         $feedback = array();
         $do_not_search = false;
         $domainlist = array();
 
-        //Deactivated because of: FTASKS-2442
-        //returns error feedback when special characters are used in searched term/domain name
-        //if (preg_match('/[^äöüa-z0-9\-\. ]/i', $this->domain)) {
-        //    $feedback = array("f_type" => "error", "f_message" => $this->i18n->getText("invalid_character_feedback"), "id" => $this->domain);
-        //    $do_not_search = true;
-        //}
+        $tldgroups = self::getTLDGroups($this->tldgroup);
+        $searched_label = self::getDomainLabel($this->domain);
+        $searched_tld = self::getDomainExtension($this->domain);
 
-        $tldgroups = $this->getTLDGroups();
-
-        $searched_label = $this->getDomainLabel($this->domain);
-        $searched_tld = $this->getDomainExtension($this->domain);
-
-        if ($this->getDomaincheckerMode() == "on" && !empty($this->registrar)) {  //if no registrar module found, use regular mode
+        if (!empty($this->registrars) && self::getDomaincheckerMode() == "on") {
             //SUGGESTIONS MODE
-            //use the first ispapi registrar to query the suggestion list TODO check if we take the order we use for the checks.
-            $registrar = $this->registrar[0];
-
+            //use the first ispapi registrar to query the suggestion list
+            $registrar = $this->registrars[0];
             //first convert the search from IDN to Punycode as this is requested by QueryDomainSuggestionList command.
-            //Deactivated because of: FTASKS-2442
-            //KEYWORD has to use the IDN form
-            //$searched_label = $this->convertToPunycode($searched_label, $registrar);
-            $searched_label = $this->convertToIDN($searched_label, $registrar);
-            $command = array(
+            //WRONG! Read FTASKS-2442, therefore switched to to convertToIDN
+            $searched_label = self::convertToIDN($searched_label, $registrar);
+            $suggestions = DCHelper::APICall($registrar, array(
                 "COMMAND" => "QueryDomainSuggestionList",
                 "KEYWORD" => $searched_label,
                 "ZONE" => $tldgroups,
                 "SOURCE" => "ISPAPI-SUGGESTIONS",
                 "LIMIT" => "60"
-            );
-            $suggestions = DCHelper::APICall($registrar, $command);
-
-            //convert the domainlist to IDN again
-            $domainlist = $this->convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
+            ));
+            //convert the domainlist to IDN as it is returned in punycode
+            $domainlist = self::convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
         } else {
             //REGULAR MODE
-            foreach ($tldgroups as $tld) {
-                array_push($domainlist, $searched_label.".".$tld);
+            foreach ($tldgroups as &$tld) {
+                $domainlist[] = $searched_label.".".$tld;
             }
         }
 
         //check if the searched keyword contains a configured TLD
         //example: thebestshop -> thebest.shop should be at the top
-        $extensions = DCHelper::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
-        foreach ($extensions as $extension) {
-            $tld = substr($extension["extension"], 1);
-            if (preg_match('/'.$tld.'$/i', $searched_label)) {
-                $tmp = explode($tld, $searched_label);
-                $thedomain = $tmp[0].".".$tld;
+        $extensions = self::getConfiguredExtensions(true);
+        foreach ($extensions as &$extension) {
+            if (preg_match('/'.$extension.'$/i', $searched_label)) {
+                $tmp = explode($extension, $searched_label);
                 //add to the domain to the list if not empty
                 if (!empty($tmp[0])) {
-                    $domainlist = array_merge(array($thedomain), $domainlist);
+                    $domainlist[] = $tmp[0].".".$extension;
                 }
             }
         }
@@ -220,20 +193,27 @@ class DomainCheck
         $domainlist = array_values(array_unique($domainlist));
 
         //add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
-        $item = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array(".".$searched_tld));
+        $item = self::getRegistrarForDomainExtension($searched_tld);
         if (!empty($item)) {
             //put the searched domain at the first place of the domain list
-            DomainCheck::deleteElement($this->domain, $domainlist);
+            self::deleteElement($this->domain, $domainlist);
             array_unshift($domainlist, $this->domain);
         } else {
             //if $searched_tld not empty display feedback message
             if (!empty($searched_tld)) {
-                $feedback = array("f_type" => "error", "f_message" => $this->i18n->getText("domain_not_supported_feedback"), "id" => $this->domain);
+                $feedback = array(
+                    "f_type" => "error",
+                    "f_message" => $this->i18n->getText("domain_not_supported_feedback"),
+                    "id" => $this->domain
+                );
                 $do_not_search = true;
             }
         }
 
-        $domainlist_checkorder = $domainlist; //TODO checkorder with the order of the category editor? //$this->getSortedDomainList($domainlist); #removed, now we are checking all TLDs with API even if not configured with ISPAPI.
+        //TODO checkorder with the order of the category editor?
+        //$this->getSortedDomainList($domainlist);
+        //removed; now we are checking all TLDs with API even if not configured with ISPAPI.
+        $domainlist_checkorder = $domainlist;
 
         //if there is an issue with the search, do not start checking
         if ($do_not_search) {
@@ -241,121 +221,122 @@ class DomainCheck
             $domainlist_checkorder = array();
         }
 
-        $this->response = json_encode(array("listorder" => $domainlist, "checkorder" => $domainlist_checkorder, "feedback" => $feedback));
+        $this->response = json_encode(array(
+            "listorder" => $domainlist,
+            "checkorder" => $domainlist_checkorder,
+            "feedback" => $feedback
+        ));
     }
 
-   /*
+   /**
     * Returns the domainchecker mode. (Suggestions or Regular)
     *
     * @return string The domainchecker mode
     */
-    private function getDomaincheckerMode()
+    private static function getDomaincheckerMode()
     {
-        $domainLookupRegistrar = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'domainLookupRegistrar' LIMIT 1", array());
-        if ($domainLookupRegistrar["value"] == "ispapi") {
-            $dc_settings = DCHelper::SQLCall("SELECT value FROM tbldomain_lookup_configuration WHERE registrar = 'ispapi' AND setting = 'suggestions' LIMIT 1", array());
-            if (isset($dc_settings["value"])) {
-                return $dc_settings["value"];
+        $registrar = self::getConfigurationValue('domainLookupRegistrar');
+        if ($registrar == "ispapi") {
+            $dc_setting = self::getLookupConfigurationValue($registrar, 'suggestions');
+            if (!empty($dc_setting)) {
+                return $dc_setting;
             }
         }
         return "";
     }
 
-    /*
+   /**
     * Loads the backorder API, returns false if backorder module not installed.
     *
     * @return boolean true if backorder API has been loaded
     */
     private function loadBackorderAPI()
     {
-        $settings = DCHelper::SQLCall("SELECT value FROM tbladdonmodules WHERE module = 'ispapibackorder' AND setting = 'access' LIMIT 1", array());
-        if (isset($settings["value"])) {
-            $backorder_module_api = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapibackorder","backend","api.php"));
-            if (file_exists($backorder_module_api)) {
-                require_once $backorder_module_api;
+        $r = self::getAddOnConfigurationValue('ispapibackorder', 'access');
+        if (isset($r["value"])) {
+            $path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapibackorder","backend","api.php"));
+            if (file_exists($path)) {
+                require_once($path);
                 return true;
             }
         }
         return false;
     }
 
-    /*
+    /**
      * Starts the domain check procedure.
      * Handle the check domain with the configured ispapi registrar account configured in WHMCS
-     * returns a JSON list of all domains with the availability
+     * Sets the response to a JSON list of all domains with the availability
      */
     private function startDomainCheck()
     {
-        $feedback = array();
-
         // In the past we had 2 different lists:
         // 1: $ispapi_domain_list  domains that use our registrar module
         // 2: $no_ispapi_domain_list  domains that don't use our registrar module
         // Since we are now allowing all registrar to use our API for checks, we will put all the domains in $ispapi_domain_list.
         // If we are not supporting this TLD, we will add the domain to the $no_ispapi_domain_list after we got an error from the checkdomain. (549)
-
-        $extendeddomainlist = $this->getExtendedDomainlist($this->domains);
-
+        $feedback = array();
+        $extendeddomainlist = self::getExtendedDomainlist($this->domains, $this->registrars);
         $no_ispapi_domain_list = array();
         $response = array();
 
         //get the selected currency
-        $selected_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+        $selected_currency_array = self::getCurrencySettingsById($this->currency);
 
-        foreach ($extendeddomainlist as $listitem) {
-            $command = array(
-                    "COMMAND" => "checkDomains",
-                    "PREMIUMCHANNELS" => "*",
-                    "DOMAIN" => $this->convertToPunycode($listitem["domain"], $listitem["registrar"])
-            );
-
-            //removes PREMIUMCHANNELS=* if premium domains should not be displayed
-            if ($listitem["show_premium"] != 1) {
-                unset($command["PREMIUMCHANNELS"]);
-            }
-
-            if ($listitem["registrar"]=="whois") { //use WHOIS to do the checks
+        foreach ($extendeddomainlist as &$listitem) {
+            //use WHOIS to do the checks
+            if ($listitem["registrar"]=="whois") {
                 $no_ispapi_domain_list = array_merge($no_ispapi_domain_list, $listitem["domain"]);
             } else {
+                $command = array(
+                    "COMMAND"   => "CheckDomains",
+                    "DOMAIN"    => self::convertToPunycode($listitem["domain"], $listitem["registrar"])
+                );
+                //set PREMIUMCHANNELS=* if premium domains should be displayed
+                if ($listitem["show_premium"] == 1) {
+                    $command["PREMIUMCHANNELS"] = "*";
+                }
                 $check = DCHelper::APICall($listitem["registrar"], $command);
-                $index = 0;
-                foreach ($listitem["domain"] as $item) {
-                    $tmp = explode(" ", $check["PROPERTY"]["DOMAINCHECK"][$index]);
-                    $code = $tmp[0];
+                foreach ($listitem["domain"] as $index => &$item) {
                     $availability = $check["PROPERTY"]["DOMAINCHECK"][$index];
+                    $tmp = explode(" ", $availability);
+                    $code = $tmp[0];
                     $class = $check["PROPERTY"]["CLASS"][$index];
                     $premiumchannel = $check["PROPERTY"]["PREMIUMCHANNEL"][$index];
                     $status = $premiumtype = $register_price_unformatted = $renew_price_unformatted = $register_price = $renew_price = "";
 
-                    if (preg_match('/549/', $check["PROPERTY"]["DOMAINCHECK"][$index])) {
+                    if ($code == "549") {
                         //TLD NOT SUPPORTED AT HEXONET USE A FALLBACK TO THE WHOIS LOOKUP
                         //add the domain to the $no_ispapi_domain_list so it will be automatically checked by the WHOIS LOOKUP in the next step
-                        array_push($no_ispapi_domain_list, $item);
-                    } elseif (preg_match('/210/', $check["PROPERTY"]["DOMAINCHECK"][$index])) {
+                        $no_ispapi_domain_list[] = $item;
+                    } elseif ($code == "210") {
                         //DOMAIN AVAILABLE
-                        $whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
+                        $whmcspricearray = self::getTLDprice(self::getDomainExtension($item), $this->currency);
                         $register_price_unformatted = $whmcspricearray["domainregister"][1];
                         $renew_price_unformatted = $whmcspricearray["domainrenew"][1];
-                        $register_price = $this->formatPrice($register_price_unformatted, $selected_currency_array);
-                        $renew_price = $this->formatPrice($renew_price_unformatted, $selected_currency_array);
+                        $register_price = self::formatPrice($register_price_unformatted, $selected_currency_array);
+                        $renew_price = self::formatPrice($renew_price_unformatted, $selected_currency_array);
                         $status = "available";
-                    } elseif (!empty($check["PROPERTY"]["PREMIUMCHANNEL"][$index])) { //IT IS A PREMIUMDOMAIN
+                    } elseif (!empty($premiumchannel)) {
                         //PREMIUM DOMAIN - DISPLAY AVAILABLE + PRICE
-                        $registrarprice = $check["PROPERTY"]["PRICE"][$index];
-                        $registrarpriceCurrency = $check["PROPERTY"]["CURRENCY"][$index];
-
-                        $register_price_unformatted = $this->getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency);
-                        $renew_price_unformatted = $this->getPremiumRenewPrice($listitem["registrar"], $check["PROPERTY"]["CLASS"][$index], $registrarpriceCurrency, $item);
-
-                        $register_price = $this->formatPrice($register_price_unformatted, $selected_currency_array);
-                        $renew_price = $this->formatPrice($renew_price_unformatted, $selected_currency_array);
-
-                        if (strpos($check["PROPERTY"]["CLASS"][$index], $check["PROPERTY"]["PREMIUMCHANNEL"][$index]) !== false) {
-                            $premiumtype = "PREMIUM";
-                        } else {
-                            $premiumtype = $check["PROPERTY"]["PREMIUMCHANNEL"][$index];
-                        }
-
+                        $registrarCurrency = $check["PROPERTY"]["CURRENCY"][$index];
+                        $register_price_unformatted = $this->getPremiumRegistrationPrice(
+                            $check["PROPERTY"]["PRICE"][$index],
+                            $registrarCurrency
+                        );
+                        $renew_price_unformatted = $this->getPremiumRenewPrice(
+                            $listitem["registrar"],
+                            $class,
+                            $registrarCurrency,
+                            $item
+                        );
+                        $register_price = self::formatPrice(
+                            $register_price_unformatted,
+                            $selected_currency_array
+                        );
+                        //TODO: check what format price is doing; is the registrarCurrency still considered?
+                        $renew_price = self::formatPrice($renew_price_unformatted, $selected_currency_array);
+                        $premiumtype = (stripos($class, $premiumchannel) === false) ? $premiumchannel :"PREMIUM";
                         $status = "available";
                     } else {
                         //DOMAIN TAKEN
@@ -368,73 +349,67 @@ class DomainCheck
                         $register_price = $renew_price = "";
                     }
 
-                    array_push($response, array("id" => $item,
-                                                "checkover" => "api",
-                                                "registrar" => $listitem["registrar"],
-                                                "code" => $code,
-                                                "availability" => $availability,
-                                                "class" => $class,
-                                                "premiumchannel" => $premiumchannel,
-                                                "premiumtype" => $premiumtype,
-                                                "registerprice" => $register_price,
-                                                "renewprice" => $renew_price,
-                                                "registerprice_unformatted" => $register_price_unformatted,
-                                                "renewprice_unformatted" => $renew_price_unformatted,
-                                                "status" => $status,
-                                                "cart" => $_SESSION["cart"]));
-
-                    $index++;
+                    $response[] = array(
+                        "id" => $item,
+                        "checkover" => "api",
+                        "registrar" => $listitem["registrar"],
+                        "code" => $code,
+                        "availability" => $availability,
+                        "class" => $class,
+                        "premiumchannel" => $premiumchannel,
+                        "premiumtype" => $premiumtype,
+                        "registerprice" => $register_price,
+                        "renewprice" => $renew_price,
+                        "registerprice_unformatted" => $register_price_unformatted,
+                        "renewprice_unformatted" => $renew_price_unformatted,
+                        "status" => $status,
+                        "cart" => $_SESSION["cart"]
+                    );
                 }
             }
         }
 
 
         //for no_ispapi_domain_list (domains that we were not able to check via API)
-        foreach ($no_ispapi_domain_list as $item) {
-            $label = $this->getDomainLabel($item);
-            $tld = $this->getDomainExtension($item);
+        foreach ($no_ispapi_domain_list as &$item) {
             $price = array();
-
-            $command = "domainwhois";
-            $values["domain"] = $label.".".$tld;
-
-            $check = localAPI($command, $values);
+            $check = localAPI("domainwhois", array("domain"=>$item));
 
             if ($check["status"] == "available") {
                 $code = "210";
                 //get the price for this domain
-                $whmcspricearray = $this->getTLDprice($this->getDomainExtension($item));
+                $whmcspricearray = self::getTLDprice(self::getDomainExtension($item), $this->currency);
                 $register_price_unformatted = $whmcspricearray["domainregister"][1];
                 $renew_price_unformatted = $whmcspricearray["domainrenew"][1];
-
-                $register_price = $this->formatPrice($register_price_unformatted, $selected_currency_array);
-                $renew_price = $this->formatPrice($renew_price_unformatted, $selected_currency_array);
-
+                $register_price = self::formatPrice($register_price_unformatted, $selected_currency_array);
+                $renew_price = self::formatPrice($renew_price_unformatted, $selected_currency_array);
                 $status = "available";
             } else {
                 $code = "211";
                 $status = "taken";
             }
 
+            //TODO move the below lines into function for reuse (see previous method)
             if (empty($register_price) || empty($renew_price)) {
                 $status = "taken";
-                $register_price = "";
-                $renew_price = "";
+                $register_price = $renew_price = "";
             }
 
-            array_push($response, array("id" => $item,
-                                        "checkover" => "whois",
-                                        "code" => $code,
-                                        "availability" => $check["message"],
-                                        "class" => "",
-                                        "premiumchannel" => "",
-                                        "premiumtype" => "",
-                                        "registerprice" => $register_price,
-                                        "renewprice" => $renew_price,
-                                        "registerprice_unformatted" => $register_price_unformatted,
-                                        "renewprice_unformatted" => $renew_price_unformatted,
-                                        "status" => $status,
-                                        "cart" => $_SESSION["cart"]));
+            $response[] = array(
+                "id" => $item,
+                "checkover" => "whois",
+                "code" => $code,
+                "availability" => $check["message"],
+                "class" => "",
+                "premiumchannel" => "",
+                "premiumtype" => "",
+                "registerprice" => $register_price,
+                "renewprice" => $renew_price,
+                "registerprice_unformatted" => $register_price_unformatted,
+                "renewprice_unformatted" => $renew_price_unformatted,
+                "status" => $status,
+                "cart" => $_SESSION["cart"]
+            );
         }
 
         //handle the displaying of the backorder button in the search response
@@ -463,35 +438,31 @@ class DomainCheck
         $this->response = json_encode($response_array);
     }
 
-    /*
+    /**
      * Add the backorder functionality when ISPAPI Backorder module installed.
      */
     private function handleBackorderButton($response)
     {
-        if (!$this->loadBackorderAPI()) {
+        if (!self::loadBackorderAPI()) {
             return $response;
         }
         $newresponse = array();
 
         //get all domains that have already been backordered by the user. If not logged in, array will be empty, this is perfect.
-        $queryBackorderList = array(
+        $ownbackorders = backorder_api_call(array(
             "COMMAND" => "QueryBackorderList"
-        );
-        $ownbackorders = backorder_api_call($queryBackorderList);
+        ));
 
         //get the list of all TLDs available in the backorder module
-        $tlds = "";
-        $backorder_tlds = DCHelper::SQLCall("SELECT extension FROM backorder_pricing WHERE currency_id = ?", array($this->currency), "fetchall");
-        foreach ($backorder_tlds as $backorder) {
-            $tlds .= "|.".$backorder["extension"];
-        }
-        $tld_list = substr($tlds, 1);
+        $backorder_tlds = self::getConfiguredBackorderExtensions($this->currency);
+        $tlds = "." . implode("|.", $backorder_tlds);
 
         //iterate all responses and add the backorder information
         foreach ($response as $item) {
             $tmp = $item;
             $tmp["backorder_available"] = $tmp["backordered"] = 0;
-            if ($item["code"]==211 && empty($item["premiumchannel"])) { //we are not supporting premium backorders, so we don't add them here.
+            if ($item["code"]==211 && empty($item["premiumchannel"])) {
+                //we are not supporting premium backorders, so we don't add them here.
                 //in this case, backorder module is installed
 
                 //check if pricing set for this TLD
@@ -501,7 +472,7 @@ class DomainCheck
                 $tmp["backordered"] = (in_array($item["id"], $ownbackorders["PROPERTY"]["DOMAIN"])) ? 1 : 0;
 
                 if ($tmp["backorder_available"]) {
-                    $tmp["backorderprice"] = $this->getBackorderPrice($item["id"]);
+                    $tmp["backorderprice"] = self::getBackorderPrice($item["id"], $this->currency);
                     //if no price set for the currency, then do not display the backorder
                     if (empty($tmp["backorderprice"])) {
                         $tmp["backorder_available"] = 0;
@@ -514,36 +485,36 @@ class DomainCheck
         return $newresponse;
     }
 
-    /*
+    /**
      * Returns the registration price for a given tld
      *
      * @param string $tld The domain extension
-
+     * @param string $currency The currency
      * @return array An array with price for 1 to 10 years
-     *
      */
-    private function getTLDprice($tld)
+    private static function getTLDprice($tld, $currency)
     {
         $domainprices = array();
 
         //get the selected currency
-        $selected_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+        $selected_currency_array = self::getCurrencySettingsById($currency);
 
         $sql = "SELECT tdp.extension, tp.type, msetupfee year1, qsetupfee year2, ssetupfee year3, asetupfee year4, bsetupfee year5, monthly year6, quarterly year7, semiannually year8, annually year9, biennially year10
 				FROM tbldomainpricing tdp, tblpricing tp
 				WHERE tp.relid = tdp.id
 				AND tp.tsetupfee = 0
-				AND tp.currency = ?
+				AND tp.currency = :currency
 				AND tp.type IN ('domainregister', 'domainrenew')
-				AND tdp.extension = ?";
+				AND tdp.extension = :tdpext";
+        $list = DCHelper::SQLCall($sql, array(":currency" => $currency, ":tdpext" => ".".$tld), "fetchall");
 
-        $list = DCHelper::SQLCall($sql, array($selected_currency_array["id"], ".".$tld), "fetchall");
-
-        foreach ($list as $item) {
+        foreach ($list as &$item) {
             if (!empty($item)) {
                 for ($i = 1; $i <= 10; $i++) {
-                    if (($item['year'.$i] > 0)) {
-                        $domainprices[$item['type']][$i] = round($item['year'.$i], 2); //$this->formatPrice($item['year'.$i], $selected_currency_array);
+                    $key = "year" . $i;
+                    if (($item[$key] > 0)) {
+                        $domainprices[$item['type']][$i] = round($item[$key], 2);
+                        //self::formatPrice($item['year'.$i], $selected_currency_array);
                     }
                 }
             }
@@ -551,89 +522,84 @@ class DomainCheck
         return $domainprices;
     }
 
-    /*
+    /**
      * Returns the backorder price for a domain
      *
      * @param string $domain The domain
-
+     * @param string $currency The currency
      * @return string The backorder price well formatted in the selected currency
      */
-    private function getBackorderPrice($domain)
+    private static function getBackorderPrice($domain, $currency)
     {
         //get the selected currency
-        $selected_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+        $selected_currency_array = self::getCurrencySettingsById($currency);
 
         //get backorder price of the domain
-        $price = DCHelper::SQLCall("SELECT * FROM backorder_pricing WHERE extension=? AND currency_id=? LIMIT 1", array($this->getDomainExtension($domain), $this->currency));
-
+        $price = DCHelper::SQLCall(
+            "SELECT fullprice FROM backorder_pricing WHERE extension=:ext AND currency_id=:currencyid LIMIT 1",
+            array(
+                ":currencyid" => self::getDomainExtension($domain),
+                ":ext" => $currency
+            )
+        );
         $backorderprice = isset($price) ? $price["fullprice"] : "";
-
-        return $this->formatPrice($backorderprice, $selected_currency_array);
+        return self::formatPrice($backorderprice, $selected_currency_array);
     }
 
-    /*
+    /**
      * Returns the price for a premiumdomain registration.
+     * NOTE: (Sometimes we are getting rounding problems (1 cent), not exactly the same price than with the standard lookup.)
      *
      * @param string $registrarprice The domain registration price asked by the registrar
      * @param string $registrarpriceCurrency The currency of this price
-
      * @return string The price well formatted
-     *
-     * (Sometimes we are getting rounding problems (1 cent), not exactly the same price than with the standard lookup.)
-     *
      */
     private function getPremiumRegistrationPrice($registrarprice, $registrarpriceCurrency)
     {
         return $this->convertPriceToSelectedCurrency($registrarprice, $registrarpriceCurrency);
     }
 
-    /*
-     * Adds the resseler markup to the given price
+    /**
+     * Adds the reseller markup to the given price
      *
      * @param string $price A price
-
-     * @return string The markuped price
+     * @return string The markup'ed price
      */
-    private function addResselerMarkup($price)
+    private static function addResellerMarkup($price)
     {
-        $markupToAdd = Premium::markupForCost($price);
-        return $price + ($price * $markupToAdd / 100);
+        return $price + ($price * Premium::markupForCost($price) / 100);
     }
 
-    /*
+    /**
      * Converts the price in the selected currency and add the markup.
      * Selected currency is taken from the session.
      *
      * @param string $price A price
      * @param string $currency A currency
-
      * @return string The price converted BUT NOT FORMATTED
      */
     private function convertPriceToSelectedCurrency($price, $currency)
     {
         //get the selected currency
-        $selected_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE id=? LIMIT 1", array($this->currency));
+        $selected_currency_array = self::getCurrencySettingsById($this->currency);
         $selected_currency_code = $selected_currency_array["code"];
 
         //check if the registrarpriceCurrency is available in WHMCS
-        $domain_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array(strtoupper($currency)));
+        $domain_currency_array = self::getCurrencySettingsByCode($currency);
 
         if ($domain_currency_array) {
             //WE ARE ABLE TO CALCULATE THE PRICE
             $domain_currency_code = $domain_currency_array["code"];
             if ($selected_currency_code == $domain_currency_code) {
-                return round($this->addResselerMarkup($price), 2);
+                return round(self::addResellerMarkup($price), 2);
             } else {
                 if ($domain_currency_array["default"] == 1) {
                     //CONVERT THE PRICE IN THE SELECTED CURRENCY
                     $convertedprice = $price * $selected_currency_array["rate"];
-                    return round($this->addResselerMarkup($convertedprice), 2);
+                    return round(self::addResellerMarkup($convertedprice), 2);
                 } else {
-                    //FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
-
-                    //get the default currency set in WHMCS
-                    $default_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE `default` = 1", array());
-                    $default_currency_code = $default_currency_array["code"];
+                    //FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND
+                    //THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
 
                     //get the price in the default currency
                     $price_default_currency = $price * ( 1 / $domain_currency_array["rate"] );
@@ -641,53 +607,54 @@ class DomainCheck
                     //get the price in the selected currency
                     $price_selected_currency = $price_default_currency * $selected_currency_array["rate"];
 
-                    return round($this->addResselerMarkup($price_selected_currency), 2);
+                    return round(self::addResellerMarkup($price_selected_currency), 2);
                 }
             }
         }
         return "";
     }
 
-    /*
+    /**
      * Returns the price for a premiumdomain renewal.
      *
      * @param string $registrarprice The domain registration price asked by the registrar
      * @param string $registrarpriceCurrency The currency of this price
-
      * @return string The price well formatted
-     *
      */
     private function getPremiumRenewPrice($registrar, $class, $registrarPriceCurrency, $domain)
     {
         $registrarPriceCurrency = strtoupper($registrarPriceCurrency);
 
         //get the domain currency id
-        $domain_currency_array = DCHelper::SQLCall("SELECT * FROM tblcurrencies WHERE code=? LIMIT 1", array($registrarPriceCurrency));
+        $domain_currency_array = self::getCurrencySettingsByCode($registrarPriceCurrency);
         $domain_currency_id = $domain_currency_array["id"];
 
         //get domain extension
-        $tld = $this->getDomainExtension($domain);
+        $tld = self::getDomainExtension($domain);
 
         //here we are calling the getRenewPrice from the respective registar module
-        //$registrarRenewPrice = ispapi_getRenewPrice(getregistrarconfigoptions($registrar), $class, $domain_currency_id, $tld);
-        $registrarRenewPrice = call_user_func($registrar."_getRenewPrice", getregistrarconfigoptions($registrar), $class, $domain_currency_id, $tld);
+        $registrarRenewPrice = call_user_func(
+            $registrar."_getRenewPrice",
+            getregistrarconfigoptions($registrar),
+            $class,
+            $domain_currency_id,
+            $tld
+        );
 
         //the renew price has to be converted to the selected currency
         return $this->convertPriceToSelectedCurrency($registrarRenewPrice, $registrarPriceCurrency);
     }
 
-    /*
-     * Returns the formatted price
-     * (10.00 -> $10.00 USD)
+    /**
+     * Returns the formatted price (e.g. 10.00 -> $10.00 USD)
      *
      * @param integer $number The price
      * @param array $cur The currency array
-     *
      * @return string The formatted price with the right unit at the right place
-     *
      */
-    private function formatPrice($number, $cur)
+    private static function formatPrice($number, $cur)
     {
+        //TODO: use whmcs build in number format (localAPI)
         //$number = round($number, 3, PHP_ROUND_HALF_UP);
         if (empty($number) || $number <= 0) {
             return "";
@@ -719,79 +686,70 @@ class DomainCheck
         }
     }
 
-    /*
-     *  Returns an extended domain list with all the required information to do the checks
+    /**
+     * Returns an extended domain list with all the required information to do the checks
      *
-     *  @param list $domainlist the initial domain list (like: array(mydomain1.tld, mydomain2.tld, ...) )
-     *  @return list Returns the extended domain list with for each domains the extension, the registrar and if premium domains should be displayed or not.
+     * @param list $domainlist the initial domain list (like: array(mydomain1.tld, mydomain2.tld, ...) )
+     * @param list $registrars the list of registrars
+     * @return list Returns the extended domain list with for each domains the extension, the registrar and if premium domains should be displayed or not.
      */
-    private function getExtendedDomainlist($domainlist)
+    private static function getExtendedDomainlist($domainlist, $registrars)
     {
-        $whmcsdomainlist = array();
-        $whmcsdomainlist["extension"] = array();
-        $whmcsdomainlist["autoreg"] = array();
-
+        $whmcsdomainlist = array(
+            "extension" => array(),
+            "autoreg" => array()
+        );
+    
         //check if premium domains are activated in WHMCS
-        $premiumEnabled = false;
-        $premium_settings = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'PremiumDomains' LIMIT 1", array());
-        if ($premium_settings && $premium_settings["value"] == 1) {
-            $premiumEnabled = true;
-        }
+        $premium_settings = self::getConfigurationValue('PremiumDomains');
+        $premiumEnabled = ($premium_settings == 1);
 
         //get the configured domain lookup registrar
         $domainlookupregistrar = "";
-        $reg_settings = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting = 'domainLookupRegistrar' LIMIT 1", array());
-        if ($premium_settings) {
-            $domainlookupregistrar = $reg_settings["value"];
+        $reg_settings = self::getConfigurationValue('domainLookupRegistrar');
+        if (!is_null($premium_settings)) {
+            $domainlookupregistrar = $reg_settings;
         }
 
         //create an array with extension and autoreg (autoreg = the configured registrar for this extension)
-        $list = DCHelper::SQLCall("SELECT extension, autoreg  FROM tbldomainpricing", array(), "fetchall");
-        foreach ($list as $item) {
-                array_push($whmcsdomainlist["extension"], $item["extension"]);
-                array_push($whmcsdomainlist["autoreg"], $item["autoreg"]);
-        }
+        $list = self::getConfiguredExtensionsInclRegistrar();
+        $whmcsdomainlist["extension"] = array_keys($list);
+        $whmcsdomainlist["autoreg"] = array_values($list);
 
         $extendeddomainlist = array();
         $ispapiobject = array();
-
-        foreach ($domainlist as $domain) {
-            $tld = ".".$this->getDomainExtension($domain);
+        foreach ($domainlist as &$domain) {
+            $tld = ".".self::getDomainExtension($domain);
             $index = array_search($tld, $whmcsdomainlist["extension"]);
 
-            $show_premium = 0;
-            if ($whmcsdomainlist["autoreg"][$index] == $domainlookupregistrar && $premiumEnabled) {
-                $show_premium = 1;
-            }
-
-            //select the registrar which will be set to replace all the third party/empty(none) registrars.
-            //this order is important
-            if (in_array($domainlookupregistrar, $this->registrar)) {
-                $defaultregistrar = $domainlookupregistrar;
-            } elseif (in_array("ispapi", $this->registrar)) {
-                $defaultregistrar = "ispapi";
-            } elseif (in_array("hexonet", $this->registrar)) {
-                $defaultregistrar = "hexonet";
-            } else {
-                $defaultregistrar = "whois";
-            }
-
             //set the proper registrar that should be used
-            if (in_array($whmcsdomainlist["autoreg"][$index], $this->registrar)) {
+            if (in_array($whmcsdomainlist["autoreg"][$index], $registrars)) {
                 $reg = $whmcsdomainlist["autoreg"][$index];
             } else {
-                $reg = $defaultregistrar;
+                //select the registrar which will be set to replace all the third party/empty(none) registrars.
+                //this order is important
+                if (in_array($domainlookupregistrar, $registrars)) {
+                    $reg = $domainlookupregistrar;
+                } elseif (in_array("ispapi", $registrars)) {
+                    $reg = "ispapi";
+                } elseif (in_array("hexonet", $registrars)) {
+                    $reg = "hexonet";
+                } else {
+                    $reg = "whois";
+                }
             }
 
-            array_push($extendeddomainlist, array("domain"=>$domain,
-                                                  "extension" => $whmcsdomainlist["extension"][$index],
-                                                  "autoreg" => $reg, //!empty($whmcsdomainlist["autoreg"][$index]) ? $whmcsdomainlist["autoreg"][$index] : "none" ,
-                                                  "show_premium" => $show_premium));
+            $extendeddomainlist[] = array(
+                "domain"        =>  $domain,
+                "extension"     =>  $whmcsdomainlist["extension"][$index],
+                "autoreg"       =>  $reg, //!empty($whmcsdomainlist["autoreg"][$index]) ? $whmcsdomainlist["autoreg"][$index] : "none" ,
+                "show_premium"  =>  ($whmcsdomainlist["autoreg"][$index] == $domainlookupregistrar && $premiumEnabled) ? 1 : 0
+            );
         }
 
         //reorganize the information
         $newlist = array();
-        foreach ($extendeddomainlist as $item) {
+        foreach ($extendeddomainlist as &$item) {
             if ($item["show_premium"] == 0) {
                 $item["autoreg"] = $item["autoreg"]."-nopremium";
             }
@@ -804,73 +762,56 @@ class DomainCheck
                 }
                 $newlist[$item["autoreg"]]["show_premium"] = $item["show_premium"];
             }
-            array_push($newlist[$item["autoreg"]]["domain"], $item["domain"]);
+            $newlist[$item["autoreg"]]["domain"][] = $item["domain"];
         }
 
         return $newlist;
     }
 
-    /*
+    /**
      * Get all domains of the selected categories if they are configured in WHMCS
      * If not categorie selected, then returns all the categories.
      *
      * @return array An array with all TLDs of the selected categories.
      */
-    private function getTLDGroups()
+    private static function getTLDGroups($tldgroup)
     {
         //get all the tlds configured in WHMCS
-        $tlds_configured_in_whmcs = array();
-        $tlds_configured_in_whmcs_array = DCHelper::SQLCall("SELECT extension FROM tbldomainpricing", array(), "fetchall");
-        foreach ($tlds_configured_in_whmcs_array as $tld) {
-            array_push($tlds_configured_in_whmcs, substr($tld["extension"], 1));
-        }
+        $tlds_configured_in_whmcs = self::getConfiguredExtensions(true);
 
         //if $this->tldgroup empty, it means no category selected, so return all the caterogies
-        if (empty($this->tldgroup)) {
-            $groups = array();
-            $all_categories = DCHelper::SQLCall("SELECT id FROM ispapi_tblcategories", array(), "fetchall");
-            foreach ($all_categories as $categorie) {
-                array_push($groups, $categorie["id"]);
-            }
+        if (empty($tldgroup)) {
+            $groups = self::getConfiguredCategories();
         } else {
-            $groups = explode(',', $this->tldgroup);
+            $groups = explode(',', $tldgroup);
         }
 
         $tlds = array();
-
-        foreach ($groups as $group) {
-            $tlds_of_the_group = DCHelper::SQLCall("SELECT id, name, tlds FROM ispapi_tblcategories WHERE id = ? LIMIT 1", array($group));
-            if ($tlds_of_the_group) {
-                $tlds_of_the_group_array = explode(' ', $tlds_of_the_group["tlds"]);
-                //remove all empty elements (yes it happens) and all tlds which are not configured in WHMCS
-                $i=0;
-                foreach ($tlds_of_the_group_array as $tld) {
-                    if (empty($tld) || (!in_array($tld, $tlds_configured_in_whmcs))) {
-                        unset($tlds_of_the_group_array[$i]);
-                    }
-                    $i++;
+        foreach ($groups as &$group) {
+            $tlds_of_the_group = self::getConfiguredCategoryExtensions($group);
+            //remove all tlds which are not configured in WHMCS
+            foreach ($tlds_of_the_group as &$tld) {
+                if (in_array($tld, $tlds_configured_in_whmcs)) {
+                    $tlds[] = $tld;
                 }
-                $tlds = array_merge($tlds, $tlds_of_the_group_array);
             }
         }
         return $tlds;
     }
 
-    /*
+    /**
      * Convert the domain from IDN to Punycode (müller.com => xn--mller-kva.com)
      *
      * @param string|array $domain The domain name or an array of domains
      * @param IspApiConnection object $ispapi The IspApiConnection object to send API Requests
      * @return string|array Punycode of the domain name or array of Punycodes
      */
-    private function convertToPunycode($domain, $registrar)
+    private static function convertToPunycode($domain, $registrar)
     {
-        $command = array(
-                "COMMAND" => "ConvertIDN",
-                "DOMAIN" => $domain
-        );
-        $response = DCHelper::APICall($registrar, $command);
-
+        $response = DCHelper::APICall($registrar, array(
+            "COMMAND" => "ConvertIDN",
+            "DOMAIN" => $domain
+        ));
         if (!is_array($domain)) {
             return $response["PROPERTY"]["ACE"][0];
         } else {
@@ -878,21 +819,19 @@ class DomainCheck
         }
     }
 
-    /*
+    /**
      * Convert the domain from Punycode to IDN (xn--mller-kva.com => müller.com)
      *
      * @param string|array $domain The domain name or an array of domains
      * @param IspApiConnection object $ispapi The IspApiConnection object to send API Requests
      * @return string|array IDN of the domain name or array of IDNs.
      */
-    private function convertToIDN($domain, $registrar)
+    private static function convertToIDN($domain, $registrar)
     {
-        $command = array(
-                "COMMAND" => "ConvertIDN",
-                "DOMAIN" => $domain
-        );
-        $response = DCHelper::APICall($registrar, $command);
-
+        $response = DCHelper::APICall($registrar, array(
+            "COMMAND" => "ConvertIDN",
+            "DOMAIN" => $domain
+        ));
         if (!is_array($domain)) {
             return $response["PROPERTY"]["IDN"][0];
         } else {
@@ -900,12 +839,11 @@ class DomainCheck
         }
     }
 
-    /*
+    /**
      * Helper to delete an element from an array.
      *
      * @param string $element The element to delete
      * @param array &$array The array
-     *
      */
     public static function deleteElement($element, &$array)
     {
@@ -915,30 +853,247 @@ class DomainCheck
         }
     }
 
-    /*
-     * Get the domain label.
-     * (testdomain.net => testdomain)
+    /**
+     * Get the domain label. (e.g. testdomain.net => testdomain)
      *
      * @param string $domain The domain name
      * @return string The domain label
      */
-    private function getDomainLabel($domain)
+    private static function getDomainLabel($domain)
     {
         $tmp = explode(".", $domain);
         return $tmp[0];
     }
 
-    /*
-     * Get the domain extension
-     * (testdomain.net => net)
+    /**
+     * Get the domain extension (e.g. testdomain.net => net)
      *
      * @param string $domain The domain name
      * @return string The domain extension (without ".")
      */
-    private function getDomainExtension($domain)
+    private static function getDomainExtension($domain)
     {
         $tmp = explode(".", $domain, 2);
         return $tmp[1];
+    }
+
+    /**
+     * Get the id list of configured search categories
+     *
+     * @return array id list of configured search categories
+     */
+    private static function getConfiguredCategories()
+    {
+        $r = DCHelper::SQLCall("SELECT id FROM ispapi_tblcategories", null, "fetchall");
+        $categories = array();
+        foreach ($r as &$row) {
+            $categories[] = $row["id"];
+        }
+        return $categories;
+    }
+
+    /**
+     * Get the configured Extension for the given search category
+     *
+     * @param int $categoryid id of the search category
+     * @return array list of extensions
+     */
+    private static function getConfiguredCategoryExtensions($categoryid)
+    {
+        $r = DCHelper::SQLCall("SELECT tlds FROM ispapi_tblcategories WHERE id = :id LIMIT 1", array(":id" => $categoryid), "fetch");
+        $extensions = array();
+        if (isset($r["tlds"])) {
+            $tlds = trim($r["tlds"]);
+            $tlds = preg_replace("/\s\s+/", " ", $tlds);
+            $extensions = explode(" ", $tlds);
+        }
+        return $extensions;
+    }
+
+    /**
+     * Get the configured registrar for the extension of the given domain name
+     *
+     * @param string $domain domain name
+     * @return string the registrar
+     */
+    private static function getRegistrarForDomain($domain)
+    {
+        return self::getRegistrarForDomainExtension(self::getDomainExtension($domain));
+    }
+
+    /**
+     * Get the configured registrar for the given domain extension
+     *
+     * @param string $ext domain extension
+     * @return string the registrar
+     */
+    private static function getRegistrarForDomainExtension($ext)
+    {
+        $r = DCHelper::SQLCall(
+            "SELECT autoreg FROM tbldomainpricing where extension=:ext",
+            array(
+                ":ext" => ".".$ext
+            )
+        );
+        return isset($r["autoreg"]) ? $r["autoreg"] : null;
+    }
+
+    /**
+     * Get the currency id by given currency code
+     *
+     * @param string $code currency code
+     * @return string currency id
+     */
+    private static function getCurrencyIDByCode($code)
+    {
+        $r = DCHelper::SQLCall(
+            "SELECT id FROM tblcurrencies WHERE code=:code LIMIT 1",
+            array(
+                ":code" => $registrarpriceCurrency
+            )
+        );
+        return isset($r["id"]) ? $r["id"] : null;
+    }
+
+    /**
+     * Get list of price-configured domain extensions
+     *
+     * @param bool $removeLeadingDot flag to auto-remove the leading dot character in extension string
+     * @return array list of configured extensions
+     */
+    private static function getConfiguredExtensions($removeLeadingDot = false)
+    {
+        $r = DCHelper::SQLCall("SELECT extension FROM tbldomainpricing", null, "fetchall");
+        $extensions = array();
+        foreach ($r as &$row) {
+            $extensions[] = $removeLeadingDot ? substr($row["extension"], 1) : $row["extension"];
+        }
+        return $extensions;
+    }
+
+    /**
+     * Get list of price-configured domain extensions mapped to the assigned registrar
+     *
+     * @return list list of extensions e.g. array(".com" => "ispapi", ....)
+     */
+    private static function getConfiguredExtensionsInclRegistrar()
+    {
+        $r = DCHelper::SQLCall("SELECT extension,autoreg FROM tbldomainpricing", null, "fetchall");
+        $map = array();
+        foreach ($r as $row) {
+            $map[$row["extension"]] = $row["autoreg"];
+        }
+        return $map;
+    }
+
+    /**
+     * Get configuration value for given setting
+     *
+     * @param string $setting the setting
+     * @return null|string returns null in case of an error otherwise the configuration value
+     */
+    private static function getConfigurationValue($setting)
+    {
+        $r = DCHelper::SQLCall(
+            "SELECT value FROM tblconfiguration WHERE setting = :setting LIMIT 1",
+            array(
+                ":setting" => $setting
+            )
+        );
+        return isset($r["value"]) ? $r["value"] : null;
+    }
+
+    /**
+     * Get lookup provider configuration value for given registrar and setting
+     *
+     * @param string $registrar the registrar
+     * @param string $setting the setting
+     * @return null|string returns null in case of an error otherwise the configuration value
+     */
+    private static function getLookupConfigurationValue($registrar, $setting)
+    {
+        $r = DCHelper::SQLCall(
+            "SELECT value FROM tbldomain_lookup_configuration WHERE registrar = :registrar AND setting = :setting LIMIT 1",
+            array(
+                ":registrar" => $registrar,
+                ":setting" => $setting
+            )
+        );
+        return isset($r["value"]) ? $r["value"] : null;
+    }
+
+    /**
+     * Get configuration value for given addon module and setting
+     *
+     * @param string $module the addon name
+     * @param string $setting the setting
+     * @return null|string returns null in case of an error otherwise the configuration value
+     */
+    private static function getAddOnConfigurationValue($module, $setting)
+    {
+        $r = DCHelper::SQLCall(
+            "SELECT value FROM tbladdonmodules WHERE module=:module  AND setting=:setting LIMIT 1",
+            array(
+                ":module" => $module,
+                ":setting" => $setting
+            )
+        );
+        return isset($r["value"]) ? $r["value"] : null;
+    }
+
+    /**
+     * Get all configuration settings for a currency specified by given currency id
+     *
+     * @param int $currencyid the currency id
+     * @return null|array returns null in case of an error otherwise the configuration values
+     */
+    private static function getCurrencySettingsById($currencyid)
+    {
+        return DCHelper::SQLCall(
+            "SELECT * FROM tblcurrencies WHERE id=:currencyid LIMIT 1",
+            array(
+                ":currencyid" => $currencyid
+            )
+        );
+    }
+
+    /**
+     * Get all configuration settings for a currency specified by given currency code
+     *
+     * @param int $code the currency code
+     * @return null|array returns null in case of an error otherwise the configuration values
+     */
+    private static function getCurrencySettingsByCode($code)
+    {
+        return DCHelper::SQLCall(
+            "SELECT * FROM tblcurrencies WHERE code=:code LIMIT 1",
+            array(
+                ":code" => strtoupper($code)
+            )
+        );
+    }
+
+    /**
+     * Get all price-configured backorderable domain extensions for given currency spefified by currency id
+     *
+     * @param int $currencyid the currency id
+     * @return array the list of backorderable domain extensions
+     */
+    private static function getConfiguredBackorderExtensions($currencyid)
+    {
+        //TODO: column currency_id should be better named id to follow WHMCS standards
+        $r = DCHelper::SQLCall(
+            "SELECT extension FROM backorder_pricing WHERE currency_id=:currencyid",
+            array(
+                ":currencyid" => $currencyid
+            ),
+            "fetchall"
+        );
+        $extensions = array();
+        foreach ($r as &$row) {
+            $extensions[] = $row["extension"];
+        }
+        return $extensions;
     }
 
     /*
@@ -946,7 +1101,6 @@ class DomainCheck
      */
     public function send()
     {
-        echo $this->response;
-        die();
+        die($this->response);
     }
 }
