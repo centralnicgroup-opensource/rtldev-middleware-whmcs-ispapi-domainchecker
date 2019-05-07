@@ -2,51 +2,39 @@ ul.cat {
     margin:0px;
     padding:0px;
 }
-
 ul.cat li {
     display:inline;
-    /*float:center;*/
     background-color: #939598;
-    color: #ffffff;
-    padding:7px 10px 7px 10px;
-    margin-left:2px;
-    margin-right:2px;
-    /*margin-top:3px;
-    margin-bottom:3px;*/
+    color: #FFF;
+    padding:7px 10px;
+    margin: 3px 2px;
     cursor:pointer;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
 }
-
 ul.cat li.active {
-    background-color: #f26522;
-    color:#ffffff;
+    background-color: #F26522;
+    color:#FFF;
 }
-
 .small-container{
     padding-left:30px;
     padding-top:10px;
 }
-
 .domain-checker-container2 {
     border-radius: 10px;
-    margin: 20px 0;
-    padding: 0;
+    margin: 20px 0px;
+    padding: 0px;
 }
 .domain-checker-bg2 {
-    margin: 0;
-    padding: 10px 0;
+    margin: 0px;
+    padding: 10px 0px;
 }
-
-.clickable {
+.clickable, .click {
    cursor: pointer;
 }
-.click {
-    cursor: pointer;
-}
 .viewWhois.added{
-    color: #00a850;
+    color: #00A850;
     text-decoration: none;
 }
 a.viewWhois{
@@ -63,7 +51,6 @@ a.viewWhois{
 }
 .first-line .domain-label{
     display: inline-block;
-
     font-weight: 500;
     color: #939598;
     line-height: 1.45;
@@ -76,23 +63,23 @@ a.viewWhois{
     font-size:21px;
 }
 .far.fa-square.avail{
-    color: #00a850;
+    color: #00A850;
 }
 .fas.fa-check-square{
     position:absolute;
     font-size:21px;
 }
 .fas.fa-check-square.avail{
-    color: #00a850;
+    color: #00A850;
 }
 .domaininbox-backorder{
     width: 645px;
     text-align: left;
     font-size: 15px;
     padding: 20px 20px 10px;
-    border: 3px solid #00a651;
+    border: 3px solid #00A651;
     margin: 20px 8px;
-    color: #0033a0;
+    color: #0033A0;
     line-height: 1.45;
 }
 .domainlabel {
@@ -104,9 +91,9 @@ a.viewWhois{
     font-size: 20px;
 }
 .action-button{
-    background-color: #00a651;
+    background-color: #00A651;
     border: none;
-    color: white;
+    color: #FFF;
     padding: 10px;
     float: right;
     font-size: 13px;
@@ -142,13 +129,13 @@ a.viewWhois{
     text-align: left;
     font-size: 15px;
     padding: 20px 20px 10px;
-    border: 3px solid #00a651;
+    border: 3px solid #00A651;
     margin: 20px 8px;
-    color: #0033a0;
+    color: #0033A0;
     line-height: 1.45;
 }
 .premium-label{
-    color: #00b1df;
+    color: #00B1DF;
     font-weight: bold;
     margin-left: 10px;
     line-height: 1.45;
@@ -159,22 +146,22 @@ a.viewWhois{
 }
 .clicked .domain-label {
     padding-left: 30px;
-    color: white;
+    color: #FFF;
 }
 .domain-label.available.added {
-    color: #00a850;
+    color: #00A850;
 }
 .domain-label.available{
     font-weight: 500;
-    color: #0033a0;
+    color: #0033A0;
 }
 .tld-zone.available.added {
     font-weight: bold;
-    color: #00a850;
+    color: #00A850;
 }
 .tld-zone.available{
     font-weight: bold;
-    color: #0033a0;
+    color: #0033A0;
 }
 div.second-line{
     margin-left: 30px;
@@ -190,64 +177,61 @@ span.taken{
     font-weight: bold;
 }
 .first-line{
-
     color: #939598;
     font-weight: 700;
     text-transform: capitalize;
 }
 span.taken.added{
-    color: #00a850;
+    color: #00A850;
 }
-
 span.registerprice {
     font-size: 14px;
-    color: #f26522;
+    color: #F26522;
     font-weight: 700;
 }
 span.spanelement{
-    color: white;
+    color: #FFF;
 }
 .search-result-price {
     text-align: right;
 }
 .added {
     font-weight: bold;
-    color: #00a850;
+    color: #00A850;
 }
 .domain-label.added{
-    color: #00a850;
+    color: #00A850;
 }
-
 .details.hide {
     display:none;
 }
 .registerprice.added{
-    color: #00a850;
+    color: #00A850;
     text-align: right;
 }
 .available {
     font-size: 12px;
-    color: #00a850;
+    color: #00A850;
     font-weight: 700;
     text-transform: uppercase;
 }
 .backorder.added{
-    color: #00a850;
+    color: #00A850;
 }
 .backorder {
     font-size: 12px;
     font-weight: 700;
     text-transform: capitalize;
-    color: #0033a0;
+    color: #0033A0;
 }
 .premium.added{
-    color: #00a850 !important;
+    color: #00A850 !important;
 }
 .premium {
     font-size: 12px;
     font-weight: bold;
     text-transform: capitalize;
-    color: #00b1df;
+    color: #00B1DF;
 }
 .more {
     text-transform: capitalize;
@@ -288,34 +272,30 @@ span.spanelement{
 .domainbox{
     margin-bottom:12px;
 }
-
 .clear{
     clear: both;
 }
-
 .domain-box{
     max-width: 100%;
     margin-left:auto;
     margin-right:auto;
 }
-
 .search-form .search-input-bar .input-group {
   width: 600px;
   max-width: 100%;
   color: #939598;
-
   margin-left:auto;
   margin-right:auto;
 }
 .search-form .search-input-bar .input-group .search-btn {
-  background-color: #f26522;
-  color: #fff;
+  background-color: #F26522;
+  color: #FFF;
   border-radius: 5px;
   border: none;
 }
 .search-form .search-input-bar .input-group .singlesearch {
   background: transparent;
-  border: 3px solid #0033a0;
+  border: 3px solid #0033A0;
   border-radius: 10px;
   font-size: 18px;
 }
@@ -323,7 +303,6 @@ span.spanelement{
   margin-left: 0;
   height: 44px;
 }
-
 .input-group .inner-addon {
   position: relative;
 }
@@ -357,7 +336,7 @@ span.spanelement{
  @media only screen and (max-width : 651px) {
      .search-form .search-input-bar .input-group {
        width: 600px;
-       color: black;
+       color: #000;
      }
  }
  @media only screen and (max-width : 640px) {
