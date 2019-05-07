@@ -4,7 +4,7 @@ use ISPAPI\DCHelper;
 
 require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","DCHelper.class.php")));
 
-$module_version = "9.0.2";
+$module_version = "9.0.3";
 
 /*
  * Configuration of the addon module.

@@ -1,3 +1,10 @@
+## [9.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.0.2...v9.0.3) (2019-05-07)
+
+
+### Performance Improvements
+
+* **DomainCheck:** class code review ([7287444](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/7287444))
+
 ## [9.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.0.1...v9.0.2) (2019-05-07)
 
 
