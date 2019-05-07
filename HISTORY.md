@@ -1,3 +1,10 @@
+## [9.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.0.1...v9.0.2) (2019-05-07)
+
+
+### Bug Fixes
+
+* **CSS:** review category margin css ([aab34a7](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/aab34a7))
+
 ## [9.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.0.0...v9.0.1) (2019-05-03)
 
 

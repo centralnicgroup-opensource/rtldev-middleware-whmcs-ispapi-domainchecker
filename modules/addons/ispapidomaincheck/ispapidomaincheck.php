@@ -11,7 +11,7 @@ if (file_exists($path)) {
 }
 require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","DCHelper.class.php")));
 
-$module_version = "9.0.1";
+$module_version = "9.0.2";
 
 /*
  * Configuration of the addon module.
