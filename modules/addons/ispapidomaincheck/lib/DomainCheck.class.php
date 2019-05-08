@@ -3,6 +3,7 @@ namespace ISPAPI;
 
 use WHMCS\Database\Capsule;
 use WHMCS\Domains\Pricing\Premium;
+use WHMCS\Config\Setting;
 use PDO;
 
 /**
@@ -95,7 +96,7 @@ class DomainCheck
             $registrar = self::getRegistrarForDomain($this->domain);
             if (isset($registrar)) {
                 $check = DCHelper::APICall($registrar, array(
-                    "COMMAND" => "checkDomains",
+                    "COMMAND" => "CheckDomains",
                     "PREMIUMCHANNELS" => "*",
                     "DOMAIN" => array($this->domain)
                 ));
@@ -235,7 +236,7 @@ class DomainCheck
     */
     private static function getDomaincheckerMode()
     {
-        $registrar = self::getConfigurationValue('domainLookupRegistrar');
+        $registrar = Setting::getValue('domainLookupRegistrar');
         if ($registrar == "ispapi") {
             $dc_setting = self::getLookupConfigurationValue($registrar, 'suggestions');
             if (!empty($dc_setting)) {
@@ -701,12 +702,12 @@ class DomainCheck
         );
     
         //check if premium domains are activated in WHMCS
-        $premium_settings = self::getConfigurationValue('PremiumDomains');
+        $premium_settings = Setting::getValue('PremiumDomains');
         $premiumEnabled = ($premium_settings == 1);
 
         //get the configured domain lookup registrar
         $domainlookupregistrar = "";
-        $reg_settings = self::getConfigurationValue('domainLookupRegistrar');
+        $reg_settings = Setting::getValue('domainLookupRegistrar');
         if (!is_null($premium_settings)) {
             $domainlookupregistrar = $reg_settings;
         }
@@ -800,6 +801,26 @@ class DomainCheck
     }
 
     /**
+     * Convert the domain name into both IDN and punycode and return the desired data by given property name
+     *
+     * @param string|array $domain The domain name or an array of domains
+     * @param IspApiConnection object $ispapi The IspApiConnection object to send API Requests
+     * @param string $key the property name to return data from
+     * @return string|array convert result for the given property name
+     */
+    private static function convert($domain, $registrar, $key)
+    {
+        return DCHelper::APICall($registrar, array(
+            "COMMAND" => "ConvertIDN",
+            "DOMAIN" => $domain
+        ));
+        if (is_array($domain)) {
+            return $r["PROPERTY"][$key];
+        }
+        return $r["PROPERTY"][$key][0];
+    }
+
+    /**
      * Convert the domain from IDN to Punycode (müller.com => xn--mller-kva.com)
      *
      * @param string|array $domain The domain name or an array of domains
@@ -808,15 +829,7 @@ class DomainCheck
      */
     private static function convertToPunycode($domain, $registrar)
     {
-        $response = DCHelper::APICall($registrar, array(
-            "COMMAND" => "ConvertIDN",
-            "DOMAIN" => $domain
-        ));
-        if (!is_array($domain)) {
-            return $response["PROPERTY"]["ACE"][0];
-        } else {
-            return $response["PROPERTY"]["ACE"];
-        }
+        return self::convert($domain, $registrar, "ACE");
     }
 
     /**
@@ -828,15 +841,7 @@ class DomainCheck
      */
     private static function convertToIDN($domain, $registrar)
     {
-        $response = DCHelper::APICall($registrar, array(
-            "COMMAND" => "ConvertIDN",
-            "DOMAIN" => $domain
-        ));
-        if (!is_array($domain)) {
-            return $response["PROPERTY"]["IDN"][0];
-        } else {
-            return $response["PROPERTY"]["IDN"];
-        }
+        return self::convert($domain, $registrar, "IDN");
     }
 
     /**
@@ -987,23 +992,6 @@ class DomainCheck
     }
 
     /**
-     * Get configuration value for given setting
-     *
-     * @param string $setting the setting
-     * @return null|string returns null in case of an error otherwise the configuration value
-     */
-    private static function getConfigurationValue($setting)
-    {
-        $r = DCHelper::SQLCall(
-            "SELECT value FROM tblconfiguration WHERE setting = :setting LIMIT 1",
-            array(
-                ":setting" => $setting
-            )
-        );
-        return isset($r["value"]) ? $r["value"] : null;
-    }
-
-    /**
      * Get lookup provider configuration value for given registrar and setting
      *
      * @param string $registrar the registrar
@@ -1082,6 +1070,7 @@ class DomainCheck
     private static function getConfiguredBackorderExtensions($currencyid)
     {
         //TODO: column currency_id should be better named id to follow WHMCS standards
+        //TODO: rename table backorder_pricing to have ispapi_ prefix
         $r = DCHelper::SQLCall(
             "SELECT extension FROM backorder_pricing WHERE currency_id=:currencyid",
             array(
