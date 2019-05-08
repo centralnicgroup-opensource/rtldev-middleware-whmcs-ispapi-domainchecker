@@ -707,9 +707,8 @@ class DomainCheck
 
         //get the configured domain lookup registrar
         $domainlookupregistrar = "";
-        $reg_settings = Setting::getValue('domainLookupRegistrar');
         if (!is_null($premium_settings)) {
-            $domainlookupregistrar = $reg_settings;
+            $domainlookupregistrar = Setting::getValue('domainLookupRegistrar');
         }
 
         //create an array with extension and autoreg (autoreg = the configured registrar for this extension)
@@ -810,7 +809,7 @@ class DomainCheck
      */
     private static function convert($domain, $registrar, $key)
     {
-        return DCHelper::APICall($registrar, array(
+        $r = DCHelper::APICall($registrar, array(
             "COMMAND" => "ConvertIDN",
             "DOMAIN" => $domain
         ));
