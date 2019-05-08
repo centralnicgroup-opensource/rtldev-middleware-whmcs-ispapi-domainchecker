@@ -13,11 +13,11 @@ function ispapidomaincheck_config()
 {
     global $module_version;
     return array(
-        "name" => "ISPAPI HP DomainChecker",
-        "description" => "This addon provides a new domainchecker interface with high speed checks, suggestions and premium support.",
-        "version" => $module_version,
-        "author" => "HEXONET",
-        "language" => "english",
+        "name"          => "ISPAPI HP DomainChecker",
+        "description"   => "This addon provides a new domainchecker interface with high speed checks, suggestions and premium support.",
+        "version"       => $module_version,
+        "author"        => "HEXONET",
+        "language"      => "english"
     );
 }
 
@@ -29,16 +29,27 @@ function ispapidomaincheck_activate()
     include(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"categories.php")));
 
     //if not existing, create ispapi_tblcategories table
-    DCHelper::SQLCall("CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)", array(), "execute");
+    DCHelper::SQLCall(
+        "CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)",
+        null,
+        "execute"
+    );
 
     //import the default categories when empty
-    $data = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
+    $data = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", null, "fetchall");
     if (empty($data)) {
         foreach ($categorieslib as $category => &$tlds) {
-            DCHelper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
+            DCHelper::SQLCall(
+                "INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)",
+                array($category, implode(" ", $tlds)),
+                "execute"
+            );
         }
     }
-    return array('status'=>'success', 'description'=>'The ISPAPI HP DomainChecker was successfully installed.');
+    return array(
+        'status'        =>  'success',
+        'description'   =>  'The ISPAPI HP DomainChecker was successfully installed.'
+    );
 }
 
 /*
@@ -48,15 +59,18 @@ function ispapidomaincheck_upgrade($vars)
 {
     if ($vars['version'] < 7.3) {
         // 1. DROP ispapi_tblaftermarketcurrencies if exists
-        DCHelper::SQLCall("DROP TABLE IF EXISTS ispapi_tblaftermarketcurrencies", array(), "execute");
+        DCHelper::SQLCall("DROP TABLE IF EXISTS ispapi_tblaftermarketcurrencies", null, "execute");
         // 2. DROP ispapi_tblsettings if exists
-        DCHelper::SQLCall("DROP TABLE IF EXISTS ispapi_tblsettings", array(), "execute");
+        DCHelper::SQLCall("DROP TABLE IF EXISTS ispapi_tblsettings", null, "execute");
         // 3. ALTER ispapi_tblcategories
-        DCHelper::SQLCall("ALTER TABLE ispapi_tblcategories DROP COLUMN parent", array(), "execute");
+        DCHelper::SQLCall("ALTER TABLE ispapi_tblcategories DROP COLUMN parent", null, "execute");
         // This one deletes the row and does not complain if it can't.
-        DCHelper::SQLCall("DELETE IGNORE FROM ispapi_tblcategories WHERE tlds=''", array(), "execute");
+        DCHelper::SQLCall("DELETE IGNORE FROM ispapi_tblcategories WHERE tlds=''", null, "execute");
     }
-    return array('status'=>'success', 'description'=>'The ISPAPI HP DomainChecker was successfully upgraded.');
+    return array(
+        'status'        =>  'success',
+        'description'   =>  'The ISPAPI HP DomainChecker was successfully upgraded.'
+    );
 }
 
 /*
@@ -65,7 +79,10 @@ function ispapidomaincheck_upgrade($vars)
 function ispapidomaincheck_deactivate()
 {
     //NOTHING TO DO
-    return array('status'=>'success','description'=>'The ISPAPI HP DomainChecker was successfully uninstalled.');
+    return array(
+        'status'        =>  'success',
+        'description'   =>  'The ISPAPI HP DomainChecker was successfully uninstalled.'
+    );
 }
 
 /*
@@ -77,7 +94,7 @@ function ispapidomaincheck_clientarea($vars)
 {
     //save the language in the session if not already set
     if (!isset($_SESSION["Language"])) {
-        $language_array = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting='Language'", array(), "fetch");
+        $language_array = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting='Language'", null, "fetch");
         $_SESSION["Language"] = strtolower($language_array["value"]);
     }
 
@@ -87,7 +104,7 @@ function ispapidomaincheck_clientarea($vars)
             'templatefile' => 'ispapidomaincheck',
             'requirelogin' => false,
             'vars' => array(
-                    'categories' => DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall"),
+                    'categories' => DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", null, "fetchall"),
                     'startsequence' => 4,
                     'modulename' => "ispapidomaincheck",
                     'modulepath' => "modules/addons/ispapidomaincheck/",
@@ -96,7 +113,7 @@ function ispapidomaincheck_clientarea($vars)
                     'path_to_domain_file' => "modules/addons/ispapidomaincheck/domain.php",
                     'domain' => isset($_POST["domain"]) ? $_POST["domain"] : "",
                     'currency' => $_SESSION["currency"]
-            ),
+            )
     );
 }
 
@@ -168,7 +185,7 @@ function ispapidomaincheck_categoryeditorcontent($modulelink)
     //import default categories
     if (isset($_REQUEST["importdefaultcategories"])) {
         $category_not_found_in_categorieslib = array();
-        $data = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
+        $data = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", null, "fetchall");
         if (empty($data)) {
             foreach ($categorieslib as $category => &$tlds) {
                 $insert_stmt = DCHelper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
@@ -209,7 +226,7 @@ function ispapidomaincheck_categoryeditorcontent($modulelink)
     ###############################################################################
 
     //get all categories with tlds for displaying
-    $categories = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", array(), "fetchall");
+    $categories = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", null, "fetchall");
 
     echo '<form action="'.$modulelink.'" method="post">';
     echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%"><tbody>';

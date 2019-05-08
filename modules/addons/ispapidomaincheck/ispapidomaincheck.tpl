@@ -441,9 +441,9 @@ $( document ).ready(function() {
                 handleFeedbackMessage(data);
 
                 //handle load more button
-                checkorder_length = data["checkorder"].length;
+                checkorder_length = data["idn"].length;
                 //display load more button if the list of domain is more than 10
-                if(data["checkorder"].length > 10){
+                if(data["idn"].length > 10){
                     $("#domainform input[id=loadmorebutton]").removeClass('hide');
                 }
 
@@ -451,7 +451,7 @@ $( document ).ready(function() {
                 //to hide divs with class when max limit exeeded
                 var hide = '';
 
-				$.each(data["checkorder"], function(index, element) {
+				$.each(data["idn"], function(index, element) {
 
 					var domain = element; //.replace(/\./g, '');
                     var index = domain.indexOf(".");
@@ -498,7 +498,7 @@ $( document ).ready(function() {
 					checkdomains(new Array(), true);
 					return;
 				}else{
-                    startChecking(data["checkorder"]);
+                    startChecking(data["idn"]);
 				}
 			}
 		});

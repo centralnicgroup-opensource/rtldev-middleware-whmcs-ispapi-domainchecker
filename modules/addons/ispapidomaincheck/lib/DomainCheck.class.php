@@ -144,87 +144,96 @@ class DomainCheck
         //delete WWW. if domain's starting with it
         $this->domain = preg_replace("/^www\./i", "", $this->domain);
         //remove all white spaces
-        $this->domain = strtolower(preg_replace("/\s+/", "", $this->domain));
+        $this->domain = strtolower(preg_replace("/\s+/", "", trim($this->domain)));
 
         $feedback = array();
         $do_not_search = false;
         $domainlist = array();
 
-        $tldgroups = self::getTLDGroups($this->tldgroup);
-        $searched_label = self::getDomainLabel($this->domain);
-        $searched_tld = self::getDomainExtension($this->domain);
+        if (!empty($this->registrars)) {
+            $tldgroups = self::getTLDGroups($this->tldgroup);
+            $registrar = $this->registrars[0];//TODO what if this is empty/null?
+            $domain_idn = self::convertToIDN($this->domain, $registrar);
+            $searched_label = self::getDomainLabel($domain_idn);
+            $searched_tld = self::getDomainExtension($domain_idn);
 
-        if (!empty($this->registrars) && self::getDomaincheckerMode() == "on") {
-            //SUGGESTIONS MODE
-            //use the first ispapi registrar to query the suggestion list
-            $registrar = $this->registrars[0];
-            //first convert the search from IDN to Punycode as this is requested by QueryDomainSuggestionList command.
-            //WRONG! Read FTASKS-2442, therefore switched to to convertToIDN
-            $searched_label = self::convertToIDN($searched_label, $registrar);
-            $suggestions = DCHelper::APICall($registrar, array(
-                "COMMAND" => "QueryDomainSuggestionList",
-                "KEYWORD" => $searched_label,
-                "ZONE" => $tldgroups,
-                "SOURCE" => "ISPAPI-SUGGESTIONS",
-                "LIMIT" => "60"
-            ));
-            //convert the domainlist to IDN as it is returned in punycode
-            $domainlist = self::convertToIDN($suggestions['PROPERTY']['DOMAIN'], $registrar);
-        } else {
-            //REGULAR MODE
-            foreach ($tldgroups as &$tld) {
-                $domainlist[] = $searched_label.".".$tld;
-            }
-        }
-
-        //check if the searched keyword contains a configured TLD
-        //example: thebestshop -> thebest.shop should be at the top
-        $extensions = self::getConfiguredExtensions(true);
-        foreach ($extensions as &$extension) {
-            if (preg_match('/'.$extension.'$/i', $searched_label)) {
-                $tmp = explode($extension, $searched_label);
-                //add to the domain to the list if not empty
-                if (!empty($tmp[0])) {
-                    $domainlist[] = $tmp[0].".".$extension;
+            if (!self::getDomaincheckerMode() == "on") {
+                //SUGGESTIONS MODE
+                $suggestions = DCHelper::APICall($registrar, array(
+                    "COMMAND" => "QueryDomainSuggestionList",
+                    "KEYWORD" => $domain_idn,//IDN as required by FTASKS-2442
+                    "ZONE" => self::convertToPunycode($tldgroups, $registrar),//PUNYCODE as required by API
+                    "SOURCE" => "ISPAPI-SUGGESTIONS",
+                    "LIMIT" => "60"
+                ));
+                //convert the domainlist to IDN as it is returned in punycode
+                $domainlist = $suggestions['PROPERTY']['DOMAIN'];
+            } else {
+                //REGULAR MODE
+                foreach ($tldgroups as &$tld) {
+                    $domainlist[] = $searched_label.".".$tld;
                 }
             }
-        }
 
-        //remove duplicate entries in the domainlist and change the keys to keep them consecutive. (array_values)
-        $domainlist = array_values(array_unique($domainlist));
-
-        //add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
-        $item = self::getRegistrarForDomainExtension($searched_tld);
-        if (!empty($item)) {
-            //put the searched domain at the first place of the domain list
-            self::deleteElement($this->domain, $domainlist);
-            array_unshift($domainlist, $this->domain);
-        } else {
-            //if $searched_tld not empty display feedback message
-            if (!empty($searched_tld)) {
-                $feedback = array(
-                    "f_type" => "error",
-                    "f_message" => $this->i18n->getText("domain_not_supported_feedback"),
-                    "id" => $this->domain
-                );
-                $do_not_search = true;
+            //check if the searched keyword contains a configured TLD
+            //example: thebestshop -> thebest.shop should be at the top
+            $extensions = self::getConfiguredExtensions(true);
+            foreach ($extensions as &$extension) {
+                if (preg_match('/'.$extension.'$/i', $searched_label)) {
+                    $tmp = explode($extension, $searched_label);
+                    //add to the domain to the list if not empty
+                    if (!empty($tmp[0])) {
+                        //TODO: wouldn't it be better to have it at 1st place?
+                        $domainlist[] = $tmp[0].".".$extension;
+                    }
+                }
             }
-        }
 
-        //TODO checkorder with the order of the category editor?
-        //$this->getSortedDomainList($domainlist);
-        //removed; now we are checking all TLDs with API even if not configured with ISPAPI.
-        $domainlist_checkorder = $domainlist;
+            //remove duplicate entries in the domainlist and change the keys to keep them consecutive. (array_values)
+            $domainlist = array_values(array_unique($domainlist));
+
+            //add the domain at the top of the list even if he's not in the current group, but just when he's configured in WHMCS
+            $item = self::getRegistrarForDomainExtension($searched_tld);
+            if (!empty($item)) {
+                //put the searched domain at the first place of the domain list
+                self::deleteElement($this->domain, $domainlist);
+                array_unshift($domainlist, $this->domain);
+            } else {
+                //if $searched_tld not empty display feedback message
+                if (!empty($searched_tld)) {
+                    $feedback = array(
+                        "f_type" => "error",
+                        "f_message" => $this->i18n->getText("domain_not_supported_feedback"),
+                        "id" => $this->domain
+                    );
+                    $do_not_search = true;
+                }
+            }
+            $domainlist = self::convertToIDN($domainlist, $registrar);
+            //otherwise we have a domain name search probably appearing twice
+            //as we searched in punycode and the searched_label will get added
+            //plus idn tld to the domainlist
+            //this should be the most simple fix for now
+            $domainlist = array_values(array_unique($domainlist));
+            $domainlistace = self::convertToPunycode($domainlist, $registrar);
+        } else {
+            $feedback = array(
+                "f_type" => "error",
+                "f_message" => $this->i18n->getText("domain_not_supported_feedback"),
+                "id" => $this->domain
+            );
+            $do_not_search = true;
+        }
 
         //if there is an issue with the search, do not start checking
         if ($do_not_search) {
             $domainlist = array();
-            $domainlist_checkorder = array();
+            $domainlistace = array();
         }
 
         $this->response = json_encode(array(
-            "listorder" => $domainlist,
-            "checkorder" => $domainlist_checkorder,
+            "idn" => $domainlist,
+            "ace" => $domainlistace,
             "feedback" => $feedback
         ));
     }
@@ -415,25 +424,29 @@ class DomainCheck
 
         //handle the displaying of the backorder button in the search response
         $response = $this->handleBackorderButton($response);
-
         //feedback for the template
-        $searched_domain_object = array();
+        $idn = self::convertToIDN(strtolower($this->domain), $this->registrars[0]);
         foreach ($response as $item) {
-            if ($item["id"] == $this->domain) {
-                $searched_domain_object = $item;
-                continue;
+            if ($item["id"] == $idn || $item["id"] == $this->domain) {
+                if ($item["status"] == "taken" && $item["backorder_available"] == 1) {
+                    $feedback = array_merge(
+                        array("f_type" => "backorder", "f_message" => $this->i18n->getText("backorder_available_feedback")),
+                        $item
+                    );
+                } elseif ($item["status"] == "taken") {
+                    $feedback = array_merge(
+                        array("f_type" => "taken", "f_message" => $this->i18n->getText("domain_taken_feedback")),
+                        $item
+                    );
+                } elseif ($item["status"] == "available") {
+                    $feedback = array_merge(
+                        array("f_type" => "available", "f_message" => $this->i18n->getText("domain_available_feedback")),
+                        $item
+                    );
+                }
+                break;
             }
         }
-        if (isset($this->domain) && $this->domain == $searched_domain_object["id"]) {
-            if ($searched_domain_object["status"] == "taken" && $searched_domain_object["backorder_available"] == 1) {
-                $feedback = array_merge(array("f_type" => "backorder", "f_message" => $this->i18n->getText("backorder_available_feedback")), $searched_domain_object);
-            } elseif ($searched_domain_object["status"] == "taken") {
-                $feedback = array_merge(array("f_type" => "taken", "f_message" => $this->i18n->getText("domain_taken_feedback")), $searched_domain_object);
-            } elseif ($searched_domain_object["status"] == "available") {
-                $feedback = array_merge(array("f_type" => "available", "f_message" => $this->i18n->getText("domain_available_feedback")), $searched_domain_object);
-            }
-        }
-
         $response_array = array("data" => $response, "feedback" => $feedback);
 
         $this->response = json_encode($response_array);
@@ -772,7 +785,7 @@ class DomainCheck
      * Get all domains of the selected categories if they are configured in WHMCS
      * If not categorie selected, then returns all the categories.
      *
-     * @return array An array with all TLDs of the selected categories.
+     * @return array An array with all TLDs (IDN format!) of the selected categories.
      */
     private static function getTLDGroups($tldgroup)
     {
