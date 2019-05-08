@@ -1,4 +1,5 @@
 <?php
+//NOTE: make sure to provide IDN TLDs in IDN format, NOT in punycode
 $categorieslib = array(
 'Adult' => array('webcam','xxx','sex','sexy','adult','porn'),
 'Business' => array('global','gmbh','gold','group','holdings','immo','inc','industries','insurance','insure','international','investments','ventures','versicherung','net','capital','car','career','careers','cars','cash','ceo','cfa','cfd','claims','cleaning','co','cocom','company','consulting','corp','cpa','credit','creditcard','lease','lifeinsurance','limited','llc','llp','loan','loans','ltd','ltda','management','market','marketing','markets','mobi','money','mortgage','sale','sarl','spreadbetting','srl','tax','trade','trading','trust','dealer','enterprises','exchange','finance','financial','forex','foundation','fund','associates','auction','auto','autos','bank','banque','bargains','bid','biz','bizki','bizpl','boutique','broker','business','buy','partners','pay'),
