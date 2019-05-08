@@ -1,3 +1,10 @@
+# [9.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.0.3...v9.1.0) (2019-05-08)
+
+
+### Features
+
+* **load more:** added load more button feature to the search results ([ac152a7](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/ac152a7))
+
 ## [9.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.0.2...v9.0.3) (2019-05-07)
 
 
