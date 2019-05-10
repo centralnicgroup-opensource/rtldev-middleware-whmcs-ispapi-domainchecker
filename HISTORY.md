@@ -1,3 +1,15 @@
+# [9.2.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.1.0...v9.2.0) (2019-05-10)
+
+
+### Bug Fixes
+
+* **DB:** set collation to utf8; review SQLCall usage for inserts; ([123cf71](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/123cf71))
+
+
+### Features
+
+* **IDN:** review support for IDN TLDs and IDN domain search ([5033a5b](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/5033a5b))
+
 # [9.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.0.3...v9.1.0) (2019-05-08)
 
 
