@@ -506,13 +506,12 @@ $( document ).ready(function() {
 
     //load more button handling
     $('#loadmorebutton').click(function() {
-        checkorder_length = checkorder_length - max;
-        max = max+10;
+        var eL = $('#searchresults');
         //display 10 div items at a time
-        $('#searchresults').find("div.domainbox.hide:lt(10)").removeClass('hide');
-        if(checkorder_length < 0){
+        eL.find("div.domainbox.hide:lt(" + max + ")").removeClass('hide');
+        max += 10;
+        if(!eL.find("div.domainbox.hide").length) {
             //reset the values 
-            checkorder_length = 0;
             max = 10;
             //hide loadmore button when the list of domains empty
             $("#domainform input[id=loadmorebutton]").addClass('hide');
