@@ -1,3 +1,10 @@
+## [9.2.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.2.0...v9.2.1) (2019-05-10)
+
+
+### Bug Fixes
+
+* **load more:** fix logic to be able to step through/display all results ([32362ab](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/32362ab))
+
 # [9.2.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.1.0...v9.2.0) (2019-05-10)
 
 
