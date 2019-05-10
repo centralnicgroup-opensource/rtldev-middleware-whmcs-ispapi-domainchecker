@@ -30,7 +30,7 @@ function ispapidomaincheck_activate()
 
     //if not existing, create ispapi_tblcategories table
     DCHelper::SQLCall(
-        "CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT)",
+        "CREATE TABLE IF NOT EXISTS ispapi_tblcategories (id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT, name TEXT, tlds TEXT) CHARACTER SET utf8 COLLATE utf8_unicode_ci",
         null,
         "execute"
     );
@@ -40,8 +40,11 @@ function ispapidomaincheck_activate()
     if (empty($data)) {
         foreach ($categorieslib as $category => &$tlds) {
             DCHelper::SQLCall(
-                "INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)",
-                array($category, implode(" ", $tlds)),
+                "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
+                array(
+                    ":name" => $category,
+                    ":tlds" => implode(" ", $tlds)
+                ),
                 "execute"
             );
         }
@@ -57,6 +60,7 @@ function ispapidomaincheck_activate()
 */
 function ispapidomaincheck_upgrade($vars)
 {
+    DCHelper::SQLCall("ALTER TABLE ispapi_tblcategories CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci", null, "execute");
     if ($vars['version'] < 7.3) {
         // 1. DROP ispapi_tblaftermarketcurrencies if exists
         DCHelper::SQLCall("DROP TABLE IF EXISTS ispapi_tblaftermarketcurrencies", null, "execute");
@@ -188,7 +192,14 @@ function ispapidomaincheck_categoryeditorcontent($modulelink)
         $data = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", null, "fetchall");
         if (empty($data)) {
             foreach ($categorieslib as $category => &$tlds) {
-                $insert_stmt = DCHelper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
+                DCHelper::SQLCall(
+                    "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
+                    array(
+                        ":name" => $category,
+                        ":tlds" => implode(" ", $tlds)
+                    ),
+                    "execute"
+                );
             }
         } else {
             foreach ($categorieslib as $key => &$value) {
@@ -196,7 +207,14 @@ function ispapidomaincheck_categoryeditorcontent($modulelink)
             }
             if (!empty($category_not_found_in_categorieslib)) {
                 foreach ($category_not_found_in_categorieslib as $category => &$tlds) {
-                    DCHelper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($category, implode(" ", $tlds)), "execute");
+                    DCHelper::SQLCall(
+                        "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
+                        array(
+                            ":name" => $category,
+                            ":tlds" => implode(" ", $tlds)
+                        ),
+                        "execute"
+                    );
                 }
             }
         }
@@ -211,7 +229,14 @@ function ispapidomaincheck_categoryeditorcontent($modulelink)
         }
         //insert when added new category
         if ($_POST['NEWCAT']['NAME']) {
-            DCHelper::SQLCall("INSERT INTO ispapi_tblcategories (name, tlds) VALUES (?, ?)", array($_POST["NEWCAT"]["NAME"], $_POST["NEWCAT"]["TLDS"]), "execute");
+            DCHelper::SQLCall(
+                "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
+                array(
+                    ":name" => $_POST["NEWCAT"]["NAME"],
+                    ":tlds" => $_POST["NEWCAT"]["TLDS"]
+                ),
+                "execute"
+            );
         }
         echo '<div class="infobox"><strong><span class="title">Successfully saved!</span></strong><br>The changes have been saved.</div>';
     }

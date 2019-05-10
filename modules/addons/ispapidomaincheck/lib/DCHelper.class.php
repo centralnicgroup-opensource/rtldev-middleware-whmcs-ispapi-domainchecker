@@ -7,6 +7,7 @@ if (file_exists($path)) {
 } else {
     die('Please install our <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">ISPAPI Registrar Module</a> >= v1.7.1');
 }
+require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__,"i18n.class.php")));
 
 /**
  * PHP DCHelper Class
