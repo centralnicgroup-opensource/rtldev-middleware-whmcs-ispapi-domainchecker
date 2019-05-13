@@ -1,3 +1,10 @@
+## [9.2.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.2.1...v9.2.2) (2019-05-13)
+
+
+### Bug Fixes
+
+* **suggestion engine:** fix activation check ([ace2204](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/ace2204))
+
 ## [9.2.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.2.0...v9.2.1) (2019-05-10)
 
 
