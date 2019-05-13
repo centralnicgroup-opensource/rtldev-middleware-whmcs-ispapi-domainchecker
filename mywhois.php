@@ -82,6 +82,7 @@ if ($registrar) {
         echo "<tt><small>";
 
         $whois = urldecode($response["PROPERTY"]["WHOISDATA"][$i]);
+        //TODO: check use of html_entities instead of the below replaces
         $whois = preg_replace('/\&/', "&amp;", $whois);
         $whois = preg_replace('/\</', "&lt;", $whois);
         $whois = preg_replace('/\>/', "&gt;", $whois);

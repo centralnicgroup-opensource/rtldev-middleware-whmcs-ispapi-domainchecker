@@ -157,7 +157,7 @@ class DomainCheck
             $searched_label = self::getDomainLabel($domain_idn);
             $searched_tld = self::getDomainExtension($domain_idn);
 
-            if (!self::getDomaincheckerMode() == "on") {
+            if (self::getDomaincheckerMode() == "on") {
                 //SUGGESTIONS MODE
                 $suggestions = DCHelper::APICall($registrar, array(
                     "COMMAND" => "QueryDomainSuggestionList",
