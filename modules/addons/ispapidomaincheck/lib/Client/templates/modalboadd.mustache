@@ -1,0 +1,32 @@
+<div class="modal fade" id="backorderaddModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4>{{translations.modalboaddtitle}}</h4>
+        </div>
+        <div class="modal-body">
+          <form role="form">
+            <input type="hidden" id="domain" value="{{row.PC}}"/>
+            <div class="status-text">{{translations.backorder_available_feedback}}</div>
+            <div class="label-text"><br/>
+              <span class="domain-label">{{row.domainlabel}}</span><span class="tld-zone"><b>{{row.extension}}</b></span>
+            </div>
+            <div class="description-text"><br/>{{translations.domain_description_backorder}}</div>
+            <div class="backorder-text"><br/>
+              {{translations.backorder_info_text_backorderprice}}<b>{{price}}</b>.<br/><br/>
+              <ul class="col details-list">{{{translations.backorder_info_text_list}}}</ul>
+            </div>
+          </form>
+        </div>  
+        <div class="modal-footer">
+          <div class="pull-right">
+            <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> {{translations.bttn_cancel}}</button>
+            <button class="btn btn-success" type="button" id="doCreateBackorder" data-dismiss="modal">
+              <span class="add-text">{{translations.backorder}}</span>
+            </button> 
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> 

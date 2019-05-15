@@ -1,0 +1,46 @@
+.row1{
+    max-width: 600px;
+    margin: 0px auto 10px auto;
+}
+.collapse-category {
+  text-align: center;
+}
+.category-button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #939598;
+}
+.category-button i {
+  font-size: 24px;
+}
+.collapse-category .category-item {
+  display: inline-block;
+}
+.collapse-category .category-item.continents {
+  margin-top: 0;
+  cursor: pointer;
+}
+ul.cat {
+    text-align:center;
+    margin:0px;
+    padding:0px;
+}
+ul.cat li {
+    display:inline-block;
+    background-color: #939598;
+    color: #FFF;
+    padding:7px 10px;
+    margin: 3px 2px;
+    cursor:pointer;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+ul.cat li.active {
+    background-color: #F26522;
+    color:#FFF;
+}

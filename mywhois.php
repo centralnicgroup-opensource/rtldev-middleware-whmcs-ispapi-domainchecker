@@ -17,7 +17,7 @@ if (file_exists($init_path)) {
 }
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"includes","registrarfunctions.php")));
-require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "lib","DCHelper.class.php")));
+require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "lib","Common","DCHelper.class.php")));
 
 function WHMCS_LookupDomain($domain)
 {
@@ -81,19 +81,22 @@ if ($registrar) {
         echo "</legend>";
         echo "<tt><small>";
 
-        $whois = urldecode($response["PROPERTY"]["WHOISDATA"][$i]);
+        $whois = html_entities(urldecode($response["PROPERTY"]["WHOISDATA"][$i]));
         //TODO: check use of html_entities instead of the below replaces
-        $whois = preg_replace('/\&/', "&amp;", $whois);
-        $whois = preg_replace('/\</', "&lt;", $whois);
-        $whois = preg_replace('/\>/', "&gt;", $whois);
+        //$whois = preg_replace('/\&/', "&amp;", $whois);
+        //$whois = preg_replace('/\</', "&lt;", $whois);
+        //$whois = preg_replace('/\>/', "&gt;", $whois);
         //$whois = preg_replace('/ /', "&nbsp;", $whois);
-        $whois = preg_replace('/\r?\n/', "<br />\n", $whois);
+        $whois = preg_replace('/\r?\n/', "<br/>\n", $whois);
         echo $whois;
 
         echo "</small></tt>";
         echo "</fieldset>";
     }
 } else {
+    if (empty($whois)) {
+        $whois = "No data returned.";
+    }
     echo "<fieldset>";
     echo "<tt><small>";
     echo $whois;

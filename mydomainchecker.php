@@ -2,6 +2,7 @@
 // Handle "Transfer" button from the WHMCS default Homepage
 if (isset($_POST["transfer"])) {
     header("Location: cart.php?a=add&domain=transfer&query=".$_POST["domain"]);
+    exit();
 }
 
 define("CLIENTAREA", true);
@@ -9,23 +10,14 @@ use ISPAPI\DCHelper;
 
 // Find the correct path of the init.php file, based on the way we are integrating the module
 // (via symlinks or copy/paste), the path is different.
-$root_path = $_SERVER["DOCUMENT_ROOT"];
-$script_path = preg_replace("/.modules.addons..+$/", "", dirname($_SERVER["SCRIPT_NAME"]));
-if (!empty($script_path)) {
-    $root_path .= $script_path;
-}
-$init_path = implode(DIRECTORY_SEPARATOR, array($root_path,"init.php"));
-if (isset($GLOBALS["customadminpath"])) {
-    $init_path = preg_replace("/(\/|\\\)" . $GLOBALS["customadminpath"] . "(\/|\\\)init.php$/", DIRECTORY_SEPARATOR . "init.php", $init_path);
-}
-if (file_exists($init_path)) {
-    require_once($init_path);
-} else {
-    exit("cannot find init.php");
-}
+require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "init.inc.php")));
 
-require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "lib","DCHelper.class.php")));
-
+// load DCHelper class
+$path = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "lib", "Common", "DCHelper.class.php"));
+if (!file_exists($path)) {
+    exit('Missing dependency `ISPAPI Registrar Module`. Please download and install it from <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">github</a>.');
+}
+require_once($path);
 
 $ca = new WHMCS_ClientArea();
 $ca->setPageTitle($_LANG["domaintitle"]);
@@ -40,19 +32,19 @@ if (!file_exists($modulepath)) {
 }
 require $modulepath;
 
-// Get module variables
-$modulevars = array();
-foreach (DCHelper::SQLCall("SELECT * FROM tbladdonmodules WHERE module = 'ispapidomaincheck'", array(), "fetchall") as $var) {
-    $modulevars[$var["setting"]] = $var["value"];
-}
-
 // Call clientarea function
-$results = call_user_func("ispapidomaincheck_clientarea", $modulevars);
+$results = call_user_func(
+    "ispapidomaincheck_clientarea",
+    DCHelper::getAddOnConfigurationValue('ispapidomaincheck')
+);
 if (is_array($results["vars"])) {
     foreach ($results["vars"] as $k => $v) {
         $smartyvalues[$k] = $v;
     }
 }
-
-$ca->setTemplate("/modules/addons/ispapidomaincheck/ispapidomaincheck.tpl");
+if ($smartyvalues["error"]) {
+    $ca->setTemplate("/modules/addons/ispapidomaincheck/lib/Client/templates/error.tpl");
+} else {
+    $ca->setTemplate("/modules/addons/ispapidomaincheck/lib/Client/templates/index.tpl");
+}
 $ca->output();

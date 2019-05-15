@@ -1,0 +1,31 @@
+<div id="suggestionsopts" class="row1 row collapse-category collapse">
+    <div class="panel panel-hexonet">
+        <div class="panel-heading"><i class="glyphicon glyphicon-cog"></i> {{translations.settings}}</div>
+        <div class="panel-body">
+            <p>{{translations.settingsdescr}}</p>
+            <div class="row">
+                <div class="col-xs-4"><label for="sug_lang_opt"><b>{{translations.set_uselang}}</b></label></div>
+                <div class="col-xs-8">
+                    <select id="sug_lang_opt" name="sug_lang_opt">
+                        <option value="">{{translations.opt_no}}</option>
+                        {{#locales}}
+                            <option value="{{languageCode}}">{{localisedName}}</option>
+                        {{/locales}}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4">
+                    <label for="sug_ip_opt">{{translations.set_useip}}</label> 
+                </div>
+                <div class="col-xs-8">
+                    <select id="sug_ip_opt" name="sug_ip_opt">
+                        <option value="0">{{translations.opt_no}}</option>
+                        <option value="1">{{translations.opt_yes}}</option>
+                    </select>
+                </div>
+            </div>            
+        </div>
+    </div>
+</div>
+

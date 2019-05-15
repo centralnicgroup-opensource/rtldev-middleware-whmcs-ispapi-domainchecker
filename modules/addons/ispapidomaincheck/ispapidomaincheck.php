@@ -1,8 +1,17 @@
 <?php
 use WHMCS\Database\Capsule;
 use ISPAPI\DCHelper;
+use ISPAPI\I18n;
+use WHMCS\Config\Setting;
+use WHMCS\Module\Addon\ispapidomaincheck\Admin\AdminDispatcher;
+use WHMCS\Module\Addon\ispapidomaincheck\Client\ClientDispatcher;
 
-require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"lib","DCHelper.class.php")));
+if (!defined("WHMCS")) {
+    die("This file cannot be accessed directly");
+}
+
+require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "i18n.class.php")));
+require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Common", "DCHelper.class.php")));
 
 $module_version = "9.2.2";
 
@@ -78,207 +87,121 @@ function ispapidomaincheck_upgrade($vars)
 }
 
 /*
- * This function will be called with the deactivation of the add-on module.
-*/
-function ispapidomaincheck_deactivate()
-{
-    //NOTHING TO DO
-    return array(
-        'status'        =>  'success',
-        'description'   =>  'The ISPAPI HP DomainChecker was successfully uninstalled.'
-    );
-}
-
-/*
  * This function is the startpoint of the add-on module
  * <#WHMCS_URL#>/index.php?m=ispapidomaincheck
  * <#WHMCS_URL#>/mydomainchecker.php
  */
 function ispapidomaincheck_clientarea($vars)
 {
-    //save the language in the session if not already set
-    if (!isset($_SESSION["Language"])) {
-        $language_array = DCHelper::SQLCall("SELECT value FROM tblconfiguration WHERE setting='Language'", null, "fetch");
-        $_SESSION["Language"] = strtolower($language_array["value"]);
+    add_hook('ClientAreaPage', 1, function () {
+        $i18n = new I18n();
+        return array("_LANG" => $i18n->getTranslations());
+    });
+    add_hook('ClientAreaHeadOutput', 1, function ($vars) {
+        $now = mktime();
+        /* {*<-- user-scalable=yes if you want user to allow zoom --> */
+        return <<<HTML
+        <meta name="viewport" content="width=device-width, user-scalable=no"/>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.mustache.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/mustache.min.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.js?t=$now"></script>
+        <link href="/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.css?t=$now" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" type="text/css" href="/modules/addons/ispapidomaincheck/lib/Client/assets/index.css?t=$now"/>
+        <link rel="stylesheet" type="text/css" href="/modules/addons/ispapidomaincheck/lib/Common/assets/categories.css?t=$now"/>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/proxy.min.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Common/assets/uts46bundle.min.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/shoppingcart.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/tplmgr.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/searchresult.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/domainsearch.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/category.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/categorymgr.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Client/assets/index.js?t=$now"></script>
+HTML;
+    });
+
+    //load WHMCS
+    require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
+
+    //get default currency as fallback
+    if (!isset($_SESSION["currency"])) {
+        $_SESSION["currency"] = DCHelper::GetCustomerCurrency();
     }
 
-    return array(
-            'pagetitle' => $_LANG['domaintitle'],
-            'breadcrumb' => array('index.php?m=ispapidomaincheck'=>$_LANG["domaintitle"]),
-            'templatefile' => 'ispapidomaincheck',
-            'requirelogin' => false,
-            'vars' => array(
-                    'categories' => DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", null, "fetchall"),
-                    'startsequence' => 4,
-                    'modulename' => "ispapidomaincheck",
-                    'modulepath' => "modules/addons/ispapidomaincheck/",
-                    'backorder_module_installed' => (file_exists(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapibackorder","backend","api.php")))) ? true : false,
-                    'backorder_module_path' => "modules/addons/ispapibackorder/",
-                    'path_to_domain_file' => "modules/addons/ispapidomaincheck/domain.php",
-                    'domain' => isset($_POST["domain"]) ? $_POST["domain"] : "",
-                    'currency' => $_SESSION["currency"]
-            )
-    );
+    //save the language in the session if not already set
+    if (!isset($_SESSION["Language"])) {
+        $_SESSION["Language"] = strtolower(Setting::getValue('Language'));
+    }
+
+    //nodata=1 -> do not return data, we just update the chosen currency in session
+    //WHMCS cares automatically about handling currency when provided in request
+    if (isset($_REQUEST["nodata"]) && $_REQUEST["nodata"]==1) {
+        //respond
+        header('Cache-Control: no-cache, must-revalidate'); // HTTP/1.1
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Content-type: application/json; charset=utf-8');
+        die(json_encode(array("success" => true, "msg" => "currency updated in session")));
+        exit();
+    }
+
+    //init smarty and call admin dispatcher
+    $smarty = new Smarty;
+    $smarty->escape_html = true;
+    $smarty->caching = false;
+    $smarty->setCompileDir($GLOBALS['templates_compiledir']);
+    $smarty->setTemplateDir(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Client", "templates")));
+    $smarty->assign($vars);
+
+    //call the dispatcher with action and data
+    $dispatcher = new ClientDispatcher();
+    $r = $dispatcher->dispatch($_REQUEST['action'], $vars, $smarty);
+    if ($_REQUEST['action']) {
+        //send json response headers
+        header('Cache-Control: no-cache, must-revalidate'); // HTTP/1.1
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Content-type: application/json; charset=utf-8');
+        //do not echo as this would add template html code around!
+        die(json_encode($r));
+    }
+    return $r;
 }
 
-
-/*
- * Backend module
+/**
+ * Admin Area output
  */
 function ispapidomaincheck_output($vars)
 {
-    if (!isset($_GET["tab"])) {
-        $_GET["tab"] = 0;
+    add_hook('AdminAreaHeadOutput', 1, function ($vars) {
+        $now = mktime();
+        return <<<HTML
+        <link rel="stylesheet" type="text/css" href="/modules/addons/ispapidomaincheck/lib/Admin/assets/index.css?t=$now"/>
+        <link rel="stylesheet" type="text/css" href="/modules/addons/ispapidomaincheck/lib/Common/assets/categories.css?t=$now"/>
+        <script src="/modules/addons/ispapidomaincheck/lib/Common/assets/uts46bundle.min.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Admin/assets/web-animations.min.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Admin/assets/muuri.min.js?t=$now"></script>
+        <script src="/modules/addons/ispapidomaincheck/lib/Admin/assets/index.js?t=$now"></script>
+HTML;
+    });
+    //load WHMCS
+    require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
+
+    //init smarty and call admin dispatcher
+    $smarty = new Smarty;
+    $smarty->escape_html = true;
+    $smarty->caching = false;
+    $smarty->setCompileDir($GLOBALS['templates_compiledir']);
+    $smarty->setTemplateDir(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Admin", "templates")));
+    $smarty->assign($vars);
+    //call the dispatcher with action and data
+    $dispatcher = new AdminDispatcher();
+    $r = $dispatcher->dispatch($_REQUEST['action'], $vars, $smarty);
+    if ($_REQUEST['action']) {
+        //send json response headers
+        header('Cache-Control: no-cache, must-revalidate'); // HTTP/1.1
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Content-type: application/json; charset=utf-8');
+        //do not echo as this would add template html code around!
+        die(json_encode($r));
     }
-
-    echo'
-	<style>
-
-	.tablebg td.fieldlabel {
-	    background-color:#FFFFFF;
-	    text-align: right;
-	}
-
-	.tablebg td.fieldarea {
-	    background-color:#F3F3F3;
-	    text-align: left;
-	}
-
-	.tab-content {
-		border-left: 1px solid #ccc;
-		border-right: 1px solid #ccc;
-		border-bottom: 1px solid #ccc;
-		padding:10px;
-	}
-
-	div.tablebg {
-		margin:0px;
-	}
-
-	div.infobox{
-		margin:0px;
-		margin-bottom:10px;
-	}
-
-	</style>
-
-	<div id="tabs">
-		<ul class="nav nav-tabs admin-tabs" role="tablist">
-			<li id="tab0" class="tab active" data-toggle="tab" role="tab" aria-expanded="true">
-				<a href="javascript:;">Category Editor</a>
-			</li>
-		</ul>
-	</div>
-	';
-
-    ispapidomaincheck_categoryeditorcontent($vars['modulelink']."&tab=0");
-}
-
-function ispapidomaincheck_categoryeditorcontent($modulelink)
-{
-    include(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"categories.php")));
-
-    echo '<div id="tab0box" class="tabbox tab-content">';
-
-    //delete category
-    if (isset($_REQUEST["delete"])) {
-        DCHelper::SQLCall("DELETE FROM ispapi_tblcategories WHERE id=? LIMIT 1", array($_REQUEST["delete"]), "execute");
-        echo '<div class="infobox"><strong><span class="title">Successfully deleted!</span></strong><br>The category has been deleted.</div>';
-    }
-
-    //import default categories
-    if (isset($_REQUEST["importdefaultcategories"])) {
-        $category_not_found_in_categorieslib = array();
-        $data = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", null, "fetchall");
-        if (empty($data)) {
-            foreach ($categorieslib as $category => &$tlds) {
-                DCHelper::SQLCall(
-                    "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
-                    array(
-                        ":name" => $category,
-                        ":tlds" => implode(" ", $tlds)
-                    ),
-                    "execute"
-                );
-            }
-        } else {
-            foreach ($categorieslib as $key => &$value) {
-                in_array_r($key, $data) ? '' : $category_not_found_in_categorieslib[$key] = $value;
-            }
-            if (!empty($category_not_found_in_categorieslib)) {
-                foreach ($category_not_found_in_categorieslib as $category => &$tlds) {
-                    DCHelper::SQLCall(
-                        "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
-                        array(
-                            ":name" => $category,
-                            ":tlds" => implode(" ", $tlds)
-                        ),
-                        "execute"
-                    );
-                }
-            }
-        }
-        echo '<div class="infobox"><strong><span class="title">Successfully imported!</span></strong><br>The categories have been sucessfully imported.</div>';
-    }
-
-    //save changes
-    if (isset($_REQUEST["savecategories"])) {
-        //update the category and tlds
-        foreach ($_POST["CAT"] as $id => &$category) {
-            DCHelper::SQLCall("UPDATE ispapi_tblcategories SET name=?, tlds=? WHERE id=?", array($category['NAME'], $category['TLDS'], $id), "execute");
-        }
-        //insert when added new category
-        if ($_POST['NEWCAT']['NAME']) {
-            DCHelper::SQLCall(
-                "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
-                array(
-                    ":name" => $_POST["NEWCAT"]["NAME"],
-                    ":tlds" => $_POST["NEWCAT"]["TLDS"]
-                ),
-                "execute"
-            );
-        }
-        echo '<div class="infobox"><strong><span class="title">Successfully saved!</span></strong><br>The changes have been saved.</div>';
-    }
-
-
-    //import default categories button
-    echo '<form action="'.$modulelink.'" method="post">';
-    echo '<input style="margin-top:5px;" class="btn btn-danger" name="importdefaultcategories" type="submit" value="Import Default Categories">';
-    echo '</form>';
-    echo "<br>";
-
-    ###############################################################################
-
-    //get all categories with tlds for displaying
-    $categories = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories", null, "fetchall");
-
-    echo '<form action="'.$modulelink.'" method="post">';
-    echo '<div class="tablebg" align="center"><table id="domainpricing" class="datatable" cellspacing="1" cellpadding="3" border="0" width="100%"><tbody>';
-    echo '<tr><th>Category Name</th>';
-    echo '<th>TLDs <span style="font-weight:100;">(space separated list of TLDs)</span></th>';
-    echo '<th width="20"></th></tr>';
-    foreach ($categories as &$cat) {
-        echo '<tr><td width="220" valign="top"><input style="width:210px;font-weight:bold" type="text" name="CAT['.$cat["id"].'][NAME]" value="'.$cat["name"].'"/></td><td><textarea style="width:100%;height:70px;" type="text" name="CAT['.$cat["id"].'][TLDS]" value="'.$cat["tlds"].'">'.$cat["tlds"].'</textarea></td><td width="20"><a href="'.$modulelink."&delete=".$cat["id"].'"><img border="0" width="16" height="16" alt="Delete" src="images/icons/delete.png"></a></td></tr>';
-    }
-    echo '<tr><td><input style="width:210px;" type="text" name="NEWCAT[NAME]" value=""/></td><td><textarea style="width:100%;" type="text" name="NEWCAT[TLDS]" value=""></textarea></td><td></td></tr>';
-    echo '</tbody></table></div>';
-    echo '<p align="center"><input class="btn" name="savecategories" type="submit" value="Save Changes">';
-    // echo '<input style="margin-left:10px;" class="btn" name="importdefaultcategories" type="submit" value="import default categories"></p>';
-    echo '</form>';
-
-    echo '</div>';
-}
-
-/*
- * Helper to import default categories
- */
-function in_array_r($key, $dataarray, $strict = false)
-{
-    foreach ($dataarray as &$item) {
-        if (($strict ? $item === $key : $item == $key) || (is_array($item) && in_array_r($key, $item, $strict))) {
-            return true;
-        }
-    }
-    return false;
+    echo $r;
 }

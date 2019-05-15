@@ -1,0 +1,124 @@
+.tablebg td.fieldlabel {
+    background-color:#FFF;
+    text-align:right;
+}
+.tablebg td.fieldarea {
+    background-color:#F3F3F3;
+    text-align:left;
+}
+.tab-content {
+    border-left:1px solid #CCC;
+    border-right:1px solid #CCC;
+    border-bottom:1px solid #CCC;
+    padding:10px;
+}
+div.tablebg {
+    margin:0px;
+}
+#infoArea {
+    margin-top:10px;
+    position: absolute;
+    z-index: 10;
+    font-size: 10px;
+}
+div.infobox{
+    margin:0px;
+    margin-bottom:10px;
+}
+#loading {
+    display:inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+#loading i {
+    color:#0033A0;
+    font-size:22px;
+}
+.grid {
+    margin-top:10px;
+}
+#contentholder span.ui-icon {
+    float: left;
+    margin: 12px 12px 20px 0px;
+}
+.ui-dialog-titlebar-close {/* hide the x icons as the icon layout is broken */
+    visibility: hidden;
+}
+.ui-widget-header {/* align it to bootstrap panel */
+    border-color: #337ab7;
+    background: #337ab7;
+}
+.ui-widget.ui-widget-content {
+    border:1px solid #337ab7;
+}
+
+/* Muuri CSS */
+/*droptld, dropcat included in item*/
+/*exclude "Not Assigned" which is .panel-warning */
+.tldgrid-item, .item .panel-primary .panel-heading {
+    cursor: pointer;
+}
+.grid {
+  position: relative;
+}
+.tldgrid {
+  min-height: 23px;
+  position: relative;
+}
+/*.grid .item-content .panel-body {
+  position: relative;
+  max-height: 300px;
+  overflow-y: auto;
+}*/
+.item {
+  position: absolute;
+  width: 345px;
+  margin: 5px;
+}
+.item-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.item.muuri-item-dragging {
+  z-index: 3;
+}
+.item.muuri-item-releasing {
+  z-index: 2;
+}
+.item.muuri-item-hidden {
+  z-index: 0;
+}
+.tldgrid-item {
+  position: absolute;
+  width: 100px;
+  height: 19px;
+  margin: 2px;
+  padding: .2em .6em;
+  font-size: 65%;
+  color: #fff;
+  white-space: nowrap;
+  border: 1px #777 solid;
+  border-radius: .25em;
+  background-color: #777;
+  text-transform: uppercase;
+}
+.tldgrid-item.muuri-item-releasing {
+  z-index: 998;
+}
+.tldgrid-item.muuri-item-dragging {
+  z-index: 999;
+  cursor: move;
+}
+.tldgrid-item.muuri-item-hidden {
+  z-index: 0;
+}
+.panel {
+    margin-bottom:0px;
+}
+a.hx {
+  text-decoration: underline;
+}
+div.muuri-item-placeholder {
+  border: 2px #777 dashed;
+}

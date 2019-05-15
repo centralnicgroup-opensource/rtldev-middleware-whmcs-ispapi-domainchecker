@@ -5,33 +5,33 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/hexonet/whmcs-ispapi-domainchecker/blob/master/CONTRIBUTING.md)
 
-This Repository covers the "ISPAPI" Domainchecker Add-on for WHMCS. It provides the following features in WHMCS:
+This Repository covers the "ISPAPI" Domainchecker Add-On for WHMCS. It provides the following features in WHMCS:
 
-## Supported Features ##
+## Supported Features (>= v10.0.0) ##
 
 The ISPAPI DomainChecker addon supports the following functions and features:
 
+* **NEW** Supports several filters
+* **NEW** Administrative Interface now allows managing of categories by drag'n'drop and provides access to all useful configurations
+* **UPDATE** Search trigger over URL (helpful for landing pages, see [Usage Guide](https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Usage-Guide))
 * High-performance Domain Availability Checks using our registrar API
 * Support of Premium Domains (Aftermarket and Registry Premium Domains)
-* API Suggestion Engine integrated
+* Domain Name Suggestion Engine integrated
 * Categorization of the TLDs for an improved user experience
-  * Default categories pre-configured
+  * **NEW** WHMCS' default categories can be imported
   * Search results based on the category selection
 * Backorder button in the search results (when having also our [whmcs backorder module](https://github.com/hexonet/whmcs-ispapi-backorder) installed)
   * Add or Remove backorders instantly in the search results
-  * WHOIS information for taken domains
+* WHOIS information for taken domains
 * Featuring each domain with availability and type of premium domain name
 * Featuring prices of domains
   * Registration and renewal prices
   * Premium domains with markup prices
-* Adding of domains to the cart instantly possible in the search results
-* Removing of domains from the cart instantly possible in the search results
+* Add or Remove domains to the cart instantly in the search results
 * Supports multiple currencies
 * Support for English and German. (If any other language is required, please contact
 us)
 * Ajax driven search (no page reload)
-* Search trigger over the URL (helpful for landing pages)
-  * For example: mydomainchecker.php?search=mydomain.com&cat=3, will trigger the search of “mydomain.com” in the category ID=3
 * Easy to install and use
 
 ... and MORE!
@@ -57,10 +57,15 @@ Read the following to get more information ...
 For the latest WHMCS minimum system requirements, please refer to
 [https://docs.whmcs.com/System_Requirements](https://docs.whmcs.com/System_Requirements)
 
-* WHMCS version 7.0 or higher (we recommend using the latest release)
+* WHMCS version 7.2.0 or higher (we recommend using the latest release)
 * Free Signup for a HEXONET [Test Account](https://www.hexonet.net/signup-ote) or [Live Account](https://www.hexonet.net/sign-up)
+* [ISPAPI Registrar Module](https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip) in the below version dependency
 
-* [ISPAPI Registrar Module](https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip) version 1.0.53 or higher for v8.3.0 and 1.7.1 or higher for v9.x
+| Domainchecker version | ISPAPI Registrar Module version |
+|-----------------------|---------------------------------|
+| >= 10.0.0             | >= 1.8.1                        |
+| >= 9.0.0 < 10.0.0     | >= 1.7.1                        |
+| >= 8.3.0 < 9.0.0      | >= 1.0.53                       |
 
 ## Contributing ##
 
