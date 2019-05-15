@@ -51,8 +51,8 @@
         "php": ">=5.6.0"
     },
     "scripts": {
-        "codeCheck": "phpcs --ignore=\"*/vendor/*\" --standard=PSR2 -s -q -n --colors *.php modules tests",
-        "codeFix": "phpcbf --ignore=\"*/vendor/*\" --standard=PSR2 -q *.php modules tests",
+        "codeCheck": "phpcs --extensions=php,inc,lib --ignore=\"*/vendor/*\" --standard=PSR2 -s -q -n --colors *.php modules tests",
+        "codeFix": "phpcbf --extensions=php,inc,lib --ignore=\"*/vendor/*\" --standard=PSR2 -q *.php modules tests",
         "test": "phpunit"
     }
 }
