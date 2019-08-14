@@ -1,3 +1,15 @@
+# [10.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.2.2...v10.0.0) (2019-08-14)
+
+
+### Code Refactoring
+
+* **pkg:** review from scratch ([9d69cb7](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/9d69cb7))
+
+
+### BREAKING CHANGES
+
+* **pkg:** Check Pull Request #63 for updates and changes. Closes #27.
+
 ## [9.2.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.2.1...v9.2.2) (2019-05-13)
 
 
