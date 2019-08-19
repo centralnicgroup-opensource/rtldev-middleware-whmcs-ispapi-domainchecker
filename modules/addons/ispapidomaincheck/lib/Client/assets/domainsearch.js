@@ -247,7 +247,7 @@ DomainSearch.prototype.initForm = function () {
       }
       return Reflect.get(...arguments)
     },
-    ownKeys (target) {
+    ownKeys: function (target) {
       return Reflect.ownKeys(target)
     }
   })
