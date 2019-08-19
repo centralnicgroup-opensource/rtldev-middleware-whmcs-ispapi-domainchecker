@@ -1,3 +1,10 @@
+## [10.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.0...v10.0.1) (2019-08-19)
+
+
+### Bug Fixes
+
+* **domainsearch:** fix ownKeys configuration for Proxy ([6aef3f1](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/6aef3f1))
+
 # [10.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v9.2.2...v10.0.0) (2019-08-14)
 
 
