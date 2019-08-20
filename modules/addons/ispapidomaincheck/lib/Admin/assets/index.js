@@ -1053,6 +1053,8 @@ function loadConfig () {
 // Trigger initial configuration load
 loadConfig()
 
+// const wr = new URLSearchParams(document.currentScript.src.replace(/[^?]+/, '')).get('wr')
+
 // Initial DOM Manipulation and rendering of tabs
 $(document).ready(() => {
   // init tabs
