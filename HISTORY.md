@@ -1,3 +1,13 @@
+## [10.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.1...v10.0.2) (2019-08-20)
+
+
+### Bug Fixes
+
+* **pkg:** fix calls to our backorder module if present ([d653dbc](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/d653dbc))
+* **pkg:** fix paths of header includes to consider WEB_ROOT ([381d5c9](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/381d5c9))
+* **pkg:** fix shopping cart url calls ([4174395](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/4174395))
+* **pkg:** fix template paths and shopping cart paths ([2ce54ef](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/2ce54ef))
+
 ## [10.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.0...v10.0.1) (2019-08-19)
 
 
