@@ -1,3 +1,10 @@
+## [10.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.2...v10.0.3) (2019-08-20)
+
+
+### Bug Fixes
+
+* **pkg:** fix request url of checkout button ([6e94d31](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/6e94d31))
+
 ## [10.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.1...v10.0.2) (2019-08-20)
 
 
