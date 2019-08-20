@@ -222,7 +222,7 @@ SearchResult.prototype.showWhoisInformation = function (e) {
   $('#modalWhoisBody').hide()
   $('#whoisDomainName').html(domain)
   $('#modalWhois').modal('show')
-  $.post(`${ds.paths.dc}../../../mywhois.php`, `domain=${domain}`, function (data) {
+  $.post(`${wr}/mywhois.php`, `domain=${domain}`, function (data) {
     // fetch html contents of body element
     const m = data.match(/<body[^>]*>([\w|\W]*)<\/body>/im)
     $('#modalWhoisBody').html(m[1])
