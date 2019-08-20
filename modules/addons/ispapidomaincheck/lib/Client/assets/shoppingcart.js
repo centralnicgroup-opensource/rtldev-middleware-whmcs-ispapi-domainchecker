@@ -60,7 +60,7 @@ ShoppingCart.prototype.addOrderPremium = function (sr, successmsg, errmsg) {
 ShoppingCart.prototype.addOrderDomain = function (sr, successmsg, errmsg) {
   const row = sr.data
   $.post(
-    `${dcpath}../../../cart.php`,
+    `${wr}/cart.php`,
     {
       a: 'addToCart',
       domain: row.IDN,
@@ -81,7 +81,7 @@ ShoppingCart.prototype.addOrderDomain = function (sr, successmsg, errmsg) {
     const term = parseInt(row.element.find('.hxdata').data('term'), 10)
     if (term > termcfg.initialTerm) {
       $.post(
-        `${dcpath}../../../cart.php`,
+        `${wr}/cart.php`,
         {
           a: 'updateDomainPeriod',
           domain: row.IDN,
