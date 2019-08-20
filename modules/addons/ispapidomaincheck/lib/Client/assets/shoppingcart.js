@@ -226,7 +226,7 @@ ShoppingCart.prototype.deleteBackorder = function (sr) {
 }
 ShoppingCart.prototype.requestBackorderAction = function (sr, action, successmsg) {
   $.post(
-    `${ds.paths.bo}backend/call.php`,
+    `${wr}${ds.paths.bo}backend/call.php`,
     {
       COMMAND: `${action}Backorder`,
       DOMAIN: sr.data.PC,
