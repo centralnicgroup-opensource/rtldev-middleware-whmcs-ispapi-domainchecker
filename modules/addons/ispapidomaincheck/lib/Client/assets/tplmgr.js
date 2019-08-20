@@ -8,7 +8,7 @@ TPLMgr.loadTemplates = function (tpls) {
   return new Promise(resolve => {
     // --- https://github.com/jonnyreeves/jquery-Mustache#usage
     // --- https://github.com/janl/mustache.js
-    const tplpath = '/modules/addons/ispapidomaincheck/lib/Client/templates/'
+    const tplpath = `${wr}/modules/addons/ispapidomaincheck/lib/Client/templates/`
     const tplext = '.mustache'
     let count = tpls.length
     if (!count) {

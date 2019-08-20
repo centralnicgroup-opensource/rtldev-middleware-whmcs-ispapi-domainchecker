@@ -21,7 +21,8 @@ module.exports = {
         "ShoppingCart": "readonly",
         "dcpath": "readonly",
         "cart": "readonly",
-        "csrfToken": "readonly"
+        "csrfToken": "readonly",
+        "wr": "readonly"
     },
     'extends': 'standard',
     'plugins': [

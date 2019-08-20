@@ -103,6 +103,7 @@ function ispapidomaincheck_clientarea($vars)
         /* {*<-- user-scalable=yes if you want user to allow zoom --> */
         return <<<HTML
         <meta name="viewport" content="width=device-width, user-scalable=no"/>
+        <script>const wr = "{$wr}";</script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.mustache.js?t=$now"></script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/mustache.min.js?t=$now"></script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.js?t=$now"></script>
@@ -176,6 +177,7 @@ function ispapidomaincheck_output($vars)
         $now = mktime();
         $wr = $vars['WEB_ROOT'];
         return <<<HTML
+        <script>const wr = "{$wr}";</script>
         <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.css?t=$now"/>
         <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/categories.css?t=$now"/>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/uts46bundle.min.js?t=$now"></script>
