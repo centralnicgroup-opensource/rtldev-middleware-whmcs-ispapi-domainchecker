@@ -1,3 +1,10 @@
+## [10.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.3...v10.0.4) (2019-08-21)
+
+
+### Bug Fixes
+
+* **whois:** fix whois info service request url ([942bee2](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/942bee2))
+
 ## [10.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.2...v10.0.3) (2019-08-20)
 
 
