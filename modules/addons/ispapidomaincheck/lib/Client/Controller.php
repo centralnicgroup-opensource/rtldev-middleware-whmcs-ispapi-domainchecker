@@ -203,6 +203,10 @@ class Controller
                                 }
                             }
                             break;
+                        case "541":
+                            $availability = false;
+                            $rs["REASON"][$idx] = preg_replace("/^[^;]+;/", "", $val);
+                            break;
                         default:
                             $availability = false;
                             break;

@@ -494,7 +494,7 @@ DomainSearch.prototype.getSearchGroups = async function (searchterm) {
     // avoid duplicates
     // jquery v3 provides $.escapeSelector, this can be replaced when
     // WHMCS six template's dependency jquery upgrades from v1 to v3 one day :-(
-    const selector = row.PC.replace(/([$%&()*+,./:;<=>?@[\\\]^{|}~])/g, '\\$1')
+    const selector = row.PC.replace(/([$%&()*+,./:;<=>?@[\\\]^{|}~'])/g, '\\$1')
     row.element = $(`#${selector}`)
     if (!row.element.length) {
       row.element = TPLMgr.renderAppend('#searchresults', 'resultRow', { row: row })
