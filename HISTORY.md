@@ -1,3 +1,10 @@
+## [10.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.4...v10.0.5) (2019-08-22)
+
+
+### Bug Fixes
+
+* **availability:** add ' to exceptional parameters; return `DOMAIN NAME NOT VALID` as reason ([af039cb](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/af039cb))
+
 ## [10.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.3...v10.0.4) (2019-08-21)
 
 
