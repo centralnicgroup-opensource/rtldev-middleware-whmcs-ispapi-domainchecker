@@ -149,7 +149,7 @@ SearchResult.prototype.showTaken = function () {
   //
   // (3) normal domain (NOT BACKORDERABLE)
   // to add Added and backorder price
-  row.element.find('div.availability').html(`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}"><i class="glyphicon glyphicon-question-sign"></i> ${translations.whois}</span>`)
+  row.element.find('div.availability').html(`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}" data-pc="${row.PC}"><i class="glyphicon glyphicon-question-sign"></i> ${translations.whois}</span>`)
   row.element.find('span.domainname.domain-label, span.domainname.tld-zone').removeClass('added')
   if (row.REASON && row.REASON.length) {
     // TODO: we could translate REASON by mapping it to translation keys using regular expressions
@@ -218,11 +218,12 @@ SearchResult.prototype.showWhoisInformation = function (e) {
   // to prevent event bubbling to parent element
   e.stopPropagation()
   const domain = $(this).data('domain')
+  const pc = $(this).data('pc')
   $('#modalWhoisLoader').toggleClass('hidden')
   $('#modalWhoisBody').hide()
   $('#whoisDomainName').html(domain)
   $('#modalWhois').modal('show')
-  $.post(`${wr}/mywhois.php`, `domain=${domain}`, function (data) {
+  $.post(`${wr}/mywhois.php`, `idn=${domain}&pc=${pc}`, function (data) {
     // fetch html contents of body element
     const m = data.match(/<body[^>]*>([\w|\W]*)<\/body>/im)
     $('#modalWhoisBody').html(m[1])

@@ -19,49 +19,34 @@ if (file_exists($init_path)) {
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"includes","registrarfunctions.php")));
 require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "lib","Common","DCHelper.class.php")));
 
-function WHMCS_LookupDomain($domain)
-{
-    $values["domain"] = $domain;
-    $check = localAPI("domainwhois", $values);
-    return urldecode($check["whois"]);
-}
 
-$registrar = false;
+$idn = strtolower($_REQUEST["idn"]);
+$pc = strtolower($_REQUEST["pc"]);
 
 //get the sld and tld
-if (strpos($_REQUEST["domain"], ".")) {
-    $domainparts = explode(".", strtolower($_REQUEST["domain"]), 2);
-    $sld = $domainparts[0];
-    $tld = ".".$domainparts[1];
-} else {
+if (strpos($idn, ".")===false) {
     die("Domain is incorrect");
 }
+$tldidn = preg_replace("/^[^.]+/", "", $idn);
 
 //Get the WHOIS
-$extension = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension = ?", array($tld), "fetch");
-if (in_array($extension["autoreg"], $_SESSION["ispapi_registrar"])) {
+$registrar = false;
+$extension = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension=?", array($tldidn), "fetch");
+if (isset($extension["autoreg"]) && preg_match("/^ispapi$/i", $extension["autoreg"])) {
     //use API
-    $domain_ace = $_REQUEST["domain"];
-    $r = DCHelper::APICall(extension["autoreg"], array(
-        "COMMAND" => "ConvertIDN",
-        "DOMAIN0" => $_REQUEST["domain"]
-    ));
-    if ($r["CODE"] == "200") {
-        $domain_ace = $r["PROPERTY"]["ACE"][0];
-    }
-    $registrar=true;
-    $command = array(
+    $response = DCHelper::APICall($extension["autoreg"], array(
         "COMMAND" => "QueryDomainWhoisInfo",
-        "DOMAIN" => $domain_ace
-    );
-    $response = DCHelper::APICall($extension["autoreg"], $command);
+        "DOMAIN" => $pc
+    ));
+    if ($response["CODE"] == 200 && !preg_match("/you have exceeded this limit/i", urldecode($response["PROPERTY"]["WHOISDATA"][0]))) {
+        $registrar=true;
+    }
 }
-
-//Fallback to WHMCS's lookup for .ch and .li domains and for issues with API
-if ((in_array($tld, array(".ch", ".li")) && ($response["CODE"] != 200)) || preg_match("/you have exceeded this limit/i", urldecode($response["PROPERTY"]["WHOISDATA"][0])) || !$registrar) {
+//Fallback to WHMCS's lookup for any issue with API or whois query limit exceeded
+if (!$registrar) {
     //use WHOIS
-    $registrar = false;
-    $whois = WHMCS_LookupDomain($_REQUEST["domain"]);
+    $check = localAPI("domainwhois", array("domain" => $idn));
+    $whois = urldecode($check["whois"]);
 }
 
 ?>
@@ -74,36 +59,21 @@ if ((in_array($tld, array(".ch", ".li")) && ($response["CODE"] != 200)) || preg_
 <body bgcolor="#F9F9F9">
 <?php
 if ($registrar) {
-    for ($i = count($response["PROPERTY"]["WHOISDATA"])-1; $i >= 0; $i--) {
-        echo "<fieldset>";
-        echo "<legend>";
-        echo htmlspecialchars($response["PROPERTY"]["WHOISSERVER"][$i]." @ ".$response["PROPERTY"]["WHOISDATE"][$i]." UTC");
-        echo "</legend>";
-        echo "<tt><small>";
-
-        $whois = html_entities(urldecode($response["PROPERTY"]["WHOISDATA"][$i]));
-        //TODO: check use of html_entities instead of the below replaces
-        //$whois = preg_replace('/\&/', "&amp;", $whois);
-        //$whois = preg_replace('/\</', "&lt;", $whois);
-        //$whois = preg_replace('/\>/', "&gt;", $whois);
-        //$whois = preg_replace('/ /', "&nbsp;", $whois);
-        $whois = preg_replace('/\r?\n/', "<br/>\n", $whois);
-        echo $whois;
-
-        echo "</small></tt>";
-        echo "</fieldset>";
+    for ($i = count($response["PROPERTY"]["WHOISDATA"])-1; $i >= 0; $i--) {?>
+        <fieldset>
+            <legend>
+            <?php echo htmlspecialchars($response["PROPERTY"]["WHOISSERVER"][$i]." @ ".$response["PROPERTY"]["WHOISDATE"][$i]." UTC");?>
+          </legend>
+          <tt><small><?php echo nl2br(htmlentities(urldecode($response["PROPERTY"]["WHOISDATA"][$i])));?></small></tt>
+        </fieldset><?php
     }
 } else {
     if (empty($whois)) {
         $whois = "No data returned.";
-    }
-    echo "<fieldset>";
-    echo "<tt><small>";
-    echo $whois;
-    echo "</small></tt>";
-    echo "</fieldset>";
-}
-
-?>
+    }?>
+    <fieldset>
+        <tt><small><?php echo $whois;?></small></tt>
+    </fieldset><?php
+}?>
 </body>
 </html>
