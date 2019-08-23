@@ -1,3 +1,10 @@
+## [10.0.6](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.5...v10.0.6) (2019-08-23)
+
+
+### Bug Fixes
+
+* **whois information:** reviewed script ([e943fc9](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/e943fc9))
+
 ## [10.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.4...v10.0.5) (2019-08-22)
 
 

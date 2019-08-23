@@ -13,7 +13,7 @@ if (!defined("WHMCS")) {
 require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "i18n.class.php")));
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Common", "DCHelper.class.php")));
 
-$module_version = "10.0.5";
+$module_version = "10.0.6";
 
 /*
  * Configuration of the addon module.
