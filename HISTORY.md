@@ -1,3 +1,10 @@
+## [11.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.1...v11.0.2) (2019-08-29)
+
+
+### Bug Fixes
+
+* **frontend:** check for incoming transfer request in correct way ([c05bbeb](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/c05bbeb)), closes [#101](https://github.com/hexonet/whmcs-ispapi-domainchecker/issues/101)
+
 ## [11.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.0...v11.0.1) (2019-08-29)
 
 
