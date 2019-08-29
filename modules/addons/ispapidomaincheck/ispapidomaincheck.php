@@ -178,8 +178,10 @@ function ispapidomaincheck_output($vars)
         $wr = $vars['WEB_ROOT'];
         return <<<HTML
         <script>const wr = "{$wr}";</script>
+        <link rel="stylesheet" type="text/css" href="{$wr}/assets/css/jquery-ui.min.css?t=$now"/>
         <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.css?t=$now"/>
         <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/categories.css?t=$now"/>
+        <script src="{$wr}/assets/js/jquery-ui.min.js?t=$now"></script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/uts46bundle.min.js?t=$now"></script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/web-animations.min.js?t=$now"></script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/muuri.min.js?t=$now"></script>

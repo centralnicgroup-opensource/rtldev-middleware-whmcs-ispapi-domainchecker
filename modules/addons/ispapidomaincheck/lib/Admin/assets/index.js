@@ -483,13 +483,19 @@ function updateNACategory () {
  */
 function addTLDGrid (elem, prepend) {
   const tldgrid = new Muuri(elem, {
+    sortData: {
+      prio: function (item, element) {
+        const tld = $(element).attr('id').replace(/^.+_/, '')
+        return data.alltlds.indexOf(tld) - data.alltlds.length + 1
+      }
+    },
     items: '.tldgrid-item',
     layoutDuration: 400,
     layoutEasing: 'ease',
     dragEnabled: true,
     dragSort: function () {
-      // not allowed to drag into category "Not assigned"
       return tldgrids.filter((g) => {
+        // not allowed to drag into category "Not assigned"
         return $(g.getElement()).attr('id') !== 'cat_-1'
       })
     },
