@@ -101,7 +101,7 @@ DomainSearch.prototype.handleXHRQueue = function () {
 // in the way of a TTL cache
 // allows to merge the searched domainlist and the results into one place for reuse
 DomainSearch.prototype.loadConfiguration = function (currencyid) {
-  let cfgurl = 'domainchecker.php?action=loadconfiguration'
+  let cfgurl = '?action=loadconfiguration'
   const currencychanged = currencyid !== undefined
   if (currencychanged) {
     this.clearSearch()
@@ -372,7 +372,7 @@ DomainSearch.prototype.getDomainSuggestions = function (searchstr) {
   }
   return new Promise(resolve => {
     $.ajax({
-      url: 'domainchecker.php?action=getsuggestions',
+      url: '?action=getsuggestions',
       type: 'POST',
       data: JSON.stringify(data),
       contentType: 'application/json; charset=utf-8',
@@ -615,7 +615,7 @@ DomainSearch.prototype.requestGroupCheck = function (group) {
     data.registrars.push(row.registrar)
   })
   $.ajax({
-    url: `domainchecker.php?action=checkdomains`,
+    url: `?action=checkdomains`,
     type: 'POST',
     data: JSON.stringify(data),
     contentType: 'application/json; charset=utf-8',

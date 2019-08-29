@@ -7,7 +7,7 @@ let cart
 
 (async function () {
   translations = await $.ajax({
-    url: 'domainchecker.php?action=loadtranslations',
+    url: '?action=loadtranslations',
     type: 'GET'
   })
   cart = new ShoppingCart()

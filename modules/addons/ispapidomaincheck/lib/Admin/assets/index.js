@@ -838,7 +838,7 @@ function generateTab2 () {
 function generateTab1Block1 () {
   const $uri = $('#genurl')
   let url = new URL(window.location.href)
-  const baseurl = `${url.origin}${url.pathname.replace(/[^/]+\/[^/]+$/, '')}domainchecker.php?search=mydomain.com&`
+  const baseurl = `${url.origin}${url.pathname.replace(/[^/]+\/[^/]+$/, '')}mydomainchecker.php?search=mydomain.com&`
   url = `${baseurl}cat=${data.defaultActiveCategories}`
   $uri.text(url)
   $uri.prop('href', url)
