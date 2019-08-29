@@ -1,6 +1,6 @@
 <?php
 // Handle "Transfer" button from the WHMCS default Homepage
-if (isset($_POST["transfer"])) {
+if (!empty($_POST["transfer"])) {
     header("Location: cart.php?a=add&domain=transfer&query=".$_POST["domain"]);
     exit();
 }
