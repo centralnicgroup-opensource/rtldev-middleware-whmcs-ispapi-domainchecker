@@ -1,3 +1,16 @@
+# [11.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.6...v11.0.0) (2019-08-29)
+
+
+### Bug Fixes
+
+* **backend:** re-introduce jquery-ui ([5dca2b9](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/5dca2b9)), closes [#101](https://github.com/hexonet/whmcs-ispapi-domainchecker/issues/101)
+
+
+### BREAKING CHANGES
+
+* **backend:** WHMCS 7.8.x drops JQuery-UI in build process or in admin theme (was available in
+WHMCS 7.7.x)
+
 ## [10.0.6](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.5...v10.0.6) (2019-08-23)
 
 
