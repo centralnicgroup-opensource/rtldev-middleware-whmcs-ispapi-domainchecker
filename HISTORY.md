@@ -1,3 +1,10 @@
+## [11.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.0...v11.0.1) (2019-08-29)
+
+
+### Bug Fixes
+
+* **frontend:** remove hardcoded use of domainchecker.php ([60772fc](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/60772fc)), closes [#101](https://github.com/hexonet/whmcs-ispapi-domainchecker/issues/101)
+
 # [11.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v10.0.6...v11.0.0) (2019-08-29)
 
 
