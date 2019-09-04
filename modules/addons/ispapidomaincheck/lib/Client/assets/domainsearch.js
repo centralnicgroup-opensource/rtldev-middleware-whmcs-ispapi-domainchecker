@@ -317,7 +317,7 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
   }
   // apply reseller's filter settings if applicable
   if (this.initFromSessionStorage === 2 || !this.initFromSessionStorage) {
-    if (this.searchStore.activeCategories === null || !this.searchStore.activeCategories.length) {
+    if (!this.searchStore.activeCategories || !this.searchStore.activeCategories.length) {
       this.searchStore.activeCategories = d.defaultActiveCategories
     }
     this.searchStore.showPremiumDomains = d.premiumDomains + ''
