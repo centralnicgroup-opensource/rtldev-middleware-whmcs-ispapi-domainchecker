@@ -288,11 +288,26 @@ span.spanelement{
   margin-left:auto;
   margin-right:auto;
 }
-.search-form .search-input-bar .input-group .search-btn {
+.search-form .search-input-bar .input-group .btn-hx-dncfg {
+  background-color: #CCC;
+  color: #333;
+  border-radius: 5px;
+  border: none;
+  margin-right:3px;
+}
+.search-form .search-input-bar .input-group .btn-hx-search {
   background-color: #F26522;
   color: #FFF;
   border-radius: 5px;
   border: none;
+  margin-right:3px;
+}
+.search-form .search-input-bar .input-group .btn-hx-transfer {
+  background-color: #999;
+  color: #FFF;
+  border-radius: 5px;
+  border:none;
+  margin-right:3px;
 }
 .search-form .search-input-bar .input-group .singlesearch {
   background: transparent;

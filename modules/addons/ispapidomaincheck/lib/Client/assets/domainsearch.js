@@ -255,6 +255,13 @@ DomainSearch.prototype.initForm = function () {
     }
   })
   // category changes are subscribed in categorymgr code
+  $('#transferbutton').off('click').click(() => {
+    const domain = $('#searchfield').val()
+    if (/\./.test(domain)) {
+      window.location.href = `${wr}/cart.php?a=add&domain=transfer&query=${domain}`
+    }
+  })
+  // category changes are subscribed in categorymgr code
   $('#searchbutton, #loadmorebutton').off('click').click(() => {
     ds.search()
   })

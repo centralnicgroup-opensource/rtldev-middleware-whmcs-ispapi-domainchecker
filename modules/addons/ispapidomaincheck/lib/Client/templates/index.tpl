@@ -5,9 +5,7 @@
                 <div class="input-group">
                     <div class="inner-addon right-addon">
                         <input  id="searchfield" name="domain" class="form-control singlesearch input-box" type="text" value="{if $domain}{$domain}{/if}" placeholder="{$_LANG.domaincheckerdomainexample}">
-                        <div class="addon">
-                            <button id="searchbutton" disabled class="btn btn-default search-btn" type="button"><i class="glyphicon glyphicon-search"></i></button>
-                        </div>
+                        <div class="addon"><button id="transferbutton" class="btn btn-default btn-hx-transfer" type="button"><i class="glyphicon glyphicon-transfer"></i></button><button id="searchbutton" disabled class="btn btn-default btn-hx-search" type="button"><i class="glyphicon glyphicon-search"></i></button></div>
                     </div>
                 </div>
             </div>
