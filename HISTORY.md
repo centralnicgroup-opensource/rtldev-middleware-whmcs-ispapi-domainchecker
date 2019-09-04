@@ -1,3 +1,10 @@
+## [11.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.2...v11.0.3) (2019-09-04)
+
+
+### Bug Fixes
+
+* **request parameter:** parameter cat is now back again optional ([730e9c5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/730e9c5))
+
 ## [11.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.1...v11.0.2) (2019-08-29)
 
 
