@@ -1,3 +1,10 @@
+## [11.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.4...v11.0.5) (2019-09-04)
+
+
+### Bug Fixes
+
+* **request parameter:** review because of indexOf issue ([b2dc4ad](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/b2dc4ad))
+
 ## [11.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.3...v11.0.4) (2019-09-04)
 
 
