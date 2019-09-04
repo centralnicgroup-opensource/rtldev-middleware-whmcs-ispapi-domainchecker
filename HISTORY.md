@@ -1,3 +1,10 @@
+## [11.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.3...v11.0.4) (2019-09-04)
+
+
+### Bug Fixes
+
+* **request parameter:** fixed issue with categories fallback ([0d838e1](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/0d838e1))
+
 ## [11.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.2...v11.0.3) (2019-09-04)
 
 
