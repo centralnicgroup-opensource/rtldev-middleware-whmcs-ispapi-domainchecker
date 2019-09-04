@@ -34,10 +34,10 @@ const DomainSearch = function () {
   const url = new URL(window.location.href)
   const search = url.searchParams.get('search')
   const categories = url.searchParams.get('cat')
-  if (search !== null && categories !== null) {
+  if (search !== null) {
     this.searchStore = {
       domain: search,
-      activeCategories: categories.split(',').map(c => {
+      activeCategories: categories === null ? null : categories.split(',').map(c => {
         return parseInt(c, 10)
       }),
       sug_ip_opt: url.searchParams.get('ip') || '0',
@@ -317,6 +317,9 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
   }
   // apply reseller's filter settings if applicable
   if (this.initFromSessionStorage === 2 || !this.initFromSessionStorage) {
+    if (this.searchStore.activeCategories === null || !this.searchStore.activeCategories.length) {
+      this.searchStore.activeCategories = d.defaultActiveCategories
+    }
     this.searchStore.showPremiumDomains = d.premiumDomains + ''
     this.searchStore.showTakenDomains = d.takenDomains + ''
   }
