@@ -1,3 +1,15 @@
+# [11.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.5...v11.1.0) (2019-09-04)
+
+
+### Bug Fixes
+
+* **button:** set margin-right to 0px ([22e374b](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/22e374b))
+
+
+### Features
+
+* **transfer:** added transfer button to fit whmcs default search ([683aef4](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/683aef4))
+
 ## [11.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.4...v11.0.5) (2019-09-04)
 
 
