@@ -37,7 +37,7 @@ const DomainSearch = function () {
   if (search !== null) {
     this.searchStore = {
       domain: search,
-      activeCategories: categories === null ? null : categories.split(',').map(c => {
+      activeCategories: categories === null ? [] : categories.split(',').map(c => {
         return parseInt(c, 10)
       }),
       sug_ip_opt: url.searchParams.get('ip') || '0',
@@ -181,6 +181,9 @@ DomainSearch.prototype.initForm = function () {
     $('#searchform').serializeArray().forEach(entry => {
       ds.searchStore[entry.name] = entry.value
     })
+    if (!this.searchStore.activeCategories.length) {
+      this.searchStore.activeCategories = data.defaultActiveCategories
+    }
     this.catmgr.setCategories(data.categories, this.searchStore.activeCategories).generate()
   } else {
     this.searchStore.activeCategories = data.defaultActiveCategories
@@ -317,9 +320,6 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
   }
   // apply reseller's filter settings if applicable
   if (this.initFromSessionStorage === 2 || !this.initFromSessionStorage) {
-    if (!this.searchStore.activeCategories || !this.searchStore.activeCategories.length) {
-      this.searchStore.activeCategories = d.defaultActiveCategories
-    }
     this.searchStore.showPremiumDomains = d.premiumDomains + ''
     this.searchStore.showTakenDomains = d.takenDomains + ''
   }
