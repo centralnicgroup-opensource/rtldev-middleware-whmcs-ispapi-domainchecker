@@ -4,6 +4,7 @@ let tldgrids // TLD Lists
 let dragCounter = 0 // counter for drag actions
 let data // configuration data container
 const docElem = document.documentElement
+const packer = new Muuri.Packer()
 
 /**
  * Notifications
@@ -476,6 +477,16 @@ function updateNACategory () {
   }
 }
 
+function sortItemsByPriority (a, b) {
+  const elA = a.getElement()
+  const elB = b.getElement()
+  const tldA = $(elA).attr('id').replace(/^.+_/, '')
+  const tldB = $(elB).attr('id').replace(/^.+_/, '')
+  const idxA = data.alltlds.indexOf(tldA)
+  const idxB = data.alltlds.indexOf(tldB)
+  return idxA - idxB
+}
+
 /**
  * Add a new TLDGrid instance
  * @param elem the html element that covers the grid dom
@@ -483,11 +494,12 @@ function updateNACategory () {
  */
 function addTLDGrid (elem, prepend) {
   const tldgrid = new Muuri(elem, {
-    sortData: {
-      prio: function (item, element) {
-        const tld = $(element).attr('id').replace(/^.+_/, '')
-        return data.alltlds.indexOf(tld) - data.alltlds.length + 1
+    layout: function (items, width, height) {
+      if (items && items.length) {
+        items[0].getGrid()._items.sort(sortItemsByPriority)
+        items.sort(sortItemsByPriority)
       }
+      return packer.getLayout(items, width, height)
     },
     items: '.tldgrid-item',
     layoutDuration: 400,
