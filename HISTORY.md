@@ -1,3 +1,10 @@
+# [11.2.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.1.0...v11.2.0) (2019-09-06)
+
+
+### Features
+
+* **backend:** auto-reorder TLDs by priority of domain pricing page ([18dc105](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/18dc105))
+
 # [11.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.0.5...v11.1.0) (2019-09-04)
 
 
