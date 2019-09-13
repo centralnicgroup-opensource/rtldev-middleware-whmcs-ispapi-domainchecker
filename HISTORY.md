@@ -1,3 +1,10 @@
+## [11.2.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.2.0...v11.2.1) (2019-09-13)
+
+
+### Bug Fixes
+
+* **dep-bump:** migrate CI to plugin semantic-release-whmcs ([2b6c181](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/2b6c181))
+
 # [11.2.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.1.0...v11.2.0) (2019-09-06)
 
 
