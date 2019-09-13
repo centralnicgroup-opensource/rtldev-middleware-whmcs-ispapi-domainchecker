@@ -54,8 +54,8 @@
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "puppeteer": "1.14.0",
-    "semantic-release": "^15.13.21"
+    "semantic-release": "^15.13.21",
+    "semantic-release-whmcs": "^1.0.4"
   },
   "scripts": {
     "lint": "eslint . --fix --config=./.eslintrc.js --ext .js,.md,.json"
@@ -71,7 +71,8 @@
     "verifyConditions": [
       "@semantic-release/changelog",
       "@semantic-release/git",
-      "@semantic-release/github"
+      "@semantic-release/github",
+      "semantic-release-whmcs"
     ],
     "prepare": [
       {
@@ -113,10 +114,7 @@
           }
         ]
       },
-      {
-        "path": "@semantic-release/exec",
-        "cmd": "node whmcsmarketplace.js ${nextRelease.version} \"${nextRelease.notes}\""
-      }
+      "semantic-release-whmcs"
     ]
   }
 }
