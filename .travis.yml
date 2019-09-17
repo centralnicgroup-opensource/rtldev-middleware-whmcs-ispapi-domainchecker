@@ -30,7 +30,7 @@ install:
   - (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`)
   - source ~/.nvm/nvm.sh
   - nvm install $TRAVIS_NODE_VERSION
-  - travis-retry npm i
+  - travis_retry npm i
   - travis_retry composer global require squizlabs/php_codesniffer
 script:
   - npm run codeCheck
