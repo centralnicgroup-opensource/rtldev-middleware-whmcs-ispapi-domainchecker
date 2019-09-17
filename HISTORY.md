@@ -1,3 +1,12 @@
+## [11.2.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.2.1...v11.2.2) (2019-09-17)
+
+
+### Bug Fixes
+
+* **release process:** fix installation step ([e1d23a5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/e1d23a5))
+* **release process:** fix typo in install step ([322e212](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/322e212))
+* **release process:** review CI/CD; lint js sources ([29a63d1](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/29a63d1))
+
 ## [11.2.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.2.0...v11.2.1) (2019-09-13)
 
 
