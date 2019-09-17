@@ -2,7 +2,7 @@ const SearchResult = function (row) {
   this.data = row
   this.data.isBackorderable = false
   if (this.data.status === 'TAKEN') {
-    if (this.data.pricing.hasOwnProperty('backorder')) {
+    if (Object.prototype.hasOwnProperty.call(this.data.pricing, 'backorder')) {
       this.data.isBackorderable = true
     }
     // FEAT not yet supported in backorder module
@@ -11,8 +11,8 @@ const SearchResult = function (row) {
     // }
     if (this.data.isBackorderable) {
       this.data.backordered = (
-        ds.backorders.hasOwnProperty(this.data.PC) ||
-        ds.backorders.hasOwnProperty(this.data.IDN)
+        Object.prototype.hasOwnProperty.call(ds.backorders, this.data.PC) ||
+        Object.prototype.hasOwnProperty.call(ds.backorders, this.data.IDN)
       )
     }
   }
@@ -24,7 +24,7 @@ SearchResult.prototype.fadeIn = function () {
   this.data.element.fadeIn()
 }
 SearchResult.prototype.getTermConfig = function (key) {
-  if (!this.data.pricing.hasOwnProperty(key)) {
+  if (!Object.prototype.hasOwnProperty.call(this.data.pricing, key)) {
     return null
   }
   const cfg = {
@@ -69,7 +69,7 @@ SearchResult.prototype.getPrice = function (pricetype, doformat, term) {
   const price = this.data.pricing[pricetype]
   if (price) {
     if (term) {
-      if (price.hasOwnProperty(term)) {
+      if (Object.prototype.hasOwnProperty.call(price, term)) {
         if (doformat) {
           return `${currency.prefix}${price[term]}${currency.suffix}`
         }
@@ -101,8 +101,8 @@ SearchResult.prototype.showAvailable = function () {
     this.showTaken()
     return
   }
-  let regprice = this.getPrice('register', true, termcfg.initialTerm)
-  let regpriceraw = this.getPrice('register', false, termcfg.initialTerm)
+  const regprice = this.getPrice('register', true, termcfg.initialTerm)
+  const regpriceraw = this.getPrice('register', false, termcfg.initialTerm)
   const renprice = this.getPrice('renew', true, termcfg.initialTerm)
   const multiTerms = termcfg.terms.length > 1
   // just set this once and not again after adding to cart, we would loss the chosen term and price

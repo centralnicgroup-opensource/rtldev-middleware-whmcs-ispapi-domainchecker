@@ -16,7 +16,7 @@ function infoOut (d, msg, title) {
   title = title || 'Error occured!'
   let infomsg = msg
   let isError = false
-  if (d.hasOwnProperty('status') && d.status !== 200) {
+  if (Object.prototype.hasOwnProperty.call(d, 'status') && d.status !== 200) {
     isError = true
     infomsg += ` (${d.status} ${d.statusText})`
   }
@@ -336,7 +336,7 @@ function addCategory (cat, index) {
  */
 function initAddTLD () {
   $('#addtld').off().click(() => {
-    let tlds = data.alltlds.map(tld => {
+    const tlds = data.alltlds.map(tld => {
       return `.${tld}`
     })
     let tldsavailable = tlds
@@ -551,7 +551,7 @@ function addTLDGrid (elem, prepend) {
     const grid = item.getGrid()
     const catTo = parseInt($(grid.getElement()).attr('id').replace(/^.+_/, ''), 10)
     const catFrom = parseInt($iEL.attr('id').replace(/(^[^_]+_|_[^_]+$)/g, ''), 10)
-    let data = {
+    const data = {
       item: item,
       toGrid: grid,
       toGridId: catTo,
@@ -944,7 +944,7 @@ function generate (d) {
   $('#loading').hide()
 
   data = d
-  if (!data.hasOwnProperty('categories')) {
+  if (!Object.prototype.hasOwnProperty.call(data, 'categories')) {
     infoOut(data, 'Error loading configuration')
     $('#tabs').remove()
     $('#contentarea').append('<div><span class="label label-danger">Error: Loading configuration data failed</span></div>')

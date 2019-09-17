@@ -107,7 +107,7 @@ DomainSearch.prototype.loadConfiguration = function (currencyid) {
     this.clearSearch()
     cfgurl += `&currency=${currencyid}`// to change the currency in session
   }
-  if (this.d.hasOwnProperty(currencyid)) {
+  if (Object.prototype.hasOwnProperty.call(this.d, currencyid)) {
     this.generate(this.d[currencyid], 'success', currencychanged)
     cfgurl += '&nodata=1'
     $.ajax(cfgurl)
@@ -128,12 +128,12 @@ DomainSearch.prototype.getTLDPricing = function (pcdomain) {
   const prices = this.d[this.activeCurrency].pricing
   // to have at least the currency for premium domains (see processresults fn)
   let pricing = $.extend({}, { currency: prices.currency })
-  if (prices.tlds.hasOwnProperty(tld)) {
+  if (Object.prototype.hasOwnProperty.call(prices.tlds, tld)) {
     pricing = $.extend(pricing, prices.tlds[tld])
-    if (pricing.hasOwnProperty('backorder')) {
+    if (Object.prototype.hasOwnProperty.call(pricing, 'backorder')) {
       pricing.backorder = parseFloat(pricing.backorder).toFixed(2)
     }
-    if (pricing.hasOwnProperty('backorderlite')) {
+    if (Object.prototype.hasOwnProperty.call(pricing, 'backorderlite')) {
       pricing.backorderlite = parseFloat(pricing.backorderlite).toFixed(2)
     }
   }
@@ -193,7 +193,7 @@ DomainSearch.prototype.initForm = function () {
     })
     sessionStorage.setItem('ispapi_searchStore', JSON.stringify(this.searchStore))
   }
-  if (this.searchStore.hasOwnProperty('domain')) {
+  if (Object.prototype.hasOwnProperty.call(this.searchStore, 'domain')) {
     const tmp = ispapiIdnconverter.convert([this.searchStore.domain])
     this.searchcfg.searchString = { IDN: tmp.IDN[0], PC: tmp.PC[0] }
   }
@@ -305,7 +305,7 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
     this.catmgr = null
     return
   }
-  if (!d.hasOwnProperty('categories')) {
+  if (!Object.prototype.hasOwnProperty.call(d, 'categories')) {
     // show error just in case we have not canceled it
     if (!/^abort$/i.test(statusText)) {
       $('#loading, #resultsarea').hide()
@@ -322,8 +322,8 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
   this.mode = d.suggestionsOn
   this.backorders = d.backorders
   this.paths = {
-    'dc': d.path_to_dc_module,
-    'bo': d.path_to_bo_module
+    dc: d.path_to_dc_module,
+    bo: d.path_to_bo_module
   }
   // apply reseller's filter settings if applicable
   if (this.initFromSessionStorage === 2 || !this.initFromSessionStorage) {
@@ -425,7 +425,7 @@ DomainSearch.prototype.buildDomainlist = async function () {
   if (/\./.test(searchstr)) {
     searchTld = searchstr.replace(/^[^.]+\./, '')
   }
-  let tldsbyprio = this.d[this.activeCurrency].tldsbyprio
+  const tldsbyprio = this.d[this.activeCurrency].tldsbyprio
   let domainlist
   let priodomainlist = []
   if (this.mode) {
@@ -475,7 +475,7 @@ DomainSearch.prototype.getCachedResult = function (domain) {
 }
 DomainSearch.prototype.getSearchGroups = async function (searchterm) {
   const newSearchTerm = (searchterm !== this.searchGroups.searchterm)
-  if (!this.searchGroups.hasOwnProperty('open') || newSearchTerm) {
+  if (!Object.prototype.hasOwnProperty.call(this.searchGroups, 'open') || newSearchTerm) {
     $('#searchresults').empty()
     const domainlist = await this.buildDomainlist()
     if (!domainlist.length) {
@@ -550,13 +550,13 @@ DomainSearch.prototype.processCachedResults = function (list) {
   }.bind(this))
 }
 DomainSearch.prototype.processResults = function (grp, d) {
-  if (d.hasOwnProperty('statusText') && /^abort$/i.test(d.statusText)) {
+  if (Object.prototype.hasOwnProperty.call(d, 'statusText') && /^abort$/i.test(d.statusText)) {
     // skip aborted connections, new search results are incoming
     return
   }
   grp.forEach((row, idx) => {
     row.status = 'UNKNOWN'
-    if (d.hasOwnProperty(status)) { // client http error
+    if (Object.prototype.hasOwnProperty.call(d, status)) { // client http error
       row.REASON = d.statusText
     }
     if (d.success === false) {
@@ -574,11 +574,11 @@ DomainSearch.prototype.processResults = function (grp, d) {
           row.premiumtype = 'AFTERMARKET'
         }
         // override by returned registrar prices and cleanup row data
-        if (row.hasOwnProperty('PRICE')) {
+        if (Object.prototype.hasOwnProperty.call(row, 'PRICE')) {
           row.pricing.register = { 1: row.PRICE.toFixed(2) }
           delete row.PRICE
         }
-        if (row.hasOwnProperty('PRICERENEW')) {
+        if (Object.prototype.hasOwnProperty.call(row, 'PRICERENEW')) {
           row.pricing.renew = { 1: row.PRICERENEW.toFixed(2) }
           delete row.PRICERENEW
         }
@@ -625,7 +625,7 @@ DomainSearch.prototype.requestGroupCheck = function (group) {
     data.registrars.push(row.registrar)
   })
   $.ajax({
-    url: `?action=checkdomains`,
+    url: '?action=checkdomains',
     type: 'POST',
     data: JSON.stringify(data),
     contentType: 'application/json; charset=utf-8',

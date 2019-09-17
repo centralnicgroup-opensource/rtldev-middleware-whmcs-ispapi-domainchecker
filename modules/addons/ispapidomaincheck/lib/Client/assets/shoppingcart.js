@@ -4,7 +4,7 @@ const ShoppingCart = function () {
 ShoppingCart.prototype.load = async function () {
   try {
     this.items = await $.ajax({
-      url: `?action=getcartitems`,
+      url: '?action=getcartitems',
       type: 'GET'
     })
     if (Array.isArray(this.items)) { // empty list
@@ -36,7 +36,7 @@ ShoppingCart.prototype.addOrderPremium = function (sr, successmsg, errmsg) {
   // analysis how they set the data and how the call for every premium domain case looks like
   const row = sr.data
   const term = parseInt(row.element.find('.hxdata').data('term'), 10)
-  $.ajax(`?action=addPremiumToCart`, {
+  $.ajax('?action=addPremiumToCart', {
     type: 'POST',
     dataType: 'json',
     contentType: 'application/json; charset=utf-8',
@@ -157,7 +157,7 @@ ShoppingCart.prototype.removeOrder = function (sr) {
   cart.removeOrderDomain(sr, successmsg, errmsg)
 }
 ShoppingCart.prototype.removeOrderDomain = function (sr, successmsg, errmsg) {
-  $.ajax(`?action=deleteorder`, {
+  $.ajax('?action=deleteorder', {
     type: 'POST',
     dataType: 'json',
     contentType: 'application/json; charset=utf-8',
