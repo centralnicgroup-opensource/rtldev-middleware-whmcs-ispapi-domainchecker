@@ -16,9 +16,7 @@
             </button>
           </div>
           <div class="col-xs-12">
-            <div class="catcontainer">
-              <ul class="cat" id="categoriescont"></ul>
-            </div>
+            <div class="catcontainer"></div>
           </div>
         </div>
         <button type="button" id="savedefaultcats" class="btn btn-default">Save Changes</button>

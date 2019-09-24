@@ -1,0 +1,13 @@
+<div class="form-inline">
+    <div class="form-group">
+        <label for="categorylabel" class="sr-only">Category </label> <select id="categoryinp" class="form-control" aria-describedby="helpCatInp">
+            <option value="">Select a Category ...</option>
+            {{#categories}}
+            <option value="{{id}}">{{name}}</option>
+            {{/categories}}
+        </select><span id="helpCatInp" class="help-block">&nbsp;</span>
+    </div>
+    <div class="form-group">
+        <label for="tldinp" class="sr-only">TLD</label> <input type="text" id="tldinp" class="form-control" placeHolder="{{tld}}" value="" aria-describedby="helpTLDInp"/><span id="helpTLDInp" class="help-block">Provide a <u>configured</u> TLD that is <u>not</u> yet part of the selected category.</span>
+    </div>
+</div>

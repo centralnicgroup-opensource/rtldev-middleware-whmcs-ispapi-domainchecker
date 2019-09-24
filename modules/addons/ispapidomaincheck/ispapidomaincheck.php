@@ -104,21 +104,21 @@ function ispapidomaincheck_clientarea($vars)
         return <<<HTML
         <meta name="viewport" content="width=device-width, user-scalable=no"/>
         <script>const wr = "{$wr}";</script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.mustache.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/mustache.min.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.js?t=$now"></script>
-        <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.css?t=$now" rel="stylesheet" type="text/css"/>
-        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/index.css?t=$now"/>
-        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/categories.css?t=$now"/>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/proxy.min.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/uts46bundle.min.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/shoppingcart.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/tplmgr.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/searchresult.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/domainsearch.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/category.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/categorymgr.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/index.js?t=$now"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/jquery.mustache.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/mustache.min.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.js?t={$now}"></script>
+        <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.css?t={$now}" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/index.css?t={$now}"/>
+        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/categories.css?t={$now}"/>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/proxy.min.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/uts46bundle.min.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/shoppingcart.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/tplmgr.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/searchresult.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/domainsearch.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/category.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/categorymgr.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/index.js?t={$now}"></script>
 HTML;
     });
 
@@ -178,14 +178,17 @@ function ispapidomaincheck_output($vars)
         $wr = $vars['WEB_ROOT'];
         return <<<HTML
         <script>const wr = "{$wr}";</script>
-        <link rel="stylesheet" type="text/css" href="{$wr}/assets/css/jquery-ui.min.css?t=$now"/>
-        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.css?t=$now"/>
-        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/categories.css?t=$now"/>
-        <script src="{$wr}/assets/js/jquery-ui.min.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/uts46bundle.min.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/web-animations.min.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/muuri.min.js?t=$now"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.js?t=$now"></script>
+        <link rel="stylesheet" type="text/css" href="{$wr}/assets/css/jquery-ui.min.css?t={$now}"/>
+        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.css?t={$now}"/>
+        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/categories.css?t={$now}"/>
+        <script src="{$wr}/assets/js/jquery-ui.min.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/uts46bundle.min.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/web-animations.min.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/muuri.min.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/tplmgr.js?t=$now"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/jquery.mustache.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Common/assets/mustache.min.js?t={$now}"></script>
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.js?t={$now}"></script>
 HTML;
     });
     //load WHMCS
