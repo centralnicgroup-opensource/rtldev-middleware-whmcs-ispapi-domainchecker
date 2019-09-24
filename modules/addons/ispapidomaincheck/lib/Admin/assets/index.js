@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+const translations = {}
 let nagrid // Grid "Not Assigned"
 let maingrid // Categories
 let tldgrids // TLD Lists
@@ -44,9 +46,7 @@ function initImport () {
       width: 400,
       modal: true,
       open: function () {
-        $('#contentholder').html(
-          '<span class="ui-icon ui-icon-alert"></span> This will overwrite your current configuration. Are you sure?'
-        )
+        $('#contentholder').html(TPLMgr.renderString('import'))
       },
       buttons: {
         Confirm: function () {
@@ -60,10 +60,12 @@ function initImport () {
           }).done(function (d) {
             $('#loading').hide()
             $('#tabs').tabs({ disabled: [] })
+            d.defaultActiveCategories = data.categories.map(cat => cat.id)
+            saveDefaultCategories(null, d.defaultActiveCategories)
             generate(d)
             generateTab1Block1()
             generateTab2()
-            infoOut(d, "Import of the default WHMCS' categories finished.", 'Import successful!')
+            infoOut(d, "Import of the default WHMCS' categories finished. Please re-configure your by-default active Categories in Settings Tab.", 'Import successful!')
           }).fail(function (d) {
             $('#loading').hide()
             generate(d)
@@ -92,16 +94,7 @@ function initAddCategory () {
       width: 400,
       modal: true,
       open: function () {
-        $('#contentholder').html(
-          `<div class="navbar-form">
-            <div class="form-group">
-              <label for="categoryinp">Category:</label> <input type="text" id="categoryinp" class="form-control" value=""/>
-            </div>
-            <div class="form-group checkbox">
-              <label for="addunassignedtlds"><input type="checkbox" id="addunassignedtlds" value="1"/> Add all unassigned TLDs</label>
-            </div>
-          </div>`
-        )
+        $('#contentholder').html(TPLMgr.renderString('addcategory'))
       },
       buttons: {
         Confirm: function () {
@@ -132,8 +125,8 @@ function initAddCategory () {
                 data.notassignedtlds = []
                 nagrid.remove(nagrid.getItems())
               }
-              addCategory(d.category, 1)
-              addTLDGrid($(`#cat_${d.category.id}`)[0], true)
+              const $catEl = addCategory(d.category, 1)
+              addTLDGrid($catEl.find('.tldgrid')[0], true)
               maingrid.refreshItems().layout()
               generateTab1Block1()
             }
@@ -151,13 +144,13 @@ function initAddCategory () {
 }
 
 /**
- * get tldgrid instance by given element id
- * @param id html element id
+ * get tldgrid instance by given category id
+ * @param categoryid id of the category
  * @return tldgrid instance
  */
-function getTLDGridByID (id) {
+function getTLDGridByCategory (categoryid) {
   return tldgrids.filter(g => {
-    return $(g.getElement()).attr('id') === id
+    return $(g.getElement()).data('category') === categoryid
   })[0]
 }
 
@@ -166,19 +159,17 @@ function getTLDGridByID (id) {
  */
 function initDropCategory () {
   $('.dropcat').off().click(function () {
-    const cat = parseInt($(this).attr('id').replace(/^dcat_/, ''), 10)
-    const name = $(this).parent().text().replace(/^\s+/, '').replace(/\s+$/, '')
     const gridEl = $(this).closest('.item')
+    const name = gridEl.data('name')
+    const cat = gridEl.data('category')
     $('#dialog-confirm').dialog({
-      title: `Delete Category '${name}'`,
+      title: `Delete Category "${name}"`,
       resizable: false,
       height: 'auto',
       width: 400,
       modal: true,
       open: function () {
-        $('#contentholder').html(
-          '<span class="ui-icon ui-icon-alert"></span> This will delete the category and all the assigned TLDs. Are you sure?'
-        )
+        $('#contentholder').html(TPLMgr.renderString('dropcategory'))
       },
       buttons: {
         Confirm: function () {
@@ -195,29 +186,31 @@ function initDropCategory () {
             $('#loading').hide()
             infoOut(d, d.msg, 'Action succeeded!')
             if (d.success) {
+              const idx = data.defaultActiveCategories.indexOf(cat)
+              if (idx > -1) {
+                data.defaultActiveCategories.splice(idx, 1)
+                saveDefaultCategories(null, data.defaultActiveCategories)
+              }
               data.categories = data.categories.filter((mycat) => {
                 return mycat.id !== cat
               })
-              const g = getTLDGridByID(gridEl.find('.tldgrid').attr('id'))
+              const g = getTLDGridByCategory(gridEl.find('.tldgrid').data('category'))
               g.getItems().forEach(item => {
-                const id = $(item.getElement()).attr('id')
-                const tld = id.replace(/.+_/, '')
+                const tld = $(item.getElement()).data('tld')
                 let found = false
-                data.categories.forEach(mycat => {
-                  found = found || mycat.tlds.indexOf(tld) !== -1
-                })
+                for (let i = 0; i < data.categories.length; i++) {
+                  found = found || data.categories[i].tlds.indexOf(tld) !== -1
+                  if (found) {
+                    break
+                  }
+                }
                 if (!found) {
-                  data.notassignedtlds.unshift(tld)
+                  data.notassignedtlds.push(tld)
                   g.send(item, nagrid, 0)
-                  let oldid = $(item.getElement()).attr('id')
-                  oldid = oldid.split('_')
-                  oldid[1] = -1
-                  $(item.getElement()).attr('id', oldid.join('_'))
                 }
               })
-              tldgrids.forEach(function (tldgrid) {
-                tldgrid.refreshItems().layout()
-              })
+              tldgrids.splice(tldgrids.indexOf(g), 1)
+              g.destroy(true)
               maingrid.remove(gridEl[0], { removeElements: true })
               maingrid.refreshItems().layout()
               generateTab1Block1()
@@ -240,21 +233,19 @@ function initDropCategory () {
  * @param item tldgrid item to delete
  */
 function dropTLD (item) {
-  const gridEl = $(item.getElement()).closest('.tldgrid-item')
-  const tmp = gridEl.attr('id').split('_')
-  const cat = parseInt(tmp[1], 10)
-  const tld = tmp[2]
+  const itemEl = $(item.getElement())
+  const cat = $(item.getGrid().getElement()).data('category')
+  const catlabel = itemEl.closest('.item').data('name')
+  const tld = itemEl.data('tld')
 
   $('#dialog-confirm').dialog({
-    title: `Remove TLD '${tld}' from Category`,
+    title: `Remove Extension .${tld}`,
     resizable: false,
     height: 'auto',
     width: 400,
     modal: true,
     open: function () {
-      $('#contentholder').html(
-        `<span class="ui-icon ui-icon-alert"></span> This will remove '${tld}' from the category. Are you sure?`
-      )
+      $('#contentholder').html(TPLMgr.renderString('droptld', { tld: tld, category: catlabel }))
     },
     buttons: {
       Confirm: function () {
@@ -271,13 +262,14 @@ function dropTLD (item) {
           return mycat
         })
         const g = item.getGrid()
+        $(item.getElement()).data('category', $(item.getGrid().getElement()).data('category'))
         if (!found) { // tld is not in any further category
           data.notassignedtlds.unshift(tld)
           g.send(item, nagrid, 0)
         } else {
           g.remove(item, { removeElements: true })
         }
-        g._emit('dragReleaseEnd', item, true)
+        g._emit('dragEnd', item)
       },
       Cancel: function () {
         $(this).dialog('close')
@@ -290,45 +282,26 @@ function dropTLD (item) {
  * Add category (to maingrid)
  * @param cat category (object e.g. {id: 1, name: "...", tlds:[]})
  * @param index where the category has to be added
+ * @returns inserted category item
  */
 function addCategory (cat, index) {
-  let html
-  html = `<div class="item">
-                <div class="item-content">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <span class="dropcat glyphicon glyphicon-remove" id="dcat_${cat.id}"></span> ${cat.name}
-                        </div>
-                        <div class="panel-body">
-                            <div class="tldgrid" id="cat_${cat.id}">`
-  cat.tlds.forEach(tld => {
-    html += `<div class="tldgrid-item" id="tld_${cat.id}_${tld}">
-                    <div class="item-content">
-                        <span class="droptld glyphicon glyphicon-remove"></span> .${tld}
-                    </div>
-                </div>`
-  })
-  html += `              </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`
-
-  const eL = $.parseHTML(html)
+  const $eL = $(TPLMgr.renderString('tldgrid', cat))
   if (cat.id < 0) {
-    $(eL).find('.droptld').hide()
-    $(eL).find('.dropcat').remove()
-    $(eL).find('.panel-primary').switchClass('panel-primary', 'panel-warning')
+    $eL.find('.droptld').hide()
+    $eL.find('.dropcat').remove()
+    $eL.find('.panel-primary').switchClass('panel-primary', 'panel-warning')
   }
+  $eL.data('tlds', cat.tlds)
   if (index != null) {
-    maingrid.add(eL, { index: index })
+    maingrid.add($eL[0], { index: index })
   } else {
-    maingrid.add(eL)
+    maingrid.add($eL[0])
   }
   // hide "not assigned" when empty
   if (cat.id === -1 && !cat.tlds.length) {
-    maingrid.hide(eL, { instant: true })
+    maingrid.hide($eL[0], { instant: true })
   }
+  return $eL
 }
 
 /**
@@ -347,28 +320,16 @@ function initAddTLD () {
       width: 600,
       modal: true,
       open: function () {
-        $('#contentholder').html(
-          `<div class="form-inline">
-            <div class="form-group">
-              <label for="categorylabel" class="sr-only">Category </label> <select id="categoryinp" class="form-control" aria-describedby="helpCatInp"><option value="">Select a Category ...</option>
-              </select><span id="helpCatInp" class="help-block">&nbsp;</span>
-            </div>
-            <div class="form-group">
-              <label for="tldinp" class="sr-only">TLD</label> <input type="text" id="tldinp" class="form-control" placeHolder="${tlds[0]}" value="" aria-describedby="helpTLDInp"/><span id="helpTLDInp" class="help-block">Provide a <u>configured</u> TLD that is <u>not</u> yet part of the selected category.</span>
-            </div>
-          </div>`
-        )
-        data.categories.forEach(cat => {
-          $('#categoryinp').append(`<option value="${cat.id}">${cat.name}</option>`)
-        })
+        $('#contentholder').html(TPLMgr.renderString('addtld', { tld: tlds[0], categories: data.categories }))
         $('#tldinp').autocomplete({
           source: tldsavailable
         })
         $('#categoryinp').change(function () {
-          const val = this.value
+          let val = this.value
           if (val !== '') {
+            val = parseInt(val, 10)
             const category = data.categories.filter((cat) => {
-              return cat.id === parseInt(val, 10)
+              return cat.id === val
             })[0]
             tldsavailable = tlds.filter(function (value) {
               return category.tlds.indexOf(value.replace(/^\./, '')) === -1
@@ -406,7 +367,7 @@ function initAddTLD () {
           $(this).dialog('close')
 
           // if it is part of category "Not Assigned"
-          const g = getTLDGridByID(`cat_${selectedCat}`)
+          const g = getTLDGridByCategory(selectedCat)
           const found = data.notassignedtlds.indexOf(selectedTLD) !== -1
           if (found) {
             // move it to the category
@@ -414,10 +375,11 @@ function initAddTLD () {
               return mytld !== selectedTLD
             })
             const item = nagrid.getItems().filter(function (i) {
-              return $(i.getElement()).attr('id') === `tld_-1_${selectedTLD}`
+              return $(i.getElement()).data('tld') === selectedTLD
             })[0]
+            $(item.getElement()).data('category', -1)
             nagrid.send(item, g, 0)
-            g._emit('dragReleaseEnd', item, false)
+            g._emit('dragEnd', item)
           } else {
             // not found, create an new item and add it
             $('#loading').show()
@@ -433,12 +395,8 @@ function initAddTLD () {
               $('#loading').hide()
               if (d.success) {
                 category.tlds = tldlist
-                $(`#cat_${selectedCat}`).prepend(`<div class="tldgrid-item" id="tld_${selectedCat}_${selectedTLD}">
-                    <div class="item-content">
-                        <span class="droptld glyphicon glyphicon-remove"></span> .${selectedTLD}
-                    </div>
-                </div>`)
-                g.add($(`#tld_${selectedCat}_${selectedTLD}`)[0], { index: 0 })
+                const $el = TPLMgr.renderPrepend(`.tldgrid[data-category="${selectedCat}"]`, 'tldgriditem', selectedTLD)
+                g.add($el[0], { index: 0 })
                 g.refreshItems().layout()
                 infoOut(d, d.msg, 'Action successful!')
                 return
@@ -478,10 +436,8 @@ function updateNACategory () {
 }
 
 function sortItemsByPriority (a, b) {
-  const elA = a.getElement()
-  const elB = b.getElement()
-  const tldA = $(elA).attr('id').replace(/^.+_/, '')
-  const tldB = $(elB).attr('id').replace(/^.+_/, '')
+  const tldA = $(a.getElement()).data('tld')
+  const tldB = $(b.getElement()).data('tld')
   const idxA = data.alltlds.indexOf(tldA)
   const idxB = data.alltlds.indexOf(tldB)
   return idxA - idxB
@@ -508,7 +464,7 @@ function addTLDGrid (elem, prepend) {
     dragSort: function () {
       return tldgrids.filter((g) => {
         // not allowed to drag into category "Not assigned"
-        return $(g.getElement()).attr('id') !== 'cat_-1'
+        return $(g.getElement()).data('category') !== -1
       })
     },
     dragSortInterval: 0,
@@ -538,43 +494,37 @@ function addTLDGrid (elem, prepend) {
   }).on('dragStart', function (item) {
     ++dragCounter
     docElem.classList.add('dragging')
+    $(item.getElement()).data('category', $(item.getGrid().getElement()).data('category'))
     $(item.getElement()).css({
       width: item.getWidth() + 'px',
       height: item.getHeight() + 'px'
     })
-  }).on('dragEnd', function () {
+  }).on('dragEnd', function (item) {
     if (--dragCounter < 1) {
       docElem.classList.remove('dragging')
     }
-  }).on('dragReleaseEnd', function (item, isRemoved) {
     const $iEL = $(item.getElement())
     const grid = item.getGrid()
-    const catTo = parseInt($(grid.getElement()).attr('id').replace(/^.+_/, ''), 10)
-    const catFrom = parseInt($iEL.attr('id').replace(/(^[^_]+_|_[^_]+$)/g, ''), 10)
+    const catTo = $(grid.getElement()).data('category')
+    const catFrom = $iEL.data('category')
+    $iEL.removeData('category')
     const data = {
       item: item,
       toGrid: grid,
       toGridId: catTo,
       fromGridId: catFrom
     }
-    if (isRemoved) {
-      data.action = 'remove'
-      // nagrid when unassigned; otherwise fromGrid
-      data.fromGrid = getTLDGridByID(`cat_${catFrom}`)
-    } else {
-      $iEL.css({
-        width: '',
-        height: ''
-      })
-      data.action = 'move'
-      data.fromGrid = (catTo === catFrom) ? grid : getTLDGridByID(`cat_${catFrom}`)
-    }
+    $iEL.css({
+      width: '',
+      height: ''
+    })
+    data.fromGrid = (catTo === catFrom) ? grid : getTLDGridByCategory(catFrom)
     saveCategoryChanges(data)
   }).on('layoutStart', function () {
     // necessary to repaint after dragging to another category
     maingrid.refreshItems().layout()
   })
-  if ($(elem).attr('id') === 'cat_-1') {
+  if ($(elem).data('category') === -1) {
     // initialize global var
     nagrid = tldgrid
   }
@@ -710,8 +660,8 @@ function getDefaultSelectedCategories () {
 /**
  * Save Configuration `Default Active Categories`
  */
-function saveDefaultCategories () {
-  const actives = getDefaultSelectedCategories()
+function saveDefaultCategories (event, categories) {
+  const actives = categories || getDefaultSelectedCategories()
   $('#loading').show()
   $.ajax({
     url: '?module=ispapidomaincheck&action=savedefaultcategories',
@@ -792,7 +742,7 @@ function generateTab2 () {
 
   // align categories correctly
   maingrid = new Muuri('.grid', {
-    layoutDuration: 400,
+    layoutDuration: 100,
     layoutEasing: 'ease',
     dragEnabled: true,
     dragSortInterval: 0,
@@ -812,15 +762,6 @@ function generateTab2 () {
     },
     dragReleaseDuration: 400,
     dragReleaseEasing: 'ease'
-    /* https://github.com/haltu/muuri/issues/301
-      dragPlaceholder: {
-      enabled: true,
-      duration: 300,
-      easing: 'ease',
-      createElement: null,
-      onCreate: null,
-      onRemove: null
-    } */
   }).on('layoutStart', function () {
     updateNACategory()
   }).on('layoutEnd', function () {
@@ -854,11 +795,13 @@ function generateTab1Block1 () {
   url = `${baseurl}cat=${data.defaultActiveCategories}`
   $uri.text(url)
   $uri.prop('href', url)
-  const $eL = $('#categoriescont')
+  const $eL = $('.catcontainer')
   $eL.empty()
-  data.categories.forEach(cat => {
-    const cl = (data.defaultActiveCategories.indexOf(cat.id) === -1) ? '' : ' active'
-    $eL.append(`<li class="subCat${cl}" id="s_${cat.id}">${cat.name}</li>`)
+  TPLMgr.renderAppend('.catcontainer', 'activecats', {
+    categories: data.categories,
+    cssclass: function () {
+      return (data.defaultActiveCategories.indexOf(this.id) === -1) ? '' : ' active'
+    }
   })
   $eL.find('.subCat').off('click').click(function () {
     $(this).toggleClass('active')
@@ -947,7 +890,7 @@ function generate (d) {
   if (!Object.prototype.hasOwnProperty.call(data, 'categories')) {
     infoOut(data, 'Error loading configuration')
     $('#tabs').remove()
-    $('#contentarea').append('<div><span class="label label-danger">Error: Loading configuration data failed</span></div>')
+    TPLMgr.renderAppend('#contentarea', 'loadcfgerror')
     return
   }
   $(document).ready(() => {
@@ -994,59 +937,34 @@ function saveCategory (cat, tlds) {
  * @param data object covering the action data fromGrid, fromGridId, toGrid, toGridId, item, action
  */
 function saveCategoryChanges (data) {
-  if (data.action === 'remove') {
-    // category not changed, position changed or item deleted
-    const tlds = []
-    data.fromGrid.getItems().forEach(item => {
-      tlds.push($(item.getElement()).attr('id').replace(/.+_/, ''))
-    })
-    // if this tld is no longer assigned to any category
-    // it switches category to nagrid
-    if (data.toGridId === -1) {
-      let oldid = $(data.item.getElement()).attr('id')
-      oldid = oldid.split('_')
-      oldid[1] = data.toGridId
-      $(data.item.getElement()).attr('id', oldid.join('_'))
-    }
-    saveCategory(data.fromGridId, tlds)
-  } else {
-    if (data.fromGrid === data.toGrid) {
-      // category not changed, position changed or item deleted
-      const tlds = []
-      data.fromGrid.getItems().forEach(item => {
-        tlds.push($(item.getElement()).attr('id').replace(/.+_/, ''))
-      })
-      saveCategory(data.fromGridId, tlds)
-    } else {
-      // category changed, care about duplicates
-      let tlds = []
-      data.fromGrid.getItems().forEach(item => {
-        tlds.push($(item.getElement()).attr('id').replace(/.+_/, ''))
-      })
-      saveCategory(data.fromGridId, tlds)// this won't save for nagrid
-
-      tlds = []
-      data.toGrid.getItems().forEach(item => {
-        const $iEL = $(item.getElement())
-        const iOldID = $iEL.attr('id')
-        const tld = iOldID.replace(/.+_/, '')
-        const iNewID = `tld_${data.toGridId}_${tld}`
-        if (iOldID === iNewID) {
-          tlds.push(tld)
-        } else {
-          const $dupl = $(`#${iNewID}`)
-          if ($dupl.length) {
-            data.toGrid.remove($dupl[0], { removeElements: true })
-          } else {
-            tlds.push(tld)
-          }
-          $iEL.attr('id', iNewID)
-        }
-        $iEL.find('.droptld').show()
-      })
-      saveCategory(data.toGridId, tlds)// this won't save for nagrid
-    }
+  let tlds = []
+  const $iEL = $(data.item.getElement())
+  const mytld = $iEL.data('tld')
+  const foundIndexes = []
+  $iEL.data('category', data.toGridId)
+  if (data.toGridId !== -1) { // naGrid
+    $iEL.find('.droptld').show()
   }
+  data.toGrid.getItems().forEach(item => {
+    const tld = $(item.getElement()).data('tld')
+    if (tld === mytld) {
+      foundIndexes.push(tlds.length)
+    }
+    tlds.push(tld)
+  })
+  foundIndexes.pop() // keep one item
+  if (foundIndexes.length) {
+    foundIndexes.forEach(idx => {
+      data.toGrid.remove(data.toGrid.getItems()[idx], { removeElements: true })
+      tlds.splice(idx, 1)
+    })
+  }
+  saveCategory(data.toGridId, tlds)// this won't save for naGrid
+  tlds = []
+  data.fromGrid.getItems().forEach(item => {
+    tlds.push($(item.getElement()).data('tld'))
+  })
+  saveCategory(data.fromGridId, tlds)// this won't save for naGrid
 
   tldgrids.forEach(function (tldgrid) {
     tldgrid.refreshItems()
@@ -1075,29 +993,32 @@ loadConfig()
 
 // Initial DOM Manipulation and rendering of tabs
 $(document).ready(() => {
-  // init tabs
-  const generated = {}
-  $('#tabs').tabs({
-    beforeActivate: function (event, ui) {
-      const idx = ui.newTab.index()
-      if (idx === 1 && !generated[idx]) {
-        $('#loading').show()
+  (async function () {
+    // load templates
+    await TPLMgr.loadTemplates([
+      'activecats', 'import', 'tldgrid', 'tldgriditem', 'loading', 'help',
+      'loadcfgerror', 'addtld', 'addcategory', 'droptld', 'dropcategory'
+    ], 'Admin')
+    // init tabs
+    const generated = {}
+    $('#tabs').tabs({
+      beforeActivate: function (event, ui) {
+        const idx = ui.newTab.index()
+        if (idx === 1 && !generated[idx]) {
+          $('#loading').show()
+        }
+      },
+      activate: function (event, ui) {
+        const idx = ui.newTab.index()
+        if (idx === 1 && !generated[idx]) {
+          generateTab2()
+          generated[idx] = true
+          $('#loading').hide()
+        }
       }
-    },
-    activate: function (event, ui) {
-      const idx = ui.newTab.index()
-      if (idx === 1 && !generated[idx]) {
-        generateTab2()
-        generated[idx] = true
-        $('#loading').hide()
-      }
-    }
-  })
-  // modify title to save space
-  const $ca = $('#contentarea')
-  $ca.find('>div >h1').prepend(
-    '<a target="_blank" href="https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Usage-Guide"><i class="glyphicon glyphicon-question-sign"></i></a> '
-  ).append(
-    '<div id="loading"><span><i class="fas fa-sync fa-spin"></i></span></div>'
-  )
+    })
+    // modify title to save space
+    TPLMgr.renderPrepend('#contentarea >div >h1', 'help', {})
+    TPLMgr.renderAppend('#contentarea >div >h1', 'loading', {})
+  }())
 })

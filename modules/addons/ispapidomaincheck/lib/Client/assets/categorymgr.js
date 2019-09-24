@@ -100,7 +100,7 @@ CategoryManager.prototype.generate = async function () {
       message: translations.error_noprices
     })
   }
-  await TPLMgr.loadTemplates(['category'])
+  await TPLMgr.loadTemplates(['category'], 'Client')
   const $eL = $('#categoriescont')
   $eL.empty()
   this.categories.forEach((category) => {

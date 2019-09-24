@@ -202,7 +202,7 @@ ShoppingCart.prototype.addBackorder = async function (sr) {
   // we can't process the backorder product through
   // the shopping cart as only in case a backorder
   // application succeeds, an invoice has to be created
-  await TPLMgr.loadTemplates(['modalboadd'])
+  await TPLMgr.loadTemplates(['modalboadd'], 'Client')
   TPLMgr.renderAppend('body', 'modalboadd', {
     row: sr.data,
     price: sr.data.element.find('.hxdata').text()

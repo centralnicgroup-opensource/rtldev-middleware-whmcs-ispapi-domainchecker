@@ -3,13 +3,12 @@ node_modules
 .nyc_output
 docs
 dist
-**/Admin/assets/hammer.min.js
 **/Admin/assets/muuri.min.js
 **/Admin/assets/web-animations.min.js
 **/Client/assets/jquery.growl.js
-**/Client/assets/jquery.mustache.js
-**/Client/assets/mustache.js
-**/Client/assets/mustache.min.js
+**/Common/assets/jquery.mustache.js
+**/Common/assets/mustache.js
+**/Common/assets/mustache.min.js
 **/Client/assets/proxy.min.js
 **/Client/assets/checker.old.js
 **/Common/assets/uts46bundle.min.js

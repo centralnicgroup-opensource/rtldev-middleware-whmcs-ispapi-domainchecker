@@ -342,7 +342,7 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
 
   // this.mode = 1 -> domain suggestions
   const tpls = ['resultRow'].concat(this.mode ? ['suggestionscfg', 'suggestionscfgbttn'] : [])
-  await TPLMgr.loadTemplates(tpls)
+  await TPLMgr.loadTemplates(tpls, 'Client')
 
   $(document).ready(function () {
     $('#loading').hide()
