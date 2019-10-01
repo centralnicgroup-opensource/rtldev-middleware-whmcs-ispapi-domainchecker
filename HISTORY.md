@@ -1,3 +1,16 @@
+# [11.3.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.2.2...v11.3.0) (2019-10-01)
+
+
+### Bug Fixes
+
+* **assets:** add jquery-ui which got removed in WHMCS 7.8.x ([653dd15](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/653dd15))
+* **assets:** add missing jquery-ui images ([5c5e0d5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/5c5e0d5))
+
+
+### Features
+
+* **refactoring:** remove use of `id` attr ([574c8e9](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/574c8e9))
+
 ## [11.2.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.2.1...v11.2.2) (2019-09-17)
 
 
