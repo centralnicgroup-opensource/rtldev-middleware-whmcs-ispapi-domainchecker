@@ -26,7 +26,6 @@ class Controller
             $cat["tlds"] = explode(" ", preg_replace("/\s\s+/", " ", trim($cat["tlds"])));
         }
         $smarty->assign("categories", $categories);
-        $smarty->assign("i18n", $i18n);
         return $smarty->fetch('index.tpl');
     }
 

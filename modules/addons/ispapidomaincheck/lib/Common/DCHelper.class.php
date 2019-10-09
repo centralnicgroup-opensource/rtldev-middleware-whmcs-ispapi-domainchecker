@@ -3,16 +3,12 @@ namespace ISPAPI;
 
 use WHMCS\Config\Setting;
 use WHMCS\Domains\Pricing\Premium;
-use ISPAPI\I18n;
 
 $path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars","ispapi","lib","Helper.class.php"));
 if (file_exists($path)) {
     require_once($path);
 } else {
     die('Please install our <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">ISPAPI Registrar Module</a> >= v1.7.1');
-}
-if (!class_exists('ISPAPI\I18n')) {
-    require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "i18n.class.php")));
 }
 
 /**
@@ -74,7 +70,6 @@ class DCHelper extends Helper
     public static function SQLCall($sql, $params = null, $fetchmode = "fetch", $debug = false)
     {
         $r = parent::SQLCall($sql, $params, $fetchmode, $debug);
-        $i18n = new I18n();
         if (empty($r["errormsg"])) {
             if ($fetchmode == "execute") {
                 return $r["success"];
@@ -84,7 +79,7 @@ class DCHelper extends Helper
         $out = array(
             "feedback" => array(
                 "f_type" => "sqlerror",
-                "f_message" => $i18n->getText("error_feedback")
+                "f_message" => "An error occured, please contact support."
             )
         );
         if ($debug) {

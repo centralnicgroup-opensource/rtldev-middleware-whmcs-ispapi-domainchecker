@@ -10,7 +10,6 @@ if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
 }
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "i18n.class.php")));
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Common", "DCHelper.class.php")));
 
 $module_version = "11.3.0";
@@ -93,10 +92,6 @@ function ispapidomaincheck_upgrade($vars)
  */
 function ispapidomaincheck_clientarea($vars)
 {
-    add_hook('ClientAreaPage', 1, function () {
-        $i18n = new I18n();
-        return array("_LANG" => $i18n->getTranslations());
-    });
     add_hook('ClientAreaHeadOutput', 1, function ($vars) {
         $now = mktime();
         $wr = $vars['WEB_ROOT'];
@@ -123,7 +118,7 @@ HTML;
     });
 
     //load WHMCS
-    require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
+    //require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
 
     //get default currency as fallback
     if (!isset($_SESSION["currency"])) {
@@ -192,7 +187,7 @@ function ispapidomaincheck_output($vars)
 HTML;
     });
     //load WHMCS
-    require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
+    //require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
 
     //init smarty and call admin dispatcher
     $smarty = new Smarty;

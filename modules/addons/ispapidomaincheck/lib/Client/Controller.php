@@ -15,16 +15,6 @@ class Controller
 {
 
     /**
-     * constructor method
-     * load translation db
-     */
-    public function __construct()
-    {
-        $i18n = new I18n();
-        $this->lang = $i18n->getTranslations();
-    }
-
-    /**
      * Index action.
      *
      * @param array $vars Module configuration parameters
@@ -44,14 +34,8 @@ class Controller
             }
         }
         return array(
-            'pagetitle' => $this->lang['domaintitle'],//TODO
-            'breadcrumb' => array(//TODO
-                'index.php?m=ispapidomaincheck' =>  $this->lang["domaintitle"]
-            ),
-            //-> templatefile see mydomainchecker.php
-            'requirelogin' => false,
-            'forcessl' => false,
             'vars' => array(
+                '_lang' => $vars['_lang'],
                 'modulelink' => $vars['modulelink'],
                 'modulepath' => "/modules/addons/ispapidomaincheck/",
                 'domain' => isset($_POST["domain"]) ? $_POST["domain"] : "",
@@ -284,7 +268,7 @@ class Controller
     public function loadtranslations($vars, $smarty)
     {
         //translation texts
-        return $this->lang;
+        return $vars["_lang"];
     }
 
     /**
