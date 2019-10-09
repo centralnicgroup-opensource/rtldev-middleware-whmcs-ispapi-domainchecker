@@ -1,3 +1,10 @@
+## [11.3.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.3.0...v11.3.1) (2019-10-09)
+
+
+### Bug Fixes
+
+* **translations:** code review in direction of using translations ([ccc7eb0](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/ccc7eb0a70964481bf14622226546112a155b87e))
+
 # [11.3.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.2.2...v11.3.0) (2019-10-01)
 
 
