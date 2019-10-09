@@ -12,7 +12,7 @@ if (!defined("WHMCS")) {
 
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Common", "DCHelper.class.php")));
 
-$module_version = "11.3.1";
+$module_version = "11.3.2";
 
 /*
  * Configuration of the addon module.

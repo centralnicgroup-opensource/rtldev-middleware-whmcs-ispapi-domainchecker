@@ -1,3 +1,10 @@
+## [11.3.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.3.1...v11.3.2) (2019-10-09)
+
+
+### Bug Fixes
+
+* **mywhois.php:** review loading of init.php ([3a75333](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/3a75333a91e0db9d37bed1a3ce53cc66176678b4))
+
 ## [11.3.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.3.0...v11.3.1) (2019-10-09)
 
 
