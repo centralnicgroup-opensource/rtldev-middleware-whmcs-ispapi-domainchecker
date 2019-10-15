@@ -1,3 +1,10 @@
+# [11.4.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.3.2...v11.4.0) (2019-10-15)
+
+
+### Features
+
+* **language:** add portuguese support ([8482298](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/84822980a3c78e6be4be751882b7a1eda155f567))
+
 ## [11.3.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.3.1...v11.3.2) (2019-10-09)
 
 
