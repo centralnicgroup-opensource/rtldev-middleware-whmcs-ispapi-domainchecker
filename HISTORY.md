@@ -1,3 +1,10 @@
+## [11.4.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.4.0...v11.4.1) (2019-10-15)
+
+
+### Bug Fixes
+
+* **translation:** fix typo in session key ([c5b42ef](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/c5b42efcb9292c04ca82473f582e557e3cefcdc1))
+
 # [11.4.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.3.2...v11.4.0) (2019-10-15)
 
 
