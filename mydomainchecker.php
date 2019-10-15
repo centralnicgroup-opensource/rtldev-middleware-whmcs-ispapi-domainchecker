@@ -35,7 +35,7 @@ require $modulepath;
 
 // Call clientarea function
 $modulevars = DCHelper::getAddOnConfigurationValue('ispapidomaincheck');
-$language = (isset($_SESSION["language"]) ? $_SESSION["language"] : "english");
+$language = (isset($_SESSION["Language"]) ? $_SESSION["Language"] : "english");
 $langpath = ROOTDIR . DIRECTORY_SEPARATOR . "modules" . DIRECTORY_SEPARATOR . "addons" . DIRECTORY_SEPARATOR . "ispapidomaincheck" . DIRECTORY_SEPARATOR . "lang" . DIRECTORY_SEPARATOR;
 $file = $langpath . $language . ".php";
 if (file_exists($file)) {
