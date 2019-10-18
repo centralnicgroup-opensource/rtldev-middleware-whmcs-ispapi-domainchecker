@@ -1,3 +1,10 @@
+## [11.4.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.4.1...v11.4.2) (2019-10-18)
+
+
+### Bug Fixes
+
+* **domain name suggestions:** fixed submitting ZONE# parameter in command and ignoring 3rd lvl tlds ([f7e1d69](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/f7e1d6964b840824d9d737025460a5ade5f25cb2))
+
 ## [11.4.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.4.0...v11.4.1) (2019-10-15)
 
 
