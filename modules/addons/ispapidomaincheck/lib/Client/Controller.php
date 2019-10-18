@@ -232,10 +232,12 @@ class Controller
             "COMMAND"   => "QueryDomainSuggestionList",
             "KEYWORD"   => $data['keyword'],
             "SOURCE"    => "ISPAPI-SUGGESTIONS",
-            "ZONE"      => $data['zones'],
             "FIRST"     => 0,
             "LIMIT"     => 500
         );
+        foreach ($data['zones'] as $idx => $z) {//TODO support arrays in every SDK
+            $cmd["ZONE".$idx] = $z;
+        }
         //OPTION: Use my ip address
         if ($data["useip"]) {
             //detect client's ip address

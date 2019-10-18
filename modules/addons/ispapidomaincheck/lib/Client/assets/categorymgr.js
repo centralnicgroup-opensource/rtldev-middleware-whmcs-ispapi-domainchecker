@@ -133,8 +133,9 @@ CategoryManager.prototype.getSelectedTLDs = function () {
   return tlds
 }
 CategoryManager.prototype.getSelectedZones = function () {
-  return this.getSelectedTLDs().map(tld => {
-    return tld.toUpperCase().replace(/\./g, '')
+  // filter out 3rd level extensions as not supported by QueryDomainSuggestionList
+  return this.getSelectedTLDs().filter(tld => /^[^.]+$/.test(tld)).map(tld => {
+    return tld.toUpperCase().replace(/\./, '')
   })
 }
 CategoryManager.prototype.buildDomainlist = function (searchLabel) {
