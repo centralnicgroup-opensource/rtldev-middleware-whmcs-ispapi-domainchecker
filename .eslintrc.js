@@ -24,9 +24,8 @@ module.exports = {
         "csrfToken": "readonly",
         "wr": "readonly"
     },
-    'extends': 'standard',
+    'extends': ['standard', 'plugin:json/recommended'],
     'plugins': [
-        'markdown',
-        'json'
+        'markdown'
     ]
 }
