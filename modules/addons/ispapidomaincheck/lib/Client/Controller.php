@@ -77,7 +77,7 @@ class Controller
                     );
                     //if the registration price we get from $_REQUEST is the same than the one we calculated,
                     //then we can add the dommain to the cart; due to rounding issues, we are not simply comparing
-                    if (abs($data['registerprice'] - $register_price) < 0.1) {
+                    if (abs($data['registerprice'] - $register_price['markup']) < 0.1) {
                         //get renew price
                         $renew_price = DCHelper::getPremiumRenewPrice(
                             $registrar,
@@ -94,11 +94,11 @@ class Controller
                             "domain" => $idn,
                             "regperiod" => $data["term"],
                             "isPremium" => "1",
-                            "domainpriceoverride" => $register_price,
-                            "registrarCostPrice" => $price,
+                            "domainpriceoverride" => $register_price['markup'],
+                            "registrarCostPrice" => $register_price['cost'],
                             "registrarCurrency" => $currencysettings["id"],
-                            "domainrenewoverride" =>  $renew_price,
-                            //"registrarRenewalCostPrice" => //NOT REQUIRED
+                            "domainrenewoverride" =>  $renew_price["markup"],//renew price plus markup
+                            "registrarRenewalCostPrice" => $renew_price["cost"]//renew price excluding markup
                         );
                         return array("success" => true);
                     }

@@ -156,35 +156,6 @@ class DCHelper extends Helper
     }
 
     /**
-     * Fetch all TLDs with no registrar configured for whois lookup
-     *
-     * @return array list of tlds
-     */
-    public static function getWhoisLookupTLDs()
-    {
-        $registrars = array();
-        // `none` (empty string)
-        $rows = self::SQLCall("SELECT SUBSTR(extension, 2) as extension FROM tbldomainpricing WHERE autoreg is null or autoreg = ''", null, "fetchall");
-        foreach ($rows as $row) {
-            $registrars[$row["extension"]] = 1;
-        }
-        return $registrars;
-    }
-    /**
-     * Fetch list of active registrars
-     *
-     * @return array list of active registrars
-     */
-    public static function getActiveRegistrars()
-    {
-        $result = select_query("tblregistrars", "DISTINCT registrar", "", "registrar", "ASC");
-        $regs = array();
-        while ($data = mysql_fetch_array($result)) {
-            $regs[] = $data[0];
-        }
-        return $regs;
-    }
-    /**
      * Fetch list of registrar per TLD
      *
      * @return array map TLD <-> configured registrar, empty string for `none`
@@ -310,7 +281,7 @@ class DCHelper extends Helper
      *
      * @param string $price A price
      * @param array $registrar_currency_array WHMCS currency settings for registrar currency
-     * @return string The price converted BUT NOT FORMATTED
+     * @return array The price converted in array (cost, markup as keys) - BUT NOT FORMATTED
      */
     private static function convertPriceToSelectedCurrency($price, $registrar_currency_array)
     {
@@ -322,19 +293,28 @@ class DCHelper extends Helper
             //WE ARE ABLE TO CALCULATE THE PRICE
             $registrar_code = $registrar_currency_array["code"];
             if ($code == $registrar_code) {
-                return round(self::addResellerMarkup($price), 2);
+                return array(
+                    "cost" => round($price, 2),
+                    "markup" => round(self::addResellerMarkup($price), 2)
+                );
             } else {
                 $rate = $selected_currency_array["rate"];
                 if ($registrar_currency_array["default"] == 1) {
                     //CONVERT THE PRICE IN THE SELECTED CURRENCY
-                    return round(self::addResellerMarkup($price * $rate), 2);
+                    return array(
+                        "cost" => round($price * $rate, 2),
+                        "markup" => round(self::addResellerMarkup($price * $rate), 2)
+                    );
                 } else {
                     //FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND
                     //THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
                     //get the price in the default currency
                     $price_default_currency = $price * ( 1 / $registrar_currency_array["rate"] );
                     //get the price in the selected currency
-                    return round(self::addResellerMarkup($price_default_currency * $rate), 2);
+                    return array(
+                        "cost" => round($price_default_currency * $rate, 2),
+                        "markup" => round(self::addResellerMarkup($price_default_currency * $rate), 2)
+                    );
                 }
             }
         }
