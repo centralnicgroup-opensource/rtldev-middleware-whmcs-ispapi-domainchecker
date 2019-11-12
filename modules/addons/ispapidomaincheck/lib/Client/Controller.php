@@ -5,7 +5,6 @@ namespace WHMCS\Module\Addon\ispapidomaincheck\Client;
 use WHMCS\Domains\Pricing\Premium;
 use WHMCS\Domains\DomainLookup\SearchResult;
 use WHMCS\Config\Setting;
-use ISPAPI\I18n;
 use ISPAPI\DCHelper;
 
 /**

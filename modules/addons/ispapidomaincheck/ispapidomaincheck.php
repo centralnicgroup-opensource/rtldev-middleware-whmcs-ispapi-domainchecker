@@ -1,7 +1,6 @@
 <?php
 use WHMCS\Database\Capsule;
 use ISPAPI\DCHelper;
-use ISPAPI\I18n;
 use WHMCS\Config\Setting;
 use WHMCS\Module\Addon\ispapidomaincheck\Admin\AdminDispatcher;
 use WHMCS\Module\Addon\ispapidomaincheck\Client\ClientDispatcher;
