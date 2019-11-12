@@ -1,3 +1,10 @@
+## [11.4.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.4.2...v11.4.3) (2019-11-12)
+
+
+### Bug Fixes
+
+* **i18n:** cleanup usage of old class ([cf593d1](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/cf593d1ffcbc8e9ff1ce51acb22191a166d6c044))
+
 ## [11.4.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.4.1...v11.4.2) (2019-10-18)
 
 
