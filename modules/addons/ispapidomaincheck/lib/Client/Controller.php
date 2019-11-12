@@ -93,9 +93,9 @@ class Controller
                             "type" => "register",
                             "domain" => $idn,
                             "regperiod" => $data["term"],
-                            "isPremium" => "1",
-                            "domainpriceoverride" => $register_price['markup'],
-                            "registrarCostPrice" => $register_price['cost'],
+                            "isPremium" => true,
+                            "domainpriceoverride" => $register_price['markup'],//registration price plus markup
+                            "registrarCostPrice" => $register_price['cost'],//registration price excluding markup
                             "registrarCurrency" => $currencysettings["id"],
                             "domainrenewoverride" =>  $renew_price["markup"],//renew price plus markup
                             "registrarRenewalCostPrice" => $renew_price["cost"]//renew price excluding markup
