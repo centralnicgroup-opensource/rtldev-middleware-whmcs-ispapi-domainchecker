@@ -54,7 +54,7 @@
   },
   "scripts": {
     "lint": "eslint . --fix --config=./.eslintrc.js --ext .js,.md,.json",
-    "codeCheck": "phpcs --extensions=php,inc,lib --ignore=\"*/vendor/*\" --standard=PSR2 -s -q -n --colors *.php modules",
-    "codeFix": "phpcbf --extensions=php,inc,lib --ignore=\"*/vendor/*\" --standard=PSR2 -q *.php modules"
+    "codeCheck": "phpcs --extensions=php,inc,lib --standard=PSR1,PSR2 -s -q -n --colors *.php modules",
+    "codeFix": "phpcbf --extensions=php,inc,lib --standard=PSR1,PSR2 -q *.php modules"
   }
 }
