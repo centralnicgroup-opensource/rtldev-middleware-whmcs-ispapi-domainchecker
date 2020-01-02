@@ -295,7 +295,7 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
   if (d.lookupprovider !== 'ispapi') {
     // show error just in case we have not canceled it
     if (!/^abort$/i.test(statusText)) {
-      $('#loading, #resultsarea').hide()
+      $('#loading, #resultsarea, #errorcont').hide()
       $('#searchresults').empty()
       $.growl.error({
         title: `${translations.error_occured}!`,
@@ -308,7 +308,7 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
   if (!Object.prototype.hasOwnProperty.call(d, 'categories')) {
     // show error just in case we have not canceled it
     if (!/^abort$/i.test(statusText)) {
-      $('#loading, #resultsarea').hide()
+      $('#loading, #resultsarea, #errorcont').hide()
       $('#searchresults').empty()
       $.growl.error({
         title: `${translations.error_occured}!`,
@@ -605,6 +605,7 @@ DomainSearch.prototype.filter = function (key, val) {
       this.searchResults.forEach(function (sr) {
         this.checkTaken(sr, val)
       }.bind(this))
+      this.checkAllTaken()
       break
   }
 }
@@ -624,7 +625,7 @@ DomainSearch.prototype.requestGroupCheck = function (group) {
     data.pc.push(row.PC)
     data.registrars.push(row.registrar)
   })
-  $.ajax({
+  return $.ajax({
     url: '?action=checkdomains',
     type: 'POST',
     data: JSON.stringify(data),
@@ -637,21 +638,48 @@ DomainSearch.prototype.requestGroupCheck = function (group) {
   })
 }
 
+DomainSearch.prototype.checkAllTaken = function () {
+  if (
+    !this.searchResults.length ||
+    ds.searchStore.showTakenDomains === '1'
+  ) {
+    $('#errorcont').hide()
+    return
+  }
+  for (let i = 0; i < this.searchResults.length; i++) {
+    const row = this.searchResults[i].data
+    if (row.isSearchString || row.status !== 'TAKEN') {
+      return // we found a row not being TAKEN
+    }
+  }
+  if (this.searchGroups.finished) {
+    if (!$('div.domainbox.clickable').length) {
+      $('#errorcont').show()
+    }
+  } else {
+    this.search()
+  }
+}
+
 DomainSearch.prototype.search = async function () {
   const search = this.searchStore.domain
   if (!search.length) {
     return
   }
   const groups = await this.getSearchGroups(search)
+  const promises = []
   $('#resultsarea').show()
+  $('#errorcont').hide()
   groups.forEach((grp) => {
     // keep in mind if replacing that fat-arrow fn with
     // this.requestGroupCheck then this context will be window
-    ds.requestGroupCheck(grp)
+    promises.push(ds.requestGroupCheck(grp))
   })
   if (this.searchGroups.finished) {
     $('#loadmorebutton').hide()
   } else {
     $('#loadmorebutton').show()
   }
+  await Promise.all(promises) // wait for requests to finish
+  this.checkAllTaken()
 }

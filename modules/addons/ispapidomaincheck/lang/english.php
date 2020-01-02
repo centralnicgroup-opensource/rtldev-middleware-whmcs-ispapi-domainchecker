@@ -5,6 +5,7 @@ $_ADDONLANG['label_descr_aftermarket'] = "This premium domain name is for sale a
 $_ADDONLANG['label_descr_taken'] = "This domain name is already registered. You might get the specific reason by mouseover.";
 $_ADDONLANG['label_descr_backorder'] = "This domain name is already registered. Through our backorder service we will then try to register the domain for you as soon as possible, when the domain's current registration term comes to its end. You will only be charged for this service in case of success.";
 $_ADDONLANG['label_descr_whois'] = "Click this label to fetch the Whois Information.";
+$_ADDONLANG['noresults'] = "No results available matching your search criteria.";
 $_ADDONLANG['legend_label'] = "Help";
 $_ADDONLANG['bttn_cancel'] = "Cancel";
 $_ADDONLANG['modalboaddtitle'] = "Create Domain Backorder";

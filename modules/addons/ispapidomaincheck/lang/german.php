@@ -5,6 +5,7 @@ $_ADDONLANG['label_descr_aftermarket'] = "Dieser Premium-Domainname steht zum Ve
 $_ADDONLANG['label_descr_taken'] = "Dieser Domainname ist reserviert / bereits vergeben. Per Mouseover wird der spezifische Grund genannt.";
 $_ADDONLANG['label_descr_backorder'] = "Dieser Domainname ist bereits vergeben. Über unseren Backorder-Dienst versuchen wir den Domainnamen für Sie zu registrieren, sobald dessen aktueller Registrierungszeitraum endet. Dieser Dienst wird nur im Erfolgsfall berechnet.";
 $_ADDONLANG['label_descr_whois'] = "Klicken sie hierauf um Whois Informationen abzurufen.";
+$_ADDONLANG['noresults'] = "Keine Ergebnisse gefunden, die zu Ihren Sucheinstellungen passen.";
 $_ADDONLANG['legend_label'] = "Hilfe";
 $_ADDONLANG['bttn_cancel'] = "Abbrechen";
 $_ADDONLANG['modalboaddtitle'] = "Domain Backorder anlegen";

@@ -88,6 +88,7 @@
     </div>
 </div>
 <div id="loading"><span><i class="fas fa-sync fa-spin"></i></span></div>
+<div id="errorcont" style="display:none"><p align="center"><b>{$_lang.noresults}</b></p></div>
 <div class="result-item" id="resultsarea" style="display:none;">
 	<form id="domainform" action="cart.php?a=add&domain=register" method="post">
         <div class="row row1 search-results" id="searchresults"></div>
