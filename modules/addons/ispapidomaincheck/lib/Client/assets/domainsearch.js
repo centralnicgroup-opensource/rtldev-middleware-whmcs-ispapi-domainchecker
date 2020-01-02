@@ -452,11 +452,16 @@ DomainSearch.prototype.buildDomainlist = async function () {
   if (searchTld.length) {
     priodomainlist.unshift(searchstr)
   }
+
   // now remove duplicates (case: search for domain including tld)
   // and filter against the selected TLDs (domainlist)
   priodomainlist = priodomainlist.filter((el, index, arr) => {
     return (
-      (domainlist.indexOf(el) !== -1) &&
+      (
+        domainlist.indexOf(el) !== -1 || // entry is part of search
+        el === this.searchcfg.searchString.IDN || // or matches the IDN search term
+        el === this.searchcfg.searchString.PC // or matches the PunyCode search term
+      ) &&
       (index === arr.indexOf(el))
     )
   })
@@ -500,7 +505,6 @@ DomainSearch.prototype.getSearchGroups = async function (searchterm) {
       row.PC === ds.searchcfg.searchString.PC ||
       row.IDN === ds.searchcfg.searchString.IDN
     )// maybe we could bring this with the above `searchterm` together
-
     // avoid duplicates
     // jquery v3 provides $.escapeSelector, this can be replaced when
     // WHMCS six template's dependency jquery upgrades from v1 to v3 one day :-(
