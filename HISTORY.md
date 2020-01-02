@@ -1,3 +1,10 @@
+# [11.5.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.4.3...v11.5.0) (2020-01-02)
+
+
+### Features
+
+* **auto-search:** improve case of no results when using `available only` filter ([40d149b](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/40d149b102cfedffc4fcfa0f651cdac5348c3eed))
+
 ## [11.4.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.4.2...v11.4.3) (2019-11-12)
 
 
