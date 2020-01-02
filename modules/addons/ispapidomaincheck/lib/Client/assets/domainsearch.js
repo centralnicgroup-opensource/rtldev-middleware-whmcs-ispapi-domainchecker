@@ -123,8 +123,8 @@ DomainSearch.prototype.loadConfiguration = function (currencyid) {
     ds.generate(d, statusText, currencychanged)
   })
 }
-DomainSearch.prototype.getTLDPricing = function (pcdomain) {
-  const tld = pcdomain.replace(/^[^.]+\./, '')
+DomainSearch.prototype.getTLDPricing = function (idndomain) {
+  const tld = idndomain.replace(/^[^.]+\./, '')
   const prices = this.d[this.activeCurrency].pricing
   // to have at least the currency for premium domains (see processresults fn)
   let pricing = $.extend({}, { currency: prices.currency })
@@ -498,7 +498,7 @@ DomainSearch.prototype.getSearchGroups = async function (searchterm) {
   let groups = this.searchGroups.open.splice(0, this.searchcfg.maxEntriesPerPage)
   groups = groups.filter(row => {
     // append rows to DOM that we request later on
-    row.pricing = ds.getTLDPricing(row.PC)
+    row.pricing = ds.getTLDPricing(row.IDN)
     row.domainlabel = row.IDN.replace(/\..+$/, '')
     row.extension = row.IDN.replace(/^[^.]+/, '')
     row.isSearchString = (
