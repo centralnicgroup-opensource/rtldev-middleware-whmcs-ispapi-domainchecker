@@ -1,3 +1,11 @@
+## [11.5.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.5.0...v11.5.1) (2020-01-02)
+
+
+### Bug Fixes
+
+* **idn tld results:** fixed to show up correctly ([e5f16b3](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/e5f16b38b622b8e64f801a39622d05b0e09c10b1))
+* **search term:** include result for specified domain search when including extension ([bfd6f98](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/bfd6f9892ac2d2bc1dd22722c663abe3f4569711))
+
 # [11.5.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.4.3...v11.5.0) (2020-01-02)
 
 
