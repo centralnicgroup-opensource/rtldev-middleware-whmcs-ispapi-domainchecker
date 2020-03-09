@@ -1,3 +1,10 @@
+# [11.6.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.5.1...v11.6.0) (2020-03-09)
+
+
+### Features
+
+* **arabic translation:** added arabic translation ([58461f6](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/58461f6b64216bf5a2072d864bbf0e3b42498ea1))
+
 ## [11.5.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.5.0...v11.5.1) (2020-01-02)
 
 
