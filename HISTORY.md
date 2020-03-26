@@ -1,3 +1,10 @@
+## [11.6.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.6.0...v11.6.1) (2020-03-26)
+
+
+### Bug Fixes
+
+* **search:** review search term cleanup (removing spaces and https://) ([0515356](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/0515356331e80dc48b81bdee5f5f515ccc20c852))
+
 # [11.6.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.5.1...v11.6.0) (2020-03-09)
 
 
