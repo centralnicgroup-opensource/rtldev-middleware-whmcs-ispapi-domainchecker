@@ -36,7 +36,7 @@ const DomainSearch = function () {
   const categories = url.searchParams.get('cat')
   if (search !== null) {
     this.searchStore = {
-      domain: search,
+      domain: DomainSearch.cleanupSearchString(search),
       activeCategories: categories === null ? [] : categories.split(',').map(c => {
         return parseInt(c, 10)
       }),
@@ -64,6 +64,9 @@ const DomainSearch = function () {
     }
   }
   // --- END
+}
+DomainSearch.cleanupSearchString = function (str) {
+  return str.replace(/(^\s+|\s+$|^http(s)?:\/\/)/g, '').toLowerCase()
 }
 DomainSearch.prototype.handleResultCache = function () {
   this.searchcfg.cacheJobID = setInterval(function () {
@@ -222,7 +225,7 @@ DomainSearch.prototype.initForm = function () {
       const isViewFilter = /^showTakenDomains$/i.test(key)
       // rewrite the value as necessary for search input field
       if (key === 'domain') {
-        value = value.replace(/\s/, '').toLowerCase()
+        value = DomainSearch.cleanupSearchString(value)
       }
       // trigger search
       if (target[key] !== value) {
@@ -273,9 +276,10 @@ DomainSearch.prototype.initForm = function () {
     }
   })
   $('#searchfield').off('change').change(function () {
-    const tmp = ispapiIdnconverter.convert([this.value])
+    const val = DomainSearch.cleanupSearchString(this.value)
+    const tmp = ispapiIdnconverter.convert([val])
     ds.searchcfg.searchString = { IDN: tmp.IDN[0], PC: tmp.PC[0] }
-    ds.searchStore[this.name] = this.value
+    ds.searchStore[this.name] = val
   })
   if (ds.mode) { // domain suggestions
     $('#sug_lang_opt, #sug_ip_opt').off('change').change(function () {
