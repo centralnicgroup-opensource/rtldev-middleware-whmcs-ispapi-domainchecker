@@ -5,7 +5,8 @@ namespace WHMCS\Module\Addon\ispapidomaincheck\Client;
 use WHMCS\Domains\Pricing\Premium;
 use WHMCS\Domains\DomainLookup\SearchResult;
 use WHMCS\Config\Setting;
-use ISPAPI\DCHelper;
+use WHMCS\Module\Addon\ispapidomaincheck\DCHelper;
+use WHMCS\Module\Registrar\Ispapi\Ispapi;
 
 /**
  * Client Area Controller
@@ -25,7 +26,7 @@ class Controller
         //load user relations into session (to have premium renewal prices; as unsupported by WHMCS)
         if (!isset($_SESSION["relations"])) {
             $_SESSION["relations"] = array();
-            $r = DCHelper::APICall('ispapi', array('COMMAND' => 'StatusUser'));
+            $r = Ispapi::call(array('COMMAND' => 'StatusUser'));
             if ($r["CODE"]=="200" && isset($r["PROPERTY"]["RELATIONTYPE"])) {
                 foreach ($r["PROPERTY"]["RELATIONTYPE"] as $idx => &$type) {
                     $_SESSION["relations"][$type] = $r["PROPERTY"]["RELATIONVALUE"][$idx];
@@ -61,7 +62,7 @@ class Controller
             //add to the cart
             $registrar = $data["registrar"];
             if (!empty($registrar)) {
-                $check = DCHelper::APICall($registrar, array(
+                $check = Ispapi::call(array(
                     "COMMAND" => "CheckDomains",
                     "DOMAIN0" => $pc,
                     "PREMIUMCHANNELS" => "*"
@@ -121,13 +122,12 @@ class Controller
         $data = json_decode(file_get_contents('php://input'), true); //convert JSON into array
         $cmd = array(
             "COMMAND"           => "CheckDomains",
-            "DOMAIN"            => $data["pc"],
-            "SKIPIDNCONVERT"    => 1 //exception for call_raw method to skip idn conversion step
+            "DOMAIN"            => $data["pc"]
         );
         if ($data["premiumDomains"]==1) {
             $cmd["PREMIUMCHANNELS"] = "*";
         }
-        $r = DCHelper::APICall('ispapi', $cmd);//TODO check for active registrar
+        $r = Ispapi::call($cmd);//TODO check for active registrar
         $res = array(
             "success" => $r["CODE"] == "200",
             "results" => array()
@@ -252,7 +252,7 @@ class Controller
             $cmd["LANGUAGE"] = array($data["language"]);
         }
         //TODO replace 'ispapi' with registrar lookup
-        $r = DCHelper::APICall('ispapi', $cmd);
+        $r = Ispapi::call($cmd);
         if ($r["CODE"]=="200") {
             return $r["PROPERTY"]["DOMAIN"];
         }

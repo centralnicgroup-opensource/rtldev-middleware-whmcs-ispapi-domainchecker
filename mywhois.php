@@ -1,5 +1,6 @@
 <?php
-use ISPAPI\DCHelper;
+use WHMCS\Module\Addon\ispapidomaincheck\DCHelper;
+use WHMCS\Module\Registrar\Ispapi\Ispapi;
 
 require "init.php";
 
@@ -20,7 +21,7 @@ $registrar = false;
 $extension = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension=?", array($tldidn), "fetch");
 if (isset($extension["autoreg"]) && preg_match("/^ispapi$/i", $extension["autoreg"])) {
     //use API
-    $response = DCHelper::APICall($extension["autoreg"], array(
+    $response = Ispapi::call(array(
         "COMMAND" => "QueryDomainWhoisInfo",
         "DOMAIN" => $pc
     ));

@@ -61,20 +61,16 @@ For the latest WHMCS minimum system requirements, please refer to
 * Free Signup for a HEXONET [Test Account](https://www.hexonet.net/signup-ote) or [Live Account](https://www.hexonet.net/sign-up)
 * [ISPAPI Registrar Module](https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip) in the below version dependency
 
-| Domainchecker version | ISPAPI Registrar Module version |
-|-----------------------|---------------------------------|
-| >= 11.0.0             | >= 1.8.1                        |
-| >= 10.0.0             | >= 1.8.1                        |
-| >= 9.0.0 < 10.0.0     | >= 1.7.1                        |
-| >= 8.3.0 < 9.0.0      | >= 1.0.53                       |
-
-| WHMCS version | Domainchecker version |
-|---------------------------------------|
-| >= 7.8.x      | >= 11.0.0             |
-| >= 7.2.x      | >= 10.0.0             |
+| Domainchecker version | ISPAPI Registrar Module version | WHMCS version |
+|-----------------------|---------------------------------|---------------|
+| >= 12.0.0             | >= 3.0.0                        | >= 7.8.x      |
+| >= 11.0.0             | >= 1.8.1                        | >= 7.8.x      |
+| >= 10.0.0             | >= 1.8.1                        | >= 7.2.x      |
+| >= 9.0.0 < 10.0.0     | >= 1.7.1                        |               |
+| >= 8.3.0 < 9.0.0      | >= 1.0.53                       |               |
 
 Compatibility with older WHMCS versions - is a matter of trial and error.
-We started gathering this information about a year ago.
+We started gathering this information starting with v10.0.0 of the domainchecker addon.
 
 ## Contributing ##
 

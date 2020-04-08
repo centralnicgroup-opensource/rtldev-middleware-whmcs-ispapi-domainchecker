@@ -1,10 +1,11 @@
 <?php
-namespace ISPAPI;
+namespace WHMCS\Module\Addon\ispapidomaincheck;
 
 use WHMCS\Config\Setting;
 use WHMCS\Domains\Pricing\Premium;
+use WHMCS\Module\Registrar\Ispapi\Helper;
 
-$path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars","ispapi","lib","Helper.class.php"));
+$path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars","ispapi","lib","Helper.php"));
 if (file_exists($path)) {
     require_once($path);
 } else {
