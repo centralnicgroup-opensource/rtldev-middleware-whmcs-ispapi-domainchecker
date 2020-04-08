@@ -2,7 +2,7 @@
 
 namespace WHMCS\Module\Addon\ispapidomaincheck\Admin;
 
-use ISPAPI\DCHelper;
+use WHMCS\Module\Addon\ispapidomaincheck\DCHelper;
 
 /**
  * Admin Area Controller

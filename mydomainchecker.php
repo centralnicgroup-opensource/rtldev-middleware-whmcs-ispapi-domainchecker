@@ -6,7 +6,7 @@ if (!empty($_POST["transfer"])) {
 }
 
 define("CLIENTAREA", true);
-use ISPAPI\DCHelper;
+use WHMCS\Module\Addon\ispapidomaincheck\DCHelper;
 
 // Find the correct path of the init.php file, based on the way we are integrating the module
 // (via symlinks or copy/paste), the path is different.
