@@ -1,3 +1,10 @@
+## [12.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.0...v12.0.1) (2020-04-29)
+
+
+### Bug Fixes
+
+* **premium renewal price:** fixed to not include markup price ([7abaced](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/7abacedd25c3928cf2e08f6f4a9eacef93aafef0))
+
 # [12.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v11.6.1...v12.0.0) (2020-04-27)
 
 
