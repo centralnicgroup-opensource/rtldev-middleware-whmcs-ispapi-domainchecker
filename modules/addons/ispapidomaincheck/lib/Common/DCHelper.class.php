@@ -309,11 +309,13 @@ class DCHelper extends Helper
      * Converts the price in the selected currency and add the markup.
      * Selected currency is taken from the session.
      *
+     * @see https://docs.whmcs.com/Premium_Domains (premium renewal costs are without markup!)
+     *
      * @param string $price A price
      * @param array $registrar_currency_array WHMCS currency settings for registrar currency
      * @return string The price converted BUT NOT FORMATTED
      */
-    private static function convertPriceToSelectedCurrency($price, $registrar_currency_array)
+    private static function convertPriceToSelectedCurrency($price, $registrar_currency_array, $ordertype)
     {
         //get the selected currency
         $selected_currency_array = self::getCurrencySettingsById($_SESSION["currency"]);
@@ -323,19 +325,21 @@ class DCHelper extends Helper
             //WE ARE ABLE TO CALCULATE THE PRICE
             $registrar_code = $registrar_currency_array["code"];
             if ($code == $registrar_code) {
-                return round(self::addResellerMarkup($price), 2);
+                return round(($ordertype === "renew") ? $price : self::addResellerMarkup($price), 2);
             } else {
                 $rate = $selected_currency_array["rate"];
                 if ($registrar_currency_array["default"] == 1) {
                     //CONVERT THE PRICE IN THE SELECTED CURRENCY
-                    return round(self::addResellerMarkup($price * $rate), 2);
+                    $cost = $price * $rate;
+                    return round(($ordertype === "renew") ? $cost : self::addResellerMarkup($cost), 2);
                 } else {
                     //FIRST CONVERT THE PRICE TO THE DEFAULT CURRENCY AND
                     //THEN CONVERT THE PRICE IN THE SELECTED CURRENCY
                     //get the price in the default currency
                     $price_default_currency = $price * ( 1 / $registrar_currency_array["rate"] );
+                    $cost = $price_default_currency * $rate;
                     //get the price in the selected currency
-                    return round(self::addResellerMarkup($price_default_currency * $rate), 2);
+                    return round(($ordertype === "renew") ? $cost : self::addResellerMarkup($cost), 2);
                 }
             }
         }
@@ -363,7 +367,7 @@ class DCHelper extends Helper
                 $currencysettings["id"],
                 $tld
             );
-            return self::convertPriceToSelectedCurrency($registrarRenewPrice, $currencysettings);
+            return self::convertPriceToSelectedCurrency($registrarRenewPrice, $currencysettings, "renew");
         }
         return false;
     }
@@ -405,6 +409,6 @@ class DCHelper extends Helper
      */
     public static function getPremiumRegistrationPrice($registrarprice, $currencysettings)
     {
-        return self::convertPriceToSelectedCurrency($registrarprice, $currencysettings);
+        return self::convertPriceToSelectedCurrency($registrarprice, $currencysettings, "register");
     }
 }
