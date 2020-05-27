@@ -11,21 +11,18 @@ if (!defined("WHMCS")) {
 
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Common", "DCHelper.class.php")));
 
-$module_version = "12.0.1";
-
 /*
  * Configuration of the addon module.
  */
 function ispapidomaincheck_config()
 {
-    global $module_version;
-    return array(
-        "name"          => "ISPAPI HP DomainChecker",
-        "description"   => "This addon provides a new domainchecker interface with high speed checks, suggestions and premium support.",
-        "version"       => $module_version,
-        "author"        => "HEXONET",
-        "language"      => "english"
-    );
+    return [
+        "name" => "ISPAPI HP DomainChecker",
+        "description" => "This addon provides a new domainchecker interface with high speed checks, suggestions and premium support.",
+        "version" => "12.0.1",
+        "author" => "HEXONET",
+        "language" => "english"
+    ];
 }
 
 /*
