@@ -1,3 +1,10 @@
+## [12.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.1...v12.0.2) (2020-05-27)
+
+
+### Bug Fixes
+
+* **versioning:** move version number directly into config method ([f5a0459](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/f5a0459c9c8e381819069d666d651b92256dd541))
+
 ## [12.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.0...v12.0.1) (2020-04-29)
 
 
