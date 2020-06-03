@@ -71,6 +71,7 @@ For the latest WHMCS minimum system requirements, please refer to
 
 Compatibility with older WHMCS versions - is a matter of trial and error.
 We started gathering this information starting with v10.0.0 of the domainchecker addon.
+The last know version working with WHMCS 5 & 6 can be downloaded [here](https://www.hexonet.net/files/whmcs/ispapi/ispapi_whmcs-domaincheckaddon-6-latest.zip). 
 
 ## Contributing ##
 
