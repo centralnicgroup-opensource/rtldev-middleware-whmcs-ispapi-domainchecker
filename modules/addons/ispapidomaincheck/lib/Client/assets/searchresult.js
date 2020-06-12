@@ -156,7 +156,7 @@ SearchResult.prototype.showTaken = function () {
     // that would allow us to improve step by step
     row.element.find('.label-hx-taken').attr('title', row.REASON).attr('data-toggle', 'tooltip').addClass('pt')
   }
-  if (row.registrar === 'ispapi') {
+  if (row.isBackorderable) {
     const renprice = this.getPrice('renew', true, 1)
     const regprice = this.getPrice('backorder', true)
     const regpriceraw = this.getPrice('backorder', false)
