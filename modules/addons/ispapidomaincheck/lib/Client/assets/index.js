@@ -6,6 +6,7 @@ let ds
 let cart
 
 (async function () {
+  // eslint-disable-next-line no-unused-vars
   translations = await $.ajax({
     url: '?action=loadtranslations',
     type: 'GET'
