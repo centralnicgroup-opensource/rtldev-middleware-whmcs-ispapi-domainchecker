@@ -1,3 +1,10 @@
+## [12.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.2...v12.0.3) (2020-06-12)
+
+
+### Bug Fixes
+
+* **backordering:** also allowed independent of the configured registrar for that TLD ([e237c52](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/e237c52ca54869eee2061595f1ecc76f34801398))
+
 ## [12.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.1...v12.0.2) (2020-05-27)
 
 

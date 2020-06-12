@@ -19,7 +19,7 @@ function ispapidomaincheck_config()
     return [
         "name" => "ISPAPI HP DomainChecker",
         "description" => "This addon provides a new domainchecker interface with high speed checks, suggestions and premium support.",
-        "version" => "12.0.2",
+        "version" => "12.0.3",
         "author" => "HEXONET",
         "language" => "english"
     ];
