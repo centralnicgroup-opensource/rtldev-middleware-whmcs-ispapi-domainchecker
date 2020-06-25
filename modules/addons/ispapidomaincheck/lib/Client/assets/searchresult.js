@@ -170,7 +170,7 @@ SearchResult.prototype.showTaken = function () {
       // hide the display register and renewprice as before
       row.element.find('span.checkboxarea').find('i.far').removeClass('far fa-square').addClass('fas fa-check-square')
       row.element.find('div.search-result-price').addClass('hide').eq(1).removeClass('hide')
-    } else if (row.isBackorderable) {
+    } else {
       // BACKORDERABLE
       row.element.find('span.checkboxarea').html('<label class="setbackorder"><i class="far fa-square" aria-hidden="true"></i></label>')
       row.element.find('div.availability').append(`<span class="label label-hx label-hx-backorder">${translations.backorder}</span>`)
@@ -179,11 +179,6 @@ SearchResult.prototype.showTaken = function () {
       row.element.find('div.second-line.renewalprice').html(`<span class="renewal">${translations.renewal}: ${renprice}</span>`)
       // add ADDED and price to the hidden div
       row.element.find('span.registerprice.added').html(`<span>${translations.domain_added_to_cart}</span><br/><span class="registerprice added hxdata" data-registerprice="${regpriceraw}" data-term="1">${regprice}</span>`)
-    } else {
-      // NOT BACKORDERABLE
-      row.element.toggleClass('clickable')
-      row.element.find('div.col-xs-7').removeClass('search-result-info')
-      row.element.find('div.second-line.registerprice').html('<span>—</span><br><span><br></span>')
     }
   } else {
     // NOT BACKORDERABLE

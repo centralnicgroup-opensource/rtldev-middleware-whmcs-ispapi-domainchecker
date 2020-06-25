@@ -166,6 +166,7 @@ class Controller
                                 $active_settings = $currencies[$_SESSION["currency"]];
                                 if ($currencysettings === null) {
                                     //unsupported currency in WHMCS
+                                    //TODO: we could improve here by just converting currency
                                     unset($rs["PRICE"][$idx], $rs["PRICERENEW"][$idx], $rs["CURRENCY"][$idx]);
                                 } else {
                                     $premiumchannel = $rs["PREMIUMCHANNEL"][$idx];
