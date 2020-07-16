@@ -24,6 +24,7 @@ install:
   - (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`)
   - source ~/.nvm/nvm.sh
   - nvm install $TRAVIS_NODE_VERSION
+  - npm prune
   - travis_retry npm i
   - travis_retry composer global require squizlabs/php_codesniffer
 script:
@@ -34,6 +35,4 @@ jobs:
     - stage: release
       node_js: lts/*
       script:
-        - npm prune
-        - travis_retry npm i
         - npx semantic-release
