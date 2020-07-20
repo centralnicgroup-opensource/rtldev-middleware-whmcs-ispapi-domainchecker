@@ -178,10 +178,10 @@ class DCHelper extends Helper
      */
     public static function getActiveRegistrars()
     {
-        $result = select_query("tblregistrars", "DISTINCT registrar", "", "registrar", "ASC");
-        $regs = array();
-        while ($data = mysql_fetch_array($result)) {
-            $regs[] = $data[0];
+        $regs = [];
+        $rows = self::SQLCall("SELECT DISTINCT registrar FROM tblregistrars ORDER BY registrar ASC", null, "fetchall");
+        foreach ($rows as $row) {
+            $regs[] = $row["registrar"];
         }
         return $regs;
     }
