@@ -1,3 +1,10 @@
+## [12.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.3...v12.0.4) (2020-07-20)
+
+
+### Bug Fixes
+
+* **phpcompatibility:** deprecated use of mysql_ functions ([a4532ab](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/a4532ab8861eb006b89f31bc1d56a8da48735439))
+
 ## [12.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.2...v12.0.3) (2020-06-12)
 
 
