@@ -1,7 +1,8 @@
 <?php
+
 // Handle "Transfer" button from the WHMCS default Homepage
 if (!empty($_POST["transfer"])) {
-    header("Location: cart.php?a=add&domain=transfer&query=".$_POST["domain"]);
+    header("Location: cart.php?a=add&domain=transfer&query=" . $_POST["domain"]);
     exit();
 }
 
@@ -29,7 +30,7 @@ $ca->initPage();
 // Include module file
 $modulepath = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapidomaincheck","ispapidomaincheck.php"));
 if (!file_exists($modulepath)) {
-    exit($modulepath. " not found");
+    exit($modulepath . " not found");
 }
 require $modulepath;
 

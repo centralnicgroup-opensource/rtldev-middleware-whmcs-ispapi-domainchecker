@@ -123,7 +123,7 @@ class Controller
 
         // default active categories
         $setting = \WHMCS\Config\Setting::getValue("ispapiDomaincheckDefaultCategories");
-        if ($setting != null && trim($setting)!="") {
+        if ($setting != null && trim($setting) != "") {
             $defcats = explode(",", $setting);
             foreach ($defcats as &$cat) {
                 $cat = (int)$cat;
@@ -141,7 +141,7 @@ class Controller
             //lookup registrar
             "lookupRegistrar" => \WHMCS\Config\Setting::getValue('domainLookupRegistrar'),
             //check if suggestion engine is active or not
-            "suggestionsOn" => (DCHelper::getDomaincheckerMode()=="on")?1:0,
+            "suggestionsOn" => (DCHelper::getDomaincheckerMode() == "on") ? 1 : 0,
             //default active Categories
             "defaultActiveCategories" => $defcats,
             //premium domains availability
@@ -177,7 +177,7 @@ class Controller
                 } else {
                     $cat["tlds"] = explode(" ", preg_replace("/\s\s+/", " ", $cat["tlds"]));
                 }
-                return array("success" => true, "msg" => "Category added.", "category"=>$cat);
+                return array("success" => true, "msg" => "Category added.", "category" => $cat);
             }
         }
         return array("success" => false, "msg" => "Adding Category failed.");

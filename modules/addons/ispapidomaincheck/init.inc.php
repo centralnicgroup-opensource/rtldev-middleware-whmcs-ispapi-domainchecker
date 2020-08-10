@@ -1,4 +1,5 @@
 <?php
+
 $root_path = $_SERVER["DOCUMENT_ROOT"];
 $script_path = preg_replace("/.modules.addons..+$/", "", dirname($_SERVER["SCRIPT_NAME"]));
 if (!empty($script_path)) {

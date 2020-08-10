@@ -27,7 +27,7 @@ class Controller
         if (!isset($_SESSION["relations"])) {
             $_SESSION["relations"] = array();
             $r = Ispapi::call(array('COMMAND' => 'StatusUser'));
-            if ($r["CODE"]=="200" && isset($r["PROPERTY"]["RELATIONTYPE"])) {
+            if ($r["CODE"] == "200" && isset($r["PROPERTY"]["RELATIONTYPE"])) {
                 foreach ($r["PROPERTY"]["RELATIONTYPE"] as $idx => &$type) {
                     $_SESSION["relations"][$type] = $r["PROPERTY"]["RELATIONVALUE"][$idx];
                 }
@@ -124,7 +124,7 @@ class Controller
             "COMMAND"           => "CheckDomains",
             "DOMAIN"            => $data["pc"]
         );
-        if ($data["premiumDomains"]==1) {
+        if ($data["premiumDomains"] == 1) {
             $cmd["PREMIUMCHANNELS"] = "*";
         }
         $r = Ispapi::call($cmd);//TODO check for active registrar
@@ -236,7 +236,7 @@ class Controller
             "LIMIT"     => 500
         );
         foreach ($data['zones'] as $idx => $z) {//TODO support arrays in every SDK
-            $cmd["ZONE".$idx] = $z;
+            $cmd["ZONE" . $idx] = $z;
         }
         //OPTION: Use my ip address
         if ($data["useip"]) {
@@ -254,7 +254,7 @@ class Controller
         }
         //TODO replace 'ispapi' with registrar lookup
         $r = Ispapi::call($cmd);
-        if ($r["CODE"]=="200") {
+        if ($r["CODE"] == "200") {
             return $r["PROPERTY"]["DOMAIN"];
         }
         return array();
@@ -308,12 +308,14 @@ class Controller
         //get shopping cart items of interest (domains for registration)
         $orderfrm = new \WHMCS\OrderForm();
         $cartitems = array();
-        foreach (array_filter(
-            $orderfrm->getCartDataByKey('domains', array()),
-            function ($item) {
-                return ($item["type"] === "register");
-            }
-        ) as &$item) {
+        foreach (
+            array_filter(
+                $orderfrm->getCartDataByKey('domains', array()),
+                function ($item) {
+                    return ($item["type"] === "register");
+                }
+            ) as &$item
+        ) {
             $cartitems[$item["domain"]] = $item;
         }
         return $cartitems;
@@ -336,7 +338,7 @@ class Controller
             $r = backorder_api_call(array(
                 "COMMAND" => "QueryBackorderList"
             ));
-            if ($r["CODE"]=="200" && isset($r["PROPERTY"]["DOMAIN"])) {
+            if ($r["CODE"] == "200" && isset($r["PROPERTY"]["DOMAIN"])) {
                 foreach ($r["PROPERTY"]["DOMAIN"] as $idx => &$d) {
                     $backorders[$d] = 1; //TODO $r["PROPERTY"]["ID"][$idx];
                 }
@@ -354,7 +356,7 @@ class Controller
 
         // default active categories
         $setting = \WHMCS\Config\Setting::getValue("ispapiDomaincheckDefaultCategories");
-        if ($setting != null && trim($setting)!="") {
+        if ($setting != null && trim($setting) != "") {
             $defcats = explode(",", $setting);
             foreach ($defcats as &$cat) {
                 $cat = (int)$cat;
@@ -388,7 +390,7 @@ class Controller
             //paths
             "path_to_dc_module" => "/modules/addons/ispapidomaincheck/",
             //check if suggestion engine is active or not
-            "suggestionsOn" => (DCHelper::getDomaincheckerMode()=="on")?1:0,
+            "suggestionsOn" => (DCHelper::getDomaincheckerMode() == "on") ? 1 : 0,
             //default active Categories
             "defaultActiveCategories" => $defcats,
             //premium domains availability

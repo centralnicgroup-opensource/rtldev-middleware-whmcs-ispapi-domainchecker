@@ -1,4 +1,5 @@
 <?php
+
 $_ADDONLANG['label_descr_available'] = "Dieser Domainname kann registriert werden.";
 $_ADDONLANG['label_descr_premium'] = "Dieser Domainname ist als Premium-Domain verfügbar. Preise von Premium-Domainnamen sind aufgrund ihrer höheren Wertigkeit i.A. teuer im Vergleich zu normalen Domainnamen.";
 $_ADDONLANG['label_descr_aftermarket'] = "Dieser Premium-Domainname steht zum Verkauf und wird über einen Aftermarket-Anbieter angeboten. Es kann einige Stunden oder bis zu einen Tag dauern den Registrierungsprozess für diese Domain abzuschließen.";

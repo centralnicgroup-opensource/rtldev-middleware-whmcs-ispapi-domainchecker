@@ -1,4 +1,5 @@
 <?php
+
 use WHMCS\Database\Capsule;
 use WHMCS\Module\Addon\ispapidomaincheck\DCHelper;
 use WHMCS\Config\Setting;
@@ -128,7 +129,7 @@ HTML;
 
     //nodata=1 -> do not return data, we just update the chosen currency in session
     //WHMCS cares automatically about handling currency when provided in request
-    if (isset($_REQUEST["nodata"]) && $_REQUEST["nodata"]==1) {
+    if (isset($_REQUEST["nodata"]) && $_REQUEST["nodata"] == 1) {
         //respond
         header('Cache-Control: no-cache, must-revalidate'); // HTTP/1.1
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
@@ -138,7 +139,7 @@ HTML;
     }
 
     //init smarty and call admin dispatcher
-    $smarty = new Smarty;
+    $smarty = new Smarty();
     $smarty->escape_html = true;
     $smarty->caching = false;
     $smarty->setCompileDir($GLOBALS['templates_compiledir']);
@@ -186,7 +187,7 @@ HTML;
     //require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
 
     //init smarty and call admin dispatcher
-    $smarty = new Smarty;
+    $smarty = new Smarty();
     $smarty->escape_html = true;
     $smarty->caching = false;
     $smarty->setCompileDir($GLOBALS['templates_compiledir']);

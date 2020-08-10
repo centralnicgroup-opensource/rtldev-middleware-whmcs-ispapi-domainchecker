@@ -1,4 +1,5 @@
 <?php
+
 namespace WHMCS\Module\Addon\ispapidomaincheck;
 
 use WHMCS\Config\Setting;
@@ -9,7 +10,7 @@ $path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars","ispap
 if (file_exists($path)) {
     require_once($path);
 } else {
-    die('Please install our <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">ISPAPI Registrar Module</a> >= v1.7.1');
+    die('Please install the latest version of our <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">ISPAPI Registrar Module</a>.');
 }
 
 /**
@@ -28,13 +29,13 @@ class DCHelper extends Helper
     {
         $data = array();
         $cs = localAPI("GetCurrencies", array());
-        if ($cs["result"]!="success") {
+        if ($cs["result"] != "success") {
             return false;
         }
 
         foreach ($cs["currencies"]["currency"] as $currency) {
             $d = localAPI("GetTLDPricing", array("currencyid" => $currency["id"]));
-            if ($d["result"]!="success") {
+            if ($d["result"] != "success") {
                 return false;
             }
             $data[] = $d;
@@ -228,10 +229,10 @@ class DCHelper extends Helper
                     $pricing["pricing"][$tld] = array();
                 }
                 if (!is_null($p["fullprice"])) {
-                    $pricing["pricing"][$tld]["backorder"] = "".$p["fullprice"];
+                    $pricing["pricing"][$tld]["backorder"] = "" . $p["fullprice"];
                 }
                 if (!is_null($p["liteprice"])) {
-                    $pricing["pricing"][$tld]["backorderlite"] = "".$p["liteprice"];
+                    $pricing["pricing"][$tld]["backorderlite"] = "" . $p["liteprice"];
                 }
             }
         }
@@ -284,7 +285,7 @@ class DCHelper extends Helper
     public static function loadBackorderAPI()
     {
         $r = self::getAddOnConfigurationValue('ispapibackorder', 'access');
-        if ($r==="1") {
+        if ($r === "1") {
             $path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapibackorder","backend","api.php"));
             if (file_exists($path)) {
                 require_once($path);
@@ -358,7 +359,7 @@ class DCHelper extends Helper
     public static function getPremiumRenewPrice($registrar, $class, $tld, $currencysettings)
     {
         //here we are calling the getRenewPrice from the respective registar module
-        $fn = $registrar."_getRenewPrice";
+        $fn = $registrar . "_getRenewPrice";
         if (function_exists($fn)) {
             $registrarRenewPrice = call_user_func(
                 $fn,
