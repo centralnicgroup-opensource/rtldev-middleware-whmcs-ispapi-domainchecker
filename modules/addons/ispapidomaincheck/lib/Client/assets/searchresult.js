@@ -214,15 +214,19 @@ SearchResult.prototype.showWhoisInformation = function (e) {
   e.stopPropagation()
   const domain = $(this).data('domain')
   const pc = $(this).data('pc')
-  $('#modalWhoisLoader').toggleClass('hidden')
-  $('#modalWhoisBody').hide()
+  $('#modalWhois').show()
+  $('#modalWhoisBody').css({
+    'overflow-y': 'auto',
+    height: ($(window).height() - 200) + 'px'
+  }).hide()
   $('#whoisDomainName').html(domain)
   $('#modalWhois').modal('show')
+  $('#modalWhoisLoader').toggleClass('hidden')
   $.post(`${wr}/mywhois.php`, `idn=${domain}&pc=${pc}`, function (data) {
     // fetch html contents of body element
     const m = data.match(/<body[^>]*>([\w|\W]*)<\/body>/im)
     $('#modalWhoisBody').html(m[1])
-    $('#modalWhoisLoader').hide()
+    $('#modalWhoisLoader').toggleClass('hidden')
     $('#modalWhoisBody').show()
   })
 }
