@@ -1,3 +1,10 @@
+## [12.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.4...v12.0.5) (2020-08-11)
+
+
+### Bug Fixes
+
+* **whois:** reviewed whois lookup popup ([743757f](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/743757f61fac6581a983d98862a84252b45a0df6))
+
 ## [12.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.3...v12.0.4) (2020-07-20)
 
 
