@@ -139,6 +139,7 @@ HTML;
     }
 
     //init smarty and call admin dispatcher
+    $vars["carttpl"] = Setting::getValue("OrderFormTemplate");
     $smarty = new Smarty();
     $smarty->escape_html = true;
     $smarty->caching = false;
