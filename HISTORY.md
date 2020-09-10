@@ -1,3 +1,10 @@
+## [12.0.6](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.5...v12.0.6) (2020-09-10)
+
+
+### Bug Fixes
+
+* **templates:** client area templates have now access to variable $carttpl in smarty ([1cd3319](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/1cd3319bce8ec9732cfbbda76acea26507c97a15)), closes [#121](https://github.com/hexonet/whmcs-ispapi-domainchecker/issues/121)
+
 ## [12.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.4...v12.0.5) (2020-08-11)
 
 
