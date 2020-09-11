@@ -39,7 +39,8 @@ class Controller
                 'modulelink' => $vars['modulelink'],
                 'modulepath' => "/modules/addons/ispapidomaincheck/",
                 'domain' => isset($_POST["domain"]) ? $_POST["domain"] : "",
-                'currency' => $_SESSION["currency"]
+                'currency' => $_SESSION["currency"],
+                'carttpl' => Setting::getValue("OrderFormTemplate")
             )
         );
     }
