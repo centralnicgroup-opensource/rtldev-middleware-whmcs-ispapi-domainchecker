@@ -58,7 +58,7 @@ class DCHelper extends Helper
         }
         return array("success" => false, "msg" => "Update not processed.");
     }
-    
+
     /*
      * Helper to send SQL call to the Database with Capsule
      *
@@ -321,7 +321,7 @@ class DCHelper extends Helper
         //get the selected currency
         $selected_currency_array = self::getCurrencySettingsById($_SESSION["currency"]);
         $code = $selected_currency_array["code"];
-        
+
         if ($registrar_currency_array) {
             //WE ARE ABLE TO CALCULATE THE PRICE
             $registrar_code = $registrar_currency_array["code"];
