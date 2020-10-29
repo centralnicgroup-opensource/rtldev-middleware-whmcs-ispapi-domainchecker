@@ -563,10 +563,10 @@ function updateLookupRegistrarHTML () {
  * in Lookup Configuration Dialog
  */
 function replaceLookupConfigurationDialogListeners () {
-  var submitButton = $('#btnSaveLookupConfiguration')
+  const submitButton = $('#btnSaveLookupConfiguration')
   submitButton.off('click')
   submitButton.on('click', function () {
-    var modalForm = $('#modalAjax').find('form')
+    const modalForm = $('#modalAjax').find('form')
     $('#modalAjax .loader').show()
     $.post(
       modalForm.attr('action'),
@@ -581,8 +581,8 @@ function replaceLookupConfigurationDialogListeners () {
       },
       'json'
     ).fail(function (xhr) {
-      var data = xhr.responseJSON
-      var genericErrorMsg = 'An error occurred while communicating with the server. Please try again.'
+      let data = xhr.responseJSON
+      const genericErrorMsg = 'An error occurred while communicating with the server. Please try again.'
       if (data && data.data) {
         data = data.data
         if (data.errorMsg) {

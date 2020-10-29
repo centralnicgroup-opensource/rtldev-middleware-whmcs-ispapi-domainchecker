@@ -37,9 +37,11 @@ const DomainSearch = function () {
   if (search !== null) {
     this.searchStore = {
       domain: DomainSearch.cleanupSearchString(search),
-      activeCategories: categories === null ? [] : categories.split(',').map(c => {
-        return parseInt(c, 10)
-      }),
+      activeCategories: (categories === null)
+        ? []
+        : categories.split(',').map(c => {
+          return parseInt(c, 10)
+        }),
       sug_ip_opt: url.searchParams.get('ip') || '0',
       sug_lang_opt: url.searchParams.get('lang') || '',
       showPremiumDomains: url.searchParams.get('showpremium') || '1',
