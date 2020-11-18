@@ -30,29 +30,12 @@ ShoppingCart.prototype.getOrder = function (sr) {
 }
 ShoppingCart.prototype.addOrderPremium = function (sr, successmsg, errmsg) {
   // WHMCS adds premium domain data to session in their standard domain availability check
-  // when calling the `addToCart` action this is being reused to put a premium domain into cart
-  // We directly write the data into shopping cart to skip that part
-  // This can for sure be replaced with WHMCS' standard logic one day, but needs time for
-  // analysis how they set the data and how the call for every premium domain case looks like
   const row = sr.data
-  const term = parseInt(row.element.find('.hxdata').data('term'), 10)
-  $.ajax('?action=addPremiumToCart', {
-    type: 'POST',
-    dataType: 'json',
-    contentType: 'application/json; charset=utf-8',
-    data: JSON.stringify({
-      IDN: row.IDN,
-      PC: row.PC,
-      registrar: row.registrar,
-      registerprice: row.element.find('.hxdata').data('registerprice'),
-      term: term
-    })
+  $.ajax(`cart.php?a=checkDomain&token=${csrfToken}&domain=${row.IDN}&source&cartAddDomain&type=domain`, {
+    type: 'GET',
+    dataType: 'json'
   }).done(d => {
-    (async function () {
-      await cart.load()
-      sr.generate()
-      $.growl.notice(successmsg)
-    }())
+    this.addOrderDomain(sr, successmsg, errmsg)
   }).fail(() => {
     $.growl.error(errmsg)
   })
