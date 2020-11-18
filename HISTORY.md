@@ -1,3 +1,10 @@
+## [12.0.8](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.7...v12.0.8) (2020-11-18)
+
+
+### Bug Fixes
+
+* **premium domains:** missing registrarRenewalCostPrice (Premium Renewal Cost Price shown as 0.00) ([997a170](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/997a170bf2aa00b20041326d12122f0301bdcdaa))
+
 ## [12.0.7](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.6...v12.0.7) (2020-09-11)
 
 
