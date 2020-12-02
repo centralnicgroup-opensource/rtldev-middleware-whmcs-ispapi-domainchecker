@@ -1,3 +1,10 @@
+# [12.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.8...v12.1.0) (2020-12-02)
+
+
+### Features
+
+* **tld groups:** support WHMCS' native TLD group labels `hot`, `new`, `sale` ([c7adcd2](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/c7adcd21ca5dafa375543175efd980c94b267aca))
+
 ## [12.0.8](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.7...v12.0.8) (2020-11-18)
 
 
