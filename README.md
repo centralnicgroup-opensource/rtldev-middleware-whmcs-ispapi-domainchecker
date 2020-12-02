@@ -7,10 +7,11 @@
 
 This Repository covers the "ISPAPI" Domainchecker Add-On for WHMCS. It provides the following features in WHMCS:
 
-## Supported Features (>= v10.0.0) ##
+## Supported Features ##
 
 The ISPAPI DomainChecker addon supports the following functions and features:
 
+* **NEW** Support WHMCS' TLD Group Labels `hot`, `new` and `sale`
 * **NEW** Supports several filters
 * **NEW** Administrative Interface now allows managing of categories by drag'n'drop and provides access to all useful configurations
 * **UPDATE** Search trigger over URL (helpful for landing pages, see [Usage Guide](https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Usage-Guide))
@@ -71,7 +72,6 @@ For the latest WHMCS minimum system requirements, please refer to
 
 Compatibility with older WHMCS versions - is a matter of trial and error.
 We started gathering this information starting with v10.0.0 of the domainchecker addon.
-The last know version working with WHMCS 5 & 6 can be downloaded [here](https://www.hexonet.net/files/whmcs/ispapi/ispapi_whmcs-domaincheckaddon-6-latest.zip). 
 
 ## Contributing ##
 
