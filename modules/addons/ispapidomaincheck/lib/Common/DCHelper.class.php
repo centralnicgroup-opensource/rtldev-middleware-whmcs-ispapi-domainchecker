@@ -242,7 +242,6 @@ class DCHelper extends Helper
                 $data["categories"],
                 $data["addons"],
                 $data["redemption_period"],
-                $data["group"],
                 $data["grace_period"],
                 $data["transfer"]
             );

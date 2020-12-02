@@ -225,6 +225,18 @@ span.spanelement{
     background: none;
     text-transform: uppercase;
 }
+.label-hx-hot {
+    color: #d9534f;
+    border: 1px #d9534f solid;
+}
+.label-hx-sale {
+    color: #f0ad4e;
+    border: 1px #f0ad4e solid;
+}
+.label-hx-new {
+    color: lightseagreen;
+    border: 1px lightseagreen solid;
+}
 .label-hx-error {
     color: #dc3545;
     border: 1px #dc3545 solid;

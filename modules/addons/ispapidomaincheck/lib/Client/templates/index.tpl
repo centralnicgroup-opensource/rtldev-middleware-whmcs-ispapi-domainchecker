@@ -39,6 +39,18 @@
                 <div class="col-xs-12">
                     <div class="collapse" id="legend">
                         <div class="row">
+                            <div class="col-xs-2"><span class="label label-hx label-hx-hot">{$_lang.grouphot}</span></div>
+                            <div class="col-xs-10">{$_lang.label_descr_grouphot}</div>
+                        </div><hr class="xs"/>
+                        <div class="row">
+                            <div class="col-xs-2"><span class="label label-hx label-hx-new">{$_lang.groupnew}</span></div>
+                            <div class="col-xs-10">{$_lang.label_descr_groupnew}</div>
+                        </div><hr class="xs"/>
+                        <div class="row">
+                            <div class="col-xs-2"><span class="label label-hx label-hx-sale">{$_lang.groupsale}</span></div>
+                            <div class="col-xs-10">{$_lang.label_descr_groupsale}</div>
+                        </div><hr class="xs"/>
+                        <div class="row">
                             <div class="col-xs-2"><span class="label label-hx label-hx-available">{$_lang.domaincheckeravailable}</span></div>
                             <div class="col-xs-10">{$_lang.label_descr_available}</div>
                         </div><hr class="xs"/>

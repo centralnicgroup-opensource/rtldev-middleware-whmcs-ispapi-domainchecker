@@ -16,6 +16,7 @@ const SearchResult = function (row) {
       )
     }
   }
+  console.dir(this.data)
 }
 SearchResult.prototype.fadeOut = function () {
   this.data.element.fadeOut('slow', 'linear')
@@ -101,6 +102,7 @@ SearchResult.prototype.showAvailable = function () {
     this.showTaken()
     return
   }
+  const group = row.pricing.group
   const regprice = this.getPrice('register', true, termcfg.initialTerm)
   const regpriceraw = this.getPrice('register', false, termcfg.initialTerm)
   const renprice = this.getPrice('renew', true, termcfg.initialTerm)
@@ -122,6 +124,9 @@ SearchResult.prototype.showAvailable = function () {
         })
         row.element.find('div.second-line.registerprice').html(`<button class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">${termcfg.initialTerm}${translations.unit_s_year} <span class="caret"></span></button><ul class="dropdown-menu">${opts}</ul>`)
         row.element.find('.dropdown-menu li').off().click(this, this.switchTerm)
+      }
+      if (group) {
+        row.element.find('div.availability').append(`<span class="label label-hx label-hx-${group}">${translations['group' + group]}</span>`)
       }
     }
     // display prices
