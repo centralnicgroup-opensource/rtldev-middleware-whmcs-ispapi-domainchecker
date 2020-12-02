@@ -79,9 +79,9 @@ Please read [our development guide](https://github.com/hexonet/whmcs-ispapi-doma
 
 ## Authors ##
 
-* **Anthony Schneider** - *development* - [AnthonySchn](https://github.com/anthonyschn)
-* **Kai Schwarz** - *development* - [PapaKai](https://github.com/papakai)
-* **Tulasi Seelamkurthi** - *development* - [Tulsi91](https://github.com/tulsi91)
+* **Kai Schwarz** - *lead developer* - [PapaKai](https://github.com/papakai)
+* **Anthony Schneider** - *former developer* - [AnthonySchn](https://github.com/anthonyschn)
+* **Tulasi Seelamkurthi** - *former developer* - [Tulsi91](https://github.com/tulsi91)
 
 See also the list of [contributors](https://github.com/hexonet/whmcs-ispapi-domainchecker/graphs/contributors) who participated in this project.
 
