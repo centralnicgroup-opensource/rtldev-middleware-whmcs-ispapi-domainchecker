@@ -1,3 +1,21 @@
+# [13.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.1.0...v13.0.0) (2021-01-25)
+
+
+### Bug Fixes
+
+* **js:** remove dangling debug output ([28b000f](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/28b000fc5dc4dd204b24f758ef19a9573f9c3d6d))
+* **styling:** whmcs 8.1/template twenty-one using bootstrap 4/flexgrid ([af87125](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/af8712580e2e577d22f11c82a404516b354b6f42))
+
+
+### Performance Improvements
+
+* **ci:** replace make with gulp task runner ([4f4b2f7](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/4f4b2f799266d5c170588ebcf5fd51679bc8fc0a))
+
+
+### BREAKING CHANGES
+
+* **styling:** WHMCS 8.1/template twenty-one introducing bootstrap 4
+
 # [12.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.0.8...v12.1.0) (2020-12-02)
 
 
