@@ -91,7 +91,8 @@ function ispapidomaincheck_clientarea($vars)
 {
     add_hook('ClientAreaHeadOutput', 1, function ($vars) {
         $now = mktime();
-        $wr = $vars['WEB_ROOT'];
+        $wr = $vars["WEB_ROOT"];
+        // bootstrap version -> $.fn.tooltip.Constructor.VERSION
         /* {*<-- user-scalable=yes if you want user to allow zoom --> */
         return <<<HTML
         <meta name="viewport" content="width=device-width, user-scalable=no"/>
