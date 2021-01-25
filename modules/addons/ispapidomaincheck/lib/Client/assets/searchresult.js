@@ -16,7 +16,6 @@ const SearchResult = function (row) {
       )
     }
   }
-  console.dir(this.data)
 }
 SearchResult.prototype.fadeOut = function () {
   this.data.element.fadeOut('slow', 'linear')
