@@ -1,4 +1,21 @@
-
+/* BEGIN: Bootstrap 4 "compatibility" */
+#dcmain {
+    padding:10px 0px;
+    background-color: #FFF;
+}
+#dcmain .row,
+#dcmain .input-group,
+#dcmain .form-control {
+    display: block
+}
+#dcmain .form-control,
+#dcmain .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
+    float: left;
+}
+#dcmain .currencychooser {
+    padding: 0px 10px;
+}
+/* END: Bootstrap 4 "compatibility" */
 .small-container{
     padding-left:30px;
     padding-top:10px;
@@ -190,8 +207,7 @@ span.spanelement{
 .domain-label.added{
     color: #00A850;
 }
-.hidden,
-.details.hide {
+.hidden {
     display:none;
 }
 .registerprice.added{
@@ -329,7 +345,7 @@ span.spanelement{
 }
 .search-form .search-input-bar .input-group .singlesearch {
   margin-left: 0;
-  height: 44px;
+  height: 48px;
 }
 .input-group .inner-addon {
   position: relative;

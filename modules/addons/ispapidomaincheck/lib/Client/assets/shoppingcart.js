@@ -14,9 +14,9 @@ ShoppingCart.prototype.load = async function () {
     this.items = {}
   }
   if (Object.keys(this.items).length) {
-    $('.orderbutton').removeClass('hide')
+    $('.orderbutton').removeClass('hidden')
   } else {
-    $('.orderbutton').addClass('hide').off('click')
+    $('.orderbutton').addClass('hidden').off('click')
   }
 }
 ShoppingCart.prototype.getOrder = function (sr) {

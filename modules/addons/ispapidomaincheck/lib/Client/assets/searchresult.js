@@ -140,11 +140,11 @@ SearchResult.prototype.showAvailable = function () {
     }
     row.element.find('span.domainname.domain-label, span.domainname.tld-zone').addClass('added')
     row.element.find('span.checkboxarea').find('i.far').removeClass('far fa-square').addClass('fas fa-check-square')
-    row.element.find('div.search-result-price').addClass('hide').eq(1).removeClass('hide')
+    row.element.find('div.search-result-price').addClass('hidden').eq(1).removeClass('hidden')
   } else {
     row.element.find('span.checkboxarea').find('i.fas').removeClass('fas fa-check-square').addClass('far fa-square')
     row.element.find('span.domainname.domain-label, span.domainname.tld-zone').removeClass('added')
-    row.element.find('div.search-result-price').removeClass('hide').eq(1).addClass('hide')
+    row.element.find('div.search-result-price').removeClass('hidden').eq(1).addClass('hidden')
   }
 }
 SearchResult.prototype.showTaken = function () {
@@ -165,7 +165,7 @@ SearchResult.prototype.showTaken = function () {
     const regprice = this.getPrice('backorder', true)
     const regpriceraw = this.getPrice('backorder', false)
     row.element.find('span.registerprice.added').html(`<span>${translations.domain_added_to_cart}</span><br/><span class="registerprice added hxdata" data-registerprice="${regpriceraw}" data-term="1">${regprice}</span>`)
-    row.element.find('div.search-result-price').removeClass('hide').eq(1).addClass('hide')
+    row.element.find('div.search-result-price').removeClass('hidden').eq(1).addClass('hidden')
     if (row.backordered) {
       // BACKORDER EXISTS
       row.element.find('span.domainname.domain-label, span.domainname.tld-zone').addClass('added')
@@ -173,7 +173,7 @@ SearchResult.prototype.showTaken = function () {
       row.element.find('div.availability').append(`<span class="label label-hx label-hx-backorder added">${translations.backorder}</span>`).find('span.taken').addClass('added')
       // hide the display register and renewprice as before
       row.element.find('span.checkboxarea').find('i.far').removeClass('far fa-square').addClass('fas fa-check-square')
-      row.element.find('div.search-result-price').addClass('hide').eq(1).removeClass('hide')
+      row.element.find('div.search-result-price').addClass('hidden').eq(1).removeClass('hidden')
     } else {
       // BACKORDERABLE
       row.element.find('span.checkboxarea').html('<label class="setbackorder"><i class="far fa-square" aria-hidden="true"></i></label>')
