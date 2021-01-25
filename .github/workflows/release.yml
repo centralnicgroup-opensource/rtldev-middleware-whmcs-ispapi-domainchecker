@@ -31,7 +31,7 @@ jobs:
       - name: Check PSR12 Standard
         run: phpcs --standard=PSR12 -q -n --colors --extensions=php,inc,lib --ignore=node_modules,vendor,templates_c .
       - name: Check Linting
-        run: eslint . --fix --config=./.eslintrc.js --ext .js,.md,.json
+        run: npm run lint
   release:
     name: Release @ NodeJS LTS - x86 - ubuntu-latest
     runs-on: ubuntu-latest
