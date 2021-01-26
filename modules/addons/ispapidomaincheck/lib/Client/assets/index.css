@@ -3,6 +3,7 @@
     padding:10px 0px;
     background-color: #FFF;
 }
+#suggestionsopts.collapse.in,
 #dcmain .row,
 #dcmain .input-group,
 #dcmain .form-control {
@@ -207,6 +208,7 @@ span.spanelement{
 .domain-label.added{
     color: #00A850;
 }
+#suggestionsopts.collapse,
 .hidden {
     display:none;
 }
