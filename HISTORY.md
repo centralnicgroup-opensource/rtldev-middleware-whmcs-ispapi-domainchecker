@@ -1,3 +1,11 @@
+## [13.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.0...v13.0.1) (2021-01-26)
+
+
+### Bug Fixes
+
+* **suggestions:** fix collapse mechanism for domain name suggestion settings panel ([17a1429](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/17a1429f6644dd852b5d860985455dabeb6d9db5))
+* **suggestions:** fix glyphicon in domain name suggestions settings ([d663b4a](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/d663b4a558514cf61f4e9f79efb74aca2d7b036a))
+
 # [13.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v12.1.0...v13.0.0) (2021-01-25)
 
 
