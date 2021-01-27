@@ -1,3 +1,10 @@
+## [13.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.1...v13.0.2) (2021-01-27)
+
+
+### Bug Fixes
+
+* **archives:** add missing build files ([2fa2074](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/2fa207474da5f9e9816068acf19dcd7ba1d3b916))
+
 ## [13.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.0...v13.0.1) (2021-01-26)
 
 
