@@ -11,7 +11,9 @@
         "CONTRIBUTING.md",
         "HISTORY.md",
         "LICENSE",
-        "modules/**"
+        "modules/**",
+        "mydomainchecker.php",
+        "mywhois.php"
     ],
     "filesForCleanup": [
         "templates_c",
