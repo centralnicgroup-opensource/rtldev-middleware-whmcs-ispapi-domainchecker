@@ -25,24 +25,24 @@ class Controller
     {
         //load user relations into session (to have premium renewal prices; as unsupported by WHMCS)
         if (!isset($_SESSION["relations"])) {
-            $_SESSION["relations"] = array();
-            $r = Ispapi::call(array('COMMAND' => 'StatusUser'));
+            $_SESSION["relations"] = [];
+            $r = Ispapi::call(['COMMAND' => 'StatusUser']);
             if ($r["CODE"] == "200" && isset($r["PROPERTY"]["RELATIONTYPE"])) {
                 foreach ($r["PROPERTY"]["RELATIONTYPE"] as $idx => &$type) {
                     $_SESSION["relations"][$type] = $r["PROPERTY"]["RELATIONVALUE"][$idx];
                 }
             }
         }
-        return array(
-            'vars' => array(
+        return [
+            'vars' => [
                 '_lang' => $vars['_lang'],
                 'modulelink' => $vars['modulelink'],
                 'modulepath' => "/modules/addons/ispapidomaincheck/",
                 'domain' => isset($_POST["domain"]) ? $_POST["domain"] : "",
                 'currency' => $_SESSION["currency"],
                 'carttpl' => Setting::getValue("OrderFormTemplate")
-            )
-        );
+            ]
+        ];
     }
 
     /**
@@ -56,20 +56,20 @@ class Controller
     {
         ignore_user_abort(false);
         $data = json_decode(file_get_contents('php://input'), true); //convert JSON into array
-        $cmd = array(
+        $cmd = [
             "COMMAND"           => "CheckDomains",
             "DOMAIN"            => $data["pc"]
-        );
+        ];
         if ($data["premiumDomains"] == 1) {
             $cmd["PREMIUMCHANNELS"] = "*";
         }
         $r = Ispapi::call($cmd);//TODO check for active registrar
-        $res = array(
+        $res = [
             "success" => $r["CODE"] == "200",
-            "results" => array()
-        );
+            "results" => []
+        ];
         if ($res["success"]) {
-            $keys = array("PREMIUMCHANNEL", "PRICE", "PRICERENEW", "REASON", "CLASS");
+            $keys = ["PREMIUMCHANNEL", "PRICE", "PRICERENEW", "REASON", "CLASS"];
             $rs = $r["PROPERTY"];
             if ($rs) {
                 if (isset($rs["PRICE"])) {
@@ -77,7 +77,7 @@ class Controller
                 }
                 foreach ($rs["DOMAINCHECK"] as $idx => &$val) {
                     $idn = $data["idn"][$idx];
-                    $row = array();
+                    $row = [];
                     $type = false;
                     switch (substr($val, 0, 3)) {
                         case "210":
@@ -88,7 +88,7 @@ class Controller
                             //relations for any TLD offered in availability check
                             //just in case relations are there, but not repository,
                             //this might be used
-                            $whois = localAPI('DomainWhois', array("domain" => $idn));
+                            $whois = localAPI('DomainWhois', ["domain" => $idn]);
                             $availability = preg_match("/^available$/i", $whois["status"]);
                             break;
                         case "211":
@@ -143,10 +143,10 @@ class Controller
             }
         } else {
             foreach ($data["pc"] as &$pc) {
-                $res["results"][] = array(
+                $res["results"][] = [
                     "statusText" => SearchResult::STATUS_UNKNOWN,
                     "status" => "UNKOWN"
-                );
+                ];
             }
             $res["errormsg"] = "Check failed (" . $r["CODE"] . " " . $r["DESCRIPTION"] . ")";
         }
@@ -164,13 +164,13 @@ class Controller
     public function getsuggestions($vars, $smarty)
     {
         $data = json_decode(file_get_contents('php://input'), true); //convert JSON into array
-        $cmd = array(
+        $cmd = [
             "COMMAND"   => "QueryDomainSuggestionList",
             "KEYWORD"   => $data['keyword'],
             "SOURCE"    => "ISPAPI-SUGGESTIONS",
             "FIRST"     => 0,
             "LIMIT"     => 500
-        );
+        ];
         foreach ($data['zones'] as $idx => $z) {//TODO support arrays in every SDK
             $cmd["ZONE" . $idx] = $z;
         }
@@ -186,14 +186,14 @@ class Controller
         }
         //OPTION: Use Language
         if (!empty($data["language"])) {
-            $cmd["LANGUAGE"] = array($data["language"]);
+            $cmd["LANGUAGE"] = [$data["language"]];
         }
         //TODO replace 'ispapi' with registrar lookup
         $r = Ispapi::call($cmd);
         if ($r["CODE"] == "200") {
             return $r["PROPERTY"]["DOMAIN"];
         }
-        return array();
+        return [];
     }
 
     /**
@@ -219,17 +219,20 @@ class Controller
     public function deleteorder($vars, $smarty)
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        $response = array("success" => false);
         if (isset($data["IDN"], $data["PC"])) {
             foreach ($_SESSION["cart"]["domains"] as $index => &$row) {
                 if ($row["domain"] == $data["IDN"] || $row["domain"] == $data["PC"]) {
                      unset($_SESSION["cart"]["domains"][$index]);
                      $_SESSION["cart"]["domains"] = array_values($_SESSION["cart"]["domains"]);
-                     return array("success" => true);
+                     return [
+                         "success" => true
+                     ];
                 }
             }
         }
-        return array("success" => false);
+        return [
+            "success" => false
+        ];
     }
 
     /**
@@ -243,10 +246,10 @@ class Controller
     {
         //get shopping cart items of interest (domains for registration)
         $orderfrm = new \WHMCS\OrderForm();
-        $cartitems = array();
+        $cartitems = [];
         foreach (
             array_filter(
-                $orderfrm->getCartDataByKey('domains', array()),
+                $orderfrm->getCartDataByKey('domains', []),
                 function ($item) {
                     return ($item["type"] === "register");
                 }
@@ -267,13 +270,13 @@ class Controller
     public function loadconfiguration($vars, $smarty, $data = null)
     {
         //check if backorder modules can be used
-        $backorders = array();
+        $backorders = [];
         $backordering = DCHelper::loadBackorderAPI();
         if ($backordering) {
             //get all domains that have already been backordered by the user. If not logged in, array will be empty, this is perfect.
-            $r = backorder_api_call(array(
+            $r = backorder_api_call([
                 "COMMAND" => "QueryBackorderList"
-            ));
+            ]);
             if ($r["CODE"] == "200" && isset($r["PROPERTY"]["DOMAIN"])) {
                 foreach ($r["PROPERTY"]["DOMAIN"] as $idx => &$d) {
                     $backorders[$d] = 1; //TODO $r["PROPERTY"]["ID"][$idx];
@@ -284,7 +287,7 @@ class Controller
         // collect current configuration data
         // and build list of tlds in use by this configuration
         $categories = DCHelper::SQLCall("Select * from ispapi_tblcategories ORDER BY name ASC", null, "fetchall");
-        $defcats = array();
+        $defcats = [];
         foreach ($categories as &$cat) {
             $cat["id"] = (int)$cat["id"];
             $defcats[] = $cat["id"];
@@ -300,17 +303,17 @@ class Controller
         }
 
         //get list of tlds ordered by priority
-        $tldsbyprio = array();
+        $tldsbyprio = [];
         $rows = DCHelper::SQLCall("SELECT SUBSTR(extension,2) as extension FROM `tbldomainpricing` ORDER BY `order` ASC", null, "fetchall");
         foreach ($rows as &$row) {
             $tldsbyprio[] = $row["extension"];
         }
 
         //get categories and pricing
-        $scfg = DCHelper::getSearchConfiguration($_SESSION["currency"], $backordering);
+        $scfg = DCHelper::getSearchConfiguration($_SESSION["currency"], $backordering, $_SESSION["uid"]);
 
         //build response format
-        $cfg = array(
+        $cfg = [
             //lookup provider
             "lookupprovider" => \WHMCS\Config\Setting::getValue('domainLookupRegistrar'),
             //backorder items: domain <-> application id
@@ -333,7 +336,7 @@ class Controller
             "premiumDomains" => (int)\WHMCS\Config\Setting::getValue('PremiumDomains'),
             //taken domains availability
             "takenDomains" => (int)\WHMCS\Config\Setting::getValue('ispapiDomaincheckTakenDomains')
-        );
+        ];
         if ($cfg["suggestionsOn"]) {
             //locales for domain name suggestion config
             $cfg["locales"] = \LANG::getLocales();

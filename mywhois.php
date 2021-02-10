@@ -5,8 +5,8 @@ use WHMCS\Module\Registrar\Ispapi\Ispapi;
 
 require "init.php";
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR, "includes", "registrarfunctions.php")));
-require_once(implode(DIRECTORY_SEPARATOR, array(ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "DCHelper.class.php")));
+require_once(implode(DIRECTORY_SEPARATOR, [ROOTDIR, "includes", "registrarfunctions.php"]));
+require_once(implode(DIRECTORY_SEPARATOR, [ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "DCHelper.class.php"]));
 
 $idn = strtolower($_REQUEST["idn"]);
 $pc = strtolower($_REQUEST["pc"]);
@@ -19,13 +19,13 @@ $tldidn = preg_replace("/^[^.]+/", "", $idn);
 
 //Get the WHOIS
 $registrar = false;
-$extension = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension=?", array($tldidn), "fetch");
+$extension = DCHelper::SQLCall("SELECT autoreg FROM tbldomainpricing WHERE extension=?", [$tldidn], "fetch");
 if (isset($extension["autoreg"]) && preg_match("/^ispapi$/i", $extension["autoreg"])) {
     //use API
-    $response = Ispapi::call(array(
+    $response = Ispapi::call([
         "COMMAND" => "QueryDomainWhoisInfo",
         "DOMAIN" => $pc
-    ));
+    ]);
     if ($response["CODE"] == 200 && !preg_match("/you have exceeded this limit/i", urldecode($response["PROPERTY"]["WHOISDATA"][0]))) {
         $registrar = true;
     }
@@ -33,7 +33,7 @@ if (isset($extension["autoreg"]) && preg_match("/^ispapi$/i", $extension["autore
 //Fallback to WHMCS's lookup for any issue with API or whois query limit exceeded
 if (!$registrar) {
     //use WHOIS
-    $check = localAPI("domainwhois", array("domain" => $idn));
+    $check = localAPI("domainwhois", ["domain" => $idn]);
     $whois = urldecode($check["whois"]);
 }
 

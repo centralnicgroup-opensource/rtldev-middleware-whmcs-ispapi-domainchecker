@@ -88,7 +88,7 @@ class Controller
         if (!$data) {
             $data = DCHelper::loadfullcurrencydata();
             if (!$data) {
-                return array("success" => false, "msg" => "Failed to load configuration.");
+                return ["success" => false, "msg" => "Failed to load configuration."];
             }
         }
 
@@ -96,12 +96,12 @@ class Controller
         // and build list of tlds in use by this configuration
         $categories = DCHelper::SQLCall("Select * from ispapi_tblcategories ORDER BY name ASC", null, "fetchall");
 
-        $alltldsinuse = array();
-        $defcats = array();
+        $alltldsinuse = [];
+        $defcats = [];
         foreach ($categories as &$cat) {
             $cat["tlds"] = trim($cat["tlds"]);
             if (empty($cat["tlds"])) {
-                $cat["tlds"] = array();
+                $cat["tlds"] = [];
             } else {
                 $cat["tlds"] = explode(" ", preg_replace("/\s\s+/", " ", $cat["tlds"]));
             }
@@ -112,7 +112,7 @@ class Controller
         $alltldsinuse = array_values(array_unique($alltldsinuse));
 
         // build list of tlds configured in WHMCS (so available for use)
-        $alltlds = array();
+        $alltlds = [];
         foreach ($data as $d) {
             $alltlds = array_merge($alltlds, array_keys($d["pricing"]));
         }
@@ -131,7 +131,7 @@ class Controller
         }
 
         //build response format
-        return array(
+        return [
             //all configured tlds
             "alltlds" => $alltlds,
             //not-assigned tlds
@@ -148,7 +148,7 @@ class Controller
             "premiumDomains" => (int)\WHMCS\Config\Setting::getValue('PremiumDomains'),
             //taken domains availability
             "takenDomains" => (int)\WHMCS\Config\Setting::getValue('ispapiDomaincheckTakenDomains')
-        );
+        ];
     }
 
     /**
@@ -163,24 +163,31 @@ class Controller
         if (isset($_REQUEST["category"])) {
             DCHelper::SQLCall(
                 "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
-                array(
+                [
                     ":name" => $_REQUEST["category"],
                     ":tlds" => isset($_REQUEST["tlds"]) ? implode(" ", $_REQUEST["tlds"]) : ""
-                ),
+                ],
                 "execute"
             );
             $cat = DCHelper::SQLCall("SELECT * FROM ispapi_tblcategories ORDER BY id DESC LIMIT 1", null, "fetch");
             if (!empty($cat)) {
                 $cat["tlds"] = trim($cat["tlds"]);
                 if (empty($cat["tlds"])) {
-                    $cat["tlds"] = array();
+                    $cat["tlds"] = [];
                 } else {
                     $cat["tlds"] = explode(" ", preg_replace("/\s\s+/", " ", $cat["tlds"]));
                 }
-                return array("success" => true, "msg" => "Category added.", "category" => $cat);
+                return [
+                    "success" => true,
+                    "msg" => "Category added.",
+                    "category" => $cat
+                ];
             }
         }
-        return array("success" => false, "msg" => "Adding Category failed.");
+        return [
+            "success" => false,
+            "msg" => "Adding Category failed."
+        ];
     }
 
     /**
@@ -193,13 +200,19 @@ class Controller
     public function updatecategory($vars, $smarty)
     {
         if (isset($_REQUEST["category"])) {
-            DCHelper::SQLCall("UPDATE ispapi_tblcategories set tlds=:tlds WHERE id=:id", array(
+            DCHelper::SQLCall("UPDATE ispapi_tblcategories set tlds=:tlds WHERE id=:id", [
                 ":id" => (int)$_REQUEST["category"],
                 ":tlds" => isset($_REQUEST["tlds"]) ? implode(" ", $_REQUEST["tlds"]) : ""//jquery removes empty arrays
-            ), "execute");
-            return array("success" => true, "msg" => "Category update processed.");
+            ], "execute");
+            return [
+                "success" => true,
+                "msg" => "Category update processed."
+            ];
         }
-        return array("success" => false, "msg" => "Category update failed.");
+        return [
+            "success" => false,
+            "msg" => "Category update failed."
+        ];
     }
 
     /**
@@ -214,14 +227,20 @@ class Controller
         if (isset($_REQUEST["category"])) {
             DCHelper::SQLCall(
                 "DELETE FROM ispapi_tblcategories WHERE id=:id",
-                array(
+                [
                     ":id" => $_REQUEST["category"]
-                ),
+                ],
                 "execute"
             );
-            return array("success" => true, "msg" => "Category deletion processed.");
+            return [
+                "success" => true,
+                "msg" => "Category deletion processed."
+            ];
         }
-        return array("success" => false, "msg" => "Category deletion failed.");
+        return [
+            "success" => false,
+            "msg" => "Category deletion failed."
+        ];
     }
 
     /**
@@ -236,16 +255,19 @@ class Controller
         //load default categories using GetCurrencies / GetTLDPricing;
         $data = DCHelper::loadfullcurrencydata();
         if (!$data) {
-            return array("success" => false, "msg" => "Failed to load configuration.");
+            return [
+                "success" => false,
+                "msg" => "Failed to load configuration."
+            ];
         }
 
         //import default categories
-        $categories = array();
+        $categories = [];
         foreach ($data as $d) {
             foreach ($d["pricing"] as $tld => $row) {
                 foreach ($row["categories"] as $cat) {
                     if (!isset($categories[$cat])) {
-                        $categories[$cat] = array();
+                        $categories[$cat] = [];
                     }
                     if (!in_array($tld, $categories[$cat])) {
                         $categories[$cat][] = $tld;
@@ -259,10 +281,10 @@ class Controller
         foreach ($categories as $category => &$tlds) {
             DCHelper::SQLCall(
                 "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
-                array(
+                [
                     ":name" => $category,
                     ":tlds" => implode(" ", $tlds)
-                ),
+                ],
                 "execute"
             );
         }

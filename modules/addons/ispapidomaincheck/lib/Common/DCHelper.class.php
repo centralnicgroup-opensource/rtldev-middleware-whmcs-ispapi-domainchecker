@@ -6,7 +6,7 @@ use WHMCS\Config\Setting;
 use WHMCS\Domains\Pricing\Premium;
 use WHMCS\Module\Registrar\Ispapi\Helper;
 
-$path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","registrars","ispapi","lib","Helper.php"));
+$path = implode(DIRECTORY_SEPARATOR, [ROOTDIR,"modules","registrars","ispapi","lib","Helper.php"]);
 if (file_exists($path)) {
     require_once($path);
 } else {
@@ -27,14 +27,14 @@ class DCHelper extends Helper
      */
     public static function loadfullcurrencydata()
     {
-        $data = array();
-        $cs = localAPI("GetCurrencies", array());
+        $data = [];
+        $cs = localAPI("GetCurrencies", []);
         if ($cs["result"] != "success") {
             return false;
         }
 
         foreach ($cs["currencies"]["currency"] as $currency) {
-            $d = localAPI("GetTLDPricing", array("currencyid" => $currency["id"]));
+            $d = localAPI("GetTLDPricing", ["currencyid" => $currency["id"]]);
             if ($d["result"] != "success") {
                 return false;
             }
@@ -54,9 +54,15 @@ class DCHelper extends Helper
     {
         $setting = \WHMCS\Config\Setting::setValue($key, $val);
         if ($setting->value == $val) {
-            return array("success" => true, "msg" => "Setting saved successfully.");
+            return [
+                "success" => true,
+                "msg" => "Setting saved successfully."
+            ];
         }
-        return array("success" => false, "msg" => "Update not processed.");
+        return [
+            "success" => false,
+            "msg" => "Update not processed."
+        ];
     }
 
     /*
@@ -78,12 +84,12 @@ class DCHelper extends Helper
             }
             return $r["result"];
         }
-        $out = array(
-            "feedback" => array(
+        $out = [
+            "feedback" => [
                 "f_type" => "sqlerror",
                 "f_message" => "An error occured, please contact support."
-            )
-        );
+            ]
+        ];
         if ($debug) {
             $out["sqlmessage"] = $r["errormsg"];
             $out["sqlquery"] = $query;
@@ -119,10 +125,10 @@ class DCHelper extends Helper
     {
         if ($setting === false) {
             $sql = "SELECT * FROM tbladdonmodules WHERE module=:module";
-            $modulevars = array();
-            $r = DCHelper::SQLCall($sql, array(
+            $modulevars = [];
+            $r = DCHelper::SQLCall($sql, [
                 ":module" => $module
-            ), "fetchall");
+            ], "fetchall");
             foreach ($r as $row) {
                 $modulevars[$row["setting"]] = $row["value"];
             }
@@ -130,10 +136,10 @@ class DCHelper extends Helper
         }
         $r = DCHelper::SQLCall(
             "SELECT value FROM tbladdonmodules WHERE module=:module AND setting=:setting LIMIT 1",
-            array(
+            [
                 ":module" => $module,
                 ":setting" => $setting
-            )
+            ]
         );
         return isset($r["value"]) ? $r["value"] : null;
     }
@@ -149,10 +155,10 @@ class DCHelper extends Helper
     {
         $r = self::SQLCall(
             "SELECT value FROM tbldomain_lookup_configuration WHERE registrar = :registrar AND setting = :setting LIMIT 1",
-            array(
+            [
                 ":registrar" => $registrar,
                 ":setting" => $setting
-            )
+            ]
         );
         return isset($r["value"]) ? $r["value"] : null;
     }
@@ -164,7 +170,7 @@ class DCHelper extends Helper
      */
     public static function getWhoisLookupTLDs()
     {
-        $registrars = array();
+        $registrars = [];
         // `none` (empty string)
         $rows = self::SQLCall("SELECT SUBSTR(extension, 2) as extension FROM tbldomainpricing WHERE autoreg is null or autoreg = ''", null, "fetchall");
         foreach ($rows as $row) {
@@ -193,7 +199,7 @@ class DCHelper extends Helper
      */
     public static function getTLDRegistrars()
     {
-        $registrars = array();
+        $registrars = [];
         //TODO do not offer if registrar is not set or inactive
         //We may filter by prev. method
         $rows = self::SQLCall("SELECT SUBSTR(extension, 2) as extension, autoreg FROM tbldomainpricing", null, "fetchall");
@@ -209,24 +215,30 @@ class DCHelper extends Helper
      * @param int $currencyid the currency ID
      * @return array list of defined categories and tlds incl. pricing
      */
-    public static function getSearchConfiguration($currencyid, $backorderEngineOn = false)
+    public static function getSearchConfiguration($currencyid, $backorderEngineOn = false, $uid = null)
     {
-        $pricing = localApi('GetTLDPricing', array(
-            'currencyid' => $currencyid
-        ));
+        if (!is_null($uid)) {
+            $pricing = localApi('GetTLDPricing', [
+                'clientid' => $_SESSION['uid']
+            ]);
+        } else {
+            $pricing = localApi('GetTLDPricing', [
+                'currencyid' => $currencyid
+            ]);
+        }
 
         if ($backorderEngineOn) {
             $prices = self::SQLCall(
                 "SELECT extension, fullprice, liteprice FROM backorder_pricing WHERE currency_id=:currencyid",
-                array(
+                [
                     ":currencyid" => $currencyid
-                ),
+                ],
                 "fetchall"
             );
             foreach ($prices as &$p) {
                 $tld = $p["extension"];
                 if (!isset($pricing["pricing"][$tld])) {
-                    $pricing["pricing"][$tld] = array();
+                    $pricing["pricing"][$tld] = [];
                 }
                 if (!is_null($p["fullprice"])) {
                     $pricing["pricing"][$tld]["backorder"] = "" . $p["fullprice"];
@@ -267,13 +279,13 @@ class DCHelper extends Helper
         //ensure correct ordered index (avoid json encode issues)
         $r = array_values($r);
 
-        return array(
+        return [
             "categories" => $r,
-            "pricing" => array(
+            "pricing" => [
                 "tlds" => $pricing["pricing"],
                 "currency" => $pricing["currency"]
-            )
-        );
+            ]
+        ];
     }
 
     /**
@@ -285,7 +297,7 @@ class DCHelper extends Helper
     {
         $r = self::getAddOnConfigurationValue('ispapibackorder', 'access');
         if ($r === "1") {
-            $path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapibackorder","backend","api.php"));
+            $path = implode(DIRECTORY_SEPARATOR, [ROOTDIR,"modules","addons","ispapibackorder","backend","api.php"]);
             if (file_exists($path)) {
                 require_once($path);
                 return true;
@@ -382,9 +394,9 @@ class DCHelper extends Helper
     {
         return self::SQLCall(
             "SELECT * FROM tblcurrencies WHERE id=:currencyid LIMIT 1",
-            array(
+            [
                 ":currencyid" => $currencyid
-            )
+            ]
         );
     }
 

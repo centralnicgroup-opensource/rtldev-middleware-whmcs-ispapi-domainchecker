@@ -29,7 +29,7 @@ class ClientDispatcher
         $controller = new Controller();
 
         // Verify requested action is valid and callable
-        if (is_callable(array($controller, $action))) {
+        if (is_callable([$controller, $action])) {
             return $controller->$action($args, $smarty);
         }
         // action error

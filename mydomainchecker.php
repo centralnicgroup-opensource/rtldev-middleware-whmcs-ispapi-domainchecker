@@ -12,10 +12,9 @@ use WHMCS\Module\Addon\ispapidomaincheck\DCHelper;
 // Find the correct path of the init.php file, based on the way we are integrating the module
 // (via symlinks or copy/paste), the path is different.
 require "init.php";
-//require_once(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "modules", "addons", "ispapidomaincheck", "init.inc.php")));
 
 // load DCHelper class
-$path = implode(DIRECTORY_SEPARATOR, array(ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "DCHelper.class.php"));
+$path = implode(DIRECTORY_SEPARATOR, [ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "DCHelper.class.php"]);
 if (!file_exists($path)) {
     exit('Missing dependency `ISPAPI Registrar Module`. Please download and install it from <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">github</a>.');
 }
@@ -28,7 +27,7 @@ $ca->addToBreadCrumb('mydomainchecker.php', Lang::trans("domaintitle"));
 $ca->initPage();
 
 // Include module file
-$modulepath = implode(DIRECTORY_SEPARATOR, array(ROOTDIR,"modules","addons","ispapidomaincheck","ispapidomaincheck.php"));
+$modulepath = implode(DIRECTORY_SEPARATOR, [ROOTDIR,"modules","addons","ispapidomaincheck","ispapidomaincheck.php"]);
 if (!file_exists($modulepath)) {
     exit($modulepath . " not found");
 }
@@ -55,6 +54,6 @@ if (is_array($results["vars"])) {
         $smartyvalues[$k] = $v;
     }
 }
-$tplpath = implode(DIRECTORY_SEPARATOR, array("", "modules", "addons", "ispapidomaincheck", "lib", "Client", "templates", ""));
+$tplpath = implode(DIRECTORY_SEPARATOR, ["", "modules", "addons", "ispapidomaincheck", "lib", "Client", "templates", ""]);
 $ca->setTemplate($tplpath . ($smartyvalues["error"] ? "error" : "index") . ".tpl");
 $ca->output();

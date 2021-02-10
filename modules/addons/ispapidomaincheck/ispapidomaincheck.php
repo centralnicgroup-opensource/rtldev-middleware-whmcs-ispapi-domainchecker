@@ -10,7 +10,7 @@ if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
 }
 
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Common", "DCHelper.class.php")));
+require_once(implode(DIRECTORY_SEPARATOR, [__DIR__, "lib", "Common", "DCHelper.class.php"]));
 
 /*
  * Configuration of the addon module.
@@ -31,7 +31,7 @@ function ispapidomaincheck_config()
  */
 function ispapidomaincheck_activate()
 {
-    include(implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),"categories.php")));
+    include(implode(DIRECTORY_SEPARATOR, [dirname(__FILE__),"categories.php"]));
 
     //if not existing, create ispapi_tblcategories table
     DCHelper::SQLCall(
@@ -46,18 +46,18 @@ function ispapidomaincheck_activate()
         foreach ($categorieslib as $category => &$tlds) {
             DCHelper::SQLCall(
                 "INSERT INTO ispapi_tblcategories ({{KEYS}}) VALUES ({{VALUES}})",
-                array(
+                [
                     ":name" => $category,
                     ":tlds" => implode(" ", $tlds)
-                ),
+                ],
                 "execute"
             );
         }
     }
-    return array(
+    return [
         'status'        =>  'success',
         'description'   =>  'The ISPAPI HP DomainChecker was successfully installed.'
-    );
+    ];
 }
 
 /*
@@ -76,10 +76,10 @@ function ispapidomaincheck_upgrade($vars)
         // This one deletes the row and does not complain if it can't.
         DCHelper::SQLCall("DELETE IGNORE FROM ispapi_tblcategories WHERE tlds=''", null, "execute");
     }
-    return array(
+    return [
         'status'        =>  'success',
         'description'   =>  'The ISPAPI HP DomainChecker was successfully upgraded.'
-    );
+    ];
 }
 
 /*
@@ -115,13 +115,8 @@ function ispapidomaincheck_clientarea($vars)
 HTML;
     });
 
-    //load WHMCS
-    //require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
-
     //get default currency as fallback
-    if (!isset($_SESSION["currency"])) {
-        $_SESSION["currency"] = DCHelper::GetCustomerCurrency();
-    }
+    $_SESSION["currency"] = DCHelper::GetCustomerCurrency();
 
     //save the language in the session if not already set
     if (!isset($_SESSION["Language"])) {
@@ -135,7 +130,7 @@ HTML;
         header('Cache-Control: no-cache, must-revalidate'); // HTTP/1.1
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
         header('Content-type: application/json; charset=utf-8');
-        die(json_encode(array("success" => true, "msg" => "currency updated in session")));
+        die(json_encode(["success" => true, "msg" => "currency updated in session"]));
         exit();
     }
 
@@ -144,7 +139,7 @@ HTML;
     $smarty->escape_html = true;
     $smarty->caching = false;
     $smarty->setCompileDir($GLOBALS['templates_compiledir']);
-    $smarty->setTemplateDir(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Client", "templates")));
+    $smarty->setTemplateDir(implode(DIRECTORY_SEPARATOR, [__DIR__, "lib", "Client", "templates"]));
     $smarty->assign($vars);
 
     //call the dispatcher with action and data
@@ -184,15 +179,13 @@ function ispapidomaincheck_output($vars)
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.js?t={$now}"></script>
 HTML;
     });
-    //load WHMCS
-    //require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, "init.inc.php")));
 
     //init smarty and call admin dispatcher
     $smarty = new Smarty();
     $smarty->escape_html = true;
     $smarty->caching = false;
     $smarty->setCompileDir($GLOBALS['templates_compiledir']);
-    $smarty->setTemplateDir(implode(DIRECTORY_SEPARATOR, array(__DIR__, "lib", "Admin", "templates")));
+    $smarty->setTemplateDir(implode(DIRECTORY_SEPARATOR, [__DIR__, "lib", "Admin", "templates"]));
     $smarty->assign($vars);
     //call the dispatcher with action and data
     $dispatcher = new AdminDispatcher();
