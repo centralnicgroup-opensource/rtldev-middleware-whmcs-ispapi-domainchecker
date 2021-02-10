@@ -1,3 +1,10 @@
+## [13.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.2...v13.0.3) (2021-02-10)
+
+
+### Bug Fixes
+
+* **pricing:** client groups pricing now considered ([ab53fd6](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/ab53fd66e9affefde0be9fb406519f05712d2b6f)), closes [#128](https://github.com/hexonet/whmcs-ispapi-domainchecker/issues/128)
+
 ## [13.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.1...v13.0.2) (2021-01-27)
 
 
