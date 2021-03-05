@@ -1,3 +1,10 @@
+## [13.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.3...v13.0.4) (2021-03-05)
+
+
+### Bug Fixes
+
+* **premium domains:** do not offer premium domain filter in case premium domains are turned off ([9b97924](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/9b979244d16ec5fba880320ef20cbe8a8d5f76e4))
+
 ## [13.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.2...v13.0.3) (2021-02-10)
 
 
