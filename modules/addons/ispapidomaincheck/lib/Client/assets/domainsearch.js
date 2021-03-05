@@ -204,17 +204,24 @@ DomainSearch.prototype.initForm = function () {
   }
   $('#showPremiumDomains i').addClass(this.searchStore.showPremiumDomains === '1' ? 'fa-toggle-off' : 'fa-toggle-on')
   $('#showTakenDomains i').addClass(this.searchStore.showTakenDomains === '1' ? 'fa-toggle-off' : 'fa-toggle-on')
+  // do not allow to activate premium domains on client side if reseller has it deactivated
+  if (!data.premiumDomains) {
+    $('#showPremiumDomains').hide()
+  }
   $('#datafilters .filter').off('click').on('click', function () {
     const $eL = $(this).find('i')
     const isOn = $eL.hasClass('fa-toggle-on')
     const filterId = $(this).attr('id')
     const isInverse = $(this).hasClass('filterInverse')
-    $eL.toggleClass('fa-toggle-on', !isOn)
-    $eL.toggleClass('fa-toggle-off', isOn)
-    if (isInverse) {
-      ds.searchStore[filterId] = isOn ? '1' : '0'
-    } else {
-      ds.searchStore[filterId] = isOn ? '0' : '1'
+    // do not allow to activate premium domains on client side if reseller has it deactivated
+    if (!(filterId === 'showPremiumDomains' && !isOn && (data.premiumDomains === 0))) {
+      $eL.toggleClass('fa-toggle-on', !isOn)
+      $eL.toggleClass('fa-toggle-off', isOn)
+      if (isInverse) {
+        ds.searchStore[filterId] = isOn ? '1' : '0'
+      } else {
+        ds.searchStore[filterId] = isOn ? '0' : '1'
+      }
     }
   })
   $('#datafilters').show()
