@@ -1,3 +1,10 @@
+## [13.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.4...v13.0.5) (2021-03-06)
+
+
+### Bug Fixes
+
+* **bootstrap 4:** compatibility improved (theme: twenty-one) ([32f03b5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/32f03b5616091590a7ff9b85ea2a5e71384ef06c)), closes [#130](https://github.com/hexonet/whmcs-ispapi-domainchecker/issues/130)
+
 ## [13.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.3...v13.0.4) (2021-03-05)
 
 
