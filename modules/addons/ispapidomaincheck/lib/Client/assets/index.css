@@ -3,6 +3,7 @@
     padding:10px 0px;
     background-color: #FFF;
 }
+#suggestionsopts.collapse.show,
 #suggestionsopts.collapse.in,
 #dcmain .row,
 #dcmain .input-group,
@@ -453,10 +454,10 @@ span.spanelement{
     outline:none;
     border:none;
 }*/
-.panel-hexonet {
+.card-hexonet {
     border-color: #0033A0;
 }
-.panel-hexonet>.panel-heading {
+.card-hexonet>.card-header {
     color: #fff;
     background-color: #0033A0;
     border-color: #0033A0;

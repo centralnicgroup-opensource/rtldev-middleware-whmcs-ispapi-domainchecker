@@ -126,7 +126,7 @@
         </form>
     </div>
     {if !$loggedin && $currencies}
-        <div class="currencychooser pull-right clearfix margin-bottom">
+        <div class="currencychooser pull-right float-right clearfix margin-bottom">
             <div class="btn-group" role="group">
                 {foreach from=$currencies item=curr}
                     <button id="curr_{$curr.id}" class="btn btn-default{if $currency eq $curr.id} active{/if}">

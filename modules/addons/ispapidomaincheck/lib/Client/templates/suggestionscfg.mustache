@@ -1,7 +1,7 @@
 <div id="suggestionsopts" class="row1 row collapse-category collapse">
-    <div class="panel panel-hexonet">
-        <div class="panel-heading"><i class="fas fa-cog"></i> {{translations.settings}}</div>
-        <div class="panel-body">
+    <div class="panel card card-hexonet">
+        <div class="panel-heading card-header"><i class="fas fa-cog"></i> {{translations.settings}}</div>
+        <div class="panel-body card-body">
             <p>{{translations.settingsdescr}}</p>
             <div class="row">
                 <div class="col col-4 col-xs-4"><label for="sug_lang_opt"><b>{{translations.set_uselang}}</b></label></div>
@@ -13,12 +13,13 @@
                         {{/locales}}
                     </select>
                 </div>
+                <div style="clear:both"></div>
             </div>
             <div class="row">
                 <div class="col col-4 col-xs-4">
-                    <label for="sug_ip_opt">{{translations.set_useip}}</label> 
+                    <label for="sug_ip_opt"><b>{{translations.set_useip}}</b></label> 
                 </div>
-                <div class="col co-8 col-xs-8">
+                <div class="col col-8 col-xs-8">
                     <select id="sug_ip_opt" name="sug_ip_opt">
                         <option value="0">{{translations.opt_no}}</option>
                         <option value="1">{{translations.opt_yes}}</option>
