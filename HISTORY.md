@@ -1,3 +1,16 @@
+# [14.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.5...v14.0.0) (2021-04-01)
+
+
+### Features
+
+* **name suggestions:** consider lookup provider settings and use active language as default ([24e2fd5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/24e2fd55fdf5ae65832ca4a2fe465210e11e3b10))
+
+
+### BREAKING CHANGES
+
+* **name suggestions:** Consider Lookup Provider Setting: 'Suppress .com and .net' and use current active
+Language as default locale for the domain name suggestions engine.
+
 ## [13.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.4...v13.0.5) (2021-03-06)
 
 
