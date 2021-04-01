@@ -330,6 +330,8 @@ class Controller
             "path_to_dc_module" => "/modules/addons/ispapidomaincheck/",
             //check if suggestion engine is active or not
             "suggestionsOn" => (DCHelper::getDomaincheckerMode() == "on") ? 1 : 0,
+            //suggestcheck if .com / .net have to be suppressed (suggestions engine)
+            "suggestionsCfg" => DCHelper::getSuggestionsConfig(),
             //default active Categories
             "defaultActiveCategories" => $defcats,
             //premium domains availability

@@ -2,7 +2,7 @@ const DomainSearch = function () {
   this.connections = []// queue for pending / queued xhr requests
   this.activeCurrency = null
   this.catmgr = new CategoryManager()
-  this.mode = 0// 1 -> suggestions, 0 -> normal search
+  this.mode = 0// { cfg } -> suggestions, 0 -> normal search
   this.searchcfg = {
     cacheJobID: null,
     maxCacheTTL: 600000, // 10 minutes in ms
@@ -43,7 +43,8 @@ const DomainSearch = function () {
           return parseInt(c, 10)
         }),
       sug_ip_opt: url.searchParams.get('ip') || '0',
-      sug_lang_opt: url.searchParams.get('lang') || '',
+      // eslint-disable-next-line no-undef
+      sug_lang_opt: url.searchParams.get('lang') || locale,
       showPremiumDomains: url.searchParams.get('showpremium') || '1',
       showTakenDomains: url.searchParams.get('showtaken') || '1'
     }
@@ -193,6 +194,8 @@ DomainSearch.prototype.initForm = function () {
   } else {
     this.searchStore.activeCategories = data.defaultActiveCategories
     this.catmgr.setCategories(data.categories, this.searchStore.activeCategories).generate()
+    // eslint-disable-next-line no-undef
+    $('#sug_lang_opt').val(locale)// use the current active language as default
     $('#searchform').serializeArray().forEach(entry => {
       ds.searchStore[entry.name] = entry.value
     })
@@ -332,7 +335,7 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
     return
   }
   this.activeCurrency = d.pricing.currency.id
-  this.mode = d.suggestionsOn
+  this.mode = d.suggestionsOn ? d.suggestionsCfg : 0
   this.backorders = d.backorders
   this.paths = {
     dc: d.path_to_dc_module,
@@ -353,7 +356,7 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
 
   this.d[this.activeCurrency] = d
 
-  // this.mode = 1 -> domain suggestions
+  // this.mode -> domain suggestions, this.mode covers the suggestionscfg from registrar module or is 0
   const tpls = ['resultRow'].concat(this.mode ? ['suggestionscfg', 'suggestionscfgbttn'] : [])
   await TPLMgr.loadTemplates(tpls, 'Client')
 
@@ -383,12 +386,15 @@ DomainSearch.prototype.generate = async function (d, statusText, currencychanged
   })
 }
 DomainSearch.prototype.getDomainSuggestions = function (searchstr) {
-  const data = {
+  // TODO: might be better to cover suggestionsnoweighted as searchStore var
+  // and checkbox in the suggestions settings modal
+  const cfg = {
     useip: this.searchStore.sug_ip_opt,
-    zones: this.catmgr.getSelectedZones(),
+    zones: this.catmgr.getSelectedZones(this.mode ? this.mode.suggestionsnoweighted : false),
     keyword: searchstr,
     language: this.searchStore.sug_lang_opt
   }
+  const data = { ...cfg, ...this.mode }
   const errmsg = {
     title: `${translations.error_occured}!`,
     message: translations.error_loadingsuggestions

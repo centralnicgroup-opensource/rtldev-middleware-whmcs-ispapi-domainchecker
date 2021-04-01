@@ -105,13 +105,39 @@ class DCHelper extends Helper
     public static function getDomaincheckerMode()
     {
         $registrar = \WHMCS\Config\Setting::getValue('domainLookupRegistrar');
-        if ($registrar == "ispapi") {
+        if ($registrar === "ispapi") {
             $dc_setting = self::getLookupConfigurationValue($registrar, 'suggestions');
             if (!empty($dc_setting)) {
                 return $dc_setting;
             }
         }
         return "";
+    }
+
+    /**
+     * Returns the suggestion engine settings
+     *
+     * @return string The domainchecker mode
+     */
+    public static function getSuggestionsConfig()
+    {
+        $cfg = [];
+        if (!empty(self::getDomaincheckerMode())) {
+            $defaults = [
+                "suggstionsamount" => 100,
+                "suggestionsnoweighted" => false
+            ];
+            foreach (["suggstionsamount", "suggestionsnoweighted"] as $k) {
+                $v = self::getLookupConfigurationValue("ispapi", $k);
+                if (is_null($v)) {
+                    $v = $defaults[$k];
+                } elseif ($v === "on") {
+                    $v = true;
+                }
+                $cfg[$k] = $v;
+            }
+        }
+        return $cfg;
     }
 
     /**

@@ -132,10 +132,16 @@ CategoryManager.prototype.getSelectedTLDs = function () {
   })
   return tlds
 }
-CategoryManager.prototype.getSelectedZones = function () {
-  // filter out 3rd level extensions as not supported by QueryDomainSuggestionList
-  return this.getSelectedTLDs().filter(tld => /^[^.]+$/.test(tld)).map(tld => {
-    return tld.toUpperCase().replace(/\./, '')
+CategoryManager.prototype.getSelectedZones = function (suggestionsnoweighted) {
+  return this.getSelectedTLDs().filter(tld => {
+    // filter out high weighted TLDs like .com, .net
+    if (suggestionsnoweighted && /^(COM|NET)$/i.test(tld)) {
+      return false
+    }
+    // filter out 3rd level extensions as not supported by QueryDomainSuggestionList
+    return /^[^.]+$/.test(tld)
+  }).map(tld => {
+    return tld.toUpperCase()
   })
 }
 CategoryManager.prototype.buildDomainlist = function (searchLabel) {
