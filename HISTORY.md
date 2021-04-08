@@ -1,3 +1,10 @@
+## [14.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.0...v14.0.1) (2021-04-08)
+
+
+### Bug Fixes
+
+* **sidebar navigation:** in shopping cart reviewed ([a80d6a9](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/a80d6a923d06d3326fcba0e45607f571359b0331))
+
 # [14.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v13.0.5...v14.0.0) (2021-04-01)
 
 
