@@ -69,6 +69,8 @@ const DomainSearch = function () {
   // --- END
 }
 DomainSearch.cleanupSearchString = function (str) {
+  // todo: review this regex with /[~`!@#$% ...]/ this looks quite ugly
+  // invalid chars - SEARCH.INVALIDCHARACTERS@ispapi-search
   const invalidChars = /(~|`|!|@|#|\$|%|\^|&|\*|\(|\)|_|\+|=|{|}|\[|\]|\||\\|;|:|"|'|<|>|,|\?|\/)/g
   let tmp = str.toLowerCase()
   tmp = tmp.replace(/(^\s+|\s+$)/g, '') // replace all dangling white spaces
@@ -78,7 +80,7 @@ DomainSearch.cleanupSearchString = function (str) {
   } catch (e) {
     tmp = tmp.replace(/(\s|%20).+$/, '') // not a working url, strip everything after space
   }
-  tmp = tmp.replace(invalidChars, '') // strip invalid chars - SEARCH.INVALIDCHARACTERS@ispapi-search
+  tmp = tmp.replace(invalidChars, '')
   return tmp
 }
 DomainSearch.prototype.handleResultCache = function () {
