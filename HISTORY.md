@@ -1,3 +1,10 @@
+## [14.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.1...v14.0.2) (2021-05-11)
+
+
+### Bug Fixes
+
+* **search term:** cleanup for better UX ([946695f](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/946695f453bdcf36d2c54bd2d2521aff1182a0a5))
+
 ## [14.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.0...v14.0.1) (2021-04-08)
 
 
