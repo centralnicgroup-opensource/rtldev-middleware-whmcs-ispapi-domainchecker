@@ -69,7 +69,17 @@ const DomainSearch = function () {
   // --- END
 }
 DomainSearch.cleanupSearchString = function (str) {
-  return str.replace(/(^\s+|\s+$|^http(s)?:\/\/)/g, '').toLowerCase()
+  const invalidChars = /(~|`|!|@|#|\$|%|\^|&|\*|\(|\)|_|\+|=|{|}|\[|\]|\||\\|;|:|"|'|<|>|,|\?|\/)/g
+  let tmp = str.toLowerCase()
+  tmp = tmp.replace(/(^\s+|\s+$)/g, '') // replace all dangling white spaces
+  try {
+    const url = new URL(tmp)// try to url-parse given string
+    tmp = url.hostname // worked, we have hostname including subdomain
+  } catch (e) {
+    tmp = tmp.replace(/(\s|%20).+$/, '') // not a working url, strip everything after space
+  }
+  tmp = tmp.replace(invalidChars, '') // strip invalid chars - SEARCH.INVALIDCHARACTERS@ispapi-search
+  return tmp
 }
 DomainSearch.prototype.handleResultCache = function () {
   this.searchcfg.cacheJobID = setInterval(function () {
