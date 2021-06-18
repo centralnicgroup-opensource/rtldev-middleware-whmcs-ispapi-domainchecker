@@ -23,16 +23,6 @@ class Controller
      */
     public function index($vars, $smarty)
     {
-        //load user relations into session (to have premium renewal prices; as unsupported by WHMCS)
-        if (!isset($_SESSION["relations"])) {
-            $_SESSION["relations"] = [];
-            $r = Ispapi::call(['COMMAND' => 'StatusUser']);
-            if ($r["CODE"] == "200" && isset($r["PROPERTY"]["RELATIONTYPE"])) {
-                foreach ($r["PROPERTY"]["RELATIONTYPE"] as $idx => &$type) {
-                    $_SESSION["relations"][$type] = $r["PROPERTY"]["RELATIONVALUE"][$idx];
-                }
-            }
-        }
         return [
             'vars' => [
                 '_lang' => $vars['_lang'],
@@ -84,10 +74,6 @@ class Controller
                             $availability = true;
                             break;
                         case "549"://invalid repository (unsupported TLD)
-                            //this should be superfluous as we pre-check for available
-                            //relations for any TLD offered in availability check
-                            //just in case relations are there, but not repository,
-                            //this might be used
                             $whois = localAPI('DomainWhois', ["domain" => $idn]);
                             $availability = preg_match("/^available$/i", $whois["status"]);
                             break;
