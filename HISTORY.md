@@ -1,3 +1,10 @@
+## [14.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.2...v14.0.3) (2021-06-18)
+
+
+### Performance Improvements
+
+* **initial load time:** highly improved - cleaning up the use of StatusUser ([61e1cc5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/61e1cc5bbd740dea6ae7bcd7b413f9d36c5c4778))
+
 ## [14.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.1...v14.0.2) (2021-05-11)
 
 
