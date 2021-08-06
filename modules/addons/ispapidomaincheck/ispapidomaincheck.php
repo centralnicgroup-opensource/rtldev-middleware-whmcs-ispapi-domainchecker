@@ -17,11 +17,13 @@ require_once(implode(DIRECTORY_SEPARATOR, [__DIR__, "lib", "Common", "DCHelper.c
  */
 function ispapidomaincheck_config()
 {
+    $logo_src = file_get_contents(implode(DIRECTORY_SEPARATOR, [ROOTDIR, "modules", "addons", "ispapidomaincheck", "logo.png"]));
+    $logo_data = ($logo_src) ? 'data:image/png;base64,' . base64_encode($logo_src) : '';
     return [
         "name" => "ISPAPI HP DomainChecker",
         "description" => "This addon provides a new domainchecker interface with high speed checks, suggestions and premium support.",
         "version" => "14.0.3",
-        "author" => "HEXONET",
+        "author" => '<a href="https://www.hexonet.net/" target="_blank"><img style="max-width:100px" src="' . $logo_data . '" alt="HEXONET" /></a>',
         "language" => "english"
     ];
 }
