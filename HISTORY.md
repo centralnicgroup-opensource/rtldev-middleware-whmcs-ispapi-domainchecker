@@ -1,3 +1,10 @@
+## [14.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.3...v14.0.4) (2021-08-09)
+
+
+### Bug Fixes
+
+* **HX logo:** HX logo.png + configuration ([cec299c](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/cec299c6d4f2f96917d87f9ae4e244a99cd4bd96))
+
 ## [14.0.3](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.2...v14.0.3) (2021-06-18)
 
 
