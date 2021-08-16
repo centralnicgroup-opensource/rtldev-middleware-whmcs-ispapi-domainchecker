@@ -1,3 +1,10 @@
+## [14.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.4...v14.0.5) (2021-08-16)
+
+
+### Bug Fixes
+
+* **lookup provider:** fixed modal for switching lookup provider ([b31342d](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/b31342d0e96588ff9f671d357c62907a3bea266f))
+
 ## [14.0.4](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.3...v14.0.4) (2021-08-09)
 
 
