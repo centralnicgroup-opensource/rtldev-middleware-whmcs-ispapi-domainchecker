@@ -622,7 +622,7 @@ function replaceLookupProviderDialogListeners () {
     }
 
     WHMCS.http.jqClient.post('configdomains.php', {
-      token: $('#frmmynotes input[name="token"]').val(),
+      token: csrfToken,
       provider: provider,
       action: 'lookup-provider'
     }, function (d) {
