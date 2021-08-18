@@ -1,18 +1,18 @@
 // eslint-disable-next-line no-unused-vars
-const dcpath = '/modules/addons/ispapidomaincheck/'
+const dcpath = "/modules/addons/ispapidomaincheck/";
 // eslint-disable-next-line no-unused-vars
-let translations
-let ds
-let cart
+let translations;
+let ds;
+let cart;
 
 (async function () {
   // eslint-disable-next-line no-unused-vars
   translations = await $.ajax({
-    url: '?action=loadtranslations',
-    type: 'GET'
-  })
-  cart = new ShoppingCart()
-  await cart.load()
-  ds = new DomainSearch()
-  ds.loadConfiguration()
-}())
+    url: "?action=loadtranslations",
+    type: "GET",
+  });
+  cart = new ShoppingCart();
+  await cart.load();
+  ds = new DomainSearch();
+  ds.loadConfiguration();
+})();
