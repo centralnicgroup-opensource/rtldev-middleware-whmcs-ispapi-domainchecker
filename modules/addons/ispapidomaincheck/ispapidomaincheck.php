@@ -92,15 +92,16 @@ function ispapidomaincheck_upgrade($vars)
 function ispapidomaincheck_clientarea($vars)
 {
     add_hook('ClientAreaHeadOutput', 1, function ($vars) {
-        $now = mktime();
+        $cfg = ispapidomaincheck_config();
+        $version = $cfg["version"];
         $wr = $vars["WEB_ROOT"];
         // bootstrap version -> $.fn.tooltip.Constructor.VERSION
         /* {*<-- user-scalable=yes if you want user to allow zoom --> */
         return <<<HTML
         <meta name="viewport" content="width=device-width, user-scalable=no"/>
         <script>const wr = "{$wr}";</script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/client.all.min.js?t={$now}"></script>
-        <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/client.all.min.css?t={$now}" rel="stylesheet" type="text/css" />
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/client.all.min.js?t={$version}"></script>
+        <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/client.all.min.css?t={$version}" rel="stylesheet" type="text/css" />
 
 HTML;
     });
@@ -152,12 +153,13 @@ HTML;
 function ispapidomaincheck_output($vars)
 {
     add_hook('AdminAreaHeadOutput', 1, function ($vars) {
-        $now = mktime();
+        $cfg = ispapidomaincheck_config();
+        $version = $cfg["version"];
         $wr = $vars['WEB_ROOT'];
         return <<<HTML
         <script>const wr = "{$wr}";</script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/admin.all.min.js?t={$now}"></script>
-        <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/admin.all.min.css?t={$now}" rel="stylesheet" type="text/css" />
+        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/admin.all.min.js?t={$version}"></script>
+        <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/admin.all.min.css?t={$version}" rel="stylesheet" type="text/css" />
 
 HTML;
     });
