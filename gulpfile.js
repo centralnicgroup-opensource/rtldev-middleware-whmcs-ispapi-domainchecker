@@ -173,59 +173,33 @@ function jsConcatenation(cb) {
  */
 function watcher() {
   watch(
-    ["**/*.js", "!**/*.min.js", "**/*.css", "!**/*.min.css"],
+    [
+      "**/assets/*.js",
+      "!**/assets/*@(.all|.min).js",
+      "**/assets/*.css",
+      "!**/assets/*@(.all|.min).css",
+    ],
     { interval: 1000 },
     series(cssConcatenation, jsConcatenation, esbuildMinify)
   );
 }
 
-exports.watcher = series(
-  watcher
-);
+exports.watcher = series(watcher);
 
-exports.minify = series(
-  esbuildMinify
-);
+exports.minify = series(esbuildMinify);
 
-exports.concat = series(
-  cssConcatenation,
-  jsConcatenation
-);
+exports.concat = series(cssConcatenation, jsConcatenation);
 
-exports.bundle = series(
-  cssConcatenation,
-  jsConcatenation,
-  esbuildMinify
-);
+exports.bundle = series(cssConcatenation, jsConcatenation, esbuildMinify);
 
-exports.lint = series(
-  doLint
-);
+exports.lint = series(doLint);
 
-exports.copy = series(
-  doDistClean,
-  doCopyFiles
-);
+exports.copy = series(doDistClean, doCopyFiles);
 
-exports.prepare = series(
-  exports.lint,
-  exports.copy
-);
+exports.prepare = series(exports.lint, exports.copy);
 
-exports.archives = series(
-  doGitZip,
-  doZip,
-  doTar
-);
+exports.archives = series(doGitZip, doZip, doTar);
 
-exports.default = series(
-  exports.prepare,
-  exports.archives,
-  doFullClean
-);
+exports.default = series(exports.prepare, exports.archives, doFullClean);
 
-exports.release = series(
-  exports.copy,
-  exports.archives,
-  doFullClean
-);
+exports.release = series(exports.copy, exports.archives, doFullClean);
