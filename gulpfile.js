@@ -1,15 +1,13 @@
-const { series, src, dest, parallel, watch } = require("gulp");
+const { series, src, dest, watch } = require("gulp");
 const concat = require("gulp-concat");
-const sourcemaps = require("gulp-sourcemaps");
+//const sourcemaps = require("gulp-sourcemaps");
 const clean = require("gulp-clean");
 const zip = require("gulp-zip");
 const tar = require("gulp-tar");
 const gzip = require("gulp-gzip");
 const exec = require("util").promisify(require("child_process").exec);
 const cfg = require("./gulpfile.json");
-const path = require("path");
 const rename = require("gulp-rename");
-const fs = require("fs");
 const esbuild = require("gulp-esbuild");
 
 /**
@@ -107,7 +105,6 @@ function esbuildMinify(cb) {
       .pipe(
         esbuild({
           minify: true,
-          outdir: ".",
         })
       )
       .pipe(
