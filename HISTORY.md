@@ -1,3 +1,16 @@
+## [14.0.6](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.5...v14.0.6) (2021-08-23)
+
+
+### Bug Fixes
+
+* **gulp:** fixed watcher glob condition ([778350f](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/778350fbbc996b87114e91f6d78a494d989df15b))
+* **minify:** create pubishable js + css files ([f74b586](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/f74b58675bc3947f508b66422a4fd5169863afb4))
+
+
+### Performance Improvements
+
+* **page load:** allowing for browser cache ([6e0170c](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/6e0170cd9f0944d394648ab01e00f6ae3d10e636))
+
 ## [14.0.5](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.4...v14.0.5) (2021-08-16)
 
 
