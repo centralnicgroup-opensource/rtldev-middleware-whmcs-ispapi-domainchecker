@@ -1,3 +1,10 @@
+# [14.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.6...v14.1.0) (2021-08-24)
+
+
+### Features
+
+* **invalid tlds:** show unsupported/invalid TLDs as such ([4c3290e](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/4c3290ed32a44758df36b6b9dbba8bead13e9cdd))
+
 ## [14.0.6](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.5...v14.0.6) (2021-08-23)
 
 
