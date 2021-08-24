@@ -4,10 +4,10 @@
 
 /* global jQuery, window */
 (function ($, window) {
-  'use strict'
+  'use strict';
 
-  let templateMap = {}
-  let instance = null
+  let templateMap = {};
+  let instance = null;
   const options = {
     // Should an error be thrown if an attempt is made to render a non-existent template.  If false, the
     // operation will fail silently.
@@ -23,25 +23,25 @@
 
     // Specifies the `dataType` attribute used when external templates are loaded.
     externalTemplateDataType: 'text'
-  }
+  };
 
   function getMustache () {
     // Lazily retrieve Mustache from the window global if it hasn't been defined by
     // the User.
     if (instance === null) {
-      instance = window.Mustache
+      instance = window.Mustache;
       if (instance === void 0) {
-        $.error('Failed to locate Mustache instance, are you sure it has been loaded?')
+        $.error('Failed to locate Mustache instance, are you sure it has been loaded?');
       }
     }
-    return instance
+    return instance;
   }
 
   /**
 	 * @return {boolean} if the supplied templateName has been added.
 	 */
   function has (templateName) {
-    return templateMap[templateName] !== void 0
+    return templateMap[templateName] !== void 0;
   }
 
   /**
@@ -54,10 +54,10 @@
 	 */
   function add (templateName, templateHtml) {
     if (!options.allowOverwrite && has(templateName)) {
-      $.error('TemplateName: ' + templateName + ' is already mapped.')
-      return
+      $.error('TemplateName: ' + templateName + ' is already mapped.');
+      return;
     }
-    templateMap[templateName] = $.trim(templateHtml)
+    templateMap[templateName] = $.trim(templateHtml);
   }
 
   /**
@@ -69,26 +69,26 @@
 	 *									`options.domTemplateType` configuration value will be added.
 	 */
   function addFromDom () {
-    let templateElementIds
+    let templateElementIds;
 
     // If no args are supplied, all script blocks will be read from the document.
     if (arguments.length === 0) {
       templateElementIds = $('script[type="' + options.domTemplateType + '"]').map(function () {
-        return this.id
-      })
+        return this.id;
+      });
     } else {
-      templateElementIds = $.makeArray(arguments)
+      templateElementIds = $.makeArray(arguments);
     }
 
     $.each(templateElementIds, function () {
-      const templateElement = document.getElementById(this)
+      const templateElement = document.getElementById(this);
 
       if (templateElement === null) {
-        $.error('No such elementId: #' + this)
+        $.error('No such elementId: #' + this);
       } else {
-        add(this, $(templateElement).html())
+        add(this, $(templateElement).html());
       }
-    })
+    });
   }
 
   /**
@@ -98,17 +98,17 @@
 	 * @returns					String which represents the raw content of the template.
 	 */
   function remove (templateName) {
-    const result = templateMap[templateName]
-    delete templateMap[templateName]
-    return result
+    const result = templateMap[templateName];
+    delete templateMap[templateName];
+    return result;
   }
 
   /**
 	 * Removes all templates and tells Mustache to flush its cache.
 	 */
   function clear () {
-    templateMap = {}
-    getMustache().clearCache()
+    templateMap = {};
+    getMustache().clearCache();
   }
 
   /**
@@ -118,11 +118,11 @@
   function render (templateName, templateData) {
     if (!has(templateName)) {
       if (options.warnOnMissingTemplates) {
-        $.error('No template registered for: ' + templateName)
+        $.error('No template registered for: ' + templateName);
       }
-      return ''
+      return '';
     }
-    return getMustache().to_html(templateMap[templateName], templateData, templateMap)
+    return getMustache().to_html(templateMap[templateName], templateData, templateMap);
   }
 
   /**
@@ -141,13 +141,13 @@
       dataType: options.externalTemplateDataType
     }).done(function (templates) {
       $(templates).filter('script').each(function (i, el) {
-        add(el.id, $(el).html())
-      })
+        add(el.id, $(el).html());
+      });
 
       if ($.isFunction(onComplete)) {
-        onComplete()
+        onComplete();
       }
-    })
+    });
   }
 
   /**
@@ -156,8 +156,8 @@
 	 */
   function templates () {
     return $.map(templateMap, function (value, key) {
-      return key
-    })
+      return key;
+    });
   }
 
   // Expose the public methods on jQuery.Mustache
@@ -172,7 +172,7 @@
     render: render,
     templates: templates,
     instance: instance
-  }
+  };
 
   /**
 	 * Renders one or more viewModels into the current jQuery element.
@@ -186,26 +186,26 @@
   $.fn.mustache = function (templateName, templateData, options) {
     const settings = $.extend({
       method: 'append'
-    }, options)
+    }, options);
 
     const renderTemplate = function (obj, viewModel) {
-      $(obj)[settings.method](render(templateName, viewModel))
-    }
+      $(obj)[settings.method](render(templateName, viewModel));
+    };
 
     return this.each(function () {
-      const element = this
+      const element = this;
 
       // Render a collection of viewModels.
       if ($.isArray(templateData)) {
         $.each(templateData, function () {
-          renderTemplate(element, this)
-        })
+          renderTemplate(element, this);
+        });
       }
 
       // Render a single viewModel.
       else {
-        renderTemplate(element, templateData)
+        renderTemplate(element, templateData);
       }
-    })
-  }
-}(window.jQuery || window.Zepto, window))
+    });
+  };
+}(window.jQuery || window.Zepto, window));
