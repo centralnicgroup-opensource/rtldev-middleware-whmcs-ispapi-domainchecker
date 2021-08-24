@@ -1,3 +1,11 @@
+## [14.1.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.1.1...v14.1.2) (2021-08-24)
+
+
+### Bug Fixes
+
+* **assets:** fixed admin area assets ([9f88f15](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/9f88f154c27e7d553560315453ef180fc5262fb3))
+* **domain name suggestions:** fixed response for empty API response ([75373b1](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/75373b1613800abe50810dc67b7e80f2f9007401))
+
 ## [14.1.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.1.0...v14.1.1) (2021-08-24)
 
 
