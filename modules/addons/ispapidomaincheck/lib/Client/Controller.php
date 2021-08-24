@@ -185,7 +185,7 @@ class Controller
         }
         //TODO replace 'ispapi' with registrar lookup
         $r = Ispapi::call($cmd);
-        if ($r["CODE"] == "200") {
+        if ($r["CODE"] == "200" && $r["PROPERTY"]["COUNT"][0] > 0) {
             return $r["PROPERTY"]["DOMAIN"];
         }
         return [];
