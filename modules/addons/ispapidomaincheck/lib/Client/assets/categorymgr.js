@@ -3,15 +3,15 @@ CategoryManager.prototype.setCategories = function (
   categories,
   activeCategories
 ) {
-  $("#categoriescont").empty();
+  $('#categoriescont').empty();
   this.categoriesMap = {}; // access by id, faster
   this.categories = [];
   this.activeCategories = activeCategories;
   const all = {
     id: -1,
-    name: "All",
+    name: 'All',
     tlds: [],
-    active: true,
+    active: true
   };
   categories
     .sort(function (a, b) {
@@ -40,16 +40,16 @@ CategoryManager.prototype.setCategories = function (
   return this;
 };
 CategoryManager.prototype.handleClicks = function () {
-  $(".subCat")
-    .off("click")
+  $('.subCat')
+    .off('click')
     .click(
       function (e) {
-        const cat = this.getCategoryByDomId($(e.target).attr("id"));
+        const cat = this.getCategoryByDomId($(e.target).attr('id'));
         if (!cat) {
           return;
         }
-        cat.element.toggleClass("active");
-        cat.active = cat.element.hasClass("active");
+        cat.element.toggleClass('active');
+        cat.active = cat.element.hasClass('active');
         // NOTE: we need to create a new array so that proxy.set handler reacts as necessary
         // ALL === -1 -> put all cats to active or remove them all
         if (cat.id === -1) {
@@ -57,14 +57,14 @@ CategoryManager.prototype.handleClicks = function () {
             const activecats = [];
             this.categories.forEach((cat) => {
               cat.active = true;
-              cat.element.addClass("active");
+              cat.element.addClass('active');
               activecats.push(cat.id);
             });
             ds.searchStore.activeCategories = activecats;
           } else {
             this.categories.forEach((cat) => {
               cat.active = false;
-              cat.element.removeClass("active");
+              cat.element.removeClass('active');
             });
             ds.searchStore.activeCategories = [];
           }
@@ -79,13 +79,13 @@ CategoryManager.prototype.handleClicks = function () {
             });
             if (allactive) {
               this.categoriesMap[-1].active = true;
-              this.categoriesMap[-1].element.addClass("active");
+              this.categoriesMap[-1].element.addClass('active');
               activecats.push(-1);
             }
             ds.searchStore.activeCategories = activecats;
           } else {
             this.categoriesMap[-1].active = false;
-            this.categoriesMap[-1].element.removeClass("active");
+            this.categoriesMap[-1].element.removeClass('active');
             ds.searchStore.activeCategories =
               ds.searchStore.activeCategories.filter((catid) => {
                 return catid !== cat.id && catid !== -1;
@@ -95,10 +95,10 @@ CategoryManager.prototype.handleClicks = function () {
       }.bind(this)
     );
   // handle the click on the category-button
-  $(".category-button")
-    .off("click")
+  $('.category-button')
+    .off('click')
     .click(function () {
-      $(this).find("i.category").toggleClass("fa-angle-up fa-angle-down");
+      $(this).find('i.category').toggleClass('fa-angle-up fa-angle-down');
     });
   return this;
 };
@@ -113,17 +113,17 @@ CategoryManager.prototype.generate = async function () {
   if (!this.categories.length) {
     return $.growl.error({
       title: `${translations.error_occured}!`,
-      message: translations.error_noprices,
+      message: translations.error_noprices
     });
   }
-  await TPLMgr.loadTemplates(["category"], "Client");
-  const $eL = $("#categoriescont");
+  await TPLMgr.loadTemplates(['category'], 'Client');
+  const $eL = $('#categoriescont');
   $eL.empty();
   this.categories.forEach((category) => {
-    category.element = $(category + "").appendTo($eL);
+    category.element = $(category + '').appendTo($eL);
   });
-  $("#categories").show();
-  $("#searchbutton").prop("disabled", false);
+  $('#categories').show();
+  $('#searchbutton').prop('disabled', false);
   this.handleClicks();
   return this;
 };

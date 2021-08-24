@@ -55,7 +55,7 @@ const TPLMgr = {
       // --- https://github.com/jonnyreeves/jquery-Mustache#usage
       // --- https://github.com/janl/mustache.js
       const tplpath = `${wr}/modules/addons/ispapidomaincheck/lib/${type}/templates/`;
-      const tplext = ".mustache";
+      const tplext = '.mustache';
       let count = tpls.length;
       if (!count) {
         resolve();
@@ -86,63 +86,63 @@ const TPLMgr = {
   renderPrepend: function (selector, tpl, data) {
     $.extend(data, { translations: translations });
     return $(selector)
-      .mustache(tpl, data, { method: "prepend" })
+      .mustache(tpl, data, { method: 'prepend' })
       .children()
       .first();
   },
   renderString: function (tpl, data) {
     $.extend(data, { translations: translations });
     return $.Mustache.render(tpl, data);
-  },
+  }
 };
 
 /*! jQuery Mustache - v0.2.8 - 2013-06-23
 * https://github.com/jonnyreeves/jquery-Mustache
 * Copyright (c) 2013 Jonny Reeves; Licensed MIT */
 
-/*global jQuery, window */
+/* global jQuery, window */
 (function ($, window) {
-    'use strict';
+  'use strict'
 
-    var templateMap = {},
-        instance = null,
-        options = {
-            // Should an error be thrown if an attempt is made to render a non-existent template.  If false, the
-            // operation will fail silently.
-            warnOnMissingTemplates: false,
+  let templateMap = {}
+  let instance = null
+  const options = {
+    // Should an error be thrown if an attempt is made to render a non-existent template.  If false, the
+    // operation will fail silently.
+    warnOnMissingTemplates: false,
 
-            // Should an error be thrown if an attempt is made to overwrite a template which has already been added.
-            // If true the original template will be overwritten with the new value.
-            allowOverwrite: true,
+    // Should an error be thrown if an attempt is made to overwrite a template which has already been added.
+    // If true the original template will be overwritten with the new value.
+    allowOverwrite: true,
 
-            // The 'type' attribute which you use to denoate a Mustache Template in the DOM; eg:
-            // `<script type="text/html" id="my-template"></script>`
-            domTemplateType: 'text/html',
+    // The 'type' attribute which you use to denoate a Mustache Template in the DOM; eg:
+    // `<script type="text/html" id="my-template"></script>`
+    domTemplateType: 'text/html',
 
-            // Specifies the `dataType` attribute used when external templates are loaded.
-            externalTemplateDataType: 'text'
-        };
+    // Specifies the `dataType` attribute used when external templates are loaded.
+    externalTemplateDataType: 'text'
+  }
 
-    function getMustache() {
-        // Lazily retrieve Mustache from the window global if it hasn't been defined by
-        // the User.
-        if (instance === null) {
-            instance = window.Mustache;
-            if (instance === void 0) {
-                $.error("Failed to locate Mustache instance, are you sure it has been loaded?");
-            }
-        }
-        return instance;
+  function getMustache () {
+    // Lazily retrieve Mustache from the window global if it hasn't been defined by
+    // the User.
+    if (instance === null) {
+      instance = window.Mustache
+      if (instance === void 0) {
+        $.error('Failed to locate Mustache instance, are you sure it has been loaded?')
+      }
     }
+    return instance
+  }
 
-	/**
+  /**
 	 * @return {boolean} if the supplied templateName has been added.
 	 */
-    function has(templateName) {
-        return templateMap[templateName] !== void 0;
-    }
+  function has (templateName) {
+    return templateMap[templateName] !== void 0
+  }
 
-	/**
+  /**
 	 * Registers a template so that it can be used by $.Mustache.
 	 *
 	 * @param templateName		A name which uniquely identifies this template.
@@ -150,82 +150,80 @@ const TPLMgr = {
 	 *							is invoked.
 	 * @throws					If options.allowOverwrite is false and the templateName has already been registered.
 	 */
-    function add(templateName, templateHtml) {
-        if (!options.allowOverwrite && has(templateName)) {
-            $.error('TemplateName: ' + templateName + ' is already mapped.');
-            return;
-        }
-        templateMap[templateName] = $.trim(templateHtml);
+  function add (templateName, templateHtml) {
+    if (!options.allowOverwrite && has(templateName)) {
+      $.error('TemplateName: ' + templateName + ' is already mapped.')
+      return
     }
+    templateMap[templateName] = $.trim(templateHtml)
+  }
 
-	/**
+  /**
 	 * Adds one or more tempaltes from the DOM using either the supplied templateElementIds or by retrieving all script
 	 * tags of the 'domTemplateType'.  Templates added in this fashion will be registered with their elementId value.
 	 *
-	 * @param [...templateElementIds]	List of element id's present on the DOM which contain templates to be added; 
-	 *									if none are supplied all script tags that are of the same type as the 
+	 * @param [...templateElementIds]	List of element id's present on the DOM which contain templates to be added;
+	 *									if none are supplied all script tags that are of the same type as the
 	 *									`options.domTemplateType` configuration value will be added.
 	 */
-    function addFromDom() {
-        var templateElementIds;
+  function addFromDom () {
+    let templateElementIds
 
-        // If no args are supplied, all script blocks will be read from the document.
-        if (arguments.length === 0) {
-            templateElementIds = $('script[type="' + options.domTemplateType + '"]').map(function () {
-                return this.id;
-            });
-        }
-        else {
-            templateElementIds = $.makeArray(arguments);
-        }
-
-        $.each(templateElementIds, function () {
-            var templateElement = document.getElementById(this);
-
-            if (templateElement === null) {
-                $.error('No such elementId: #' + this);
-            }
-            else {
-                add(this, $(templateElement).html());
-            }
-        });
+    // If no args are supplied, all script blocks will be read from the document.
+    if (arguments.length === 0) {
+      templateElementIds = $('script[type="' + options.domTemplateType + '"]').map(function () {
+        return this.id
+      })
+    } else {
+      templateElementIds = $.makeArray(arguments)
     }
 
-	/**
+    $.each(templateElementIds, function () {
+      const templateElement = document.getElementById(this)
+
+      if (templateElement === null) {
+        $.error('No such elementId: #' + this)
+      } else {
+        add(this, $(templateElement).html())
+      }
+    })
+  }
+
+  /**
 	 * Removes a template, the contents of the removed Template will be returned.
 	 *
 	 * @param templateName		The name of the previously registered Mustache template that you wish to remove.
 	 * @returns					String which represents the raw content of the template.
 	 */
-    function remove(templateName) {
-        var result = templateMap[templateName];
-        delete templateMap[templateName];
-        return result;
-    }
+  function remove (templateName) {
+    const result = templateMap[templateName]
+    delete templateMap[templateName]
+    return result
+  }
 
-	/**
+  /**
 	 * Removes all templates and tells Mustache to flush its cache.
 	 */
-    function clear() {
-        templateMap = {};
-        getMustache().clearCache();
-    }
+  function clear () {
+    templateMap = {}
+    getMustache().clearCache()
+  }
 
-	/**
+  /**
 	 * Renders a previously added Mustache template using the supplied templateData object.  Note if the supplied
 	 * templateName doesn't exist an empty String will be returned.
 	 */
-    function render(templateName, templateData) {
-        if (!has(templateName)) {
-            if (options.warnOnMissingTemplates) {
-                $.error('No template registered for: ' + templateName);
-            }
-            return '';
-        }
-        return getMustache().to_html(templateMap[templateName], templateData, templateMap);
+  function render (templateName, templateData) {
+    if (!has(templateName)) {
+      if (options.warnOnMissingTemplates) {
+        $.error('No template registered for: ' + templateName)
+      }
+      return ''
     }
+    return getMustache().to_html(templateMap[templateName], templateData, templateMap)
+  }
 
-	/**
+  /**
 	 * Loads the external Mustache templates located at the supplied URL and registers them for later use.  This method
 	 * returns a jQuery Promise and also support an `onComplete` callback.
 	 *
@@ -235,46 +233,46 @@ const TPLMgr = {
 	 * @returns				jQuery deferred promise which will complete when the templates have been loaded and are
 	 *						ready for use.
 	 */
-    function load(url, onComplete) {
-        return $.ajax({
-            url: url,
-            dataType: options.externalTemplateDataType
-        }).done(function (templates) {
-            $(templates).filter('script').each(function (i, el) {
-                add(el.id, $(el).html());
-            });
+  function load (url, onComplete) {
+    return $.ajax({
+      url: url,
+      dataType: options.externalTemplateDataType
+    }).done(function (templates) {
+      $(templates).filter('script').each(function (i, el) {
+        add(el.id, $(el).html())
+      })
 
-            if ($.isFunction(onComplete)) {
-                onComplete();
-            }
-        });
-    }
+      if ($.isFunction(onComplete)) {
+        onComplete()
+      }
+    })
+  }
 
-	/**
+  /**
 	 * Returns an Array of templateNames which have been registered and can be retrieved via
 	 * $.Mustache.render() or $(element).mustache().
 	 */
-    function templates() {
-        return $.map(templateMap, function (value, key) {
-            return key;
-        });
-    }
+  function templates () {
+    return $.map(templateMap, function (value, key) {
+      return key
+    })
+  }
 
-    // Expose the public methods on jQuery.Mustache
-    $.Mustache = {
-        options: options,
-        load: load,
-        has: has,
-        add: add,
-        addFromDom: addFromDom,
-        remove: remove,
-        clear: clear,
-        render: render,
-        templates: templates,
-        instance: instance
-    };
+  // Expose the public methods on jQuery.Mustache
+  $.Mustache = {
+    options: options,
+    load: load,
+    has: has,
+    add: add,
+    addFromDom: addFromDom,
+    remove: remove,
+    clear: clear,
+    render: render,
+    templates: templates,
+    instance: instance
+  }
 
-	/**
+  /**
 	 * Renders one or more viewModels into the current jQuery element.
 	 *
 	 * @param templateName	The name of the Mustache template you wish to render, Note that the
@@ -283,33 +281,33 @@ const TPLMgr = {
 	 *						template.
 	 * @param options.method	jQuery method to use when rendering, defaults to 'append'.
 	 */
-    $.fn.mustache = function (templateName, templateData, options) {
-        var settings = $.extend({
-            method: 'append'
-        }, options);
+  $.fn.mustache = function (templateName, templateData, options) {
+    const settings = $.extend({
+      method: 'append'
+    }, options)
 
-        var renderTemplate = function (obj, viewModel) {
-            $(obj)[settings.method](render(templateName, viewModel));
-        };
+    const renderTemplate = function (obj, viewModel) {
+      $(obj)[settings.method](render(templateName, viewModel))
+    }
 
-        return this.each(function () {
-            var element = this;
+    return this.each(function () {
+      const element = this
 
-            // Render a collection of viewModels.
-            if ($.isArray(templateData)) {
-                $.each(templateData, function () {
-                    renderTemplate(element, this);
-                });
-            }
+      // Render a collection of viewModels.
+      if ($.isArray(templateData)) {
+        $.each(templateData, function () {
+          renderTemplate(element, this)
+        })
+      }
 
-            // Render a single viewModel.
-            else {
-                renderTemplate(element, templateData);
-            }
-        });
-    };
+      // Render a single viewModel.
+      else {
+        renderTemplate(element, templateData)
+      }
+    })
+  }
+}(window.jQuery || window.Zepto, window))
 
-}(window.jQuery || window.Zepto, window));
 (function defineMustache(global, factory) { if (typeof exports === "object" && exports && typeof exports.nodeName !== "string") { factory(exports) } else if (typeof define === "function" && define.amd) { define(["exports"], factory) } else { global.Mustache = {}; factory(global.Mustache) } })(this, function mustacheFactory(mustache) { var objectToString = Object.prototype.toString; var isArray = Array.isArray || function isArrayPolyfill(object) { return objectToString.call(object) === "[object Array]" }; function isFunction(object) { return typeof object === "function" } function typeStr(obj) { return isArray(obj) ? "array" : typeof obj } function escapeRegExp(string) { return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&") } function hasProperty(obj, propName) { return obj != null && typeof obj === "object" && propName in obj } function primitiveHasOwnProperty(primitive, propName) { return primitive != null && typeof primitive !== "object" && primitive.hasOwnProperty && primitive.hasOwnProperty(propName) } var regExpTest = RegExp.prototype.test; function testRegExp(re, string) { return regExpTest.call(re, string) } var nonSpaceRe = /\S/; function isWhitespace(string) { return !testRegExp(nonSpaceRe, string) } var entityMap = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "/": "&#x2F;", "`": "&#x60;", "=": "&#x3D;" }; function escapeHtml(string) { return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap(s) { return entityMap[s] }) } var whiteRe = /\s*/; var spaceRe = /\s+/; var equalsRe = /\s*=/; var curlyRe = /\s*\}/; var tagRe = /#|\^|\/|>|\{|&|=|!/; function parseTemplate(template, tags) { if (!template) return []; var sections = []; var tokens = []; var spaces = []; var hasTag = false; var nonSpace = false; function stripSpace() { if (hasTag && !nonSpace) { while (spaces.length) delete tokens[spaces.pop()] } else { spaces = [] } hasTag = false; nonSpace = false } var openingTagRe, closingTagRe, closingCurlyRe; function compileTags(tagsToCompile) { if (typeof tagsToCompile === "string") tagsToCompile = tagsToCompile.split(spaceRe, 2); if (!isArray(tagsToCompile) || tagsToCompile.length !== 2) throw new Error("Invalid tags: " + tagsToCompile); openingTagRe = new RegExp(escapeRegExp(tagsToCompile[0]) + "\\s*"); closingTagRe = new RegExp("\\s*" + escapeRegExp(tagsToCompile[1])); closingCurlyRe = new RegExp("\\s*" + escapeRegExp("}" + tagsToCompile[1])) } compileTags(tags || mustache.tags); var scanner = new Scanner(template); var start, type, value, chr, token, openSection; while (!scanner.eos()) { start = scanner.pos; value = scanner.scanUntil(openingTagRe); if (value) { for (var i = 0, valueLength = value.length; i < valueLength; ++i) { chr = value.charAt(i); if (isWhitespace(chr)) { spaces.push(tokens.length) } else { nonSpace = true } tokens.push(["text", chr, start, start + 1]); start += 1; if (chr === "\n") stripSpace() } } if (!scanner.scan(openingTagRe)) break; hasTag = true; type = scanner.scan(tagRe) || "name"; scanner.scan(whiteRe); if (type === "=") { value = scanner.scanUntil(equalsRe); scanner.scan(equalsRe); scanner.scanUntil(closingTagRe) } else if (type === "{") { value = scanner.scanUntil(closingCurlyRe); scanner.scan(curlyRe); scanner.scanUntil(closingTagRe); type = "&" } else { value = scanner.scanUntil(closingTagRe) } if (!scanner.scan(closingTagRe)) throw new Error("Unclosed tag at " + scanner.pos); token = [type, value, start, scanner.pos]; tokens.push(token); if (type === "#" || type === "^") { sections.push(token) } else if (type === "/") { openSection = sections.pop(); if (!openSection) throw new Error('Unopened section "' + value + '" at ' + start); if (openSection[1] !== value) throw new Error('Unclosed section "' + openSection[1] + '" at ' + start) } else if (type === "name" || type === "{" || type === "&") { nonSpace = true } else if (type === "=") { compileTags(value) } } openSection = sections.pop(); if (openSection) throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos); return nestTokens(squashTokens(tokens)) } function squashTokens(tokens) { var squashedTokens = []; var token, lastToken; for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) { token = tokens[i]; if (token) { if (token[0] === "text" && lastToken && lastToken[0] === "text") { lastToken[1] += token[1]; lastToken[3] = token[3] } else { squashedTokens.push(token); lastToken = token } } } return squashedTokens } function nestTokens(tokens) { var nestedTokens = []; var collector = nestedTokens; var sections = []; var token, section; for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) { token = tokens[i]; switch (token[0]) { case "#": case "^": collector.push(token); sections.push(token); collector = token[4] = []; break; case "/": section = sections.pop(); section[5] = token[2]; collector = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens; break; default: collector.push(token) } } return nestedTokens } function Scanner(string) { this.string = string; this.tail = string; this.pos = 0 } Scanner.prototype.eos = function eos() { return this.tail === "" }; Scanner.prototype.scan = function scan(re) { var match = this.tail.match(re); if (!match || match.index !== 0) return ""; var string = match[0]; this.tail = this.tail.substring(string.length); this.pos += string.length; return string }; Scanner.prototype.scanUntil = function scanUntil(re) { var index = this.tail.search(re), match; switch (index) { case -1: match = this.tail; this.tail = ""; break; case 0: match = ""; break; default: match = this.tail.substring(0, index); this.tail = this.tail.substring(index) }this.pos += match.length; return match }; function Context(view, parentContext) { this.view = view; this.cache = { ".": this.view }; this.parent = parentContext } Context.prototype.push = function push(view) { return new Context(view, this) }; Context.prototype.lookup = function lookup(name) { var cache = this.cache; var value; if (cache.hasOwnProperty(name)) { value = cache[name] } else { var context = this, intermediateValue, names, index, lookupHit = false; while (context) { if (name.indexOf(".") > 0) { intermediateValue = context.view; names = name.split("."); index = 0; while (intermediateValue != null && index < names.length) { if (index === names.length - 1) lookupHit = hasProperty(intermediateValue, names[index]) || primitiveHasOwnProperty(intermediateValue, names[index]); intermediateValue = intermediateValue[names[index++]] } } else { intermediateValue = context.view[name]; lookupHit = hasProperty(context.view, name) } if (lookupHit) { value = intermediateValue; break } context = context.parent } cache[name] = value } if (isFunction(value)) value = value.call(this.view); return value }; function Writer() { this.cache = {} } Writer.prototype.clearCache = function clearCache() { this.cache = {} }; Writer.prototype.parse = function parse(template, tags) { var cache = this.cache; var cacheKey = template + ":" + (tags || mustache.tags).join(":"); var tokens = cache[cacheKey]; if (tokens == null) tokens = cache[cacheKey] = parseTemplate(template, tags); return tokens }; Writer.prototype.render = function render(template, view, partials, tags) { var tokens = this.parse(template, tags); var context = view instanceof Context ? view : new Context(view); return this.renderTokens(tokens, context, partials, template, tags) }; Writer.prototype.renderTokens = function renderTokens(tokens, context, partials, originalTemplate, tags) { var buffer = ""; var token, symbol, value; for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) { value = undefined; token = tokens[i]; symbol = token[0]; if (symbol === "#") value = this.renderSection(token, context, partials, originalTemplate); else if (symbol === "^") value = this.renderInverted(token, context, partials, originalTemplate); else if (symbol === ">") value = this.renderPartial(token, context, partials, tags); else if (symbol === "&") value = this.unescapedValue(token, context); else if (symbol === "name") value = this.escapedValue(token, context); else if (symbol === "text") value = this.rawValue(token); if (value !== undefined) buffer += value } return buffer }; Writer.prototype.renderSection = function renderSection(token, context, partials, originalTemplate) { var self = this; var buffer = ""; var value = context.lookup(token[1]); function subRender(template) { return self.render(template, context, partials) } if (!value) return; if (isArray(value)) { for (var j = 0, valueLength = value.length; j < valueLength; ++j) { buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate) } } else if (typeof value === "object" || typeof value === "string" || typeof value === "number") { buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate) } else if (isFunction(value)) { if (typeof originalTemplate !== "string") throw new Error("Cannot use higher-order sections without the original template"); value = value.call(context.view, originalTemplate.slice(token[3], token[5]), subRender); if (value != null) buffer += value } else { buffer += this.renderTokens(token[4], context, partials, originalTemplate) } return buffer }; Writer.prototype.renderInverted = function renderInverted(token, context, partials, originalTemplate) { var value = context.lookup(token[1]); if (!value || isArray(value) && value.length === 0) return this.renderTokens(token[4], context, partials, originalTemplate) }; Writer.prototype.renderPartial = function renderPartial(token, context, partials, tags) { if (!partials) return; var value = isFunction(partials) ? partials(token[1]) : partials[token[1]]; if (value != null) return this.renderTokens(this.parse(value, tags), context, partials, value) }; Writer.prototype.unescapedValue = function unescapedValue(token, context) { var value = context.lookup(token[1]); if (value != null) return value }; Writer.prototype.escapedValue = function escapedValue(token, context) { var value = context.lookup(token[1]); if (value != null) return mustache.escape(value) }; Writer.prototype.rawValue = function rawValue(token) { return token[1] }; mustache.name = "mustache.js"; mustache.version = "3.0.1"; mustache.tags = ["{{", "}}"]; var defaultWriter = new Writer; mustache.clearCache = function clearCache() { return defaultWriter.clearCache() }; mustache.parse = function parse(template, tags) { return defaultWriter.parse(template, tags) }; mustache.render = function render(template, view, partials, tags) { if (typeof template !== "string") { throw new TypeError('Invalid template! Template should be a "string" ' + 'but "' + typeStr(template) + '" was given as the first ' + "argument for mustache#render(template, view, partials)") } return defaultWriter.render(template, view, partials, tags) }; mustache.to_html = function to_html(template, view, partials, send) { var result = mustache.render(template, view, partials); if (isFunction(send)) { send(result) } else { return result } }; mustache.escape = escapeHtml; mustache.Scanner = Scanner; mustache.Context = Context; mustache.Writer = Writer; return mustache });
 // eslint-disable-next-line no-unused-vars
 const translations = {};
@@ -327,55 +325,55 @@ const packer = new Muuri.Packer();
  * @param msg Message to display
  * @param [title] Title to display
  */
-function infoOut(d, msg, title) {
-  title = title || "Error occured!";
+function infoOut (d, msg, title) {
+  title = title || 'Error occured!';
   let infomsg = msg;
   let isError = false;
-  if (Object.prototype.hasOwnProperty.call(d, "status") && d.status !== 200) {
+  if (Object.prototype.hasOwnProperty.call(d, 'status') && d.status !== 200) {
     isError = true;
     infomsg += ` (${d.status} ${d.statusText})`;
   }
   if (isError || /(error|fail)/i.test(title) || /(error|fail)/i.test(infomsg)) {
     return $.growl.error({
       title: title,
-      message: infomsg,
+      message: infomsg
     });
   }
   $.growl.notice({
     title: title,
-    message: infomsg,
+    message: infomsg
   });
 }
 
 /**
  * Initialize Default WHMCS' categories import feature
  */
-function initImport() {
-  $("#importdefaultcategories")
+function initImport () {
+  $('#importdefaultcategories')
     .off()
     .click(() => {
-      $("#dialog-confirm").dialog({
+      $('#dialog-confirm').dialog({
         title: "Import WHMCS' default categories",
         resizable: false,
-        height: "auto",
+        height: 'auto',
         width: 400,
         modal: true,
         open: function () {
-          $("#contentholder").html(TPLMgr.renderString("import"));
+          $('#contentholder').html(TPLMgr.renderString('import'));
         },
         buttons: {
           Confirm: function () {
-            $(this).dialog("close");
-            $("#loading").show();
-            $("#tabs").tabs({ disabled: [0] });
+            $(this).dialog('close');
+            $('#loading').show();
+            $('#tabs').tabs({ disabled: [0] });
             $.ajax({
-              url: "?module=ispapidomaincheck&action=importdefaults",
-              type: "POST",
-              dataType: "json",
+              url: '?module=ispapidomaincheck&action=importdefaults',
+              type: 'POST',
+              dataType: 'json'
             })
               .done(function (d) {
-                $("#loading").hide();
-                $("#tabs").tabs({ disabled: [] });
+                $('#loading').hide();
+                $('#tabs').tabs({ disabled: [] });
                 d.defaultActiveCategories = data.categories.map(
                   (cat) => cat.id
                 );
@@ -386,25 +384,25 @@ function initImport() {
                 infoOut(
                   d,
                   "Import of the default WHMCS' categories finished. Please re-configure your by-default active Categories in Settings Tab.",
-                  "Import successful!"
+                  'Import successful!'
                 );
               })
               .fail(function (d) {
-                $("#loading").hide();
+                $('#loading').hide();
                 generate(d);
                 generateTab1Block1();
                 generateTab2();
                 infoOut(
                   d,
                   "Import of the default WHMCS' categories failed.",
-                  "Import failed!"
+                  'Import failed!'
                 );
               });
           },
           Cancel: function () {
-            $(this).dialog("close");
-          },
-        },
+            $(this).dialog('close');
+          }
+        }
       });
     });
 }
@@ -412,45 +410,45 @@ function initImport() {
 /**
  * Initialize Add new Category feature
  */
-function initAddCategory() {
-  $("#addcategory")
+function initAddCategory () {
+  $('#addcategory')
     .off()
     .click(() => {
-      $("#dialog-confirm").dialog({
-        title: "Add a custom Category",
+      $('#dialog-confirm').dialog({
+        title: 'Add a custom Category',
         resizable: false,
-        height: "auto",
+        height: 'auto',
         width: 400,
         modal: true,
         open: function () {
-          $("#contentholder").html(TPLMgr.renderString("addcategory"));
+          $('#contentholder').html(TPLMgr.renderString('addcategory'));
         },
         buttons: {
           Confirm: function () {
-            $("#contentholder .form-group").first().removeClass("has-error");
-            const cat = $("#categoryinp")
+            $('#contentholder .form-group').first().removeClass('has-error');
+            const cat = $('#categoryinp')
               .val()
-              .replace(/(^\s+|\s+$)/g, "");
+              .replace(/(^\s+|\s+$)/g, '');
             if (!cat.length) {
-              $("#contentholder .form-group").first().addClass("has-error");
+              $('#contentholder .form-group').first().addClass('has-error');
               return;
             }
-            const addnatlds = $("#addunassignedtlds").prop("checked") === true;
+            const addnatlds = $('#addunassignedtlds').prop('checked') === true;
             const tlds = addnatlds ? data.notassignedtlds : [];
-            $(this).dialog("close");
-            $("#loading").show();
+            $(this).dialog('close');
+            $('#loading').show();
             $.ajax({
-              url: "?module=ispapidomaincheck&action=addcategory",
-              type: "POST",
+              url: '?module=ispapidomaincheck&action=addcategory',
+              type: 'POST',
               data: {
                 category: cat,
-                tlds: tlds,
+                tlds: tlds
               },
-              dataType: "json",
+              dataType: 'json'
             })
               .done(function (d) {
-                $("#loading").hide();
-                infoOut(d, d.msg, "Action succeeded!");
+                $('#loading').hide();
+                infoOut(d, d.msg, 'Action succeeded!');
                 if (d.success) {
                   data.categories.unshift(d.category); // to correspond to view order
                   if (addnatlds) {
@@ -458,20 +456,20 @@ function initAddCategory() {
                     nagrid.remove(nagrid.getItems());
                   }
                   const $catEl = addCategory(d.category, 1);
-                  addTLDGrid($catEl.find(".tldgrid")[0], true);
+                  addTLDGrid($catEl.find('.tldgrid')[0], true);
                   maingrid.refreshItems().layout();
                   generateTab1Block1();
                 }
               })
               .fail(function (d) {
-                $("#loading").hide();
-                infoOut(d, "Failed to add the custom category.");
+                $('#loading').hide();
+                infoOut(d, 'Failed to add the custom category.');
               });
           },
           Cancel: function () {
-            $(this).dialog("close");
-          },
-        },
+            $(this).dialog('close');
+          }
+        }
       });
     });
 }
@@ -481,46 +479,46 @@ function initAddCategory() {
  * @param categoryid id of the category
  * @return tldgrid instance
  */
-function getTLDGridByCategory(categoryid) {
+function getTLDGridByCategory (categoryid) {
   return tldgrids.filter((g) => {
-    return $(g.getElement()).data("category") === categoryid;
+    return $(g.getElement()).data('category') === categoryid;
   })[0];
 }
 
 /**
  * Initialize Delete Category feature
  */
-function initDropCategory() {
-  $(".dropcat")
+function initDropCategory () {
+  $('.dropcat')
     .off()
     .click(function () {
-      const gridEl = $(this).closest(".item");
-      const name = gridEl.data("name");
-      const cat = gridEl.data("category");
-      $("#dialog-confirm").dialog({
+      const gridEl = $(this).closest('.item');
+      const name = gridEl.data('name');
+      const cat = gridEl.data('category');
+      $('#dialog-confirm').dialog({
         title: `Delete Category "${name}"`,
         resizable: false,
-        height: "auto",
+        height: 'auto',
         width: 400,
         modal: true,
         open: function () {
-          $("#contentholder").html(TPLMgr.renderString("dropcategory"));
+          $('#contentholder').html(TPLMgr.renderString('dropcategory'));
         },
         buttons: {
           Confirm: function () {
-            $(this).dialog("close");
-            $("#loading").show();
+            $(this).dialog('close');
+            $('#loading').show();
             $.ajax({
-              url: "?module=ispapidomaincheck&action=deletecategory",
-              type: "POST",
+              url: '?module=ispapidomaincheck&action=deletecategory',
+              type: 'POST',
               data: {
-                category: cat,
+                category: cat
               },
-              dataType: "json",
+              dataType: 'json'
             })
               .done(function (d) {
-                $("#loading").hide();
-                infoOut(d, d.msg, "Action succeeded!");
+                $('#loading').hide();
+                infoOut(d, d.msg, 'Action succeeded!');
                 if (d.success) {
                   const idx = data.defaultActiveCategories.indexOf(cat);
                   if (idx > -1) {
@@ -531,10 +529,10 @@ function initDropCategory() {
                     return mycat.id !== cat;
                   });
                   const g = getTLDGridByCategory(
-                    gridEl.find(".tldgrid").data("category")
+                    gridEl.find('.tldgrid').data('category')
                   );
                   g.getItems().forEach((item) => {
-                    const tld = $(item.getElement()).data("tld");
+                    const tld = $(item.getElement()).data('tld');
                     let found = false;
                     for (let i = 0; i < data.categories.length; i++) {
                       found =
@@ -556,14 +554,14 @@ function initDropCategory() {
                 }
               })
               .fail(function (d) {
-                $("#loading").hide();
-                infoOut(d, "Failed to add the custom category.");
+                $('#loading').hide();
+                infoOut(d, 'Failed to add the custom category.');
               });
           },
           Cancel: function () {
-            $(this).dialog("close");
-          },
-        },
+            $(this).dialog('close');
+          }
+        }
       });
     });
 }
@@ -572,26 +570,26 @@ function initDropCategory() {
  * Delete TLD feature
  * @param item tldgrid item to delete
  */
-function dropTLD(item) {
+function dropTLD (item) {
   const itemEl = $(item.getElement());
-  const cat = $(item.getGrid().getElement()).data("category");
-  const catlabel = itemEl.closest(".item").data("name");
-  const tld = itemEl.data("tld");
+  const cat = $(item.getGrid().getElement()).data('category');
+  const catlabel = itemEl.closest('.item').data('name');
+  const tld = itemEl.data('tld');
 
-  $("#dialog-confirm").dialog({
+  $('#dialog-confirm').dialog({
     title: `Remove Extension .${tld}`,
     resizable: false,
-    height: "auto",
+    height: 'auto',
     width: 400,
     modal: true,
     open: function () {
-      $("#contentholder").html(
-        TPLMgr.renderString("droptld", { tld: tld, category: catlabel })
+      $('#contentholder').html(
+        TPLMgr.renderString('droptld', { tld: tld, category: catlabel })
       );
     },
     buttons: {
       Confirm: function () {
-        $(this).dialog("close");
+        $(this).dialog('close');
         let found = false;
         data.categories = data.categories.map((mycat) => {
           if (mycat.id !== cat) {
@@ -605,8 +603,8 @@ function dropTLD(item) {
         });
         const g = item.getGrid();
         $(item.getElement()).data(
-          "category",
-          $(item.getGrid().getElement()).data("category")
+          'category',
+          $(item.getGrid().getElement()).data('category')
         );
         if (!found) {
           // tld is not in any further category
@@ -615,12 +613,12 @@ function dropTLD(item) {
         } else {
           g.remove(item, { removeElements: true });
         }
-        g._emit("dragEnd", item);
+        g._emit('dragEnd', item);
       },
       Cancel: function () {
-        $(this).dialog("close");
-      },
-    },
+        $(this).dialog('close');
+      }
+    }
   });
 }
 
@@ -630,14 +628,14 @@ function dropTLD(item) {
  * @param index where the category has to be added
  * @returns inserted category item
  */
-function addCategory(cat, index) {
-  const $eL = $(TPLMgr.renderString("tldgrid", cat));
+function addCategory (cat, index) {
+  const $eL = $(TPLMgr.renderString('tldgrid', cat));
   if (cat.id < 0) {
-    $eL.find(".droptld").hide();
-    $eL.find(".dropcat").remove();
-    $eL.find(".panel-primary").switchClass("panel-primary", "panel-warning");
+    $eL.find('.droptld').hide();
+    $eL.find('.dropcat').remove();
+    $eL.find('.panel-primary').switchClass('panel-primary', 'panel-warning');
   }
-  $eL.data("tlds", cat.tlds);
+  $eL.data('tlds', cat.tlds);
   if (index != null) {
     maingrid.add($eL[0], { index: index });
   } else {
@@ -653,66 +651,66 @@ function addCategory(cat, index) {
 /**
  * Initialize Add TLD (to category) feature
  */
-function initAddTLD() {
-  $("#addtld")
+function initAddTLD () {
+  $('#addtld')
     .off()
     .click(() => {
       const tlds = data.alltlds.map((tld) => {
         return `.${tld}`;
       });
       let tldsavailable = tlds;
-      $("#dialog-confirm").dialog({
-        title: "Add TLD to Category",
+      $('#dialog-confirm').dialog({
+        title: 'Add TLD to Category',
         resizable: false,
-        height: "auto",
+        height: 'auto',
         width: 600,
         modal: true,
         open: function () {
-          $("#contentholder").html(
-            TPLMgr.renderString("addtld", {
+          $('#contentholder').html(
+            TPLMgr.renderString('addtld', {
               tld: tlds[0],
-              categories: data.categories,
+              categories: data.categories
             })
           );
-          $("#tldinp").autocomplete({
-            source: tldsavailable,
+          $('#tldinp').autocomplete({
+            source: tldsavailable
           });
-          $("#categoryinp").change(function () {
+          $('#categoryinp').change(function () {
             let val = this.value;
-            if (val !== "") {
+            if (val !== '') {
               val = parseInt(val, 10);
               const category = data.categories.filter((cat) => {
                 return cat.id === val;
               })[0];
               tldsavailable = tlds.filter(function (value) {
-                return category.tlds.indexOf(value.replace(/^\./, "")) === -1;
+                return category.tlds.indexOf(value.replace(/^\./, '')) === -1;
               });
             } else {
               tldsavailable = tlds;
             }
             tldsavailable.sort();
-            $("#tldinp").autocomplete("option", { source: tldsavailable });
+            $('#tldinp').autocomplete('option', { source: tldsavailable });
           });
         },
         buttons: {
           Add: function () {
-            const selectedCat = parseInt($("#categoryinp").val(), 10);
-            const selectedTLD = $("#tldinp")
+            const selectedCat = parseInt($('#categoryinp').val(), 10);
+            const selectedTLD = $('#tldinp')
               .val()
               .toLowerCase()
-              .replace(/(^\.|\s)/g, "");
+              .replace(/(^\.|\s)/g, '');
             const category = data.categories.filter((cat) => {
               return cat.id === selectedCat;
             })[0];
-            $("#contentholder .form-group").first().removeClass("has-error");
-            $("#contentholder .form-group").last().removeClass("has-error");
+            $('#contentholder .form-group').first().removeClass('has-error');
+            $('#contentholder .form-group').last().removeClass('has-error');
             if (category === undefined) {
-              $("#contentholder .form-group").first().addClass("has-error");
+              $('#contentholder .form-group').first().addClass('has-error');
               return;
             }
             const tldlist = category.tlds;
             const tldsav = tldsavailable.map((tld) => {
-              return tld.replace(/\./, "");
+              return tld.replace(/\./, '');
             });
             // if invalid input     || already part of that category       || tld not available / configured
             if (
@@ -720,11 +718,11 @@ function initAddTLD() {
               tldlist.indexOf(selectedTLD) !== -1 ||
               tldsav.indexOf(selectedTLD) === -1
             ) {
-              $("#contentholder .form-group").last().addClass("has-error");
+              $('#contentholder .form-group').last().addClass('has-error');
               return;
             }
             tldlist.unshift(selectedTLD);
-            $(this).dialog("close");
+            $(this).dialog('close');
 
             // if it is part of category "Not Assigned"
             const g = getTLDGridByCategory(selectedCat);
@@ -737,49 +735,49 @@ function initAddTLD() {
                 return mytld !== selectedTLD;
               });
               const item = nagrid.getItems().filter(function (i) {
-                return $(i.getElement()).data("tld") === selectedTLD;
+                return $(i.getElement()).data('tld') === selectedTLD;
               })[0];
-              $(item.getElement()).data("category", -1);
+              $(item.getElement()).data('category', -1);
               nagrid.send(item, g, 0);
-              g._emit("dragEnd", item);
+              g._emit('dragEnd', item);
             } else {
               // not found, create an new item and add it
-              $("#loading").show();
+              $('#loading').show();
               $.ajax({
-                url: "?module=ispapidomaincheck&action=updatecategory",
+                url: '?module=ispapidomaincheck&action=updatecategory',
                 data: {
                   category: selectedCat,
-                  tlds: tldlist,
+                  tlds: tldlist
                 },
-                type: "POST",
-                dataType: "json",
+                type: 'POST',
+                dataType: 'json'
               })
                 .done(function (d) {
-                  $("#loading").hide();
+                  $('#loading').hide();
                   if (d.success) {
                     category.tlds = tldlist;
                     const $el = TPLMgr.renderPrepend(
                       `.tldgrid[data-category="${selectedCat}"]`,
-                      "tldgriditem",
+                      'tldgriditem',
                       selectedTLD
                     );
                     g.add($el[0], { index: 0 });
                     g.refreshItems().layout();
-                    infoOut(d, d.msg, "Action successful!");
+                    infoOut(d, d.msg, 'Action successful!');
                     return;
                   }
-                  infoOut(d, "Failed to update the category.");
+                  infoOut(d, 'Failed to update the category.');
                 })
                 .fail(function (d) {
-                  $("#loading").hide();
-                  infoOut(d, "Failed to update the category.");
+                  $('#loading').hide();
+                  infoOut(d, 'Failed to update the category.');
                 });
             }
           },
           Cancel: function () {
-            $(this).dialog("close");
-          },
-        },
+            $(this).dialog('close');
+          }
+        }
       });
     });
 }
@@ -787,7 +785,7 @@ function initAddTLD() {
 /**
  * Update Grid "Not Assigned"
  */
-function updateNACategory() {
+function updateNACategory () {
   if (!nagrid) {
     return;
   }
@@ -795,17 +793,17 @@ function updateNACategory() {
   const items = nagrid.getItems();
   if (items.length) {
     items.forEach((i) => {
-      $(i.getElement()).find(".droptld").hide();
+      $(i.getElement()).find('.droptld').hide();
     });
-    maingrid.show($(eL).closest(".item")[0], { instant: true });
+    maingrid.show($(eL).closest('.item')[0], { instant: true });
   } else {
-    maingrid.hide($(eL).closest(".item")[0], { instant: true });
+    maingrid.hide($(eL).closest('.item')[0], { instant: true });
   }
 }
 
-function sortItemsByPriority(a, b) {
-  const tldA = $(a.getElement()).data("tld");
-  const tldB = $(b.getElement()).data("tld");
+function sortItemsByPriority (a, b) {
+  const tldA = $(a.getElement()).data('tld');
+  const tldB = $(b.getElement()).data('tld');
   const idxA = data.alltlds.indexOf(tldA);
   const idxB = data.alltlds.indexOf(tldB);
   return idxA - idxB;
@@ -816,7 +814,7 @@ function sortItemsByPriority(a, b) {
  * @param elem the html element that covers the grid dom
  * @param prepend if the grid should be at the beginning. by default at the end.
  */
-function addTLDGrid(elem, prepend) {
+function addTLDGrid (elem, prepend) {
   const tldgrid = new Muuri(elem, {
     layout: function (items, width, height) {
       if (items && items.length) {
@@ -825,80 +823,80 @@ function addTLDGrid(elem, prepend) {
       }
       return packer.getLayout(items, width, height);
     },
-    items: ".tldgrid-item",
+    items: '.tldgrid-item',
     layoutDuration: 400,
-    layoutEasing: "ease",
+    layoutEasing: 'ease',
     dragEnabled: true,
     dragSort: function () {
       return tldgrids.filter((g) => {
         // not allowed to drag into category "Not assigned"
-        return $(g.getElement()).data("category") !== -1;
+        return $(g.getElement()).data('category') !== -1;
       });
     },
     dragSortInterval: 0,
     // don't change the below, or tldgrid-item might be invisible when dragging
     dragContainer: document.body,
     dragReleaseDuration: 400,
-    dragReleaseEasing: "ease",
+    dragReleaseEasing: 'ease',
     dragStartPredicate: function (item, event) {
       const $t = $(event.target);
-      if (!event.isFinal && $t.hasClass("droptld")) {
+      if (!event.isFinal && $t.hasClass('droptld')) {
         dropTLD(item);
         return false;
       }
       return Muuri.ItemDrag.defaultStartPredicate(item, event, {
         distance: 10,
-        delay: 50,
+        delay: 50
       });
     },
     dragPlaceholder: {
       enabled: true,
       duration: 300,
-      easing: "ease",
+      easing: 'ease',
       createElement: null,
       onCreate: null,
-      onRemove: null,
-    },
+      onRemove: null
+    }
   })
-    .on("dragStart", function (item) {
+    .on('dragStart', function (item) {
       ++dragCounter;
-      docElem.classList.add("dragging");
+      docElem.classList.add('dragging');
       $(item.getElement()).data(
-        "category",
-        $(item.getGrid().getElement()).data("category")
+        'category',
+        $(item.getGrid().getElement()).data('category')
       );
       $(item.getElement()).css({
-        width: item.getWidth() + "px",
-        height: item.getHeight() + "px",
+        width: item.getWidth() + 'px',
+        height: item.getHeight() + 'px'
       });
     })
-    .on("dragEnd", function (item) {
+    .on('dragEnd', function (item) {
       if (--dragCounter < 1) {
-        docElem.classList.remove("dragging");
+        docElem.classList.remove('dragging');
       }
       const $iEL = $(item.getElement());
       const grid = item.getGrid();
-      const catTo = $(grid.getElement()).data("category");
-      const catFrom = $iEL.data("category");
-      $iEL.removeData("category");
+      const catTo = $(grid.getElement()).data('category');
+      const catFrom = $iEL.data('category');
+      $iEL.removeData('category');
       const data = {
         item: item,
         toGrid: grid,
         toGridId: catTo,
-        fromGridId: catFrom,
+        fromGridId: catFrom
       };
       $iEL.css({
-        width: "",
-        height: "",
+        width: '',
+        height: ''
       });
       data.fromGrid = catTo === catFrom ? grid : getTLDGridByCategory(catFrom);
       saveCategoryChanges(data);
     })
-    .on("layoutStart", function () {
+    .on('layoutStart', function () {
       // necessary to repaint after dragging to another category
       maingrid.refreshItems().layout();
     });
-  if ($(elem).data("category") === -1) {
+  if ($(elem).data('category') === -1) {
     // initialize global var
     nagrid = tldgrid;
   }
@@ -913,23 +911,23 @@ function addTLDGrid(elem, prepend) {
 /**
  * update lookup configuration output in DOM
  */
-function updateLookupConfigurationHTML() {
-  $("#cfgsuggestionstatus").text(data.suggestionsOn ? "ON" : "OFF");
+function updateLookupConfigurationHTML () {
+  $('#cfgsuggestionstatus').text(data.suggestionsOn ? 'ON' : 'OFF');
 }
 
 /**
  * update lookup registrar output in DOM
  */
-function updateLookupRegistrarHTML() {
-  const $lr = $("#cfglookupregistrar");
-  if (data.lookupRegistrar === "ispapi") {
-    $lr.text("IS");
-    $lr.removeClass("label-danger");
-    $lr.addClass("label label-success");
+function updateLookupRegistrarHTML () {
+  const $lr = $('#cfglookupregistrar');
+  if (data.lookupRegistrar === 'ispapi') {
+    $lr.text('IS');
+    $lr.removeClass('label-danger');
+    $lr.addClass('label label-success');
   } else {
-    $lr.text("IS NOT");
-    $lr.removeClass("label-success");
-    $lr.addClass("label label-danger");
+    $lr.text('IS NOT');
+    $lr.removeClass('label-success');
+    $lr.addClass('label label-danger');
   }
 }
 
@@ -937,45 +935,45 @@ function updateLookupRegistrarHTML() {
  * Overwrite Native JS set by WHMCS for submit button
  * in Lookup Configuration Dialog
  */
-function replaceLookupConfigurationDialogListeners() {
-  const submitButton = $("#btnSaveLookupConfiguration");
-  submitButton.off("click");
-  submitButton.on("click", function () {
-    const modalForm = $("#modalAjax").find("form");
-    $("#modalAjax .loader").show();
+function replaceLookupConfigurationDialogListeners () {
+  const submitButton = $('#btnSaveLookupConfiguration');
+  submitButton.off('click');
+  submitButton.on('click', function () {
+    const modalForm = $('#modalAjax').find('form');
+    $('#modalAjax .loader').show();
     $.post(
-      modalForm.attr("action"),
+      modalForm.attr('action'),
       modalForm.serialize(),
       function (d) {
         if (d.successMsg) {
           const selector =
             'input[type="checkbox"][name="providerSettings[Registrarispapi][suggestions]"]';
-          data.suggestionsOn = modalForm.find(selector).prop("checked") ? 1 : 0;
+          data.suggestionsOn = modalForm.find(selector).prop('checked') ? 1 : 0;
           updateLookupConfigurationHTML();
         }
         updateAjaxModal(d);
       },
-      "json"
+      'json'
     ).fail(function (xhr) {
       let data = xhr.responseJSON;
       const genericErrorMsg =
-        "An error occurred while communicating with the server. Please try again.";
+        'An error occurred while communicating with the server. Please try again.';
       if (data && data.data) {
         data = data.data;
         if (data.errorMsg) {
           $.growl.warning({
             title: data.errorMsgTitle,
-            message: data.errorMsg,
+            message: data.errorMsg
           });
         } else if (data.data.body) {
-          $("#modalAjax .modal-body").html(data.body);
+          $('#modalAjax .modal-body').html(data.body);
         } else {
-          $("#modalAjax .modal-body").html(genericErrorMsg);
+          $('#modalAjax .modal-body').html(genericErrorMsg);
         }
       } else {
-        $("#modalAjax .modal-body").html(genericErrorMsg);
+        $('#modalAjax .modal-body').html(genericErrorMsg);
       }
-      $("#modalAjax .loader").fadeOut();
+      $('#modalAjax .loader').fadeOut();
     });
   });
 }
@@ -984,32 +982,32 @@ function replaceLookupConfigurationDialogListeners() {
  * Overwrite Native JS set by WHMCS for submit button
  * in Lookup Provider Dialog
  */
-function replaceLookupProviderDialogListeners() {
-  $(document).off("click", ".lookup-provider, .lookup-providers-registrars a");
+function replaceLookupProviderDialogListeners () {
+  $(document).off('click', '.lookup-provider, .lookup-providers-registrars a');
   $(document).on(
-    "click",
-    ".lookup-provider, .lookup-providers-registrars a",
+    'click',
+    '.lookup-provider, .lookup-providers-registrars a',
     function () {
       const self = $(this);
-      const provider = self.data("provider");
+      const provider = self.data('provider');
 
-      $(".lookup-provider").removeClass("active");
-      self.addClass("active");
+      $('.lookup-provider').removeClass('active');
+      self.addClass('active');
 
-      if (provider === "Registrar") {
-        if ($(".lookup-providers-registrars").hasClass("hidden")) {
-          $(".lookup-providers-registrars").hide().removeClass("hidden");
+      if (provider === 'Registrar') {
+        if ($('.lookup-providers-registrars').hasClass('hidden')) {
+          $('.lookup-providers-registrars').hide().removeClass('hidden');
         }
-        $(".lookup-providers-registrars").slideDown();
+        $('.lookup-providers-registrars').slideDown();
         return;
       }
 
       WHMCS.http.jqClient.post(
-        "configdomains.php",
+        'configdomains.php',
         {
-          token: $('#frmmynotes input[name="token"]').val(),
+          token: csrfToken,
           provider: provider,
-          action: "lookup-provider",
+          action: 'lookup-provider'
         },
         function (d) {
           if (d.successMsg) {
@@ -1018,16 +1016,16 @@ function replaceLookupProviderDialogListeners() {
             updateLookupRegistrarHTML();
             $.growl.notice({
               title: d.successMsgTitle,
-              message: d.successMsg,
+              message: d.successMsg
             });
           } else {
             $.growl.warning({
               title: d.errorMsgTitle,
-              message: d.errorMsg,
+              message: d.errorMsg
             });
           }
         },
-        "json"
+        'json'
       );
     }
   );
@@ -1038,10 +1036,10 @@ function replaceLookupProviderDialogListeners() {
  *
  * @return list of category ids
  */
-function getDefaultSelectedCategories() {
+function getDefaultSelectedCategories () {
   const actives = [];
-  $("#categoriescont >li.active").each(function () {
-    actives.push(parseInt($(this).attr("id").replace(/^s_/, ""), 10));
+  $('#categoriescont >li.active').each(function () {
+    actives.push(parseInt($(this).attr('id').replace(/^s_/, ''), 10));
   });
   return actives;
 }
@@ -1049,25 +1047,25 @@ function getDefaultSelectedCategories() {
 /**
  * Save Configuration `Default Active Categories`
  */
-function saveDefaultCategories(event, categories) {
+function saveDefaultCategories (event, categories) {
   const actives = categories || getDefaultSelectedCategories();
-  $("#loading").show();
+  $('#loading').show();
   $.ajax({
-    url: "?module=ispapidomaincheck&action=savedefaultcategories",
-    type: "POST",
+    url: '?module=ispapidomaincheck&action=savedefaultcategories',
+    type: 'POST',
     data: {
-      categories: actives,
+      categories: actives
     },
-    dataType: "json",
+    dataType: 'json'
   })
     .done(function (d) {
-      $("#loading").hide();
+      $('#loading').hide();
       data.defaultActiveCategories = actives;
-      infoOut(d, d.msg, "Action successful!");
+      infoOut(d, d.msg, 'Action successful!');
     })
     .fail(function (d) {
-      $("#loading").hide();
-      infoOut(d, "Setting update failed.");
+      $('#loading').hide();
+      infoOut(d, 'Setting update failed.');
     });
 }
 
@@ -1076,25 +1074,25 @@ function saveDefaultCategories(event, categories) {
  * @param event the triggered event
  * @param state the checkbox state (true/false)
  */
-function saveSettingTakenDomains(event, state) {
+function saveSettingTakenDomains (event, state) {
   const val = state ? 1 : 0;
-  $("#loading").show();
+  $('#loading').show();
   $.ajax({
-    url: "?module=ispapidomaincheck&action=savetakendomains",
-    type: "POST",
+    url: '?module=ispapidomaincheck&action=savetakendomains',
+    type: 'POST',
     data: {
-      takenDomains: val,
+      takenDomains: val
     },
-    dataType: "json",
+    dataType: 'json'
   })
     .done(function (d) {
-      $("#loading").hide();
+      $('#loading').hide();
       data.takenDomains = val;
-      infoOut(d, d.msg, "Action successful!");
+      infoOut(d, d.msg, 'Action successful!');
     })
     .fail(function (d) {
-      $("#loading").hide();
-      infoOut(d, "Setting update failed.");
+      $('#loading').hide();
+      infoOut(d, 'Setting update failed.');
     });
 }
 
@@ -1103,42 +1101,42 @@ function saveSettingTakenDomains(event, state) {
  * @param event the triggered event
  * @param state the checkbox state (true/false)
  */
-function saveSettingPremiumDomains(event, state) {
+function saveSettingPremiumDomains (event, state) {
   const val = state ? 1 : 0;
-  $("#loading").show();
+  $('#loading').show();
   $.ajax({
-    url: "?module=ispapidomaincheck&action=savepremiumdomains",
-    type: "POST",
+    url: '?module=ispapidomaincheck&action=savepremiumdomains',
+    type: 'POST',
     data: {
-      premiumDomains: val,
+      premiumDomains: val
     },
-    dataType: "json",
+    dataType: 'json'
   })
     .done(function (d) {
-      $("#loading").hide();
+      $('#loading').hide();
       data.premiumDomains = val;
-      infoOut(d, d.msg, "Action successful!");
+      infoOut(d, d.msg, 'Action successful!');
     })
     .fail(function (d) {
-      $("#loading").hide();
-      infoOut(d, "Setting update failed.");
+      $('#loading').hide();
+      infoOut(d, 'Setting update failed.');
     });
 }
 
 /**
  * Generate Content of Tab `Categories`
  */
-function generateTab2() {
+function generateTab2 () {
   initImport();
   initAddCategory();
   initAddTLD();
 
-  $("#maingrid").empty();
+  $('#maingrid').empty();
 
   // align categories correctly
-  maingrid = new Muuri(".grid", {
+  maingrid = new Muuri('.grid', {
     layoutDuration: 100,
-    layoutEasing: "ease",
+    layoutEasing: 'ease',
     dragEnabled: true,
     dragSortInterval: 0,
     dragStartPredicate: function (item, event) {
@@ -1146,22 +1144,22 @@ function generateTab2() {
       if (maingrid.getItems().indexOf(item) === 0) {
         return false;
       }
-      return $(event.target).hasClass("panel-heading");
+      return $(event.target).hasClass('panel-heading');
     },
     dragSortPredicate: function (item) {
       const result = Muuri.ItemDrag.defaultSortPredicate(item, {
-        action: "move",
-        threshold: 50,
+        action: 'move',
+        threshold: 50
       });
       return result && result.index === 0 ? false : result;
     },
     dragReleaseDuration: 400,
-    dragReleaseEasing: "ease",
+    dragReleaseEasing: 'ease'
   })
-    .on("layoutStart", function () {
+    .on('layoutStart', function () {
       updateNACategory();
     })
-    .on("layoutEnd", function () {
+    .on('layoutEnd', function () {
       initDropCategory();
     });
   // add categories
@@ -1171,15 +1169,15 @@ function generateTab2() {
   addCategory(
     {
       id: -1, // not existing id
-      name: "Not assigned",
-      tlds: data.notassignedtlds,
+      name: 'Not assigned',
+      tlds: data.notassignedtlds
     },
     0
   );
 
   // make tlds draggable
   tldgrids = [];
-  $(".tldgrid").each(function () {
+  $('.tldgrid').each(function () {
     addTLDGrid(this, false);
   });
   maingrid.refreshItems().layout();
@@ -1188,66 +1186,66 @@ function generateTab2() {
 /**
  * (Re-)Gemerate Block 'By-default active Categories' of Tab 1
  */
-function generateTab1Block1() {
-  const $uri = $("#genurl");
+function generateTab1Block1 () {
+  const $uri = $('#genurl');
   let url = new URL(window.location.href);
   const baseurl = `${url.origin}${url.pathname.replace(
     /[^/]+\/[^/]+$/,
-    ""
+    ''
   )}mydomainchecker.php?search=mydomain.com&`;
   url = `${baseurl}cat=${data.defaultActiveCategories}`;
   $uri.text(url);
-  $uri.prop("href", url);
-  const $eL = $(".catcontainer");
+  $uri.prop('href', url);
+  const $eL = $('.catcontainer');
   $eL.empty();
-  TPLMgr.renderAppend(".catcontainer", "activecats", {
+  TPLMgr.renderAppend('.catcontainer', 'activecats', {
     categories: data.categories,
     cssclass: function () {
       return data.defaultActiveCategories.indexOf(this.id) === -1
-        ? ""
-        : " active";
-    },
+        ? ''
+        : ' active';
+    }
   });
   $eL
-    .find(".subCat")
-    .off("click")
+    .find('.subCat')
+    .off('click')
     .click(function () {
-      $(this).toggleClass("active");
+      $(this).toggleClass('active');
       const url = `${baseurl}cat=${getDefaultSelectedCategories()}`;
       $uri.text(url);
-      $uri.prop("href", url);
+      $uri.prop('href', url);
     });
-  $("#savedefaultcats").off("click").click(saveDefaultCategories);
+  $('#savedefaultcats').off('click').click(saveDefaultCategories);
 }
 
 /**
  * Generate Content of Tab `Settings`
  */
-function generateTab1() {
+function generateTab1 () {
   // BLOCK #1 (Default Active Categories)
   generateTab1Block1();
 
   // BLOCK #2 (Display Taken Domains)
-  $("#toggle-takendomains")
+  $('#toggle-takendomains')
     .off()
     .bootstrapSwitch({
       state: data.takenDomains === 1,
-      size: "small",
-      onColor: "success",
-      offColor: "default",
+      size: 'small',
+      onColor: 'success',
+      offColor: 'default'
     })
-    .on("switchChange.bootstrapSwitch", saveSettingTakenDomains);
+    .on('switchChange.bootstrapSwitch', saveSettingTakenDomains);
 
   // BLOCK #3 (Display Premium Domains)
-  $("#toggle-premiumdomains")
+  $('#toggle-premiumdomains')
     .off()
     .bootstrapSwitch({
       state: data.premiumDomains === 1,
-      size: "small",
-      onColor: "success",
-      offColor: "default",
+      size: 'small',
+      onColor: 'success',
+      offColor: 'default'
     })
-    .on("switchChange.bootstrapSwitch", saveSettingPremiumDomains);
+    .on('switchChange.bootstrapSwitch', saveSettingPremiumDomains);
 
   // BLOCK #4 (Lookup Provider + Configuration)
   updateLookupConfigurationHTML();
@@ -1256,11 +1254,11 @@ function generateTab1() {
   // Change Lookup Provider & Configuration Modal - JS listener override
   // Necessary as we need to know the result of the operation
   // and the target url was wrong for the data post (lookup provider dialog).
-  $("#configureLookupProvider").click(function () {
+  $('#configureLookupProvider').click(function () {
     const observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
         if (!mutation.addedNodes) return;
-        if ($("#btnSaveLookupConfiguration").length) {
+        if ($('#btnSaveLookupConfiguration').length) {
           replaceLookupConfigurationDialogListeners();
           observer.disconnect();
         }
@@ -1270,14 +1268,14 @@ function generateTab1() {
       childList: true,
       subtree: true,
       attributes: false,
-      characterData: false,
+      characterData: false
     });
   });
-  $("#changeLookupProvider").click(function () {
+  $('#changeLookupProvider').click(function () {
     const observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
         if (!mutation.addedNodes) return;
-        if ($(".lookup-providers-registrars").length) {
+        if ($('.lookup-providers-registrars').length) {
           replaceLookupProviderDialogListeners();
           observer.disconnect();
         }
@@ -1287,28 +1285,28 @@ function generateTab1() {
       childList: true,
       subtree: true,
       attributes: false,
-      characterData: false,
+      characterData: false
     });
   });
-  $("#cfgaccordion").accordion({ heightStyle: "content" });
+  $('#cfgaccordion').accordion({ heightStyle: 'content' });
 }
 
 /**
  * Generate initial View
  * @param d configuration data response
  */
-function generate(d) {
-  $("#loading").hide();
+function generate (d) {
+  $('#loading').hide();
 
   data = d;
-  if (!Object.prototype.hasOwnProperty.call(data, "categories")) {
-    infoOut(data, "Error loading configuration");
-    $("#tabs").remove();
-    TPLMgr.renderAppend("#contentarea", "loadcfgerror");
+  if (!Object.prototype.hasOwnProperty.call(data, 'categories')) {
+    infoOut(data, 'Error loading configuration');
+    $('#tabs').remove();
+    TPLMgr.renderAppend('#contentarea', 'loadcfgerror');
     return;
   }
   $(document).ready(() => {
-    $("#tabs").show();
+    $('#tabs').show();
     // render tabs step by step
     // Tab #1
     generateTab1();
@@ -1321,33 +1319,33 @@ function generate(d) {
  * @param cat categoryid
  * @param tlds tld list
  */
-function saveCategory(cat, tlds) {
+function saveCategory (cat, tlds) {
   if (cat === -1) {
     // NOT ASSIGNED
     if (!tlds.length) {
-      maingrid.hide($(nagrid.getElement()).closest(".item")[0], {
-        instant: true,
+      maingrid.hide($(nagrid.getElement()).closest('.item')[0], {
+        instant: true
       });
     }
     return;
   }
-  $("#loading").show();
+  $('#loading').show();
   $.ajax({
-    url: "?module=ispapidomaincheck&action=updatecategory",
-    type: "POST",
+    url: '?module=ispapidomaincheck&action=updatecategory',
+    type: 'POST',
     data: {
       category: cat,
-      tlds: tlds, // $ will leave this out when empty
+      tlds: tlds // $ will leave this out when empty
     },
-    dataType: "json",
+    dataType: 'json'
   })
     .done(function (d) {
-      $("#loading").hide();
-      infoOut(d, d.msg, "Action successful!");
+      $('#loading').hide();
+      infoOut(d, d.msg, 'Action successful!');
     })
     .fail(function (d) {
-      $("#loading").hide();
-      infoOut(d, "Failed to update the category.");
+      $('#loading').hide();
+      infoOut(d, 'Failed to update the category.');
     });
 }
 
@@ -1355,18 +1353,18 @@ function saveCategory(cat, tlds) {
  * Prepare saving tldgrid changes (remove, move)
  * @param data object covering the action data fromGrid, fromGridId, toGrid, toGridId, item, action
  */
-function saveCategoryChanges(data) {
+function saveCategoryChanges (data) {
   let tlds = [];
   const $iEL = $(data.item.getElement());
-  const mytld = $iEL.data("tld");
+  const mytld = $iEL.data('tld');
   const foundIndexes = [];
-  $iEL.data("category", data.toGridId);
+  $iEL.data('category', data.toGridId);
   if (data.toGridId !== -1) {
     // naGrid
-    $iEL.find(".droptld").show();
+    $iEL.find('.droptld').show();
   }
   data.toGrid.getItems().forEach((item) => {
-    const tld = $(item.getElement()).data("tld");
+    const tld = $(item.getElement()).data('tld');
     if (tld === mytld) {
       foundIndexes.push(tlds.length);
     }
@@ -1382,7 +1380,7 @@ function saveCategoryChanges(data) {
   saveCategory(data.toGridId, tlds); // this won't save for naGrid
   tlds = [];
   data.fromGrid.getItems().forEach((item) => {
-    tlds.push($(item.getElement()).data("tld"));
+    tlds.push($(item.getElement()).data('tld'));
   });
   saveCategory(data.fromGridId, tlds); // this won't save for naGrid
 
@@ -1394,11 +1392,11 @@ function saveCategoryChanges(data) {
 /**
  * load configuration data from PHP
  */
-function loadConfig() {
+function loadConfig () {
   $.ajax({
-    url: "?module=ispapidomaincheck&action=loadconfiguration",
-    type: "GET",
-    dataType: "json",
+    url: '?module=ispapidomaincheck&action=loadconfiguration',
+    type: 'GET',
+    dataType: 'json'
   }).then(
     (d) => {
       generate(d);
@@ -1420,27 +1418,27 @@ $(document).ready(() => {
     // load templates
     await TPLMgr.loadTemplates(
       [
-        "activecats",
-        "import",
-        "tldgrid",
-        "tldgriditem",
-        "loading",
-        "help",
-        "loadcfgerror",
-        "addtld",
-        "addcategory",
-        "droptld",
-        "dropcategory",
+        'activecats',
+        'import',
+        'tldgrid',
+        'tldgriditem',
+        'loading',
+        'help',
+        'loadcfgerror',
+        'addtld',
+        'addcategory',
+        'droptld',
+        'dropcategory'
       ],
-      "Admin"
+      'Admin'
     );
     // init tabs
     const generated = {};
-    $("#tabs").tabs({
+    $('#tabs').tabs({
       beforeActivate: function (event, ui) {
         const idx = ui.newTab.index();
         if (idx === 1 && !generated[idx]) {
-          $("#loading").show();
+          $('#loading').show();
         }
       },
       activate: function (event, ui) {
@@ -1448,12 +1446,12 @@ $(document).ready(() => {
         if (idx === 1 && !generated[idx]) {
           generateTab2();
           generated[idx] = true;
-          $("#loading").hide();
+          $('#loading').hide();
         }
-      },
+      }
     });
     // modify title to save space
-    TPLMgr.renderPrepend("#contentarea >div >h1", "help", {});
-    TPLMgr.renderAppend("#contentarea >div >h1", "loading", {});
+    TPLMgr.renderPrepend('#contentarea >div >h1', 'help', {});
+    TPLMgr.renderAppend('#contentarea >div >h1', 'loading', {});
   })();
 });

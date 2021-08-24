@@ -8,7 +8,7 @@ const TPLMgr = {
       // --- https://github.com/jonnyreeves/jquery-Mustache#usage
       // --- https://github.com/janl/mustache.js
       const tplpath = `${wr}/modules/addons/ispapidomaincheck/lib/${type}/templates/`;
-      const tplext = ".mustache";
+      const tplext = '.mustache';
       let count = tpls.length;
       if (!count) {
         resolve();
@@ -39,12 +39,12 @@ const TPLMgr = {
   renderPrepend: function (selector, tpl, data) {
     $.extend(data, { translations: translations });
     return $(selector)
-      .mustache(tpl, data, { method: "prepend" })
+      .mustache(tpl, data, { method: 'prepend' })
       .children()
       .first();
   },
   renderString: function (tpl, data) {
     $.extend(data, { translations: translations });
     return $.Mustache.render(tpl, data);
-  },
+  }
 };

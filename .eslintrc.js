@@ -1,4 +1,7 @@
 module.exports = {
+  rules: {
+    semi: ['error', 'always']
+  },
   env: {
     mocha: true,
     node: true,
@@ -28,4 +31,4 @@ module.exports = {
   plugins: [
     'markdown'
   ]
-}
+};
