@@ -1,19 +1,19 @@
-const { series, src, dest, watch } = require("gulp");
-const concat = require("gulp-concat");
-//const sourcemaps = require("gulp-sourcemaps");
-const clean = require("gulp-clean");
-const zip = require("gulp-zip");
-const tar = require("gulp-tar");
-const gzip = require("gulp-gzip");
-const exec = require("util").promisify(require("child_process").exec);
-const cfg = require("./gulpfile.json");
-const rename = require("gulp-rename");
-const esbuild = require("gulp-esbuild");
+const { series, src, dest, watch } = require('gulp');
+const concat = require('gulp-concat');
+// const sourcemaps = require("gulp-sourcemaps");
+const clean = require('gulp-clean');
+const zip = require('gulp-zip');
+const tar = require('gulp-tar');
+const gzip = require('gulp-gzip');
+const exec = require('util').promisify(require('child_process').exec);
+const cfg = require('./gulpfile.json');
+const rename = require('gulp-rename');
+const esbuild = require('gulp-esbuild');
 
 /**
  * Perform PHP Linting
  */
-async function doLint() {
+async function doLint () {
   // these may fail, it's fine
   try {
     await exec(`${cfg.phpcsfixcmd} ${cfg.phpcsparams}`);
@@ -34,11 +34,11 @@ async function doLint() {
  * cleanup old build folder / archive
  * @return stream
  */
-function doDistClean() {
+function doDistClean () {
   return src([cfg.archiveBuildPath, `${cfg.archiveFileName}-latest.zip`], {
     read: false,
-    base: ".",
-    allowEmpty: true,
+    base: '.',
+    allowEmpty: true
   }).pipe(clean({ force: true }));
 }
 
@@ -46,8 +46,8 @@ function doDistClean() {
  * Copy all files/folders to build folder
  * @return stream
  */
-function doCopyFiles() {
-  return src(cfg.filesForArchive, { base: "." }).pipe(
+function doCopyFiles () {
+  return src(cfg.filesForArchive, { base: '.' }).pipe(
     dest(cfg.archiveBuildPath)
   );
 }
@@ -56,11 +56,11 @@ function doCopyFiles() {
  * Clean up files
  * @return stream
  */
-function doFullClean() {
+function doFullClean () {
   return src(cfg.filesForCleanup, {
     read: false,
-    base: ".",
-    allowEmpty: true,
+    base: '.',
+    allowEmpty: true
   }).pipe(clean({ force: true }));
 }
 
@@ -68,48 +68,48 @@ function doFullClean() {
  * build latest zip archive
  * @return stream
  */
-function doGitZip() {
+function doGitZip () {
   return src(`./${cfg.archiveBuildPath}/**`)
     .pipe(zip(`${cfg.archiveFileName}-latest.zip`))
-    .pipe(dest("."));
+    .pipe(dest('.'));
 }
 
 /**
  * build zip archive
  * @return stream
  */
-function doZip() {
+function doZip () {
   return src(`./${cfg.archiveBuildPath}/**`)
     .pipe(zip(`${cfg.archiveFileName}.zip`))
-    .pipe(dest("./pkg"));
+    .pipe(dest('./pkg'));
 }
 
 /**
  * build tar archive
  * @return stream
  */
-function doTar() {
+function doTar () {
   return src(`./${cfg.archiveBuildPath}/**`)
     .pipe(tar(`${cfg.archiveFileName}.tar`))
     .pipe(gzip())
-    .pipe(dest("./pkg"));
+    .pipe(dest('./pkg'));
 }
 
 /**
  * Esbuild minify + bundle css and js files
  * @param {*} cb
  */
-function esbuildMinify(cb) {
+function esbuildMinify (cb) {
   cfg.minificationConfig.map(function (folder) {
-    return src(folder.dir + "@(*.all.js|*.all.css)")
+    return src(folder.dir + '@(*.all.js|*.all.css)')
       .pipe(
         esbuild({
-          minify: true,
+          minify: true
         })
       )
       .pipe(
         rename({
-          suffix: ".min",
+          suffix: '.min'
         })
       )
       .pipe(dest(folder.dir));
@@ -121,7 +121,7 @@ function esbuildMinify(cb) {
  * Concatinate css files
  * @param {*} cb
  */
-function cssConcatenation(cb) {
+function cssConcatenation (cb) {
   cfg.minificationConfig.map(function (folder) {
     return (
       src(
@@ -130,13 +130,13 @@ function cssConcatenation(cb) {
           return folder.dir + file;
         })
       )
-        //.pipe(sourcemaps.init())
+        // .pipe(sourcemaps.init())
         .pipe(
-          concat(folder.name + ".all.css").on("error", (error) =>
+          concat(folder.name + '.all.css').on('error', (error) =>
             console.log(error)
           )
         )
-        //.pipe(sourcemaps.write("."))
+        // .pipe(sourcemaps.write("."))
         .pipe(dest(folder.dir))
     );
   });
@@ -147,7 +147,7 @@ function cssConcatenation(cb) {
  * Concatinate js files
  * @param {*} cb
  */
-function jsConcatenation(cb) {
+function jsConcatenation (cb) {
   cfg.minificationConfig.map(function (folder) {
     return (
       src(
@@ -155,13 +155,13 @@ function jsConcatenation(cb) {
           return folder.dir + file;
         })
       )
-        //.pipe(sourcemaps.init())
+        // .pipe(sourcemaps.init())
         .pipe(
-          concat(folder.name + ".all.js").on("error", (error) =>
+          concat(folder.name + '.all.js').on('error', (error) =>
             console.log(error)
           )
         )
-        //.pipe(sourcemaps.write("."))
+        // .pipe(sourcemaps.write("."))
         .pipe(dest(folder.dir))
     );
   });
@@ -174,10 +174,10 @@ function jsConcatenation(cb) {
 exports.watcher = function () {
   watch(
     [
-      "**/assets/*.js",
-      "!**/assets/*@(.all|.min).js",
-      "**/assets/*.css",
-      "!**/assets/*@(.all|.min).css",
+      '**/assets/*.js',
+      '!**/assets/*@(.all|.min).js',
+      '**/assets/*.css',
+      '!**/assets/*@(.all|.min).css'
     ],
     { interval: 1000 },
     series(cssConcatenation, jsConcatenation, esbuildMinify)

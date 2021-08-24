@@ -648,8 +648,8 @@ const ShoppingCart = function () {
 ShoppingCart.prototype.load = async function () {
   try {
     this.items = await $.ajax({
-      url: "?action=getcartitems",
-      type: "GET",
+      url: '?action=getcartitems',
+      type: 'GET'
     });
     if (Array.isArray(this.items)) {
       // empty list
@@ -659,9 +659,9 @@ ShoppingCart.prototype.load = async function () {
     this.items = {};
   }
   if (Object.keys(this.items).length) {
-    $(".orderbutton").removeClass("hidden");
+    $('.orderbutton').removeClass('hidden');
   } else {
-    $(".orderbutton").addClass("hidden").off("click");
+    $('.orderbutton').addClass('hidden').off('click');
   }
 };
 ShoppingCart.prototype.getOrder = function (sr) {
@@ -679,8 +679,8 @@ ShoppingCart.prototype.addOrderPremium = function (sr, successmsg, errmsg) {
   $.ajax(
     `cart.php?a=checkDomain&token=${csrfToken}&domain=${row.IDN}&source&cartAddDomain&type=domain`,
     {
-      type: "GET",
-      dataType: "json",
+      type: 'GET',
+      dataType: 'json'
     }
   )
     .done((d) => {
@@ -695,40 +695,40 @@ ShoppingCart.prototype.addOrderDomain = function (sr, successmsg, errmsg) {
   $.post(
     `${wr}/cart.php`,
     {
-      a: "addToCart",
+      a: 'addToCart',
       domain: row.IDN,
       token: csrfToken,
       whois: 0,
-      sideorder: 0,
+      sideorder: 0
     },
-    "json"
+    'json'
   )
     .done(function (data) {
-      if (data.result !== "added") {
+      if (data.result !== 'added') {
         $.growl.error(errmsg);
         return;
       }
       // check if the chosen term is different to the lowest term
       // WHMCS creates the order using the lowest term
       // in that case update the order item accordingly
-      const termcfg = sr.getTermConfig("register");
-      const term = parseInt(row.element.find(".hxdata").data("term"), 10);
+      const termcfg = sr.getTermConfig('register');
+      const term = parseInt(row.element.find('.hxdata').data('term'), 10);
       if (term > termcfg.initialTerm) {
         $.post(
           `${wr}/cart.php`,
           {
-            a: "updateDomainPeriod",
+            a: 'updateDomainPeriod',
             domain: row.IDN,
             period: term,
-            token: csrfToken,
+            token: csrfToken
           },
-          "json"
+          'json'
         )
           .done(function (data) {
             const rows = data.domains.filter((d) => {
               return d.domain === row.IDN || d.domain === row.PC;
             });
-            if (rows.length && rows[0].regperiod === term + "") {
+            if (rows.length && rows[0].regperiod === term + '') {
               (async function () {
                 await cart.load();
                 sr.generate();
@@ -756,11 +756,11 @@ ShoppingCart.prototype.addOrderDomain = function (sr, successmsg, errmsg) {
 ShoppingCart.prototype.addOrder = function (sr) {
   const errmsg = {
     title: `${translations.error_occured}!`,
-    message: translations.error_addtocart,
+    message: translations.error_addtocart
   };
   const successmsg = {
     title: `${translations.success_occured}!`,
-    message: translations.success_addtocart,
+    message: translations.success_addtocart
   };
   // PREMIUM DOMAIN
   if (sr.data.premiumtype) {
@@ -768,7 +768,7 @@ ShoppingCart.prototype.addOrder = function (sr) {
     return;
   }
   // BACKORDER
-  if (sr.data.status === "TAKEN") {
+  if (sr.data.status === 'TAKEN') {
     this.addBackorder(sr);
     return;
   }
@@ -778,14 +778,14 @@ ShoppingCart.prototype.addOrder = function (sr) {
 ShoppingCart.prototype.removeOrder = function (sr) {
   const errmsg = {
     title: `${translations.error_occured}!`,
-    message: translations.error_removefromcart,
+    message: translations.error_removefromcart
   };
   const successmsg = {
     title: `${translations.success_occured}!`,
-    message: translations.success_removefromcart,
+    message: translations.success_removefromcart
   };
   // BACKORDER
-  if (sr.data.status === "TAKEN") {
+  if (sr.data.status === 'TAKEN') {
     this.deleteBackorder(sr);
     return;
   }
@@ -794,14 +794,14 @@ ShoppingCart.prototype.removeOrder = function (sr) {
   cart.removeOrderDomain(sr, successmsg, errmsg);
 };
 ShoppingCart.prototype.removeOrderDomain = function (sr, successmsg, errmsg) {
-  $.ajax("?action=deleteorder", {
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=utf-8",
+  $.ajax('?action=deleteorder', {
+    type: 'POST',
+    dataType: 'json',
+    contentType: 'application/json; charset=utf-8',
     data: JSON.stringify({
       PC: sr.data.PC,
-      IDN: sr.data.IDN,
-    }),
+      IDN: sr.data.IDN
+    })
   })
     .done((d) => {
       if (d.success) {
@@ -827,11 +827,11 @@ ShoppingCart.prototype.orderClickHandler = function (e) {
     return;
   }
   if (/^SPAN$/.test(e.target.nodeName)) {
-    if ($(e.target).hasClass("caret")) {
+    if ($(e.target).hasClass('caret')) {
       return;
     }
   }
-  if (e.data.action === "add") {
+  if (e.data.action === 'add') {
     this.addOrder(e.data.sr);
   } else {
     this.removeOrder(e.data.sr);
@@ -841,30 +841,30 @@ ShoppingCart.prototype.addBackorder = async function (sr) {
   // we can't process the backorder product through
   // the shopping cart as only in case a backorder
   // application succeeds, an invoice has to be created
-  await TPLMgr.loadTemplates(["modalboadd"], "Client");
-  TPLMgr.renderAppend("body", "modalboadd", {
+  await TPLMgr.loadTemplates(['modalboadd'], 'Client');
+  TPLMgr.renderAppend('body', 'modalboadd', {
     row: sr.data,
-    price: sr.data.element.find(".hxdata").text(),
+    price: sr.data.element.find('.hxdata').text()
   });
-  $("#backorderaddModal").modal({
-    backdrop: "static",
-    keyboard: false,
+  $('#backorderaddModal').modal({
+    backdrop: 'static',
+    keyboard: false
   });
-  $("#doCreateBackorder")
+  $('#doCreateBackorder')
     .off()
     .click(
       function () {
-        this.requestBackorderAction(sr, "Create", {
+        this.requestBackorderAction(sr, 'Create', {
           title: `${translations.success_occured}!`,
-          message: translations.backorder_created,
+          message: translations.backorder_created
         });
       }.bind(this)
     );
 };
 ShoppingCart.prototype.deleteBackorder = function (sr) {
-  this.requestBackorderAction(sr, "Delete", {
+  this.requestBackorderAction(sr, 'Delete', {
     title: `${translations.success_occured}!`,
-    message: translations.backorder_deleted,
+    message: translations.backorder_deleted
   });
 };
 ShoppingCart.prototype.requestBackorderAction = function (
@@ -877,16 +877,16 @@ ShoppingCart.prototype.requestBackorderAction = function (
     {
       COMMAND: `${action}Backorder`,
       DOMAIN: sr.data.PC,
-      TYPE: "FULL",
+      TYPE: 'FULL'
     },
-    "json"
+    'json'
   )
     .done((data) => {
       // TODO: why do we have to parse this? BUG:
       // (looks like response is text/html and not json!)
       data = JSON.parse(data);
       if (data.CODE === 200) {
-        if (action === "Create") {
+        if (action === 'Create') {
           sr.data.backordered = true;
           ds.backorders[sr.data.PC] = true; // TODO: data.PROPERTY.ID[0]
         } else {
@@ -916,7 +916,7 @@ const TPLMgr = {
       // --- https://github.com/jonnyreeves/jquery-Mustache#usage
       // --- https://github.com/janl/mustache.js
       const tplpath = `${wr}/modules/addons/ispapidomaincheck/lib/${type}/templates/`;
-      const tplext = ".mustache";
+      const tplext = '.mustache';
       let count = tpls.length;
       if (!count) {
         resolve();
@@ -947,21 +947,21 @@ const TPLMgr = {
   renderPrepend: function (selector, tpl, data) {
     $.extend(data, { translations: translations });
     return $(selector)
-      .mustache(tpl, data, { method: "prepend" })
+      .mustache(tpl, data, { method: 'prepend' })
       .children()
       .first();
   },
   renderString: function (tpl, data) {
     $.extend(data, { translations: translations });
     return $.Mustache.render(tpl, data);
-  },
+  }
 };
 
 const SearchResult = function (row) {
   this.data = row;
   this.data.isBackorderable = false;
-  if (this.data.status === "TAKEN") {
-    if (Object.prototype.hasOwnProperty.call(this.data.pricing, "backorder")) {
+  if (this.data.status === 'TAKEN') {
+    if (Object.prototype.hasOwnProperty.call(this.data.pricing, 'backorder')) {
       this.data.isBackorderable = true;
     }
     // FEAT not yet supported in backorder module
@@ -976,7 +976,7 @@ const SearchResult = function (row) {
   }
 };
 SearchResult.prototype.fadeOut = function () {
-  this.data.element.fadeOut("slow", "linear");
+  this.data.element.fadeOut('slow', 'linear');
 };
 SearchResult.prototype.fadeIn = function () {
   this.data.element.fadeIn();
@@ -986,7 +986,7 @@ SearchResult.prototype.getTermConfig = function (key) {
     return null;
   }
   const cfg = {
-    terms: Object.keys(this.data.pricing[key]).sort(),
+    terms: Object.keys(this.data.pricing[key]).sort()
   };
   cfg.initialTerm = cfg.terms[0];
   return cfg;
@@ -1000,11 +1000,11 @@ SearchResult.prototype.show = function () {
 SearchResult.prototype.applyClickHandler = function () {
   const row = this.data;
   row.element.off();
-  if (row.element.hasClass("clickable")) {
+  if (row.element.hasClass('clickable')) {
     row.element.click(
       {
-        action: row.order || row.backordered ? "remove" : "add",
-        sr: this,
+        action: row.order || row.backordered ? 'remove' : 'add',
+        sr: this
       },
       cart.orderClickHandler.bind(cart)
     );
@@ -1013,11 +1013,14 @@ SearchResult.prototype.applyClickHandler = function () {
 SearchResult.prototype.generate = function () {
   this.data.order = cart.getOrder(this);
   switch (this.data.status) {
-    case "TAKEN":
+    case 'TAKEN':
       this.showTaken();
       break;
-    case "AVAILABLE":
+    case 'AVAILABLE':
       this.showAvailable();
+      break;
+    case 'INVALID':
+      this.showInvalid();
       break;
     default:
       // status 'UNKNOWN' and error cases
@@ -1044,26 +1047,40 @@ SearchResult.prototype.getPrice = function (pricetype, doformat, term) {
       return `${price}`;
     }
   }
-  return "-";
+  return '-';
 };
 // TODO move the below HTML code into Mustache templates
 // idea: having for every case a complete row covered, easier to read
 SearchResult.prototype.showError = function () {
   const row = this.data;
   row.element
-    .find("div.availability")
+    .find('div.availability')
     .html(
       `<span class="label label-hx label-hx-error" data-toggle="tooltip" title="${row.REASON}">${translations.domaincheckererror}</span>`
     );
-  row.element.find("div.col-xs-7").removeClass("search-result-info");
+  row.element.find('div.col-xs-7').removeClass('search-result-info');
   row.element
-    .find("div.second-line.registerprice")
-    .html("<span>—</span><br><span><br></span>");
+    .find('div.second-line.registerprice')
+    .html('<span>—</span><br><span><br></span>');
+};
+// TODO move the below HTML code into Mustache templates
+// idea: having for every case a complete row covered, easier to read
+SearchResult.prototype.showInvalid = function () {
+  const row = this.data;
+  row.element
+    .find('div.availability')
+    .html(
+      `<span class="label label-hx label-hx-warning" data-toggle="tooltip" title="${translations.label_descr_invalidtld}">${translations.domaincheckerinvalidtld}</span>`
+    );
+  row.element.find('div.col-xs-7').removeClass('search-result-info');
+  row.element
+    .find('div.second-line.registerprice')
+    .html('<span>—</span><br><span><br></span>');
 };
 SearchResult.prototype.showAvailable = function () {
   const row = this.data;
-  const regenerate = !!row.element.find(".hxdata").length;
-  const termcfg = this.getTermConfig("register");
+  const regenerate = !!row.element.find('.hxdata').length;
+  const termcfg = this.getTermConfig('register');
   if (!termcfg) {
     // registration price not configured
     row.REASON = `${translations.error_notldprice}!`;
@@ -1071,30 +1088,30 @@ SearchResult.prototype.showAvailable = function () {
     return;
   }
   const group = row.pricing.group;
-  const regprice = this.getPrice("register", true, termcfg.initialTerm);
-  const regpriceraw = this.getPrice("register", false, termcfg.initialTerm);
-  const renprice = this.getPrice("renew", true, termcfg.initialTerm);
+  const regprice = this.getPrice('register', true, termcfg.initialTerm);
+  const regpriceraw = this.getPrice('register', false, termcfg.initialTerm);
+  const renprice = this.getPrice('renew', true, termcfg.initialTerm);
   const multiTerms = termcfg.terms.length > 1;
   // just set this once and not again after adding to cart, we would loss the chosen term and price
   if (!regenerate) {
     row.element
-      .find("span.domainname.domain-label, span.domainname.tld-zone")
-      .addClass("available");
+      .find('span.domainname.domain-label, span.domainname.tld-zone')
+      .addClass('available');
     row.element
-      .find("span.checkboxarea")
+      .find('span.checkboxarea')
       .html(
         '<label><i class="far fa-square avail" aria-hidden="true"></i></label>'
       );
     row.element
-      .find("div.availability")
+      .find('div.availability')
       .html(
         `<span class="label label-hx label-hx-available">${translations.domaincheckeravailable}</span>`
       );
-    row.element.find("div.second-line.registerprice").empty();
+    row.element.find('div.second-line.registerprice').empty();
     if (row.premiumtype) {
       // premium domain (AFTERMARKET, REGISTRY RESERVED, ...
       row.element
-        .find("div.availability")
+        .find('div.availability')
         .append(
           `<span class="label label-hx label-hx-premium">${
             translations[row.premiumtype.toLowerCase()] || row.premiumtype
@@ -1102,42 +1119,42 @@ SearchResult.prototype.showAvailable = function () {
         );
     } else {
       if (multiTerms) {
-        let opts = "";
+        let opts = '';
         termcfg.terms.forEach((term) => {
           opts += `<li><a href="javascript:;">${term}${translations.unit_s_year}</li>`;
         });
         row.element
-          .find("div.second-line.registerprice")
+          .find('div.second-line.registerprice')
           .html(
             `<button class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">${termcfg.initialTerm}${translations.unit_s_year} <span class="caret"></span></button><ul class="dropdown-menu">${opts}</ul>`
           );
         row.element
-          .find(".dropdown-menu li")
+          .find('.dropdown-menu li')
           .off()
           .click(this, this.switchTerm);
       }
       if (group) {
         row.element
-          .find("div.availability")
+          .find('div.availability')
           .append(
             `<span class="label label-hx label-hx-${group}">${
-              translations["group" + group]
+              translations['group' + group]
             }</span>`
           );
       }
     }
     // display prices
     row.element
-      .find("div.second-line.registerprice")
+      .find('div.second-line.registerprice')
       .append(`<span class="registerprice">${regprice}</span>`);
     row.element
-      .find("div.second-line.renewalprice")
+      .find('div.second-line.renewalprice')
       .html(
         `<span class="renewal">${translations.renewal}: ${renprice}</span>`
       );
     // add ADDED and price to the hidden div
     row.element
-      .find("span.registerprice.added")
+      .find('span.registerprice.added')
       .html(
         `<span>${translations.domain_added_to_cart}</span><br/><span class="registerprice added hxdata" data-registerprice="${regpriceraw}" data-term="${termcfg.initialTerm}">${regprice}</span>`
       );
@@ -1146,37 +1163,37 @@ SearchResult.prototype.showAvailable = function () {
     if (multiTerms) {
       row.element
         .find(`ul.dropdown-menu > li > a:contains("${row.order.regperiod}Y")`)
-        .trigger("click")
-        .parent("li")
-        .addClass("active");
+        .trigger('click')
+        .parent('li')
+        .addClass('active');
     }
     row.element
-      .find("span.domainname.domain-label, span.domainname.tld-zone")
-      .addClass("added");
+      .find('span.domainname.domain-label, span.domainname.tld-zone')
+      .addClass('added');
     row.element
-      .find("span.checkboxarea")
-      .find("i.far")
-      .removeClass("far fa-square")
-      .addClass("fas fa-check-square");
+      .find('span.checkboxarea')
+      .find('i.far')
+      .removeClass('far fa-square')
+      .addClass('fas fa-check-square');
     row.element
-      .find("div.search-result-price")
-      .addClass("hidden")
+      .find('div.search-result-price')
+      .addClass('hidden')
       .eq(1)
-      .removeClass("hidden");
+      .removeClass('hidden');
   } else {
     row.element
-      .find("span.checkboxarea")
-      .find("i.fas")
-      .removeClass("fas fa-check-square")
-      .addClass("far fa-square");
+      .find('span.checkboxarea')
+      .find('i.fas')
+      .removeClass('fas fa-check-square')
+      .addClass('far fa-square');
     row.element
-      .find("span.domainname.domain-label, span.domainname.tld-zone")
-      .removeClass("added");
+      .find('span.domainname.domain-label, span.domainname.tld-zone')
+      .removeClass('added');
     row.element
-      .find("div.search-result-price")
-      .removeClass("hidden")
+      .find('div.search-result-price')
+      .removeClass('hidden')
       .eq(1)
-      .addClass("hidden");
+      .addClass('hidden');
   }
 };
 SearchResult.prototype.showTaken = function () {
@@ -1186,132 +1203,132 @@ SearchResult.prototype.showTaken = function () {
   // (3) normal domain (NOT BACKORDERABLE)
   // to add Added and backorder price
   row.element
-    .find("div.availability")
+    .find('div.availability')
     .html(
       `<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}" data-pc="${row.PC}"><i class="glyphicon glyphicon-question-sign"></i> ${translations.whois}</span>`
     );
   row.element
-    .find("span.domainname.domain-label, span.domainname.tld-zone")
-    .removeClass("added");
+    .find('span.domainname.domain-label, span.domainname.tld-zone')
+    .removeClass('added');
   if (row.REASON && row.REASON.length) {
     // TODO: we could translate REASON by mapping it to translation keys using regular expressions
     // that would allow us to improve step by step
     row.element
-      .find(".label-hx-taken")
-      .attr("title", row.REASON)
-      .attr("data-toggle", "tooltip")
-      .addClass("pt");
+      .find('.label-hx-taken')
+      .attr('title', row.REASON)
+      .attr('data-toggle', 'tooltip')
+      .addClass('pt');
   }
   if (row.isBackorderable) {
-    const renprice = this.getPrice("renew", true, 1);
-    const regprice = this.getPrice("backorder", true);
-    const regpriceraw = this.getPrice("backorder", false);
+    const renprice = this.getPrice('renew', true, 1);
+    const regprice = this.getPrice('backorder', true);
+    const regpriceraw = this.getPrice('backorder', false);
     row.element
-      .find("span.registerprice.added")
+      .find('span.registerprice.added')
       .html(
         `<span>${translations.domain_added_to_cart}</span><br/><span class="registerprice added hxdata" data-registerprice="${regpriceraw}" data-term="1">${regprice}</span>`
       );
     row.element
-      .find("div.search-result-price")
-      .removeClass("hidden")
+      .find('div.search-result-price')
+      .removeClass('hidden')
       .eq(1)
-      .addClass("hidden");
+      .addClass('hidden');
     if (row.backordered) {
       // BACKORDER EXISTS
       row.element
-        .find("span.domainname.domain-label, span.domainname.tld-zone")
-        .addClass("added");
+        .find('span.domainname.domain-label, span.domainname.tld-zone')
+        .addClass('added');
       row.element
-        .find("span.checkboxarea")
+        .find('span.checkboxarea')
         .html(
           '<label class="added setbackorder"><i class="fas fa-check-square avail" aria-hidden="true"></i></label>'
         );
       row.element
-        .find("div.availability")
+        .find('div.availability')
         .append(
           `<span class="label label-hx label-hx-backorder added">${translations.backorder}</span>`
         )
-        .find("span.taken")
-        .addClass("added");
+        .find('span.taken')
+        .addClass('added');
       // hide the display register and renewprice as before
       row.element
-        .find("span.checkboxarea")
-        .find("i.far")
-        .removeClass("far fa-square")
-        .addClass("fas fa-check-square");
+        .find('span.checkboxarea')
+        .find('i.far')
+        .removeClass('far fa-square')
+        .addClass('fas fa-check-square');
       row.element
-        .find("div.search-result-price")
-        .addClass("hidden")
+        .find('div.search-result-price')
+        .addClass('hidden')
         .eq(1)
-        .removeClass("hidden");
+        .removeClass('hidden');
     } else {
       // BACKORDERABLE
       row.element
-        .find("span.checkboxarea")
+        .find('span.checkboxarea')
         .html(
           '<label class="setbackorder"><i class="far fa-square" aria-hidden="true"></i></label>'
         );
       row.element
-        .find("div.availability")
+        .find('div.availability')
         .append(
           `<span class="label label-hx label-hx-backorder">${translations.backorder}</span>`
         );
       // display prices
       row.element
-        .find("div.second-line.registerprice")
+        .find('div.second-line.registerprice')
         .html(`<span class="registerprice">${regprice}</span>`);
       row.element
-        .find("div.second-line.renewalprice")
+        .find('div.second-line.renewalprice')
         .html(
           `<span class="renewal">${translations.renewal}: ${renprice}</span>`
         );
       // add ADDED and price to the hidden div
       row.element
-        .find("span.registerprice.added")
+        .find('span.registerprice.added')
         .html(
           `<span>${translations.domain_added_to_cart}</span><br/><span class="registerprice added hxdata" data-registerprice="${regpriceraw}" data-term="1">${regprice}</span>`
         );
     }
   } else {
     // NOT BACKORDERABLE
-    row.element.toggleClass("clickable");
-    row.element.find("div.col-xs-7").removeClass("search-result-info");
+    row.element.toggleClass('clickable');
+    row.element.find('div.col-xs-7').removeClass('search-result-info');
     row.element
-      .find("div.second-line.registerprice")
-      .html("<span>—</span><br><span><br></span>");
+      .find('div.second-line.registerprice')
+      .html('<span>—</span><br><span><br></span>');
   }
 
   row.element
-    .find(".label-hx-whois")
+    .find('.label-hx-whois')
     .off()
-    .on("click", this.showWhoisInformation);
+    .on('click', this.showWhoisInformation);
 };
 SearchResult.prototype.switchTerm = function (e) {
   // to prevent event bubbling to parent element
   e.stopPropagation(); // because of this we have to close dropdown menu manually
   const sr = e.data;
   const row = sr.data;
-  row.element.find("div.second-line.registerprice").removeClass("open");
-  row.element.find("button.dropdown-toggle").attr("aria-expanded", false);
+  row.element.find('div.second-line.registerprice').removeClass('open');
+  row.element.find('button.dropdown-toggle').attr('aria-expanded', false);
   let chosenTerm = $(this).text();
   row.element
-    .find(".dropdown-toggle:first-child")
+    .find('.dropdown-toggle:first-child')
     .html(`${chosenTerm} <span class="caret"></span>`);
   chosenTerm = parseInt(chosenTerm, 10);
-  row.element.find(".dropdown-toggle:first-child").val(chosenTerm);
+  row.element.find('.dropdown-toggle:first-child').val(chosenTerm);
   // update prices
-  const regprice = sr.getPrice("register", true, chosenTerm);
-  const regpriceraw = sr.getPrice("register", false, chosenTerm);
-  const renprice = sr.getPrice("renew", true, chosenTerm);
+  const regprice = sr.getPrice('register', true, chosenTerm);
+  const regpriceraw = sr.getPrice('register', false, chosenTerm);
+  const renprice = sr.getPrice('renew', true, chosenTerm);
   row.element
-    .find("div.second-line.registerprice span.registerprice")
+    .find('div.second-line.registerprice span.registerprice')
     .html(regprice);
   row.element
-    .find("div.second-line.renewalprice")
+    .find('div.second-line.renewalprice')
     .html(`<span class="renewal">${translations.renewal}: ${renprice}</span>`);
   // add ADDED and price to the hidden div
   row.element
-    .find("span.registerprice.added")
+    .find('span.registerprice.added')
     .html(
       `<span>${translations.domain_added_to_cart}</span><br/><span class="registerprice added hxdata" data-registerprice="${regpriceraw}" data-term="${chosenTerm}">${regprice}</span>`
     );
@@ -1319,24 +1336,24 @@ SearchResult.prototype.switchTerm = function (e) {
 SearchResult.prototype.showWhoisInformation = function (e) {
   // to prevent event bubbling to parent element
   e.stopPropagation();
-  const domain = $(this).data("domain");
-  const pc = $(this).data("pc");
-  $("#modalWhois").show();
-  $("#modalWhoisBody")
+  const domain = $(this).data('domain');
+  const pc = $(this).data('pc');
+  $('#modalWhois').show();
+  $('#modalWhoisBody')
     .css({
-      "overflow-y": "auto",
-      height: $(window).height() - 200 + "px",
+      'overflow-y': 'auto',
+      height: $(window).height() - 200 + 'px'
     })
     .hide();
-  $("#whoisDomainName").html(domain);
-  $("#modalWhois").modal("show");
-  $("#modalWhoisLoader").toggleClass("hidden");
+  $('#whoisDomainName').html(domain);
+  $('#modalWhois').modal('show');
+  $('#modalWhoisLoader').toggleClass('hidden');
   $.post(`${wr}/mywhois.php`, `idn=${domain}&pc=${pc}`, function (data) {
     // fetch html contents of body element
     const m = data.match(/<body[^>]*>([\w|\W]*)<\/body>/im);
-    $("#modalWhoisBody").html(m[1]);
-    $("#modalWhoisLoader").toggleClass("hidden");
-    $("#modalWhoisBody").show();
+    $('#modalWhoisBody').html(m[1]);
+    $('#modalWhoisLoader').toggleClass('hidden');
+    $('#modalWhoisBody').show();
   });
 };
 
@@ -1354,7 +1371,7 @@ const DomainSearch = function () {
     maxGroupsPerPage: 3,
     maxEntriesPerPage: 14, // (2 + 4 + 8)
     // to know if a searchresult corresponds to the search string
-    searchString: { IDN: "", PC: "" },
+    searchString: { IDN: '', PC: '' }
   };
   this.searchGroups = {};
   this.searchResults = [];
@@ -1374,43 +1391,43 @@ const DomainSearch = function () {
   // (1) check if GET parameters are used
   // e.g. domainchecker.php?search=test.com&cat=5
   const url = new URL(window.location.href);
-  const search = url.searchParams.get("search");
-  const categories = url.searchParams.get("cat");
+  const search = url.searchParams.get('search');
+  const categories = url.searchParams.get('cat');
   if (search !== null) {
     this.searchStore = {
       domain: DomainSearch.cleanupSearchString(search),
       activeCategories:
         categories === null
           ? []
-          : categories.split(",").map((c) => {
-              return parseInt(c, 10);
-            }),
-      sug_ip_opt: url.searchParams.get("ip") || "0",
+          : categories.split(',').map((c) => {
+            return parseInt(c, 10);
+          }),
+      sug_ip_opt: url.searchParams.get('ip') || '0',
       // eslint-disable-next-line no-undef
-      sug_lang_opt: url.searchParams.get("lang") || locale,
-      showPremiumDomains: url.searchParams.get("showpremium") || "1",
-      showTakenDomains: url.searchParams.get("showtaken") || "1",
+      sug_lang_opt: url.searchParams.get('lang') || locale,
+      showPremiumDomains: url.searchParams.get('showpremium') || '1',
+      showTakenDomains: url.searchParams.get('showtaken') || '1'
     };
     sessionStorage.setItem(
-      "ispapi_searchStore",
+      'ispapi_searchStore',
       JSON.stringify(this.searchStore)
     );
     this.initFromSessionStorage = 2; // filters can be overwritten by reseller settings
   } else {
     // (2) if sessionStore provides a configuration
-    if (sessionStorage.getItem("ispapi_searchStore")) {
+    if (sessionStorage.getItem('ispapi_searchStore')) {
       this.searchStore = JSON.parse(
-        sessionStorage.getItem("ispapi_searchStore")
+        sessionStorage.getItem('ispapi_searchStore')
       );
       this.initFromSessionStorage = 1;
-      const tmp = $("#searchfield").val();
+      const tmp = $('#searchfield').val();
       if (tmp) {
         this.searchStore.domain = tmp;
       } // do not override searchstr that got posted
     } else {
       // (3) otherwise, start with defaults / empty config
       this.searchStore = {};
-      sessionStorage.setItem("ispapi_searchStore", "{}");
+      sessionStorage.setItem('ispapi_searchStore', '{}');
       this.initFromSessionStorage = 0;
     }
   }
@@ -1422,14 +1439,14 @@ DomainSearch.cleanupSearchString = function (str) {
   const invalidChars =
     /(~|`|!|@|#|\$|%|\^|&|\*|\(|\)|_|\+|=|{|}|\[|\]|\||\\|;|:|"|'|<|>|,|\?|\/)/g;
   let tmp = str.toLowerCase();
-  tmp = tmp.replace(/(^\s+|\s+$)/g, ""); // replace all dangling white spaces
+  tmp = tmp.replace(/(^\s+|\s+$)/g, ''); // replace all dangling white spaces
   try {
     const url = new URL(tmp); // try to url-parse given string
     tmp = url.hostname; // worked, we have hostname including subdomain
   } catch (e) {
-    tmp = tmp.replace(/(\s|%20).+$/, ""); // not a working url, strip everything after space
+    tmp = tmp.replace(/(\s|%20).+$/, ''); // not a working url, strip everything after space
   }
-  tmp = tmp.replace(invalidChars, "");
+  tmp = tmp.replace(invalidChars, '');
   return tmp;
 };
 DomainSearch.prototype.handleResultCache = function () {
@@ -1460,8 +1477,8 @@ DomainSearch.prototype.handleXHRQueue = function () {
     ds.removeFromQueue(...arguments);
   });
   $(window)
-    .off("beforeunload")
-    .on("beforeunload", function () {
+    .off('beforeunload')
+    .on('beforeunload', function () {
       ds.clearSearch();
       clearInterval(ds.searchcfg.cacheJobID);
     });
@@ -1475,22 +1492,22 @@ DomainSearch.prototype.handleXHRQueue = function () {
 // in the way of a TTL cache
 // allows to merge the searched domainlist and the results into one place for reuse
 DomainSearch.prototype.loadConfiguration = function (currencyid) {
-  let cfgurl = "?action=loadconfiguration";
+  let cfgurl = '?action=loadconfiguration';
   const currencychanged = currencyid !== undefined;
   if (currencychanged) {
     this.clearSearch();
     cfgurl += `&currency=${currencyid}`; // to change the currency in session
   }
   if (Object.prototype.hasOwnProperty.call(this.d, currencyid)) {
-    this.generate(this.d[currencyid], "success", currencychanged);
-    cfgurl += "&nodata=1";
+    this.generate(this.d[currencyid], 'success', currencychanged);
+    cfgurl += '&nodata=1';
     $.ajax(cfgurl);
     return;
   }
   $.ajax({
     url: cfgurl,
-    type: "GET",
-    dataType: "json",
+    type: 'GET',
+    dataType: 'json'
   }).then(
     (d, statusText) => {
       ds.generate(d, statusText, currencychanged);
@@ -1501,16 +1518,16 @@ DomainSearch.prototype.loadConfiguration = function (currencyid) {
   );
 };
 DomainSearch.prototype.getTLDPricing = function (idndomain) {
-  const tld = idndomain.replace(/^[^.]+\./, "");
+  const tld = idndomain.replace(/^[^.]+\./, '');
   const prices = this.d[this.activeCurrency].pricing;
   // to have at least the currency for premium domains (see processresults fn)
   let pricing = $.extend({}, { currency: prices.currency });
   if (Object.prototype.hasOwnProperty.call(prices.tlds, tld)) {
     pricing = $.extend(pricing, prices.tlds[tld]);
-    if (Object.prototype.hasOwnProperty.call(pricing, "backorder")) {
+    if (Object.prototype.hasOwnProperty.call(pricing, 'backorder')) {
       pricing.backorder = parseFloat(pricing.backorder).toFixed(2);
     }
-    if (Object.prototype.hasOwnProperty.call(pricing, "backorderlite")) {
+    if (Object.prototype.hasOwnProperty.call(pricing, 'backorderlite')) {
       pricing.backorderlite = parseFloat(pricing.backorderlite).toFixed(2);
     }
   }
@@ -1520,7 +1537,7 @@ DomainSearch.prototype.clearCache = function () {
   this.searchResultsCache = {};
 };
 DomainSearch.prototype.clearSearch = function () {
-  $("#searchresults").empty();
+  $('#searchresults').empty();
   this.searchGroups = {};
   this.searchResults = [];
   $.each(this.connections, function (idx, jqxhr) {
@@ -1552,12 +1569,12 @@ DomainSearch.prototype.initForm = function () {
   }
   if (this.initFromSessionStorage) {
     // loop over all form elements (select is also considered under scope of an :input)
-    $("#searchform *")
-      .filter(":input")
+    $('#searchform *')
+      .filter(':input')
       .each(function () {
         $(this).val(ds.searchStore[this.name]);
       });
-    $("#searchform")
+    $('#searchform')
       .serializeArray()
       .forEach((entry) => {
         ds.searchStore[entry.name] = entry.value;
@@ -1574,58 +1591,58 @@ DomainSearch.prototype.initForm = function () {
       .setCategories(data.categories, this.searchStore.activeCategories)
       .generate();
     // eslint-disable-next-line no-undef
-    $("#sug_lang_opt").val(locale); // use the current active language as default
-    $("#searchform")
+    $('#sug_lang_opt').val(locale); // use the current active language as default
+    $('#searchform')
       .serializeArray()
       .forEach((entry) => {
         ds.searchStore[entry.name] = entry.value;
       });
     sessionStorage.setItem(
-      "ispapi_searchStore",
+      'ispapi_searchStore',
       JSON.stringify(this.searchStore)
     );
   }
-  if (Object.prototype.hasOwnProperty.call(this.searchStore, "domain")) {
+  if (Object.prototype.hasOwnProperty.call(this.searchStore, 'domain')) {
     const tmp = ispapiIdnconverter.convert([this.searchStore.domain]);
     this.searchcfg.searchString = { IDN: tmp.IDN[0], PC: tmp.PC[0] };
   }
-  $("#showPremiumDomains i").addClass(
-    this.searchStore.showPremiumDomains === "1"
-      ? "fa-toggle-off"
-      : "fa-toggle-on"
+  $('#showPremiumDomains i').addClass(
+    this.searchStore.showPremiumDomains === '1'
+      ? 'fa-toggle-off'
+      : 'fa-toggle-on'
   );
-  $("#showTakenDomains i").addClass(
-    this.searchStore.showTakenDomains === "1" ? "fa-toggle-off" : "fa-toggle-on"
+  $('#showTakenDomains i').addClass(
+    this.searchStore.showTakenDomains === '1' ? 'fa-toggle-off' : 'fa-toggle-on'
   );
   // do not allow to activate premium domains on client side if reseller has it deactivated
   if (!data.premiumDomains) {
-    $("#showPremiumDomains").hide();
+    $('#showPremiumDomains').hide();
   }
-  $("#datafilters .filter")
-    .off("click")
-    .on("click", function () {
-      const $eL = $(this).find("i");
-      const isOn = $eL.hasClass("fa-toggle-on");
-      const filterId = $(this).attr("id");
-      const isInverse = $(this).hasClass("filterInverse");
+  $('#datafilters .filter')
+    .off('click')
+    .on('click', function () {
+      const $eL = $(this).find('i');
+      const isOn = $eL.hasClass('fa-toggle-on');
+      const filterId = $(this).attr('id');
+      const isInverse = $(this).hasClass('filterInverse');
       // do not allow to activate premium domains on client side if reseller has it deactivated
       if (
         !(
-          filterId === "showPremiumDomains" &&
+          filterId === 'showPremiumDomains' &&
           !isOn &&
           data.premiumDomains === 0
         )
       ) {
-        $eL.toggleClass("fa-toggle-on", !isOn);
-        $eL.toggleClass("fa-toggle-off", isOn);
+        $eL.toggleClass('fa-toggle-on', !isOn);
+        $eL.toggleClass('fa-toggle-off', isOn);
         if (isInverse) {
-          ds.searchStore[filterId] = isOn ? "1" : "0";
+          ds.searchStore[filterId] = isOn ? '1' : '0';
         } else {
-          ds.searchStore[filterId] = isOn ? "0" : "1";
+          ds.searchStore[filterId] = isOn ? '0' : '1';
         }
       }
     });
-  $("#datafilters").show();
+  $('#datafilters').show();
 
   // Read about proxy here:
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/set
@@ -1634,7 +1651,7 @@ DomainSearch.prototype.initForm = function () {
     set: function (target, key, value) {
       const isViewFilter = /^showTakenDomains$/i.test(key);
       // rewrite the value as necessary for search input field
-      if (key === "domain") {
+      if (key === 'domain') {
         value = DomainSearch.cleanupSearchString(value);
       }
       // trigger search
@@ -1650,7 +1667,7 @@ DomainSearch.prototype.initForm = function () {
       }
       const result = Reflect.set(...arguments);
       sessionStorage.setItem(
-        "ispapi_searchStore",
+        'ispapi_searchStore',
         JSON.stringify(ds.searchStore)
       );
       if (!isViewFilter) {
@@ -1661,41 +1678,41 @@ DomainSearch.prototype.initForm = function () {
       return result;
     },
     get: function (target, key) {
-      if (key === "isProxy") {
+      if (key === 'isProxy') {
         return true;
       }
       return Reflect.get(...arguments);
     },
     ownKeys: function (target) {
       return Reflect.ownKeys(target);
-    },
+    }
   });
   // category changes are subscribed in categorymgr code
-  $("#transferbutton")
-    .off("click")
+  $('#transferbutton')
+    .off('click')
     .click(() => {
-      const domain = $("#searchfield").val();
+      const domain = $('#searchfield').val();
       if (/\./.test(domain)) {
         window.location.href = `${wr}/cart.php?a=add&domain=transfer&query=${domain}`;
       }
     });
   // category changes are subscribed in categorymgr code
-  $("#searchbutton, #loadmorebutton")
-    .off("click")
+  $('#searchbutton, #loadmorebutton')
+    .off('click')
     .click(() => {
       ds.search();
     });
   // starts the search when enterkey is pressed
-  $("#searchfield")
-    .off("keypress")
-    .on("keypress", function (e) {
+  $('#searchfield')
+    .off('keypress')
+    .on('keypress', function (e) {
       const keyCode = e.keyCode || e.which;
       if (keyCode === 13 && this.value.length) {
         this.blur();
       }
     });
-  $("#searchfield")
-    .off("change")
+  $('#searchfield')
+    .off('change')
     .change(function () {
       const val = DomainSearch.cleanupSearchString(this.value);
       const tmp = ispapiIdnconverter.convert([val]);
@@ -1704,8 +1721,8 @@ DomainSearch.prototype.initForm = function () {
     });
   if (ds.mode) {
     // domain suggestions
-    $("#sug_lang_opt, #sug_ip_opt")
-      .off("change")
+    $('#sug_lang_opt, #sug_ip_opt')
+      .off('change')
       .change(function () {
         ds.searchStore[this.name] = this.value;
       });
@@ -1718,35 +1735,35 @@ DomainSearch.prototype.generate = async function (
 ) {
   const self = this;
   // handle the click on the category-button
-  $("#legend-button")
-    .off("click")
+  $('#legend-button')
+    .off('click')
     .click(function () {
-      $(this).find("i.legend").toggleClass("fa-angle-up fa-angle-down");
+      $(this).find('i.legend').toggleClass('fa-angle-up fa-angle-down');
     });
   if (currencychanged) {
     this.clearCache();
   }
-  if (d.lookupprovider !== "ispapi") {
+  if (d.lookupprovider !== 'ispapi') {
     // show error just in case we have not canceled it
     if (!/^abort$/i.test(statusText)) {
-      $("#loading, #resultsarea, #errorcont").hide();
-      $("#searchresults").empty();
+      $('#loading, #resultsarea, #errorcont').hide();
+      $('#searchresults').empty();
       $.growl.error({
         title: `${translations.error_occured}!`,
-        message: translations.error_lookupprovider,
+        message: translations.error_lookupprovider
       });
     }
     this.catmgr = null;
     return;
   }
-  if (!Object.prototype.hasOwnProperty.call(d, "categories")) {
+  if (!Object.prototype.hasOwnProperty.call(d, 'categories')) {
     // show error just in case we have not canceled it
     if (!/^abort$/i.test(statusText)) {
-      $("#loading, #resultsarea, #errorcont").hide();
-      $("#searchresults").empty();
+      $('#loading, #resultsarea, #errorcont').hide();
+      $('#searchresults').empty();
       $.growl.error({
         title: `${translations.error_occured}!`,
-        message: `${translations.error_loadingcfg} (${d.status} ${d.statusText})`,
+        message: `${translations.error_loadingcfg} (${d.status} ${d.statusText})`
       });
     }
     this.catmgr = null;
@@ -1757,12 +1774,12 @@ DomainSearch.prototype.generate = async function (
   this.backorders = d.backorders;
   this.paths = {
     dc: d.path_to_dc_module,
-    bo: d.path_to_bo_module,
+    bo: d.path_to_bo_module
   };
   // apply reseller's filter settings if applicable
   if (this.initFromSessionStorage === 2 || !this.initFromSessionStorage) {
-    this.searchStore.showPremiumDomains = d.premiumDomains + "";
-    this.searchStore.showTakenDomains = d.takenDomains + "";
+    this.searchStore.showPremiumDomains = d.premiumDomains + '';
+    this.searchStore.showTakenDomains = d.takenDomains + '';
   }
   // commented out below lines to be able to reuse response for currency switch
   /* delete d.backorders;
@@ -1775,36 +1792,36 @@ DomainSearch.prototype.generate = async function (
   this.d[this.activeCurrency] = d;
 
   // this.mode -> domain suggestions, this.mode covers the suggestionscfg from registrar module or is 0
-  const tpls = ["resultRow"].concat(
-    this.mode ? ["suggestionscfg", "suggestionscfgbttn"] : []
+  const tpls = ['resultRow'].concat(
+    this.mode ? ['suggestionscfg', 'suggestionscfgbttn'] : []
   );
-  await TPLMgr.loadTemplates(tpls, "Client");
+  await TPLMgr.loadTemplates(tpls, 'Client');
 
   $(document).ready(function () {
-    $("#loading").hide();
+    $('#loading').hide();
     if (!currencychanged && self.mode) {
       // domain suggestions
       // render the specific DOM
-      TPLMgr.renderPrepend("#searchform div.addon", "suggestionscfgbttn");
-      TPLMgr.renderBefore("#categories", "suggestionscfg", {
-        locales: d.locales,
+      TPLMgr.renderPrepend('#searchform div.addon', 'suggestionscfgbttn');
+      TPLMgr.renderBefore('#categories', 'suggestionscfg', {
+        locales: d.locales
       });
     }
 
     self.initForm();
     self.search();
 
-    $(".currencychooser button")
-      .off("click")
+    $('.currencychooser button')
+      .off('click')
       .click(function () {
         const eL = $(this);
-        if (eL.hasClass("active")) {
+        if (eL.hasClass('active')) {
           return;
         }
-        const bttns = $(".currencychooser button");
-        bttns.removeClass("active");
-        eL.toggleClass("active");
-        ds.loadConfiguration(parseInt(eL.attr("id").replace(/^curr_/, ""), 10));
+        const bttns = $('.currencychooser button');
+        bttns.removeClass('active');
+        eL.toggleClass('active');
+        ds.loadConfiguration(parseInt(eL.attr('id').replace(/^curr_/, ''), 10));
       });
   });
 };
@@ -1817,20 +1834,20 @@ DomainSearch.prototype.getDomainSuggestions = function (searchstr) {
       this.mode ? this.mode.suggestionsnoweighted : false
     ),
     keyword: searchstr,
-    language: this.searchStore.sug_lang_opt,
+    language: this.searchStore.sug_lang_opt
   };
   const data = { ...cfg, ...this.mode };
   const errmsg = {
     title: `${translations.error_occured}!`,
-    message: translations.error_loadingsuggestions,
+    message: translations.error_loadingsuggestions
   };
   return new Promise((resolve) => {
     $.ajax({
-      url: "?action=getsuggestions",
-      type: "POST",
+      url: '?action=getsuggestions',
+      type: 'POST',
       data: JSON.stringify(data),
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
+      contentType: 'application/json; charset=utf-8',
+      dataType: 'json'
     }).then(
       (d, textStatus) => {
         if (!d.length) {
@@ -1860,7 +1877,7 @@ DomainSearch.prototype.buildRows = function (list) {
     group.push({
       IDN: l.IDN[idx],
       PC: pc,
-      registrar: self.getRegistrar(pc),
+      registrar: self.getRegistrar(pc)
     });
   });
   return group;
@@ -1869,10 +1886,10 @@ DomainSearch.prototype.buildRows = function (list) {
 DomainSearch.prototype.buildDomainlist = async function () {
   // suggestionlist only works well with IDN keyword (FTASKS-2442)
   const searchstr = this.searchcfg.searchString.IDN;
-  const searchLabel = searchstr.replace(/\..+$/, "");
-  let searchTld = "";
+  const searchLabel = searchstr.replace(/\..+$/, '');
+  let searchTld = '';
   if (/\./.test(searchstr)) {
-    searchTld = searchstr.replace(/^[^.]+\./, "");
+    searchTld = searchstr.replace(/^[^.]+\./, '');
   }
   const tldsbyprio = this.d[this.activeCurrency].tldsbyprio;
   let domainlist;
@@ -1884,8 +1901,8 @@ DomainSearch.prototype.buildDomainlist = async function () {
     // (2) reorder them by by priority of the TLD (reorder by ascii by option)
     const regex = /^[^.]+\./;
     priodomainlist = domainlist.sort(function (a, b) {
-      const indexA = tldsbyprio.indexOf(a.replace(regex, ""));
-      const indexB = tldsbyprio.indexOf(b.replace(regex, ""));
+      const indexA = tldsbyprio.indexOf(a.replace(regex, ''));
+      const indexB = tldsbyprio.indexOf(b.replace(regex, ''));
       return indexA - indexB;
     });
   } else {
@@ -1928,10 +1945,10 @@ DomainSearch.prototype.getCachedResult = function (domain) {
 DomainSearch.prototype.getSearchGroups = async function (searchterm) {
   const newSearchTerm = searchterm !== this.searchGroups.searchterm;
   if (
-    !Object.prototype.hasOwnProperty.call(this.searchGroups, "open") ||
+    !Object.prototype.hasOwnProperty.call(this.searchGroups, 'open') ||
     newSearchTerm
   ) {
-    $("#searchresults").empty();
+    $('#searchresults').empty();
     const domainlist = await this.buildDomainlist();
     if (!domainlist.length) {
       this.searchGroups.finished = true;
@@ -1940,7 +1957,7 @@ DomainSearch.prototype.getSearchGroups = async function (searchterm) {
     this.searchGroups = {
       searchterm: searchterm,
       open: this.buildRows(ispapiIdnconverter.convert(domainlist)),
-      finished: false,
+      finished: false
     };
   }
   const cachedgroup = [];
@@ -1952,8 +1969,8 @@ DomainSearch.prototype.getSearchGroups = async function (searchterm) {
   groups = groups.filter((row) => {
     // append rows to DOM that we request later on
     row.pricing = ds.getTLDPricing(row.IDN);
-    row.domainlabel = row.IDN.replace(/\..+$/, "");
-    row.extension = row.IDN.replace(/^[^.]+/, "");
+    row.domainlabel = row.IDN.replace(/\..+$/, '');
+    row.extension = row.IDN.replace(/^[^.]+/, '');
     row.isSearchString =
       row.PC === ds.searchcfg.searchString.PC ||
       row.IDN === ds.searchcfg.searchString.IDN; // maybe we could bring this with the above `searchterm` together
@@ -1962,12 +1979,12 @@ DomainSearch.prototype.getSearchGroups = async function (searchterm) {
     // WHMCS six template's dependency jquery upgrades from v1 to v3 one day :-(
     const selector = row.PC.replace(
       /([$%&()*+,./:;<=>?@[\\\]^{|}~'])/g,
-      "\\$1"
+      '\\$1'
     );
     row.element = $(`#${selector}`);
     if (!row.element.length) {
-      row.element = TPLMgr.renderAppend("#searchresults", "resultRow", {
-        row: row,
+      row.element = TPLMgr.renderAppend('#searchresults', 'resultRow', {
+        row: row
       });
     }
     const cachedRow = ds.getCachedResult(row.PC);
@@ -1995,7 +2012,7 @@ DomainSearch.prototype.checkTaken = function (sr, val) {
   if (val === undefined) {
     val = ds.searchStore.showTakenDomains;
   }
-  if (!row.isSearchString && row.status === "TAKEN" && val === "0") {
+  if (!row.isSearchString && row.status === 'TAKEN' && val === '0') {
     sr.fadeOut();
   } else {
     sr.show();
@@ -2014,14 +2031,14 @@ DomainSearch.prototype.processCachedResults = function (list) {
 };
 DomainSearch.prototype.processResults = function (grp, d) {
   if (
-    Object.prototype.hasOwnProperty.call(d, "statusText") &&
+    Object.prototype.hasOwnProperty.call(d, 'statusText') &&
     /^abort$/i.test(d.statusText)
   ) {
     // skip aborted connections, new search results are incoming
     return;
   }
   grp.forEach((row, idx) => {
-    row.status = "UNKNOWN";
+    row.status = 'UNKNOWN';
     if (Object.prototype.hasOwnProperty.call(d, status)) {
       // client http error
       row.REASON = d.statusText;
@@ -2035,17 +2052,17 @@ DomainSearch.prototype.processResults = function (grp, d) {
           if (row.CLASS.indexOf(row.PREMIUMCHANNEL) === -1) {
             row.premiumtype = row.PREMIUMCHANNEL;
           } else {
-            row.premiumtype = "PREMIUM";
+            row.premiumtype = 'PREMIUM';
           }
         } else if (row.PREMIUMCHANNEL) {
-          row.premiumtype = "AFTERMARKET";
+          row.premiumtype = 'AFTERMARKET';
         }
         // override by returned registrar prices and cleanup row data
-        if (Object.prototype.hasOwnProperty.call(row, "PRICE")) {
+        if (Object.prototype.hasOwnProperty.call(row, 'PRICE')) {
           row.pricing.register = { 1: row.PRICE.toFixed(2) };
           delete row.PRICE;
         }
-        if (Object.prototype.hasOwnProperty.call(row, "PRICERENEW")) {
+        if (Object.prototype.hasOwnProperty.call(row, 'PRICERENEW')) {
           row.pricing.renew = { 1: row.PRICERENEW.toFixed(2) };
           delete row.PRICERENEW;
         }
@@ -2055,7 +2072,7 @@ DomainSearch.prototype.processResults = function (grp, d) {
     this.searchResults.push(sr); // NOTE: this no longer represents the order in DOM
     this.searchResultsCache[row.PC] = {
       row: $.extend(true, {}, row),
-      ts: Date.now(),
+      ts: Date.now()
     };
     // to ensure we use the one that is created by the next search batch
     delete this.searchResultsCache[row.PC].row.element;
@@ -2068,7 +2085,7 @@ DomainSearch.prototype.processResults = function (grp, d) {
 };
 DomainSearch.prototype.filter = function (key, val) {
   switch (key) {
-    case "showTakenDomains":
+    case 'showTakenDomains':
       this.searchResults.forEach(
         function (sr) {
           this.checkTaken(sr, val);
@@ -2079,7 +2096,7 @@ DomainSearch.prototype.filter = function (key, val) {
   }
 };
 DomainSearch.prototype.getRegistrar = function (domain) {
-  const tld = domain.replace(/^[^.]+\./, "");
+  const tld = domain.replace(/^[^.]+\./, '');
   return this.d[this.activeCurrency].registrars[tld];
 };
 DomainSearch.prototype.requestGroupCheck = function (group) {
@@ -2087,7 +2104,7 @@ DomainSearch.prototype.requestGroupCheck = function (group) {
     idn: [],
     pc: [],
     registrars: [],
-    premiumDomains: parseInt(this.searchStore.showPremiumDomains, 10),
+    premiumDomains: parseInt(this.searchStore.showPremiumDomains, 10)
   };
   group.forEach((row) => {
     data.idn.push(row.IDN);
@@ -2095,11 +2112,11 @@ DomainSearch.prototype.requestGroupCheck = function (group) {
     data.registrars.push(row.registrar);
   });
   return $.ajax({
-    url: "?action=checkdomains",
-    type: "POST",
+    url: '?action=checkdomains',
+    type: 'POST',
     data: JSON.stringify(data),
-    contentType: "application/json; charset=utf-8",
-    dataType: "json",
+    contentType: 'application/json; charset=utf-8',
+    dataType: 'json'
   }).then(
     (d) => {
       ds.processResults(group, d);
@@ -2111,19 +2128,19 @@ DomainSearch.prototype.requestGroupCheck = function (group) {
 };
 
 DomainSearch.prototype.checkAllTaken = function () {
-  if (!this.searchResults.length || ds.searchStore.showTakenDomains === "1") {
-    $("#errorcont").hide();
+  if (!this.searchResults.length || ds.searchStore.showTakenDomains === '1') {
+    $('#errorcont').hide();
     return;
   }
   for (let i = 0; i < this.searchResults.length; i++) {
     const row = this.searchResults[i].data;
-    if (row.isSearchString || row.status !== "TAKEN") {
+    if (row.isSearchString || row.status !== 'TAKEN') {
       return; // we found a row not being TAKEN
     }
   }
   if (this.searchGroups.finished) {
-    if (!$("div.domainbox.clickable").length) {
-      $("#errorcont").show();
+    if (!$('div.domainbox.clickable').length) {
+      $('#errorcont').show();
     }
   } else {
     this.search();
@@ -2137,17 +2154,17 @@ DomainSearch.prototype.search = async function () {
   }
   const groups = await this.getSearchGroups(search);
   const promises = [];
-  $("#resultsarea").show();
-  $("#errorcont").hide();
+  $('#resultsarea').show();
+  $('#errorcont').hide();
   groups.forEach((grp) => {
     // keep in mind if replacing that fat-arrow fn with
     // this.requestGroupCheck then this context will be window
     promises.push(ds.requestGroupCheck(grp));
   });
   if (this.searchGroups.finished) {
-    $("#loadmorebutton").hide();
+    $('#loadmorebutton').hide();
   } else {
-    $("#loadmorebutton").show();
+    $('#loadmorebutton').show();
   }
   await Promise.all(promises); // wait for requests to finish
   this.checkAllTaken();
@@ -2158,11 +2175,11 @@ const Category = function (name, id, tlds, isActive) {
   this.id = id;
   this.name = name;
   this.active = isActive;
-  this.className = isActive ? "subCat active" : "subCat";
+  this.className = isActive ? 'subCat active' : 'subCat';
   this.element = null; // will be set by categorymgr in generate method
 };
 Category.prototype.toString = function () {
-  return TPLMgr.renderString("category", { category: this });
+  return TPLMgr.renderString('category', { category: this });
 };
 
 const CategoryManager = function () {};
@@ -2170,15 +2187,15 @@ CategoryManager.prototype.setCategories = function (
   categories,
   activeCategories
 ) {
-  $("#categoriescont").empty();
+  $('#categoriescont').empty();
   this.categoriesMap = {}; // access by id, faster
   this.categories = [];
   this.activeCategories = activeCategories;
   const all = {
     id: -1,
-    name: "All",
+    name: 'All',
     tlds: [],
-    active: true,
+    active: true
   };
   categories
     .sort(function (a, b) {
@@ -2207,16 +2224,16 @@ CategoryManager.prototype.setCategories = function (
   return this;
 };
 CategoryManager.prototype.handleClicks = function () {
-  $(".subCat")
-    .off("click")
+  $('.subCat')
+    .off('click')
     .click(
       function (e) {
-        const cat = this.getCategoryByDomId($(e.target).attr("id"));
+        const cat = this.getCategoryByDomId($(e.target).attr('id'));
         if (!cat) {
           return;
         }
-        cat.element.toggleClass("active");
-        cat.active = cat.element.hasClass("active");
+        cat.element.toggleClass('active');
+        cat.active = cat.element.hasClass('active');
         // NOTE: we need to create a new array so that proxy.set handler reacts as necessary
         // ALL === -1 -> put all cats to active or remove them all
         if (cat.id === -1) {
@@ -2224,14 +2241,14 @@ CategoryManager.prototype.handleClicks = function () {
             const activecats = [];
             this.categories.forEach((cat) => {
               cat.active = true;
-              cat.element.addClass("active");
+              cat.element.addClass('active');
               activecats.push(cat.id);
             });
             ds.searchStore.activeCategories = activecats;
           } else {
             this.categories.forEach((cat) => {
               cat.active = false;
-              cat.element.removeClass("active");
+              cat.element.removeClass('active');
             });
             ds.searchStore.activeCategories = [];
           }
@@ -2246,13 +2263,13 @@ CategoryManager.prototype.handleClicks = function () {
             });
             if (allactive) {
               this.categoriesMap[-1].active = true;
-              this.categoriesMap[-1].element.addClass("active");
+              this.categoriesMap[-1].element.addClass('active');
               activecats.push(-1);
             }
             ds.searchStore.activeCategories = activecats;
           } else {
             this.categoriesMap[-1].active = false;
-            this.categoriesMap[-1].element.removeClass("active");
+            this.categoriesMap[-1].element.removeClass('active');
             ds.searchStore.activeCategories =
               ds.searchStore.activeCategories.filter((catid) => {
                 return catid !== cat.id && catid !== -1;
@@ -2262,10 +2279,10 @@ CategoryManager.prototype.handleClicks = function () {
       }.bind(this)
     );
   // handle the click on the category-button
-  $(".category-button")
-    .off("click")
+  $('.category-button')
+    .off('click')
     .click(function () {
-      $(this).find("i.category").toggleClass("fa-angle-up fa-angle-down");
+      $(this).find('i.category').toggleClass('fa-angle-up fa-angle-down');
     });
   return this;
 };
@@ -2280,17 +2297,17 @@ CategoryManager.prototype.generate = async function () {
   if (!this.categories.length) {
     return $.growl.error({
       title: `${translations.error_occured}!`,
-      message: translations.error_noprices,
+      message: translations.error_noprices
     });
   }
-  await TPLMgr.loadTemplates(["category"], "Client");
-  const $eL = $("#categoriescont");
+  await TPLMgr.loadTemplates(['category'], 'Client');
+  const $eL = $('#categoriescont');
   $eL.empty();
   this.categories.forEach((category) => {
-    category.element = $(category + "").appendTo($eL);
+    category.element = $(category + '').appendTo($eL);
   });
-  $("#categories").show();
-  $("#searchbutton").prop("disabled", false);
+  $('#categories').show();
+  $('#searchbutton').prop('disabled', false);
   this.handleClicks();
   return this;
 };
@@ -2345,7 +2362,7 @@ CategoryManager.prototype.buildDomainlist = function (searchLabel) {
 };
 
 // eslint-disable-next-line no-unused-vars
-const dcpath = "/modules/addons/ispapidomaincheck/";
+const dcpath = '/modules/addons/ispapidomaincheck/';
 // eslint-disable-next-line no-unused-vars
 let translations;
 let ds;
@@ -2354,8 +2371,8 @@ let cart;
 (async function () {
   // eslint-disable-next-line no-unused-vars
   translations = await $.ajax({
-    url: "?action=loadtranslations",
-    type: "GET",
+    url: '?action=loadtranslations',
+    type: 'GET'
   });
   cart = new ShoppingCart();
   await cart.load();

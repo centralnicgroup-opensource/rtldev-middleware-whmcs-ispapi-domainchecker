@@ -75,7 +75,11 @@ class Controller
                             break;
                         case "549"://invalid repository (unsupported TLD)
                             $whois = localAPI('DomainWhois', ["domain" => $idn]);
-                            $availability = preg_match("/^available$/i", $whois["status"]);
+                            if ($whois["result"] === "error") {
+                                $availability = -1;
+                            } else {
+                                $availability = preg_match("/^available$/i", $whois["status"]);
+                            }
                             break;
                         case "211":
                             $availability = false;
@@ -117,8 +121,13 @@ class Controller
                             $availability = false;
                             break;
                     }
-                    $row["statusText"] = $availability ? SearchResult::STATUS_NOT_REGISTERED : SearchResult::STATUS_REGISTERED;
-                    $row["status"] = $availability ? 'AVAILABLE' : "TAKEN";
+                    if ($availability === -1) { // unsupported tld
+                        $row["statusText"] = SearchResult::STATUS_TLD_NOT_SUPPORTED;
+                        $row["status"] = "INVALID";
+                    } else {
+                        $row["statusText"] = $availability ? SearchResult::STATUS_NOT_REGISTERED : SearchResult::STATUS_REGISTERED;
+                        $row["status"] = $availability ? 'AVAILABLE' : "TAKEN";
+                    }
                     foreach ($keys as &$key) {
                         if (!empty($rs[$key][$idx])) {
                             $row[$key] = $rs[$key][$idx];

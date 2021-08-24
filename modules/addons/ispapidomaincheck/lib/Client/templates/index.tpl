@@ -47,48 +47,58 @@
                     <div class="col col-12 col-xs-12">
                         <div class="collapse" id="legend">
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-hot">{$_lang.grouphot}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_grouphot}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-hot">{$_lang.grouphot}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_grouphot}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-new">{$_lang.groupnew}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_groupnew}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-new">{$_lang.groupnew}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_groupnew}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-sale">{$_lang.groupsale}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_groupsale}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-sale">{$_lang.groupsale}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_groupsale}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-available">{$_lang.domaincheckeravailable}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_available}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-available">{$_lang.domaincheckeravailable}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_available}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-premium">{$_lang.premium}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_premium}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-premium">{$_lang.premium}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_premium}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-premium">{$_lang.aftermarket}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_aftermarket}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-premium">{$_lang.aftermarket}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_aftermarket}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-taken">{$_lang.domaincheckertaken}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_taken}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-taken">{$_lang.domaincheckertaken}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_taken}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-backorder">{$_lang.backorder}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_backorder}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-backorder">{$_lang.backorder}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_backorder}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-2 col-xs-2"><span class="label label-hx label-hx-whois"><i class="glyphicon glyphicon-question-sign"></i> {$_lang.whois}</span></div>
-                                <div class="col col-10 col-xs-10">{$_lang.label_descr_whois}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-whois"><i class="glyphicon glyphicon-question-sign"></i> {$_lang.whois}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_whois}</div>
+                                <div class="clear"></div>
+                            </div><hr class="xs"/>
+                            <div class="row">
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-error"><i class="glyphicon glyphicon-question-sign"></i> {$_lang.domaincheckererror}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_error}</div>
+                                <div class="clear"></div>
+                            </div><hr class="xs"/>
+                            <div class="row">
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-warning"><i class="glyphicon glyphicon-question-sign"></i> {$_lang.domaincheckerinvalidtld}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_invalidtld}</div>
                                 <div class="clear"></div>
                             </div>
                         </div>
@@ -120,7 +130,7 @@
     <div id="errorcont" style="display:none"><p align="center"><b>{$_lang.noresults}</b></p></div>
     <div class="result-item" id="resultsarea" style="display:none;">
         <form id="domainform" action="cart.php?a=add&domain=register" method="post">
-            <div class="row row1 search-results" id="searchresults"></div>
+            <div class="row row1 search-results clear" id="searchresults"></div>
             <p align="center"><button id="loadmorebutton" type="button" class="btn btn-secondary" style="display:none">{$_lang.loadmorebutton} &raquo;</button> <a class="btn btn-danger orderbutton hidden" href="{$WEB_ROOT}/cart.php?a=confdomains" role="button">{$_lang.checkoutbutton} &raquo;</a></p> 
             <hr>
         </form>
