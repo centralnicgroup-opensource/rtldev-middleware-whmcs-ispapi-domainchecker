@@ -169,9 +169,9 @@ function jsConcatenation(cb) {
 }
 
 /**
- * watch for any changes, minify + bundle + concatinate
+ * watch for any changes, minify + concatenate
  */
-function watcher() {
+exports.watcher = function () {
   watch(
     [
       "**/assets/*.js",
@@ -182,9 +182,7 @@ function watcher() {
     { interval: 1000 },
     series(cssConcatenation, jsConcatenation, esbuildMinify)
   );
-}
-
-exports.watcher = series(watcher);
+};
 
 exports.minify = series(esbuildMinify);
 
