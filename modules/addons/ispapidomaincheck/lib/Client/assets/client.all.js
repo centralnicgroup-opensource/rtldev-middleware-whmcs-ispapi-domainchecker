@@ -1394,8 +1394,9 @@ const DomainSearch = function () {
   const search = url.searchParams.get('search');
   const categories = url.searchParams.get('cat');
   if (search !== null) {
+    $('#searchfield').val(search);
     this.searchStore = {
-      domain: DomainSearch.cleanupSearchString(search),
+      domain: search,
       activeCategories:
         categories === null
           ? []
@@ -1414,16 +1415,20 @@ const DomainSearch = function () {
     );
     this.initFromSessionStorage = 2; // filters can be overwritten by reseller settings
   } else {
+    const $mysf = $('#searchfield');
+    const tmp = $mysf.val();
     // (2) if sessionStore provides a configuration
     if (sessionStorage.getItem('ispapi_searchStore')) {
       this.searchStore = JSON.parse(
         sessionStorage.getItem('ispapi_searchStore')
       );
       this.initFromSessionStorage = 1;
-      const tmp = $('#searchfield').val();
+      // do not override searchstr that got posted
       if (tmp) {
         this.searchStore.domain = tmp;
-      } // do not override searchstr that got posted
+      } else {
+        $mysf.val(this.searchStore.domain);
+      }
     } else {
       // (3) otherwise, start with defaults / empty config
       this.searchStore = {};
@@ -1433,11 +1438,10 @@ const DomainSearch = function () {
   }
   // --- END
 };
-DomainSearch.cleanupSearchString = function (str) {
+DomainSearch.prototype.cleanupSearchString = function (str) {
   // todo: review this regex with /[~`!@#$% ...]/ this looks quite ugly
   // invalid chars - SEARCH.INVALIDCHARACTERS@ispapi-search
-  const invalidChars =
-    /(~|`|!|@|#|\$|%|\^|&|\*|\(|\)|_|\+|=|{|}|\[|\]|\||\\|;|:|"|'|<|>|,|\?|\/)/g;
+  const invalidChars = /(~|`|!|@|#|\$|%|\^|&|\*|\(|\)|_|\+|=|{|}|\[|\]|\||\\|;|:|"|'|<|>|,|\?|\/)/g;
   let tmp = str.toLowerCase();
   tmp = tmp.replace(/(^\s+|\s+$)/g, ''); // replace all dangling white spaces
   try {
@@ -1447,7 +1451,31 @@ DomainSearch.cleanupSearchString = function (str) {
     tmp = tmp.replace(/(\s|%20).+$/, ''); // not a working url, strip everything after space
   }
   tmp = tmp.replace(invalidChars, '');
-  return tmp;
+
+  if (!tmp.length || this.activeCurrency === null || this.activeCurrency === undefined) {
+    return tmp;
+  }
+  let search = tmp;
+  const tlds = this.d[this.activeCurrency].pricing.tlds;
+  const tldparts = [];
+  tmp = search.split('.').reverse();
+  let found = true;
+  let part;
+  while (tmp.length && found) {
+    part = tmp.shift();
+    found = Object.prototype.hasOwnProperty.call(tlds, part);
+    if (found) {
+      tldparts.push(part);
+    }
+  }
+  if (!tldparts.length) {
+    return search.replace(/^[^.]+\./, '');
+  }
+  search = '';
+  if (tmp.length) {
+    search = part + '.';
+  }
+  return `${search}${tldparts.join('.')}`;
 };
 DomainSearch.prototype.handleResultCache = function () {
   this.searchcfg.cacheJobID = setInterval(
@@ -1567,6 +1595,12 @@ DomainSearch.prototype.initForm = function () {
     });
     this.searchStore = tmp;
   }
+
+  // final search string cleanup for initial page load
+  const $mysf = $('#searchfield');
+  $mysf.val(this.cleanupSearchString($mysf.val()));
+  this.searchStore.domain = $mysf.val();
+
   if (this.initFromSessionStorage) {
     // loop over all form elements (select is also considered under scope of an :input)
     $('#searchform *')
@@ -1582,6 +1616,7 @@ DomainSearch.prototype.initForm = function () {
     if (!this.searchStore.activeCategories.length) {
       this.searchStore.activeCategories = data.defaultActiveCategories;
     }
+    $('#searchform *').filter(':input');
     this.catmgr
       .setCategories(data.categories, this.searchStore.activeCategories)
       .generate();
@@ -1652,7 +1687,7 @@ DomainSearch.prototype.initForm = function () {
       const isViewFilter = /^showTakenDomains$/i.test(key);
       // rewrite the value as necessary for search input field
       if (key === 'domain') {
-        value = DomainSearch.cleanupSearchString(value);
+        value = ds.cleanupSearchString(value);
       }
       // trigger search
       if (target[key] !== value) {
@@ -1714,7 +1749,7 @@ DomainSearch.prototype.initForm = function () {
   $('#searchfield')
     .off('change')
     .change(function () {
-      const val = DomainSearch.cleanupSearchString(this.value);
+      const val = ds.cleanupSearchString(this.value);
       const tmp = ispapiIdnconverter.convert([val]);
       ds.searchcfg.searchString = { IDN: tmp.IDN[0], PC: tmp.PC[0] };
       ds.searchStore[this.name] = val;
