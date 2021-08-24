@@ -1,3 +1,10 @@
+## [14.1.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.1.0...v14.1.1) (2021-08-24)
+
+
+### Bug Fixes
+
+* **search term:** cleanup also for POST/GET. Extended cleanup by TLD-detection ([8691a1b](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/8691a1b759729c1bcb26b3cc79682892485a7a7b))
+
 # [14.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.0.6...v14.1.0) (2021-08-24)
 
 
