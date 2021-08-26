@@ -63,10 +63,19 @@ SearchResult.prototype.generate = function () {
     case 'INVALID':
       this.showInvalid();
       break;
+    case 'RESERVED':
+      this.showReserved();
+      break;
+    case 'AFTERMARKET':
+      this.showAftermarket();
+      break;
     default:
       // status 'UNKNOWN' and error cases
       this.showError();
       break;
+  }
+  if (this.data.isSearchString) {
+    this.data.element.addClass('searchstring-' + (this.data.status === 'AVAILABLE' ? 'available' : 'taken'));
   }
   this.applyClickHandler();
 };
@@ -111,7 +120,35 @@ SearchResult.prototype.showInvalid = function () {
   row.element
     .find('div.availability')
     .html(
-      `<span class="label label-hx label-hx-warning" data-toggle="tooltip" title="${translations.label_descr_invalidtld}">${translations.domaincheckerinvalidtld}</span>`
+      `<span class="label label-hx label-hx-taken" data-toggle="tooltip" title="${translations.label_descr_invaliddn}">${translations.domaincheckerinvaliddn}</span>`
+    );
+  row.element.find('div.col-xs-7').removeClass('search-result-info');
+  row.element
+    .find('div.second-line.registerprice')
+    .html('<span>—</span><br><span><br></span>');
+};
+// TODO move the below HTML code into Mustache templates
+// idea: having for every case a complete row covered, easier to read
+SearchResult.prototype.showReserved = function () {
+  const row = this.data;
+  row.element
+    .find('div.availability')
+    .html(
+      `<span class="label label-hx label-hx-reserved" data-toggle="tooltip" title="${translations.label_descr_reserveddn}">${translations.domaincheckerreserveddn}</span>`
+    );
+  row.element.find('div.col-xs-7').removeClass('search-result-info');
+  row.element
+    .find('div.second-line.registerprice')
+    .html('<span>—</span><br><span><br></span>');
+};
+// TODO move the below HTML code into Mustache templates
+// idea: having for every case a complete row covered, easier to read
+SearchResult.prototype.showAftermarket = function () {
+  const row = this.data;
+  row.element
+    .find('div.availability')
+    .html(
+      `<span class="label label-hx label-hx-premium" data-toggle="tooltip" title="${translations.label_descr_aftermarket}">${translations.aftermarket}</span>`
     );
   row.element.find('div.col-xs-7').removeClass('search-result-info');
   row.element
@@ -150,13 +187,11 @@ SearchResult.prototype.showAvailable = function () {
       );
     row.element.find('div.second-line.registerprice').empty();
     if (row.premiumtype) {
-      // premium domain (AFTERMARKET, REGISTRY RESERVED, ...
+      // premium domain handling
       row.element
         .find('div.availability')
         .append(
-          `<span class="label label-hx label-hx-premium">${
-            translations[row.premiumtype.toLowerCase()] || row.premiumtype
-          }</span>`
+          `<span class="label label-hx label-hx-premium">${translations[row.premiumtype.toLowerCase()] || row.premiumtype}</span>`
         );
     } else {
       if (multiTerms) {
@@ -246,12 +281,12 @@ SearchResult.prototype.showTaken = function () {
   row.element
     .find('div.availability')
     .html(
-      `<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}" data-pc="${row.PC}"><i class="glyphicon glyphicon-question-sign"></i> ${translations.whois}</span>`
+      `<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}" data-pc="${row.PC}"><i class="fa fa-question-circle"></i> ${translations.whois}</span>`
     );
   row.element
     .find('span.domainname.domain-label, span.domainname.tld-zone')
     .removeClass('added');
-  if (row.REASON && row.REASON.length) {
+  /*if (row.REASON && row.REASON.length) {
     // TODO: we could translate REASON by mapping it to translation keys using regular expressions
     // that would allow us to improve step by step
     row.element
@@ -259,7 +294,7 @@ SearchResult.prototype.showTaken = function () {
       .attr('title', row.REASON)
       .attr('data-toggle', 'tooltip')
       .addClass('pt');
-  }
+  }*/
   if (row.isBackorderable) {
     const renprice = this.getPrice('renew', true, 1);
     const regprice = this.getPrice('backorder', true);
@@ -388,12 +423,12 @@ SearchResult.prototype.showWhoisInformation = function (e) {
     .hide();
   $('#whoisDomainName').html(domain);
   $('#modalWhois').modal('show');
-  $('#modalWhoisLoader').toggleClass('hidden');
+  $('#modalWhoisLoader').toggleClass('w-hidden');
   $.post(`${wr}/mywhois.php`, `idn=${domain}&pc=${pc}`, function (data) {
     // fetch html contents of body element
     const m = data.match(/<body[^>]*>([\w|\W]*)<\/body>/im);
     $('#modalWhoisBody').html(m[1]);
-    $('#modalWhoisLoader').toggleClass('hidden');
+    $('#modalWhoisLoader').toggleClass('w-hidden');
     $('#modalWhoisBody').show();
   });
 };

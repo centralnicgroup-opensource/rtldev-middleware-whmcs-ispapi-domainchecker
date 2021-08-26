@@ -2,12 +2,13 @@
 
 $_ADDONLANG['label_descr_available'] = "Dieser Domainname kann registriert werden.";
 $_ADDONLANG['label_descr_premium'] = "Dieser Domainname ist als Premium-Domain verfügbar. Preise von Premium-Domainnamen sind aufgrund ihrer höheren Wertigkeit i.A. teuer im Vergleich zu normalen Domainnamen.";
-$_ADDONLANG['label_descr_aftermarket'] = "Dieser Premium-Domainname steht zum Verkauf und wird über einen Aftermarket-Anbieter angeboten. Es kann einige Stunden oder bis zu einen Tag dauern den Registrierungsprozess für diese Domain abzuschließen.";
+$_ADDONLANG['label_descr_aftermarket'] = "Dieser Premium-Domainname steht zum Verkauf und wird über einen Aftermarket-Anbieter angeboten. Es kann einige Stunden oder bis zu einen Tag dauern den Registrierungsprozess für diese Domain abzuschließen. Setzen Sie sich bitte bzgl. des Kaufs mit dem Support in Verbindung.";
 $_ADDONLANG['label_descr_taken'] = "Dieser Domainname ist reserviert / bereits vergeben. Per Mouseover wird der spezifische Grund genannt.";
 $_ADDONLANG['label_descr_backorder'] = "Dieser Domainname ist bereits vergeben. Über unseren Backorder-Dienst versuchen wir den Domainnamen für Sie zu registrieren, sobald dessen aktueller Registrierungszeitraum endet. Dieser Dienst wird nur im Erfolgsfall berechnet.";
 $_ADDONLANG['label_descr_whois'] = "Klicken sie hierauf um Whois Informationen abzurufen.";
 $_ADDONLANG['label_descr_error'] = "Ein Fehler ist aufgetreten. Versuchen Sie es später erneut. Falls dies nicht hilft, kontaktieren Sie den Support.";
-$_ADDONLANG['label_descr_invalidtld'] = "Unbekannte oder nicht unterstützte Domainendung.";
+$_ADDONLANG['label_descr_invaliddn'] = "Ungültiger Domainname. Mögliche Ursache: Ungültige Endung oder nicht von der Registry unterstütze IDN Zeichen.";
+$_ADDONLANG['label_descr_reserveddn'] = "Reservierter Domainname. Kontaktieren Sie den Support.";
 $_ADDONLANG['noresults'] = "Keine Ergebnisse gefunden, die zu Ihren Sucheinstellungen passen.";
 $_ADDONLANG['legend_label'] = "Hilfe";
 $_ADDONLANG['bttn_cancel'] = "Abbrechen";
@@ -23,7 +24,8 @@ $_ADDONLANG['filter_notaken'] = "NUR VERFÜGBARE";
 $_ADDONLANG['domaincheckertaken'] = "VERGEBEN";
 $_ADDONLANG['domaincheckeravailable'] = "VERFÜGBAR";
 $_ADDONLANG['domaincheckererror'] = "FEHLER";
-$_ADDONLANG['domaincheckerinvalidtld'] = "UNGÜLTIGE ENDUNG";
+$_ADDONLANG['domaincheckerinvaliddn'] = "UNGÜLTIGE DOMAIN";
+$_ADDONLANG['domaincheckerreserveddn'] = "RESERVIERTE DOMAIN";
 $_ADDONLANG['categories_label'] = "Kategorien";
 $_ADDONLANG['more'] = "Mehr";
 $_ADDONLANG['backorder_info_text'] = "ist registriert, aber Sie wollen diese Domain immer noch, wenn sie abläuft. Setzen Sie einen kostenlosen BACKORDER noch heute und wir werden Sie benachrichtigen und versuchen die Domain zu registrieren, wenn sie verfügbar ist. ";

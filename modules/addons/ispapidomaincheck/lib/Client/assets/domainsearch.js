@@ -79,45 +79,62 @@ const DomainSearch = function () {
   }
   // --- END
 };
-DomainSearch.prototype.cleanupSearchString = function (str) {
-  // todo: review this regex with /[~`!@#$% ...]/ this looks quite ugly
-  // invalid chars - SEARCH.INVALIDCHARACTERS@ispapi-search
-  const invalidChars = /(~|`|!|@|#|\$|%|\^|&|\*|\(|\)|_|\+|=|{|}|\[|\]|\||\\|;|:|"|'|<|>|,|\?|\/)/g;
-  let tmp = str.toLowerCase();
-  tmp = tmp.replace(/(^\s+|\s+$)/g, ''); // replace all dangling white spaces
-  try {
-    const url = new URL(tmp); // try to url-parse given string
-    tmp = url.hostname; // worked, we have hostname including subdomain
-  } catch (e) {
-    tmp = tmp.replace(/(\s|%20).+$/, ''); // not a working url, strip everything after space
-  }
-  tmp = tmp.replace(invalidChars, '');
 
-  if (!tmp.length || this.activeCurrency === null || this.activeCurrency === undefined) {
-    return tmp;
-  }
-  let search = tmp;
-  const tlds = this.d[this.activeCurrency].pricing.tlds;
-  const tldparts = [];
-  tmp = search.split('.').reverse();
-  let found = true;
-  let part;
-  while (tmp.length && found) {
-    part = tmp.shift();
-    found = Object.prototype.hasOwnProperty.call(tlds, part);
-    if (found) {
-      tldparts.push(part);
+DomainSearch.prototype.cleanupSearchString = function (str) {
+  function cleanupSearchStringSingle (str) {
+    let tmp = str;
+    // todo: review this regex with /[~`!@#$% ...]/ this looks quite ugly
+    // invalid chars - SEARCH.INVALIDCHARACTERS@ispapi-search
+    const invalidChars = /(~|`|!|@|#|\$|%|\^|&|\*|\(|\)|_|\+|=|{|}|\[|\]|\||\\|;|:|"|'|<|>|,|\?|\/)/g;
+    try {
+      const url = new URL(tmp); // try to url-parse given string
+      tmp = url.hostname; // worked, we have hostname including subdomain
+    } catch (e) {
     }
+    tmp = tmp.replace(invalidChars, '');
+    if (
+      !tmp.length ||
+      this.activeCurrency === null ||
+      this.activeCurrency === undefined
+    ) {
+      return tmp;
+    }
+    
+    if (!/\./.test(tmp)) {
+      return tmp;
+    }
+    let search = tmp;
+    const tlds = this.d[this.activeCurrency].pricing.tlds;
+    const tldparts = [];
+    tmp = search.split('.').reverse();
+    let part;
+    let tld;
+    let found;
+    do {
+      part = tmp.shift();
+      tld = part;
+      if (tldparts.length) {
+        tld += `.${tldparts.join('.')}`;
+      }
+      found = Object.prototype.hasOwnProperty.call(tlds, tld);
+      if (found) {
+        tldparts.unshift(part);
+      }
+    } while (tmp.length && found);
+    if (!tldparts.length) {
+      return search.replace(/^[^.]+\./, '');
+    }
+    return `${part}.${tldparts.join('.')}`;
   }
-  if (!tldparts.length) {
-    return search.replace(/^[^.]+\./, '');
-  }
-  search = '';
-  if (tmp.length) {
-    search = part + '.';
-  }
-  return `${search}${tldparts.join('.')}`;
+
+  let searchterms = str.toLowerCase()
+    .replace(/(^\s+|\s+$)/g, '')// replace all dangling white spaces
+    .replace(/(%20|\s)+/g, ' ')// replace multiple (urlenc) space with space
+    .split(' ');// multi-keyword search
+  return searchterms.map(cleanupSearchStringSingle, this)
+    .join(' ');
 };
+
 DomainSearch.prototype.handleResultCache = function () {
   this.searchcfg.cacheJobID = setInterval(
     function () {
@@ -279,8 +296,7 @@ DomainSearch.prototype.initForm = function () {
     );
   }
   if (Object.prototype.hasOwnProperty.call(this.searchStore, 'domain')) {
-    const tmp = ispapiIdnconverter.convert([this.searchStore.domain]);
-    this.searchcfg.searchString = { IDN: tmp.IDN[0], PC: tmp.PC[0] };
+    this.searchcfg.searchString = ispapiIdnconverter.convert(this.searchStore.domain.split(' '));
   }
   $('#showPremiumDomains i').addClass(
     this.searchStore.showPremiumDomains === '1'
@@ -329,6 +345,7 @@ DomainSearch.prototype.initForm = function () {
       // rewrite the value as necessary for search input field
       if (key === 'domain') {
         value = ds.cleanupSearchString(value);
+        $('#searchfield').val(value);// this won't fire a change event
       }
       // trigger search
       if (target[key] !== value) {
@@ -391,8 +408,7 @@ DomainSearch.prototype.initForm = function () {
     .off('change')
     .change(function () {
       const val = ds.cleanupSearchString(this.value);
-      const tmp = ispapiIdnconverter.convert([val]);
-      ds.searchcfg.searchString = { IDN: tmp.IDN[0], PC: tmp.PC[0] };
+      ds.searchcfg.searchString = ispapiIdnconverter.convert(val.split(' '));
       ds.searchStore[this.name] = val;
     });
   if (ds.mode) {
@@ -562,18 +578,13 @@ DomainSearch.prototype.buildRows = function (list) {
 DomainSearch.prototype.buildDomainlist = async function () {
   // suggestionlist only works well with IDN keyword (FTASKS-2442)
   const searchstr = this.searchcfg.searchString.IDN;
-  const searchLabel = searchstr.replace(/\..+$/, '');
-  let searchTld = '';
-  if (/\./.test(searchstr)) {
-    searchTld = searchstr.replace(/^[^.]+\./, '');
-  }
   const tldsbyprio = this.d[this.activeCurrency].tldsbyprio;
-  let domainlist;
+  let domainlist = [];
   let priodomainlist = [];
   if (this.mode) {
     // domain suggestions search
     // (1) fetch list of domain suggestions from API
-    domainlist = await this.getDomainSuggestions(searchstr);
+    domainlist = await this.getDomainSuggestions(searchstr.join(' '));
     // (2) reorder them by by priority of the TLD (reorder by ascii by option)
     const regex = /^[^.]+\./;
     priodomainlist = domainlist.sort(function (a, b) {
@@ -583,28 +594,51 @@ DomainSearch.prototype.buildDomainlist = async function () {
     });
   } else {
     // default search
-    // (1) build domain list out of selected categories
-    domainlist = this.catmgr.buildDomainlist(searchLabel);
+    const directResults = [];
+    const labels = searchstr.map(function(str) {
+        const label = str.replace(/\..+$/, '');
+        let tld = '';
+        if (/\./.test(str)) {
+          tld = str.replace(/^[^.]+\./, '');
+        }
+        domainlist = domainlist.concat(
+          this.catmgr.buildDomainlist(label)
+        );
+        if (tld.length) {
+          directResults.push(str);
+          domainlist.push(str);
+        }
+        // (1) build domain list out of selected categories        
+        return {
+          label,
+          tld
+        };
+      }, this);
+      
     // (2) build domain list out of ALL available TLDs
     tldsbyprio.forEach((tld) => {
-      const entry = `${searchLabel}.${tld}`;
-      priodomainlist.push(entry);
+      labels.forEach(item => {
+        const entry = `${item.label}.${tld}`;
+        priodomainlist.push(entry);
+      });
     });
-  }
-  if (searchTld.length) {
-    priodomainlist.unshift(searchstr);
+    if (directResults.length) {
+      priodomainlist = directResults.concat(priodomainlist);
+    }
   }
 
   // now remove duplicates (case: search for domain including tld)
   // and filter against the selected TLDs (domainlist)
-  priodomainlist = priodomainlist.filter((el, index, arr) => {
+  /*priodomainlist = priodomainlist.filter((el, index, arr) => {
     return (
-      (domainlist.indexOf(el) !== -1 || // entry is part of search
-        el === this.searchcfg.searchString.IDN || // or matches the IDN search term
-        el === this.searchcfg.searchString.PC) && // or matches the PunyCode search term
+      (
+        domainlist.indexOf(el) !== -1 // entry is part of search
+        || el === this.searchcfg.searchString.IDN // or matches the IDN search term
+        || el === this.searchcfg.searchString.PC
+      ) && // or matches the PunyCode search term
       index === arr.indexOf(el)
     );
-  });
+  });*/
   return priodomainlist;
 };
 DomainSearch.prototype.getCachedResult = function (domain) {
@@ -647,9 +681,10 @@ DomainSearch.prototype.getSearchGroups = async function (searchterm) {
     row.pricing = ds.getTLDPricing(row.IDN);
     row.domainlabel = row.IDN.replace(/\..+$/, '');
     row.extension = row.IDN.replace(/^[^.]+/, '');
-    row.isSearchString =
-      row.PC === ds.searchcfg.searchString.PC ||
-      row.IDN === ds.searchcfg.searchString.IDN; // maybe we could bring this with the above `searchterm` together
+    row.isSearchString = (
+      ds.searchcfg.searchString.PC.includes(row.PC) ||
+      ds.searchcfg.searchString.IDN.includes(row.IDN)
+    ); // maybe we could bring this with the above `searchterm` together
     // avoid duplicates
     // jquery v3 provides $.escapeSelector, this can be replaced when
     // WHMCS six template's dependency jquery upgrades from v1 to v3 one day :-(
@@ -730,16 +765,14 @@ DomainSearch.prototype.processResults = function (grp, d) {
           } else {
             row.premiumtype = 'PREMIUM';
           }
-        } else if (row.PREMIUMCHANNEL) {
-          row.premiumtype = 'AFTERMARKET';
         }
         // override by returned registrar prices and cleanup row data
         if (Object.prototype.hasOwnProperty.call(row, 'PRICE')) {
-          row.pricing.register = { 1: row.PRICE.toFixed(2) };
+          row.pricing.register = { 1: parseFloat(row.PRICE).toFixed(2) };
           delete row.PRICE;
         }
         if (Object.prototype.hasOwnProperty.call(row, 'PRICERENEW')) {
-          row.pricing.renew = { 1: row.PRICERENEW.toFixed(2) };
+          row.pricing.renew = { 1: parseFloat(row.PRICERENEW).toFixed(2) };
           delete row.PRICERENEW;
         }
       }

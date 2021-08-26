@@ -2,12 +2,13 @@
 
 $_ADDONLANG['label_descr_available'] = "This domain name is available for registration.";
 $_ADDONLANG['label_descr_premium'] = "This domain name is available as premium domain name. Check the pricing as premium domains are in general more expensive than normal domains due to their perceived higher value.";
-$_ADDONLANG['label_descr_aftermarket'] = "This premium domain name is for sale and offered by an aftermarket provider. It may take a few hours or up to a day to complete the registration process for this domain.";
+$_ADDONLANG['label_descr_aftermarket'] = "This premium domain name is for sale and offered by an aftermarket provider. It may take a few hours or up to a day to complete the registration process for this domain. Please reach out to support to get it ordered for you.";
 $_ADDONLANG['label_descr_taken'] = "This domain name is already registered. You might get the specific reason by mouseover.";
 $_ADDONLANG['label_descr_backorder'] = "This domain name is already registered. Through our backorder service we will then try to register the domain for you as soon as possible, when the domain's current registration term comes to its end. You will only be charged for this service in case of success.";
 $_ADDONLANG['label_descr_whois'] = "Click this label to fetch the Whois Information.";
 $_ADDONLANG['label_descr_error'] = "An error occured. Retry again later. If it doesn't help, contact support.";
-$_ADDONLANG['label_descr_invalidtld'] = "Unknown or Unsupported Domain Name Extension.";
+$_ADDONLANG['label_descr_invaliddn'] = "Invalid domain name. Possible cause: Invalid extension or IDN characters not supported by the registry.";
+$_ADDONLANG['label_descr_reserveddn'] = "Reserved Domain Name. Contact Support.";
 $_ADDONLANG['noresults'] = "No results available matching your search criteria.";
 $_ADDONLANG['legend_label'] = "Help";
 $_ADDONLANG['bttn_cancel'] = "Cancel";
@@ -23,7 +24,8 @@ $_ADDONLANG['filter_notaken'] = "AVAILABLE ONLY";
 $_ADDONLANG['domaincheckertaken'] = "TAKEN";
 $_ADDONLANG['domaincheckeravailable'] = "AVAILABLE";
 $_ADDONLANG['domaincheckererror'] = "ERROR";
-$_ADDONLANG['domaincheckerinvalidtld'] = "INVALID EXTENSION";
+$_ADDONLANG['domaincheckerinvaliddn'] = "INVALID DOMAIN";
+$_ADDONLANG['domaincheckerreserveddn'] = "RESERVED DOMAIN";
 $_ADDONLANG['categories_label'] = "Categories";
 $_ADDONLANG['more'] = "More";
 $_ADDONLANG['backorder_info_text'] = "is registered, but you still want this domain if and when it expires. Place a free BACKORDER today and we will notify and attempt to register* when it becomes available. ";

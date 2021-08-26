@@ -58,9 +58,9 @@
     </div>    
   </div>
   <div id="tabs-2">
-    <button class="btn btn-default" id="importdefaultcategories"><i class="glyphicon glyphicon-import"></i> Import Default Categories</button>
-    <button class="btn btn-default" id="addcategory"><i class="glyphicon glyphicon-plus-sign"></i> Add Category</button>
-    <button class="btn btn-default" id="addtld"><i class="glyphicon glyphicon-plus-sign"></i> Add TLD to Category</button>
+    <button class="btn btn-default" id="importdefaultcategories"><i class="fa fa-download"></i> Import Default Categories</button>
+    <button class="btn btn-default" id="addcategory"><i class="fa fa-plus"></i> Add Category</button>
+    <button class="btn btn-default" id="addtld"><i class="fa fa-plus"></i> Add TLD to Category</button>
     <br/><br/>
     <div id="maingrid" class="grid"></div>
   </div>

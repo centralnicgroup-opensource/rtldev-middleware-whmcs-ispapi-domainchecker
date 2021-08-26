@@ -2,12 +2,13 @@
 
 $_ADDONLANG['label_descr_available'] = "Este domínio está disponível para registo.";
 $_ADDONLANG['label_descr_premium'] = "Este domínio está disponível como domínio premium. Verifique os preços, pois os domínios premium geralmente são mais caros que os domínios normais devido ao alto valor de mercado.";
-$_ADDONLANG['label_descr_aftermarket'] = "Este domínio premium está à venda e é oferecido por um fornecedor de pós-venda. Pode levar algumas horas ou até um dia para concluir o processo de registo para este domínio.";
+$_ADDONLANG['label_descr_aftermarket'] = "Este domínio premium está à venda e é oferecido por um fornecedor de pós-venda. Pode levar algumas horas ou até um dia para concluir o processo de registo para este domínio. Entre em contato com o suporte para solicitá-lo para você.";
 $_ADDONLANG['label_descr_taken'] = "Este domínio já está registado. Pode ser oferecida uma razão ao sobrevoar o rato sobre ele.";
 $_ADDONLANG['label_descr_backorder'] = "Este domínio já está registado. Através do nosso serviço de domínios de reserva, tentaremos registar o domínio o mais breve possível, quando o registo actual do mesmo chegar ao fim. Só será cobrado por este serviço em caso de sucesso. ";
 $_ADDONLANG['label_descr_whois'] = "Clique neste rótulo para mostrar as informações Whois.";
 $_ADDONLANG['label_descr_error'] = "Um erro ocorreu. Tente novamente mais tarde. Se não ajudar, entre em contato com o suporte.";
-$_ADDONLANG['label_descr_invalidtld'] = "Extensão de nome de domínio desconhecida ou não suportada.";
+$_ADDONLANG['label_descr_invaliddn'] = "Nome de domínio inválido. Possível causa: final inválido ou caracteres IDN não suportados pelo registro.";
+$_ADDONLANG['label_descr_reserveddn'] = "Nome de domínio reservado. Entre em contato com o suporte.";
 $_ADDONLANG['noresults'] = "Nenhum resultado disponível corresponde aos seus critérios de pesquisa.";
 $_ADDONLANG['legend_label'] = "Ajuda";
 $_ADDONLANG['bttn_cancel'] = "Cancelar";
@@ -23,7 +24,8 @@ $_ADDONLANG['filter_notaken'] = "DISPONÍVEIS APENAS";
 $_ADDONLANG['domaincheckertaken'] = "OCUPADO";
 $_ADDONLANG['domaincheckeravailable'] = "DISPONÍVEL";
 $_ADDONLANG['domaincheckererror'] = "ERRO";
-$_ADDONLANG['domaincheckerinvalidtld'] = "INVÁLIDA TLD";
+$_ADDONLANG['domaincheckerinvaliddn'] = "DOMÍNIO INVÁLIDO";
+$_ADDONLANG['domaincheckerreserveddn'] = "DOMÍNIO RESERVADO";
 $_ADDONLANG['categories_label'] = "Categorias";
 $_ADDONLANG['more'] = "Mais";
 $_ADDONLANG['backorder_info_text'] = "está registado, mas ainda deseja esse domínio se e quando expirar. Faça um domínio de reserva gratuito hoje e notificaremos e tentaremos registar * quando ele estiver disponível.";

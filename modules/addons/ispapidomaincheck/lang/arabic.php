@@ -2,12 +2,13 @@
 
 $_ADDONLANG['label_descr_available'] = "هذا المجال متاح للتسجيل.";
 $_ADDONLANG['label_descr_premium'] = "اسم المجال هذا متاح كاسم نطاق 'premium'. تحقق من التسعير لأن النطاقات المميزة بشكل عام أغلى من النطاقات العادية.";
-$_ADDONLANG['label_descr_aftermarket'] = "اسم النطاق المميز هذا معروض للبيع ومقدم من قبل شركة ما بعد البيع. قد يستغرق الأمر بضع ساعات أو ما يصل إلى يوم كامل لإكمال عملية التسجيل لهذا المجال.";
+$_ADDONLANG['label_descr_aftermarket'] = "اسم النطاق المميز هذا معروض للبيع ومقدم من قبل شركة ما بعد البيع .قد يستغرق الأمر بضع ساعات أو ما يصل إلى يوم كامل لإكمال عملية التسجيل لهذا المجال.يُرجى التواصل مع فريق الدعم للحصول عليه من أجلك.";
 $_ADDONLANG['label_descr_taken'] = "اسم المجال مسجل مسبقا. قد تحصل على سبب محدد بواسطة تحريك الماوس على النص.";
 $_ADDONLANG['label_descr_backorder'] = "اسم المجال مسجل من قبل. من خلال خدمة backorder الخاصة بنا ، سنحاول تسجيل النطاق لك في أقرب وقت ممكن ، عندما تتم عمليه التسجيل الحالية للنطاق ، ستتم محاسبتك على هذه الخدمة فقط في حالة النجاح.";
 $_ADDONLANG['label_descr_whois'] = "انقر فوق هذا الملصق لجلب معلومات Whois.";
 $_ADDONLANG['label_descr_error'] = "حدث خطأ. أعد المحاولة لاحقًا. إذا لم يساعد ذلك ، فاتصل بالدعم.";
-$_ADDONLANG['label_descr_invalidtld'] = "ملحق اسم المجال غير معروف أو غير مدعوم.";
+$_ADDONLANG['label_descr_invaliddn'] = "اسم النطاق غير صالح. السبب المحتمل: نهاية غير صالحة أو أحرف IDN غير معتمدة من قبل التسجيل.";
+$_ADDONLANG['label_descr_reserveddn'] = "اسم المجال المحجوز. اتصل بالدعم.";
 $_ADDONLANG['noresults'] = "لا توجد نتائج تطابق معايير البحث الخاصة بك.";
 $_ADDONLANG['legend_label'] = "مساعده";
 $_ADDONLANG['bttn_cancel'] = "إلغاء";
@@ -23,7 +24,8 @@ $_ADDONLANG['filter_notaken'] = "متوفر فقط";
 $_ADDONLANG['domaincheckertaken'] = "مأخوذ";
 $_ADDONLANG['domaincheckeravailable'] = "متوفر";
 $_ADDONLANG['domaincheckererror'] = "خطأ";
-$_ADDONLANG['domaincheckerinvalidtld'] = "امتداد المجال غير صالح";
+$_ADDONLANG['domaincheckerinvaliddn'] = "اسم النطاق غير صالح.";
+$_ADDONLANG['domaincheckerreserveddn'] = "اسم المجال المحجوز";
 $_ADDONLANG['categories_label'] = "التصنيفات";
 $_ADDONLANG['more'] = "ألمزيد";
 $_ADDONLANG['backorder_info_text'] = "تم تسجيله ، لكنك لا تزال تريد هذا النطاق إذا انتهت صلاحيته. ضع BACKORDER مجانًا اليوم وسنقوم بإشعارك ومحاولة التسجيل * عند توفرها.";

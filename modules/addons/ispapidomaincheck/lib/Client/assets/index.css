@@ -268,9 +268,9 @@ span.spanelement {
   color: lightseagreen;
   border: 1px lightseagreen solid;
 }
-.label-hx-warning {
-  color: #ffc107;
-  border: 1px #ffc107 solid;
+.label-hx-reserved {
+  color: #00b1df;
+  border: 1px #00b1df solid;
 }
 .label-hx-error {
   color: #dc3545;
@@ -301,8 +301,14 @@ span.spanelement {
 }
 .searchstring {
   border-radius: 10px;
-  border: 2px #0033a0 solid;
   padding: 10px 0px;
+  border: 2px none solid;
+}
+.searchstring-available {
+  border: 2px #00a850 solid;
+}
+.searchstring-taken {
+  border: 2px #939598 solid;
 }
 /*.premium {
     font-size: 12px;

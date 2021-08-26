@@ -58,6 +58,9 @@ class Controller
             "success" => $r["CODE"] == "200",
             "results" => []
         ];
+        //$invalids = [];
+        //$takens = [];
+        //$reserveds = [];
         if ($res["success"]) {
             $keys = ["PREMIUMCHANNEL", "PRICE", "PRICERENEW", "REASON", "CLASS"];
             $rs = $r["PROPERTY"];
@@ -67,66 +70,118 @@ class Controller
                 }
                 foreach ($rs["DOMAINCHECK"] as $idx => &$val) {
                     $idn = $data["idn"][$idx];
-                    $row = [];
+                    list($code, $descr) = explode(" ", $val, 2);
+                    $row = [
+                        "DOMAIN" => $data["pc"][$idx],
+                        "API" => [
+                            "CODE" => $code ? $code : "421",
+                            "DESCR" => $descr ? $descr : "Temporary Error occured.",
+                            "REASON" => $code ? $rs["REASON"][$idx] : ""
+                        ]
+                    ];
                     $type = false;
-                    switch (substr($val, 0, 3)) {
+                    switch ($row["API"]["CODE"]) {
                         case "210":
-                            $availability = true;
+                            $row["statusText"] = SearchResult::STATUS_NOT_REGISTERED;
+                            $row["status"] = "AVAILABLE";
                             break;
+                        case "":
+                        case "421":
+                            $row["statusText"] = SearchResult::STATUS_UNKNOWN;
+                            $row["status"] = "ERROR";
+                            $row["REASON"] = $row["API"]["DESCR"];
+                            break;
+                        case "504":
+                        case "505":                           
+                        case "541":
                         case "549"://invalid repository (unsupported TLD)
-                            $whois = localAPI('DomainWhois', ["domain" => $idn]);
+                            // 504 Parameter value policy error
+                            // 505 Parameter value syntax error: Invalid domain name.
+                            // 549 Command failed; Invalid value in field [.+/DomainName]
+                            // 549 Command failed; Domain name is not a valid IDN for this TLD
+                            $row["statusText"] = preg_replace("/^[^;]+; /", "", $val);
+                            $row["status"] = "INVALID";
+                            //$invalids[$row["DOMAIN"]] = $row;
+                            
+                            /*$whois = localAPI('DomainWhois', ["domain" => $idn]);
                             if ($whois["result"] === "error") {
                                 $availability = -1;
+                                $rs["REASON"][$idx] = $whois["message"];
                             } else {
                                 $availability = preg_match("/^available$/i", $whois["status"]);
-                            }
+                            }*/
                             break;
                         case "211":
-                            $availability = false;
-                            //further handling of specific cases on client-sides
-                            if (isset($rs["PRICE"], $rs["CURRENCY"]) && !empty($rs["PRICE"][$idx])) {
-                                $price = $rs["PRICE"][$idx];
-                                $currency = $rs["CURRENCY"][$idx];
-                                $currencies = DCHelper::getCurrencies();
-                                $currencysettings = $currencies[$currency];
-                                $active_settings = $currencies[$_SESSION["currency"]];
-                                if ($currencysettings === null) {
-                                    //unsupported currency in WHMCS
-                                    //TODO: we could improve here by just converting currency
-                                    unset($rs["PRICE"][$idx], $rs["PRICERENEW"][$idx], $rs["CURRENCY"][$idx]);
-                                } else {
-                                    $premiumchannel = $rs["PREMIUMCHANNEL"][$idx];
-                                    $class = $rs["CLASS"][$idx];
-                                    $register_price_raw = DCHelper::getPremiumRegistrationPrice(
-                                        $price,
-                                        $currencysettings
-                                    );
-                                    $renew_price_raw = DCHelper::getPremiumRenewPrice(
-                                        $data["registrars"][$idx],
-                                        $class,
-                                        DCHelper::getDomainExtension($idn),
-                                        $currencysettings
-                                    );
-                                    $availability = true;
-                                    $rs["PRICE"][$idx] = $register_price_raw;
-                                    $rs["PRICERENEW"][$idx] = $renew_price_raw;
+                            if (preg_match("/reserved/i", $rs["REASON"][$idx])) {
+                                $row["statusText"] = SearchResult::STATUS_RESERVED;
+                                $row["status"] = "RESERVED";
+                                //$reserveds[$row["DOMAIN"]] = $row;
+                            } elseif (
+                                preg_match("/^(invalid|Character from an invalid script.|Invalid.+syntax|.+is not supported|Domain name not in a valid format.|.+Illegal unicode code points|U-label is not valid.+|disallowed codes|Not a valid.+domain name|invalid domain name|string contains.+character table)$/i", $rs["REASON"][$idx])
+                                || $rs["CLASS"][$idx] === "PREMIUM_ASIA_INVALID"
+                            ) {
+                                $row["statusText"] = $rs["REASON"][$idx];
+                                $row["status"] = "INVALID";
+                                //$invalids[$row["DOMAIN"]] = $row;
+                            } else {
+                                $row["status"] = "TAKEN";
+                                $row["statusText"] = SearchResult::STATUS_REGISTERED;   
+                                //$availability = false; // TODO
+                                //further handling of specific cases on client-sides
+                                if (
+                                    !empty($rs["PREMIUMCHANNEL"][$idx]) //e.g. AFTERNIC, SEDO
+                                    && preg_match("/not available/i", $descr) //taken ones -> aftermarket
+                                    && isset($rs["PRICE"], $rs["CURRENCY"])
+                                    && !empty($rs["PRICE"][$idx])
+                                ) {
+                                    $row["status"] = "AFTERMARKET";//STATUS_REGISTERED
                                 }
+                                elseif (
+                                    !empty($rs["PREMIUMCHANNEL"][$idx]) //exclude already registered ones
+                                    && preg_match("/^PREMIUM_/", $rs["CLASS"][$idx])
+                                    && preg_match("/^Premium Domain name available/i", $descr) //exclude aftermarket
+                                    && isset($rs["PRICE"], $rs["CURRENCY"])
+                                    && !empty($rs["PRICE"][$idx])
+                                ) {
+                                    $price = $rs["PRICE"][$idx];
+                                    $currency = $rs["CURRENCY"][$idx];
+                                    $currencies = DCHelper::getCurrencies();
+                                    $currencysettings = $currencies[$currency];
+                                    $active_settings = $currencies[$_SESSION["currency"]];
+                                    if ($currencysettings === null) {
+                                        //unsupported currency in WHMCS
+                                        //TODO: we could improve here by just converting currency
+                                        unset($rs["PRICE"][$idx], $rs["PRICERENEW"][$idx], $rs["CURRENCY"][$idx]);
+                                    } else {
+                                        $premiumchannel = $rs["PREMIUMCHANNEL"][$idx];
+                                        $class = $rs["CLASS"][$idx];
+                                        $register_price_raw = DCHelper::getPremiumRegistrationPrice(
+                                            $price,
+                                            $currencysettings
+                                        );
+                                        $renew_price_raw = DCHelper::getPremiumRenewPrice(
+                                            $data["registrars"][$idx],
+                                            $class,
+                                            DCHelper::getDomainExtension($idn),
+                                            $currencysettings
+                                        );
+                                        //$availability = true;//TODO
+                                        $row["statusText"] = SearchResult::STATUS_NOT_REGISTERED;
+                                        $row["status"] = "AVAILABLE";
+                                        $rs["PRICE"][$idx] = $register_price_raw;
+                                        $rs["PRICERENEW"][$idx] = $renew_price_raw;
+                                    }
+                                }
+                                //if (!$availability) {//TODO
+                                //    $takens[$row["DOMAIN"]] = $row;
+                                //}
                             }
                             break;
-                        case "541":
-                            $availability = false;
-                            $rs["REASON"][$idx] = preg_replace("/^[^;]+;/", "", $val);
-                            break;
                         default:
-                            $availability = false;
+                            $row["status"] = "TAKEN";
+                            $row["statusText"] = SearchResult::STATUS_REGISTERED;
+                            //$takens[$row["DOMAIN"]] = $row;
                             break;
-                    }
-                    if ($availability === -1) { // unsupported tld
-                        $row["statusText"] = SearchResult::STATUS_TLD_NOT_SUPPORTED;
-                        $row["status"] = "INVALID";
-                    } else {
-                        $row["statusText"] = $availability ? SearchResult::STATUS_NOT_REGISTERED : SearchResult::STATUS_REGISTERED;
-                        $row["status"] = $availability ? 'AVAILABLE' : "TAKEN";
                     }
                     foreach ($keys as &$key) {
                         if (!empty($rs[$key][$idx])) {
@@ -137,14 +192,36 @@ class Controller
                 }
             }
         } else {
+            $msg = "Check failed (" . $r["CODE"] . " " . $r["DESCRIPTION"] . ")";
             foreach ($data["pc"] as &$pc) {
                 $res["results"][] = [
                     "statusText" => SearchResult::STATUS_UNKNOWN,
-                    "status" => "UNKOWN"
+                    "status" => "ERROR",
+                    "REASON" => $msg
                 ];
             }
-            $res["errormsg"] = "Check failed (" . $r["CODE"] . " " . $r["DESCRIPTION"] . ")";
+            $res["errormsg"] = $msg;
         }
+        /*if (!empty($invalids)) {
+            $file = "/var/www/html/invalid.json";
+            if (file_exists($file)) {
+                $current = json_decode(file_get_contents($file), true);
+                $current = array_merge($current, $invalids);
+            } else {
+                $current = $invalids;
+            }
+            file_put_contents($file, json_encode($current, JSON_PRETTY_PRINT));
+        }
+        if (!empty($takens)) {
+            $file = "/var/www/html/taken.json";
+            if (file_exists($file)) {
+                $current = json_decode(file_get_contents($file), true);
+                $current = array_merge($current, $takens);
+            } else {
+                $current = $takens;
+            }
+            file_put_contents($file, json_encode($current, JSON_PRETTY_PRINT));
+        }*/
         ksort($res["results"]);
         return $res;
     }

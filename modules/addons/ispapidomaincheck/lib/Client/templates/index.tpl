@@ -77,8 +77,8 @@
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-taken">{$_lang.domaincheckertaken}</span></div>
-                                <div class="col col-9 col-xs-9">{$_lang.label_descr_taken}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-reserved">{$_lang.domaincheckerreserveddn}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_reserveddn}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
@@ -87,18 +87,23 @@
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-whois"><i class="glyphicon glyphicon-question-sign"></i> {$_lang.whois}</span></div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-taken">{$_lang.domaincheckertaken}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_taken}</div>
+                                <div class="clear"></div>
+                            </div><hr class="xs"/>
+                            <div class="row">
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-whois"><i class="fa fa-question-circle"></i> {$_lang.whois}</span></div>
                                 <div class="col col-9 col-xs-9">{$_lang.label_descr_whois}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-error"><i class="glyphicon glyphicon-question-sign"></i> {$_lang.domaincheckererror}</span></div>
-                                <div class="col col-9 col-xs-9">{$_lang.label_descr_error}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-taken">{$_lang.domaincheckerinvaliddn}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_invaliddn}</div>
                                 <div class="clear"></div>
                             </div><hr class="xs"/>
                             <div class="row">
-                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-warning"><i class="glyphicon glyphicon-question-sign"></i> {$_lang.domaincheckerinvalidtld}</span></div>
-                                <div class="col col-9 col-xs-9">{$_lang.label_descr_invalidtld}</div>
+                                <div class="col col-3 col-xs-3"><span class="label label-hx label-hx-error"><i class="fa fa-question-circle"></i> {$_lang.domaincheckererror}</span></div>
+                                <div class="col col-9 col-xs-9">{$_lang.label_descr_error}</div>
                                 <div class="clear"></div>
                             </div>
                         </div>
