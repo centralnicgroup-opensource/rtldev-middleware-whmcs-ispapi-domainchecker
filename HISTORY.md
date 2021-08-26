@@ -1,3 +1,21 @@
+# [15.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.1.1...v15.0.0) (2021-08-26)
+
+
+### Bug Fixes
+
+* **assets:** fixed admin area assets ([9f88f15](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/9f88f154c27e7d553560315453ef180fc5262fb3))
+* **domain name suggestions:** fixed response for empty API response ([75373b1](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/75373b1613800abe50810dc67b7e80f2f9007401))
+
+
+### Features
+
+* **revamp:** revamped availability check to allow multi-keyword/-domain search ([8999ae8](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/8999ae85d976f18230434ec2482f0f736011c4b7))
+
+
+### BREAKING CHANGES
+
+* **revamp:** Added multi-keyword/-domain search. Aftermarket Domains now shown as taken until we've reviewed them. Improved searchstring cleanup.
+
 ## [14.1.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.1.0...v14.1.1) (2021-08-24)
 
 
