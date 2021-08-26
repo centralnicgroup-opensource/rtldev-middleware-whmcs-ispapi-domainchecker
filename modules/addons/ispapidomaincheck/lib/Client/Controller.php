@@ -92,7 +92,7 @@ class Controller
                             $row["REASON"] = $row["API"]["DESCR"];
                             break;
                         case "504":
-                        case "505":                           
+                        case "505":
                         case "541":
                         case "549"://invalid repository (unsupported TLD)
                             // 504 Parameter value policy error
@@ -102,7 +102,7 @@ class Controller
                             $row["statusText"] = preg_replace("/^[^;]+; /", "", $val);
                             $row["status"] = "INVALID";
                             //$invalids[$row["DOMAIN"]] = $row;
-                            
+
                             /*$whois = localAPI('DomainWhois', ["domain" => $idn]);
                             if ($whois["result"] === "error") {
                                 $availability = -1;
@@ -125,7 +125,7 @@ class Controller
                                 //$invalids[$row["DOMAIN"]] = $row;
                             } else {
                                 $row["status"] = "TAKEN";
-                                $row["statusText"] = SearchResult::STATUS_REGISTERED;   
+                                $row["statusText"] = SearchResult::STATUS_REGISTERED;
                                 //$availability = false; // TODO
                                 //further handling of specific cases on client-sides
                                 if (
@@ -135,8 +135,7 @@ class Controller
                                     && !empty($rs["PRICE"][$idx])
                                 ) {
                                     $row["status"] = "AFTERMARKET";//STATUS_REGISTERED
-                                }
-                                elseif (
+                                } elseif (
                                     !empty($rs["PREMIUMCHANNEL"][$idx]) //exclude already registered ones
                                     && preg_match("/^PREMIUM_/", $rs["CLASS"][$idx])
                                     && preg_match("/^Premium Domain name available/i", $descr) //exclude aftermarket
