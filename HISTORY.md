@@ -1,3 +1,10 @@
+## [15.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.0.0...v15.0.1) (2021-08-27)
+
+
+### Bug Fixes
+
+* **checkout:** aftermarket and reserved domains can no longer be added to cart ([56186d4](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/56186d4b3ef5d2fedaf9010c7942b1db2609cf21))
+
 # [15.0.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v14.1.1...v15.0.0) (2021-08-26)
 
 
