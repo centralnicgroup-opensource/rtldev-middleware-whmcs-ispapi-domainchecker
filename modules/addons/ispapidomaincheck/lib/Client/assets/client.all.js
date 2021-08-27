@@ -1063,6 +1063,7 @@ SearchResult.prototype.getPrice = function (pricetype, doformat, term) {
 SearchResult.prototype.showError = function () {
   const row = this.data;
   row.element
+    .toggleClass('clickable')
     .find('div.availability')
     .html(
       `<span class="label label-hx label-hx-error" data-toggle="tooltip" title="${row.REASON}">${translations.domaincheckererror}</span>`
@@ -1077,6 +1078,7 @@ SearchResult.prototype.showError = function () {
 SearchResult.prototype.showInvalid = function () {
   const row = this.data;
   row.element
+    .toggleClass('clickable')
     .find('div.availability')
     .html(
       `<span class="label label-hx label-hx-taken" data-toggle="tooltip" title="${translations.label_descr_invaliddn}">${translations.domaincheckerinvaliddn}</span>`
@@ -1091,6 +1093,7 @@ SearchResult.prototype.showInvalid = function () {
 SearchResult.prototype.showReserved = function () {
   const row = this.data;
   row.element
+    .toggleClass('clickable')
     .find('div.availability')
     .html(
       `<span class="label label-hx label-hx-reserved" data-toggle="tooltip" title="${translations.label_descr_reserveddn}">${translations.domaincheckerreserveddn}</span>`
@@ -1105,6 +1108,7 @@ SearchResult.prototype.showReserved = function () {
 SearchResult.prototype.showAftermarket = function () {
   const row = this.data;
   row.element
+    .toggleClass('clickable')
     .find('div.availability')
     .html(
       `<span class="label label-hx label-hx-premium" data-toggle="tooltip" title="${translations.label_descr_aftermarket}">${translations.aftermarket}</span>`
@@ -1113,6 +1117,7 @@ SearchResult.prototype.showAftermarket = function () {
   row.element
     .find('div.second-line.registerprice')
     .html('<span>—</span><br><span><br></span>');
+  
 };
 SearchResult.prototype.showAvailable = function () {
   const row = this.data;
