@@ -1,3 +1,10 @@
+## [15.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.0.1...v15.0.2) (2021-08-27)
+
+
+### Performance Improvements
+
+* **backordering:** improve check for loaded backorder module ([71d263a](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/71d263a5a3f300a4f37e8f8d745c77bf973bedee))
+
 ## [15.0.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.0.0...v15.0.1) (2021-08-27)
 
 
