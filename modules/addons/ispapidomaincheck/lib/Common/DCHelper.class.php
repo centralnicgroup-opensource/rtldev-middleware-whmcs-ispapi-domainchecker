@@ -321,8 +321,8 @@ class DCHelper extends Helper
      */
     public static function loadBackorderAPI()
     {
-        $r = self::getAddOnConfigurationValue('ispapibackorder', 'access');
-        if ($r === "1") {
+        $activeAddOns = explode(",", $GLOBALS["CONFIG"]["ActiveAddonModules"]);
+        if (in_array("ispapibackorder", $activeAddOns)) {
             $path = implode(DIRECTORY_SEPARATOR, [ROOTDIR,"modules","addons","ispapibackorder","backend","api.php"]);
             if (file_exists($path)) {
                 require_once($path);
