@@ -1,44 +1,44 @@
-.row1{
-    max-width: 600px;
-    margin: 0px auto 10px auto;
+.row1 {
+	max-width: 600px;
+	margin: 0px auto 10px auto;
 }
 .collapse-category {
-  text-align: center;
+	text-align: center;
 }
 .category-button {
-  padding: 0;
-  border: none;
-  background: transparent;
-  text-transform: uppercase;
-  color: #939598;
+	padding: 0;
+	border: none;
+	background: transparent;
+	text-transform: uppercase;
+	color: #939598;
 }
 .category-button i {
-  font-size: 24px;
+	font-size: 24px;
 }
 .collapse-category .category-item {
-  display: inline-block;
+	display: inline-block;
 }
 .collapse-category .category-item.continents {
-  margin-top: 0;
-  cursor: pointer;
+	margin-top: 0;
+	cursor: pointer;
 }
 ul.cat {
-    text-align:center;
-    margin:0px;
-    padding:0px;
+	text-align: center;
+	margin: 0px;
+	padding: 0px;
 }
 ul.cat li {
-    display:inline-block;
-    background-color: #939598;
-    color: #FFF;
-    padding:7px 10px;
-    margin: 3px 2px;
-    cursor:pointer;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
+	display: inline-block;
+	background-color: #939598;
+	color: #fff;
+	padding: 7px 10px;
+	margin: 3px 2px;
+	cursor: pointer;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
 }
 ul.cat li.active {
-    background-color: #F26522;
-    color:#FFF;
+	background-color: #f26522;
+	color: #fff;
 }

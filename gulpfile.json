@@ -1,61 +1,72 @@
 {
-  "phpcsparams": "--extensions=php --ignore=node_modules,vendor,templates_c -q .",
-  "phpcsfixcmd": "phpcbf --standard=PSR12",
-  "phpcschkcmd": "phpcs -n --colors --standard=PSR12",
-  "phpcomptcmd": "phpcs -n --colors --standard=PHPCompatibility --runtime-set testVersion \"$(php -r 'echo PHP_MAJOR_VERSION . \".\" . PHP_MINOR_VERSION;')\"",
-  "phpstancmd": "./vendor/bin/phpstan analyse",
-  "archiveFileName": "whmcs-ispapi-domainchecker",
-  "archiveBuildPath": "build",
-  "minificationConfig": [
-    {
-      "dir": "modules/addons/ispapidomaincheck/lib/Client/assets/",
-      "name": "client",
-      "cssfilesorder": ["jquery.growl.css", "index.css", "categories.css"],
-      "jsfilesorder": [
-        "jquery.mustache.js",
-        "mustache.min.js",
-        "jquery.growl.js",
-        "proxy.min.js",
-        "uts46bundle.min.js",
-        "shoppingcart.js",
-        "tplmgr.js",
-        "searchresult.js",
-        "domainsearch.js",
-        "category.js",
-        "categorymgr.js",
-        "index.js"
-      ]
-    },
-    {
-      "dir": "modules/addons/ispapidomaincheck/lib/Admin/assets/",
-      "name": "admin",
-      "cssfilesorder": ["jquery-ui.min.css", "index.css", "categories.css"],
-      "jsfilesorder": [
-        "jquery-ui.min.js",
-        "uts46bundle.min.js",
-        "web-animations.min.js",
-        "muuri.min.js",
-        "tplmgr.js",
-        "jquery.mustache.js",
-        "mustache.min.js",
-        "index.js"
-      ]
-    }
-  ],
-  "filesForArchive": [
-    "README.md",
-    "CONTRIBUTING.md",
-    "HISTORY.md",
-    "LICENSE",
-    "modules/**",
-    "mydomainchecker.php",
-    "mywhois.php"
-  ],
-  "filesForCleanup": [
-    "templates_c",
-    "composer.lock",
-    ".phpunit.result.cache",
-    "package-lock.json",
-    "tmp"
-  ]
+	"phpcsparams": "--extensions=php --ignore=node_modules,vendor,templates_c -q .",
+	"phpcsfixcmd": "phpcbf --standard=PSR12",
+	"phpcschkcmd": "phpcs -n --colors --standard=PSR12",
+	"phpcomptcmd": "phpcs -n --colors --standard=PHPCompatibility --runtime-set testVersion \"$(php -r 'echo PHP_MAJOR_VERSION . \".\" . PHP_MINOR_VERSION;')\"",
+	"phpstancmd": "./vendor/bin/phpstan analyse",
+	"archiveFileName": "whmcs-ispapi-domainchecker",
+	"archiveBuildPath": "build",
+	"minificationConfig": [
+		{
+			"dir": "modules/addons/ispapidomaincheck/lib/Client/assets/",
+			"name": "client",
+			"cssfilesorder": ["jquery.growl.css", "index.css", "categories.css"],
+			"jsfilesorder": [
+				"jquery.mustache.js",
+				"mustache.min.js",
+				"jquery.growl.js",
+				"proxy.min.js",
+				"uts46bundle.min.js",
+				"shoppingcart.js",
+				"tplmgr.js",
+				"searchresult.js",
+				"domainsearch.js",
+				"category.js",
+				"categorymgr.js",
+				"index.js"
+			]
+		},
+		{
+			"dir": "modules/addons/ispapidomaincheck/lib/Admin/assets/",
+			"name": "admin",
+			"cssfilesorder": ["jquery-ui.min.css", "index.css", "categories.css"],
+			"jsfilesorder": [
+				"jquery-ui.min.js",
+				"uts46bundle.min.js",
+				"web-animations.min.js",
+				"muuri.min.js",
+				"tplmgr.js",
+				"jquery.mustache.js",
+				"mustache.min.js",
+				"index.js"
+			]
+		}
+	],
+	"filesForArchive": [
+		"README.md",
+		"CONTRIBUTING.md",
+		"HISTORY.md",
+		"LICENSE",
+		"modules/**",
+		"mydomainchecker.php",
+		"mywhois.php"
+	],
+	"filesForCleanup": [
+		"templates_c",
+		"composer.lock",
+		".phpunit.result.cache",
+		"package-lock.json",
+		"tmp"
+	],
+	"filesForPrettier": [
+		"**/*.@(js|json|css)",
+		"!@(vendor|node_modules|pkg|build)/**",
+		"!package*.json",
+		"!**/*.@(all|min).@(css|js)"
+	],
+	"filesForXO": [
+		"**/*.js",
+		"!@(vendor|node_modules|pkg|build)/**",
+		"!**/*.@(all|min).js"
+	]
 }

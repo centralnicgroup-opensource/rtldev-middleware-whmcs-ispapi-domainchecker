@@ -1,4 +1,4 @@
 {
-    "extends": "@hexonet/semantic-release-github-whmcs-config",
-    "branch": "master"
+  "extends": "@hexonet/semantic-release-github-whmcs-config",
+  "branch": "master"
 }
