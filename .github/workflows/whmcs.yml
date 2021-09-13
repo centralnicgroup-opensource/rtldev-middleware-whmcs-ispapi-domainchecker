@@ -1,17 +1,17 @@
 name: Release
-on: 
+on:
   # will run for every branch, except tags. See RSRMID-206.
   push:
     # Sequence of patterns matched against refs/heads
     branches:
       - "**"
     # Sequence of patterns matched against refs/tags
-    tags-ignore: 
+    tags-ignore:
       - "**"
   pull_request:
     branches:
       - "**"
-    tags-ignore: 
+    tags-ignore:
       - "**"
 
 jobs:
@@ -30,11 +30,16 @@ jobs:
         run: |
           echo "$HOME/.composer/vendor/bin" >> $GITHUB_PATH
           composer global require dealerdirect/phpcodesniffer-composer-installer roave/security-advisories:dev-master squizlabs/php_codesniffer phpcompatibility/php-compatibility
-        # TODO migrate the below to gulp calls
-      - name: Check PHP Compatibility
-        run: phpcs --standard=PHPCompatibility -s -q -n --colors --runtime-set testVersion ${{ matrix.php-version }} --extensions=php,inc,lib --ignore=sdk,node_modules,vendor,templates_c,modules/registrars/ispapi/lib,modules/registrars/ispapi/migration,modules/registrars/ispapi/hooks_migration .
-      - name: Check PSR12 Standard
-        run: phpcs --standard=PSR12 -s -q -n --colors --extensions=php,inc,lib --ignore=sdk,node_modules,vendor,templates_c,modules/registrars/ispapi/lib,modules/registrars/ispapi/migration,modules/registrars/ispapi/hooks_migration .
+      - name: Setup NodeJS LTS
+        uses: actions/setup-node@v2
+      - name: Install dependencies
+        run: |
+          npm prune
+          npm i
+      - name: Formatting check
+        run: |
+          gulp prettierCheck
+          gulp lint
   release:
     name: Release @ NodeJS LTS - x86 - ubuntu-latest
     runs-on: ubuntu-latest
