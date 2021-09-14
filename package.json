@@ -1,78 +1,78 @@
 {
-  "name": "whmcs-ispapi-domainchecker",
-  "description": "WHMCS ISPAPI High Performance Domainchecker Add-on",
-  "version": "0.0.0-development",
-  "private": true,
-  "author": {
-    "name": "Kai Schwarz",
-    "email": "kschwarz@hexonet.net"
-  },
-  "license": "MIT",
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "homepage": "https://github.com/hexonet/whmcs-ispapi-domainchecker",
-  "repository": "github:hexonet/whmcs-ispapi-domainchecker.git",
-  "bugs": "https://github.com/hexonet/whmcs-ispapi-domainchecker/issues",
-  "maintainers": [
-    {
-      "name": "Kai Schwarz",
-      "email": "kschwarz@hexonet.net"
-    }
-  ],
-  "keywords": [
-    "whmcs",
-    "web host automation platform",
-    "domainchecker addon",
-    "domain check",
-    "addon",
-    "hexonet",
-    "ispapi",
-    "domain",
-    "isp",
-    "ssl",
-    "cert",
-    "dns",
-    "backorder",
-    "premium",
-    "preregistration",
-    "registration",
-    "application"
-  ],
-  "xo": {
-    "prettier": true,
-    "globals": [
-      "jQuery",
-      "$",
-      "document",
-      "window"
-    ],
-    "ignores": [
-      "!@(vendor|node_modules|pkg|build)/**",
-      "!**/*.@(all|min).js"
-    ]
-  },
-  "devDependencies": {
-    "@hexonet/semantic-release-github-whmcs-config": "^1.4.1",
-    "gulp": "^4.0.2",
-    "gulp-clean": "^0.4.0",
-    "gulp-concat": "^2.6.1",
-    "gulp-debug": "^4.0.0",
-    "gulp-esbuild": "^0.8.7",
-    "gulp-prettier": "^4.0.0",
-    "gulp-rename": "^2.0.0",
-    "gulp-xo": "^0.25.0",
-    "gulp-zip": "^5.1.0",
-    "prettier-config-xo": "^2.0.0",
-    "semantic-release": "^17.4.7",
-    "xo": "^0.44.0"
-  },
-  "scripts": {
-    "phpCompatibility": "./scripts/phpcompatibility.sh",
-    "lint": "eslint . --config=./.eslintrc.js --ext .js,.md,.json",
-    "jsCheck": "prettier --check .",
-    "jsFix": "prettier --write .",
-    "codeCheck": "phpcs --extensions=php,inc,lib --standard=PSR12 -s -q -n --colors *.php modules",
-    "codeFix": "phpcbf --extensions=php,inc,lib --standard=PSR12 -q *.php modules"
-  }
+	"name": "whmcs-ispapi-domainchecker",
+	"description": "WHMCS ISPAPI High Performance Domainchecker Add-on",
+	"version": "0.0.0-development",
+	"private": true,
+	"author": {
+		"name": "Kai Schwarz",
+		"email": "kschwarz@hexonet.net"
+	},
+	"license": "MIT",
+	"engines": {
+		"node": ">=16.0.0"
+	},
+	"homepage": "https://github.com/hexonet/whmcs-ispapi-domainchecker",
+	"repository": "github:hexonet/whmcs-ispapi-domainchecker.git",
+	"bugs": "https://github.com/hexonet/whmcs-ispapi-domainchecker/issues",
+	"maintainers": [
+		{
+			"name": "Kai Schwarz",
+			"email": "kschwarz@hexonet.net"
+		}
+	],
+	"keywords": [
+		"whmcs",
+		"web host automation platform",
+		"domainchecker addon",
+		"domain check",
+		"addon",
+		"hexonet",
+		"ispapi",
+		"domain",
+		"isp",
+		"ssl",
+		"cert",
+		"dns",
+		"backorder",
+		"premium",
+		"preregistration",
+		"registration",
+		"application"
+	],
+	"xo": {
+		"prettier": true,
+		"globals": [
+			"jQuery",
+			"$",
+			"document",
+			"window"
+		],
+		"ignores": [
+			"!@(vendor|node_modules|pkg|build)/**",
+			"!**/*.@(all|min).js"
+		]
+	},
+	"devDependencies": {
+		"@hexonet/semantic-release-github-whmcs-config": "^1.4.1",
+		"gulp": "^4.0.2",
+		"gulp-clean": "^0.4.0",
+		"gulp-concat": "^2.6.1",
+		"gulp-debug": "^4.0.0",
+		"gulp-esbuild": "^0.8.7",
+		"gulp-prettier": "^4.0.0",
+		"gulp-rename": "^2.0.0",
+		"gulp-xo": "^0.25.0",
+		"gulp-zip": "^5.1.0",
+		"prettier-config-xo": "^2.0.0",
+		"semantic-release": "^17.4.7",
+		"xo": "^0.44.0"
+	},
+	"scripts": {
+		"phpCompatibility": "./scripts/phpcompatibility.sh",
+		"lint": "eslint . --config=./.eslintrc.js --ext .js,.md,.json",
+		"jsCheck": "prettier --check .",
+		"jsFix": "prettier --write .",
+		"codeCheck": "phpcs --extensions=php,inc,lib --standard=PSR12 -s -q -n --colors *.php modules",
+		"codeFix": "phpcbf --extensions=php,inc,lib --standard=PSR12 -q *.php modules"
+	}
 }
