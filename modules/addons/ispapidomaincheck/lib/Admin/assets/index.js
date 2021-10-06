@@ -883,7 +883,7 @@ function generateTab1Block1() {
 	const baseurl = `${url.origin}${url.pathname.replace(
 		/[^/]+\/[^/]+$/,
 		'',
-	)}mydomainchecker.php?search=mydomain.com&`;
+	)}domainchecker.php?search=mydomain.com&`;
 	url = `${baseurl}cat=${data.defaultActiveCategories}`;
 	$uri.text(url);
 	$uri.prop('href', url);
