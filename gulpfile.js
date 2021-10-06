@@ -192,26 +192,6 @@ function jsConcatenation(cb) {
 	cb(); // see https://gulpjs.com/docs/en/getting-started/async-completion/#using-an-error-first-callback
 }
 
-/**
- * watch for any changes, minify + concatenate
- */
-exports.watcher = function () {
-	watch(
-		[
-			'**/assets/*.js',
-			'!**/assets/*@(.all|.min).js',
-			'**/assets/*.css',
-			'!**/assets/*@(.all|.min).css',
-		],
-		{interval: 1000},
-		series(cssConcatenation, jsConcatenation, esbuildMinify),
-	);
-};
-
-exports.minify = esbuildMinify;
-
-exports.concat = series(cssConcatenation, jsConcatenation);
-
 exports.bundle = series(cssConcatenation, jsConcatenation, esbuildMinify);
 
 exports.lint = series(phpLint);
@@ -225,3 +205,18 @@ exports.archives = series(doGitZip, doZip);
 exports.default = series(exports.prepare, exports.archives, doFullClean);
 
 exports.release = series(exports.copy, exports.archives, doFullClean);
+
+/**
+ * watch for any changes, minify + concatenate
+ */
+exports.watcher = function () {
+	watch(
+		[
+			'**/assets/*.js',
+			'!**/assets/*@(.all|.min).js',
+			'**/assets/*.css',
+			'!**/assets/*@(.all|.min).css',
+		],
+		exports.bundle,
+	);
+};
