@@ -1992,11 +1992,18 @@ DomainSearch.prototype.buildRows = function (list) {
 	});
 	return group;
 };
-
+DomainSearch.prototype.orderByPrio = function (a, b) {
+	const regex = /^[^.]+\./;
+	const tldsbyprio = this.d[this.activeCurrency].tldsbyprio;
+	const indexA = tldsbyprio.indexOf(a.replace(regex, ''));
+	const indexB = tldsbyprio.indexOf(b.replace(regex, ''));
+	return indexA - indexB;
+};
 DomainSearch.prototype.buildDomainlist = async function () {
 	// suggestionlist only works well with IDN keyword (FTASKS-2442)
 	const searchstr = this.searchcfg.searchString.IDN;
 	const tldsbyprio = this.d[this.activeCurrency].tldsbyprio;
+	let directResults = [];
 	let domainlist = [];
 	let priodomainlist = [];
 	if (this.mode) {
@@ -2004,15 +2011,14 @@ DomainSearch.prototype.buildDomainlist = async function () {
 		// (1) fetch list of domain suggestions from API
 		domainlist = await this.getDomainSuggestions(searchstr.join(' '));
 		// (2) reorder them by by priority of the TLD (reorder by ascii by option)
-		const regex = /^[^.]+\./;
-		priodomainlist = domainlist.sort(function (a, b) {
-			const indexA = tldsbyprio.indexOf(a.replace(regex, ''));
-			const indexB = tldsbyprio.indexOf(b.replace(regex, ''));
-			return indexA - indexB;
-		});
+		priodomainlist = domainlist.sort(this.orderByPrio.bind(this));
+		directResults = searchstr
+			.filter(str => {
+				return /.+\..+/.test(str);
+			})
+			.sort(this.orderByPrio.bind(this));
 	} else {
 		// default search
-		const directResults = [];
 		const labels = searchstr.map(function (str) {
 			const label = str.replace(/\..+$/, '');
 			let tld = '';
@@ -2038,23 +2044,22 @@ DomainSearch.prototype.buildDomainlist = async function () {
 				priodomainlist.push(entry);
 			});
 		});
-		if (directResults.length) {
-			priodomainlist = directResults.concat(priodomainlist);
-		}
+	}
+
+	if (directResults.length) {
+		priodomainlist = directResults.concat(priodomainlist);
 	}
 
 	// now remove duplicates (case: search for domain including tld)
 	// and filter against the selected TLDs (domainlist)
-	/*priodomainlist = priodomainlist.filter((el, index, arr) => {
-    return (
-      (
-        domainlist.indexOf(el) !== -1 // entry is part of search
-        || el === this.searchcfg.searchString.IDN // or matches the IDN search term
-        || el === this.searchcfg.searchString.PC
-      ) && // or matches the PunyCode search term
-      index === arr.indexOf(el)
-    );
-  });*/
+	priodomainlist = priodomainlist.filter((el, index, arr) => {
+		return (
+			(domainlist.indexOf(el) !== -1 || // entry is part of search
+				this.searchcfg.searchString.IDN.indexOf(el) !== -1 || // or matches the IDN search term
+				this.searchcfg.searchString.PC.indexOf(el) !== -1) && // or matches the PunyCode search term
+			index === arr.indexOf(el)
+		);
+	});
 	return priodomainlist;
 };
 DomainSearch.prototype.getCachedResult = function (domain) {
