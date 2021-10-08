@@ -19,6 +19,8 @@ class ClientDispatcher
      */
     public function dispatch($action, $args, $smarty)
     {
+        global $perf;
+        $perf["dispatcher"] = ["start" => microtime(true)];
         if (!$action) {
             // Default to index if no action specified
             $action = 'index';
@@ -30,10 +32,12 @@ class ClientDispatcher
 
         // Verify requested action is valid and callable
         if (is_callable([$controller, $action])) {
+            $perf["dispatcher"]["end"] = microtime(true);
+            $perf["dispatcher"]["rt"] = $perf["dispatcher"]["end"] - $perf["dispatcher"]["start"];
             return $controller->$action($args, $smarty);
         }
         // action error
-        $smarty->assign("error", $args['_lang']['actionerror']);
+        $smarty->assign("error", $args['_lang']['actionerror']);        
         return $smarty->fetch('error.tpl');
     }
 }

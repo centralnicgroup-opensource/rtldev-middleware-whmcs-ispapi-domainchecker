@@ -7,11 +7,10 @@ use WHMCS\Domains\Pricing\Premium;
 use WHMCS\Module\Registrar\Ispapi\Helper;
 
 $path = implode(DIRECTORY_SEPARATOR, [ROOTDIR,"modules","registrars","ispapi","lib","Helper.php"]);
-if (file_exists($path)) {
-    require_once($path);
-} else {
-    die('Please install the latest version of our <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">ISPAPI Registrar Module</a>.');
+if (!file_exists($path)) {
+    die("Please install the latest version of our <a href=\"https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip\">ISPAPI Registrar Module</a>.");
 }
+require_once($path);
 
 /**
  * PHP DCHelper Class

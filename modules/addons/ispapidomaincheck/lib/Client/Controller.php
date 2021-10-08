@@ -44,6 +44,10 @@ class Controller
      */
     public function checkdomains($vars, $smarty)
     {
+        global $perf;
+        $perf["controller"] = [
+            "start" => microtime(true)
+        ];
         ignore_user_abort(false);
         $data = json_decode(file_get_contents('php://input'), true); //convert JSON into array
         $cmd = [
@@ -222,6 +226,8 @@ class Controller
             file_put_contents($file, json_encode($current, JSON_PRETTY_PRINT));
         }*/
         ksort($res["results"]);
+        $perf["controller"]["end"] = microtime(true);
+        $perf["controller"]["rt"] = $perf["controller"]["end"] - $perf["controller"]["start"];
         return $res;
     }
 
