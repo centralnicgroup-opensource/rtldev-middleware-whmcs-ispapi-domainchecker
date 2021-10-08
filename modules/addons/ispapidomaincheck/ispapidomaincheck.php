@@ -91,6 +91,11 @@ function ispapidomaincheck_upgrade($vars)
  */
 function ispapidomaincheck_clientarea($vars)
 {
+    global $perf;
+
+    $perf["addon"] = [
+        "start" => microtime(true)
+    ];
     add_hook('ClientAreaHeadOutput', 1, function ($vars) {
         $cfg = ispapidomaincheck_config();
         $version = $cfg["version"];
@@ -102,12 +107,13 @@ function ispapidomaincheck_clientarea($vars)
         <script>const wr = "{$wr}";</script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/client.all.min.js?t={$version}"></script>
         <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/client.all.min.css?t={$version}" rel="stylesheet" type="text/css" />
-
 HTML;
     });
 
     //get default currency as fallback
-    $_SESSION["currency"] = DCHelper::GetCustomerCurrency();
+    if (!isset($_SESSION["currency"])) {
+        $_SESSION["currency"] = DCHelper::GetCustomerCurrency();
+    }
 
     //save the language in the session if not already set
     if (!isset($_SESSION["Language"])) {
@@ -117,12 +123,7 @@ HTML;
     //nodata=1 -> do not return data, we just update the chosen currency in session
     //WHMCS cares automatically about handling currency when provided in request
     if (isset($_REQUEST["nodata"]) && $_REQUEST["nodata"] == 1) {
-        //respond
-        header('Cache-Control: no-cache, must-revalidate'); // HTTP/1.1
-        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Content-type: application/json; charset=utf-8');
-        die(json_encode(["success" => true, "msg" => "currency updated in session"]));
-        exit();
+        return json_encode(["success" => true, "msg" => "currency updated in session"]);       
     }
 
     //init smarty and call admin dispatcher
@@ -137,12 +138,13 @@ HTML;
     $dispatcher = new ClientDispatcher();
     $r = $dispatcher->dispatch($_REQUEST['action'], $vars, $smarty);
     if ($_REQUEST['action']) {
-        //send json response headers
-        header('Cache-Control: no-cache, must-revalidate'); // HTTP/1.1
-        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Content-type: application/json; charset=utf-8');
         //do not echo as this would add template html code around!
-        die(json_encode($r));
+        global $perf;
+        $perf["addon"]["end"] = $perf["script"]["end"] = microtime(true);
+        $perf["addon"]["rt"] = $perf["addon"]["end"] - $perf["addon"]["start"];
+        $perf["script"]["rt"] = $perf["script"]["end"] - $perf["script"]["start"];
+        header("X_PERF: " . json_encode($perf));
+        return json_encode($r);
     }
     return $r;
 }

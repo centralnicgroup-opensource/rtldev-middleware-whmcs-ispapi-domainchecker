@@ -7,10 +7,10 @@ const DomainSearch = function () {
 		cacheJobID: null,
 		maxCacheTTL: 600000, // 10 minutes in ms
 		base: 2,
-		initExp: 1,
-		maxExp: 4,
-		maxGroupsPerPage: 3,
-		maxEntriesPerPage: 14, // (2 + 4 + 8)
+		initExp: 0,
+		maxExp: 3,
+		//maxGroupsPerPage: 3,
+		maxEntriesPerPage: 15, // (1 + 2 + 4 + 8)
 		// to know if a searchresult corresponds to the search string
 		searchString: {IDN: '', PC: ''},
 	};

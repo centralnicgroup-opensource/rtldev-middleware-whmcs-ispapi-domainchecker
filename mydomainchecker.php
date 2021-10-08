@@ -1,30 +1,43 @@
 <?php
 
+use WHMCS\Module\Addon\ispapidomaincheck\DCHelper;
+
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+
 // Handle "Transfer" button from the WHMCS default Homepage
 if (!empty($_POST["transfer"])) {
     header("Location: cart.php?a=add&domain=transfer&query=" . $_POST["domain"]);
     exit();
 }
 
+global $perf;
+
 define("CLIENTAREA", true);
-use WHMCS\Module\Addon\ispapidomaincheck\DCHelper;
+
+$perf = [
+    "script" => [
+        "start" => microtime(true),
+    ]
+];
 
 // Find the correct path of the init.php file, based on the way we are integrating the module
 // (via symlinks or copy/paste), the path is different.
+$perf["init.php"] = ["start" => microtime(true)];
+$isXHR = (
+    isset($_REQUEST["action"])
+    || (
+        isset($_REQUEST["nodata"])
+        && $_REQUEST["nodata"] == 1
+    )
+);
 require "init.php";
 
-// load DCHelper class
-$path = implode(DIRECTORY_SEPARATOR, [ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "DCHelper.class.php"]);
-if (!file_exists($path)) {
-    exit('Missing dependency `ISPAPI Registrar Module`. Please download and install it from <a href="https://github.com/hexonet/whmcs-ispapi-registrar/raw/master/whmcs-ispapi-registrar-latest.zip">github</a>.');
-}
-require_once($path);
+$perf["init.php"]["end"] = microtime(true);
+$perf["init.php"]["rt"] = $perf["init.php"]["end"] - $perf["init.php"]["start"];
 
-$ca = new WHMCS_ClientArea();
-$ca->setPageTitle(Lang::trans("domaintitle"));
-$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('mydomainchecker.php', Lang::trans("domaintitle"));
-$ca->initPage();
+// load DCHelper class
+require_once(implode(DIRECTORY_SEPARATOR, [ROOTDIR, "modules", "addons", "ispapidomaincheck", "lib", "Common", "DCHelper.class.php"]));
 
 // Include module file
 $modulepath = implode(DIRECTORY_SEPARATOR, [ROOTDIR,"modules","addons","ispapidomaincheck","ispapidomaincheck.php"]);
@@ -36,7 +49,7 @@ require $modulepath;
 // Call clientarea function
 $modulevars = DCHelper::getAddOnConfigurationValue('ispapidomaincheck');
 $language = (isset($_SESSION["Language"]) ? $_SESSION["Language"] : "english");
-$langpath = ROOTDIR . DIRECTORY_SEPARATOR . "modules" . DIRECTORY_SEPARATOR . "addons" . DIRECTORY_SEPARATOR . "ispapidomaincheck" . DIRECTORY_SEPARATOR . "lang" . DIRECTORY_SEPARATOR;
+$langpath = implode(DIRECTORY_SEPARATOR, [ROOTDIR, "modules", "addons", "ispapidomaincheck", "lang", ""]);
 $file = $langpath . $language . ".php";
 if (file_exists($file)) {
     include($file);
@@ -49,6 +62,20 @@ $results = call_user_func(
     $modulevars
 );
 
+//respond XHR Requests in JSON
+if ($isXHR) {
+    header('Cache-Control: no-cache, must-revalidate'); // HTTP/1.1
+    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+    header('Content-type: application/json; charset=utf-8');
+    echo $results;
+    exit();
+}
+
+$ca = new WHMCS_ClientArea();
+$ca->setPageTitle(Lang::trans("domaintitle"));
+$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
+$ca->addToBreadCrumb('mydomainchecker.php', Lang::trans("domaintitle"));
+$ca->initPage();
 if (is_array($results["vars"])) {
     foreach ($results["vars"] as $k => $v) {
         $smartyvalues[$k] = $v;
