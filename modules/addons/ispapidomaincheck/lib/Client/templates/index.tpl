@@ -126,7 +126,7 @@
                             <hr>
                         </div>
                     </div>
-                    <p align="center"><a class="btn btn-danger orderbutton hidden" href="{$WEB_ROOT}/cart.php?a=confdomains" role="button">{$_lang.checkoutbutton} &raquo;</a></p>
+                    <p align="center"><a class="btn btn-danger orderbutton" style="visibility:hidden" href="{$WEB_ROOT}/cart.php?a=confdomains" role="button">{$_lang.checkoutbutton} &raquo;</a></p>
                 </div>
             </form>
         </div>
@@ -136,7 +136,7 @@
     <div class="result-item" id="resultsarea" style="display:none;">
         <form id="domainform" action="cart.php?a=add&domain=register" method="post">
             <div class="row row1 search-results clear" id="searchresults"></div>
-            <p align="center"><button id="loadmorebutton" type="button" class="btn btn-secondary" style="display:none">{$_lang.loadmorebutton} &raquo;</button> <a class="btn btn-danger orderbutton hidden" href="{$WEB_ROOT}/cart.php?a=confdomains" role="button">{$_lang.checkoutbutton} &raquo;</a></p> 
+            <p align="center"><button id="loadmorebutton" type="button" class="btn btn-secondary" style="display:none">{$_lang.loadmorebutton} &raquo;</button> <a class="btn btn-danger orderbutton" style="visibility:hidden" href="{$WEB_ROOT}/cart.php?a=confdomains" role="button">{$_lang.checkoutbutton} &raquo;</a></p> 
             <hr>
         </form>
     </div>

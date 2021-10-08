@@ -74,16 +74,14 @@ hr.xs {
 .clickable .checkboxarea label {
 	cursor: pointer;
 }
+.fas.fa-spinner,
+.fas.fa-check-square,
 .far.fa-square {
 	position: absolute;
 	font-size: 21px;
 }
 .far.fa-square.avail {
 	color: #00a850;
-}
-.fas.fa-check-square {
-	position: absolute;
-	font-size: 21px;
 }
 .fas.fa-check-square.avail {
 	color: #00a850;

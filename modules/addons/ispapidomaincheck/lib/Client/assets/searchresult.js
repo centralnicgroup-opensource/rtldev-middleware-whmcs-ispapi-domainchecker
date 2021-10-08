@@ -244,6 +244,13 @@ SearchResult.prototype.showAvailable = function () {
 				`<span>${translations.domain_added_to_cart}</span><br/><span class="registerprice added hxdata" data-registerprice="${regpriceraw}" data-term="${termcfg.initialTerm}">${regprice}</span>`,
 			);
 	}
+
+	row.element
+		.find('span.checkboxarea')
+		.find('i.fa-spin')
+		.removeClass('fas fa-spinner fa-spin')
+		.addClass(row.order ? 'fas fa-check-square' : 'far fa-square');
+
 	if (row.order) {
 		if (multiTerms) {
 			row.element

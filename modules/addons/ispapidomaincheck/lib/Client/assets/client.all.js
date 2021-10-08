@@ -670,9 +670,9 @@ ShoppingCart.prototype.load = async function () {
 		this.items = {};
 	}
 	if (Object.keys(this.items).length) {
-		$('.orderbutton').removeClass('hidden');
+		$('.orderbutton').css('visibility', 'visible');
 	} else {
-		$('.orderbutton').addClass('hidden').off('click');
+		$('.orderbutton').css('visibility', 'hidden').off('click');
 	}
 };
 ShoppingCart.prototype.getOrder = function (sr) {
@@ -743,7 +743,7 @@ ShoppingCart.prototype.addOrderDomain = function (sr, successmsg, errmsg) {
 							(async function () {
 								await cart.load();
 								sr.generate();
-								$.growl.notice(successmsg);
+								//$.growl.notice(successmsg);
 							})();
 						} else {
 							$.growl.error(errmsg);
@@ -756,7 +756,7 @@ ShoppingCart.prototype.addOrderDomain = function (sr, successmsg, errmsg) {
 				(async function () {
 					await cart.load();
 					sr.generate();
-					$.growl.notice(successmsg);
+					//$.growl.notice(successmsg);
 				})();
 			}
 		})
@@ -819,7 +819,7 @@ ShoppingCart.prototype.removeOrderDomain = function (sr, successmsg, errmsg) {
 				(async function () {
 					await cart.load();
 					sr.generate();
-					$.growl.notice(successmsg);
+					//$.growl.notice(successmsg);
 				})();
 				return;
 			}
@@ -842,9 +842,15 @@ ShoppingCart.prototype.orderClickHandler = function (e) {
 			return;
 		}
 	}
+
+	let eL = $(e.target).closest('div.clickable');
 	if (e.data.action === 'add') {
+		eL = eL.find('i.fa-square');
+		eL.removeClass('far fa-square').addClass('fas fa-spinner fa-spin');
 		this.addOrder(e.data.sr);
 	} else {
+		eL = eL.find('i.fa-check-square');
+		eL.removeClass('fas fa-check-square').addClass('fas fa-spinner fa-spin');
 		this.removeOrder(e.data.sr);
 	}
 };
@@ -905,7 +911,7 @@ ShoppingCart.prototype.requestBackorderAction = function (
 					delete ds.backorders[sr.data.PC];
 				}
 				sr.generate();
-				$.growl.notice(successmsg);
+				//$.growl.notice(successmsg);
 			} else if (data.CODE === 531) {
 				$.growl.error({message: translations.login_required});
 			} else {
@@ -1214,6 +1220,13 @@ SearchResult.prototype.showAvailable = function () {
 				`<span>${translations.domain_added_to_cart}</span><br/><span class="registerprice added hxdata" data-registerprice="${regpriceraw}" data-term="${termcfg.initialTerm}">${regprice}</span>`,
 			);
 	}
+
+	row.element
+		.find('span.checkboxarea')
+		.find('i.fa-spin')
+		.removeClass('fas fa-spinner fa-spin')
+		.addClass(row.order ? 'fas fa-check-square' : 'far fa-square');
+
 	if (row.order) {
 		if (multiTerms) {
 			row.element
