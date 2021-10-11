@@ -8,7 +8,7 @@
       <h3>By-default active Categories</h3>
       <div>
         <p>Click on the category boxes to select or deselect categories to fit your needs. The active ones (highlighted in orange) will be activated by default when your clients initially visit the domain search form.</p>
-        <p>If you have the use for it, here a pre-configured search url. Find further available parameters documented in the <a class="hx" href="https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Usage-Guide" target="_blank">Usage Guide</a>.<br/><small><a id="genurl" href="" target="_blank" class="hx"></a></small></p>
+        <p>If you have the use for it, here a pre-configured search url. Find further available parameters documented in the <a class="hx" href="https://github.com/hexonet/whmcs-ispapi-domainchecker/wiki/Usage-Guide" target="_blank">Usage Guide</a>.<br/><small>Your production link: <a id="genurl" href="" target="_blank" class="hx"></a><br/>Your direct script link: <a id="genurl2" href="" target="_blank" class="hx"></a></small></p>
         <div id="categories" class="row1 row collapse-category">
           <div class="col col-12 col-xs-12 category-setting">
             <button class="category-button collapsed" type="button" data-toggle="collapse" data-target="#category" aria-expanded="false">

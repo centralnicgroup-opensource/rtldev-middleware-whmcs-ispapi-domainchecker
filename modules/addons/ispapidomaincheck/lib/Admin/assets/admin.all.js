@@ -1203,14 +1203,22 @@ function generateTab2() {
  */
 function generateTab1Block1() {
 	const $uri = $('#genurl');
+	const $uri2 = $('#genurl2');
 	let url = new URL(window.location.href);
 	const baseurl = `${url.origin}${url.pathname.replace(
 		/[^/]+\/[^/]+$/,
 		'',
 	)}domainchecker.php?search=mydomain.com&`;
+	const baseurl2 = `${url.origin}${url.pathname.replace(
+		/[^/]+\/[^/]+$/,
+		'',
+	)}mydomainchecker.php?search=mydomain.com&`;
 	url = `${baseurl}cat=${data.defaultActiveCategories}`;
 	$uri.text(url);
 	$uri.prop('href', url);
+	url = `${baseurl2}cat=${data.defaultActiveCategories}`;
+	$uri2.text(url);
+	$uri2.prop('href', url);
 	const $eL = $('.catcontainer');
 	$eL.empty();
 	TPLMgr.renderAppend('.catcontainer', 'activecats', {
@@ -1226,9 +1234,13 @@ function generateTab1Block1() {
 		.off('click')
 		.click(function () {
 			$(this).toggleClass('active');
-			const url = `${baseurl}cat=${getDefaultSelectedCategories()}`;
+			let url = `${baseurl}cat=${getDefaultSelectedCategories()}`;
 			$uri.text(url);
 			$uri.prop('href', url);
+
+			url = `${baseurl2}cat=${getDefaultSelectedCategories()}`;
+			$uri2.text(url);
+			$uri2.prop('href', url);
 		});
 	$('#savedefaultcats').off('click').click(saveDefaultCategories);
 }
