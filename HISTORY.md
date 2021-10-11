@@ -1,3 +1,24 @@
+# [15.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.0.2...v15.1.0) (2021-10-11)
+
+
+### Bug Fixes
+
+* **aa settings:** fixed pre-configured search url ([c8f0d65](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/c8f0d6557a54ff20cc0f2ec5449eae9e08997361))
+* **aa settings:** offer two clickable Links (production & test) ([f40dafe](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/f40dafe6f00a2b8257548796a5e91e931b09f4cd))
+* **gulp:** ensure js/css bundles being part of package ([7031cc5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/7031cc57c3c4faade0dadc73e1af160fda2852be))
+* **name suggestions:** to include explicit searched domain names at top ([b83e0d8](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/b83e0d8adf8a9eb49a1d04594b874ac9be12f2a0))
+* **search string:** cleanup mechanism fixed ([fd34564](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/fd34564769f848c93c65e2662f9dcdc9c3cdc988))
+
+
+### Features
+
+* **checkbox actions:** no longer show success modals, but spinning icon ([4a0b1d9](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/4a0b1d92715a8668ed2c2c78f2ac0ade7ee1586c))
+
+
+### Performance Improvements
+
+* **ajax requests:** to not instantiate WHMCS_ClientArea class ([6b4c2a5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/6b4c2a5b8bb3a0ceddca593c160d4468b48d9c54))
+
 ## [15.0.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.0.1...v15.0.2) (2021-08-27)
 
 ### Performance Improvements
