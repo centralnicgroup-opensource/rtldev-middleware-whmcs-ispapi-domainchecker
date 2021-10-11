@@ -50,7 +50,7 @@ exports.xo = function () {
 /**
  * Perform PHP Linting
  */
-async function phpLint() {
+async function doPHPLint() {
 	// these may fail, it's fine
 	try {
 		await exec(`${cfg.phpcsfixcmd} ${cfg.phpcsparams}`);
@@ -123,7 +123,7 @@ function doZip() {
  * Esbuild minify + bundle css and js files
  * @param {*} cb
  */
-function esbuildMinify(cb) {
+function doESBuildMinify(cb) {
 	cfg.minificationConfig.map(function (folder) {
 		return src(folder.dir + '@(*.all.js|*.all.css)')
 			.pipe(
@@ -145,7 +145,7 @@ function esbuildMinify(cb) {
  * Concatinate css files
  * @param {*} cb
  */
-function cssConcatenation(cb) {
+function doCSSConcatenation(cb) {
 	cfg.minificationConfig.map(function (folder) {
 		return (
 			src(
@@ -171,7 +171,7 @@ function cssConcatenation(cb) {
  * Concatinate js files
  * @param {*} cb
  */
-function jsConcatenation(cb) {
+function doJSConcatenation(cb) {
 	cfg.minificationConfig.map(function (folder) {
 		return (
 			src(
@@ -192,19 +192,26 @@ function jsConcatenation(cb) {
 	cb(); // see https://gulpjs.com/docs/en/getting-started/async-completion/#using-an-error-first-callback
 }
 
-exports.bundle = series(cssConcatenation, jsConcatenation, esbuildMinify);
+/**
+ * create js / css bundles
+ */
+exports.bundle = series(doCSSConcatenation, doJSConcatenation, doESBuildMinify);
 
-exports.lint = series(phpLint);
+/**
+ * Linting Task
+ */
+exports.lint = doPHPLint;
 
-exports.copy = series(doDistClean, doCopyFiles);
-
-exports.prepare = series(exports.lint, exports.copy);
-
-exports.archives = series(doGitZip, doZip);
-
-exports.default = series(exports.prepare, exports.archives, doFullClean);
-
-exports.release = series(exports.copy, exports.archives, doFullClean);
+/**
+ * Build Archives
+ */
+exports.archives = series(
+	exports.bundle,
+	doDistClean,
+	doCopyFiles,
+	doGitZip,
+	doZip,
+);
 
 /**
  * watch for any changes, minify + concatenate
@@ -220,3 +227,13 @@ exports.watcher = function () {
 		exports.bundle,
 	);
 };
+
+/**
+ * Release task
+ */
+exports.release = series(exports.archives, doFullClean);
+
+/**
+ * Linting plus Release Task
+ */
+exports.default = series(exports.lint, exports.release);
