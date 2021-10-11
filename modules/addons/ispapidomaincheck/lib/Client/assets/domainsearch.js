@@ -103,28 +103,21 @@ DomainSearch.prototype.cleanupSearchString = function (str) {
 		if (!/\./.test(tmp)) {
 			return tmp;
 		}
-		let search = tmp;
+		let part,
+			tld,
+			found,
+			search = tmp;
 		const tlds = this.d[this.activeCurrency].pricing.tlds;
-		const tldparts = [];
-		tmp = search.split('.').reverse();
-		let part;
-		let tld;
-		let found;
+		tmp = search.split('.');
 		do {
-			part = tmp.shift();
-			tld = part;
-			if (tldparts.length) {
-				tld += `.${tldparts.join('.')}`;
-			}
+			part = tmp.shift(); // label
+			tld = tmp.join('.'); // tlds
 			found = Object.prototype.hasOwnProperty.call(tlds, tld);
 			if (found) {
-				tldparts.unshift(part);
+				return `${part}.${tld}`;
 			}
-		} while (tmp.length && found);
-		if (!tldparts.length) {
-			return search.replace(/^[^.]+\./, '');
-		}
-		return `${part}.${tldparts.join('.')}`;
+		} while (tmp.length);
+		return search;
 	}
 
 	let searchterms = str
