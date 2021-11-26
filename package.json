@@ -65,7 +65,7 @@
 		"gulp-zip": "^5.1.0",
 		"prettier-config-xo": "^2.0.0",
 		"semantic-release": "^17.4.7",
-		"xo": "^0.46.4"
+		"xo": "^0.47.0"
 	},
 	"scripts": {
 		"phpCompatibility": "./scripts/phpcompatibility.sh",
