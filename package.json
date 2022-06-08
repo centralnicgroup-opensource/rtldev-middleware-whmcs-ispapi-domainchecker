@@ -10,7 +10,7 @@
 	"license": "MIT",
 	"engines": {
 		"node": ">=16.15.1",
-		"npm": ">8.11.1"
+		"npm": ">=8.11.1"
 	},
 	"homepage": "https://github.com/hexonet/whmcs-ispapi-domainchecker",
 	"repository": "github:hexonet/whmcs-ispapi-domainchecker.git",
