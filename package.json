@@ -70,7 +70,6 @@
 	},
 	"scripts": {
 		"phpCompatibility": "./scripts/phpcompatibility.sh",
-		"lint": "eslint . --config=./.eslintrc.js --ext .js,.md,.json",
 		"jsCheck": "prettier --check .",
 		"jsFix": "prettier --write .",
 		"codeCheck": "phpcs --extensions=php,inc,lib --standard=PSR12 -s -q -n --colors *.php modules",
