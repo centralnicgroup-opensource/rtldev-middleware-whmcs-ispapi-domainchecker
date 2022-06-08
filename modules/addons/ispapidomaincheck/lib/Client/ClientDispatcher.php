@@ -37,7 +37,7 @@ class ClientDispatcher
             return $controller->$action($args, $smarty);
         }
         // action error
-        $smarty->assign("error", $args['_lang']['actionerror']);        
+        $smarty->assign("error", $args['_lang']['actionerror']);
         return $smarty->fetch('error.tpl');
     }
 }

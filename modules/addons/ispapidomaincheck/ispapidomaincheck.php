@@ -138,7 +138,7 @@ HTML;
     //nodata=1 -> do not return data, we just update the chosen currency in session
     //WHMCS cares automatically about handling currency when provided in request
     if (isset($_REQUEST["nodata"]) && $_REQUEST["nodata"] == 1) {
-        return json_encode(["success" => true, "msg" => "currency updated in session"]);       
+        return json_encode(["success" => true, "msg" => "currency updated in session"]);
     }
 
     //init smarty and call admin dispatcher
