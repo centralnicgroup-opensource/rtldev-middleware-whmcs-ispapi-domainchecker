@@ -30,7 +30,8 @@ class Controller
                 'modulepath' => "/modules/addons/ispapidomaincheck/",
                 'domain' => isset($_POST["domain"]) ? $_POST["domain"] : "",
                 'currency' => $_SESSION["currency"],
-                'carttpl' => Setting::getValue("OrderFormTemplate")
+                'carttpl' => Setting::getValue("OrderFormTemplate"),
+                'currencies' => DCHelper::getCurrencies()
             ]
         ];
     }
