@@ -1,3 +1,10 @@
+## [15.1.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.1.0...v15.1.1) (2022-07-07)
+
+
+### Bug Fixes
+
+* **currency flags:** added missing fields ([f94a0c3](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/f94a0c3abbcd9d0104150d8a19be2ccea3d2a6a3))
+
 # [15.1.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.0.2...v15.1.0) (2021-10-11)
 
 
