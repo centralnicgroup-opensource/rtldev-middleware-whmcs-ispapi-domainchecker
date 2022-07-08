@@ -764,6 +764,12 @@ DomainSearch.prototype.processResults = function (grp, d) {
 					} else {
 						row.premiumtype = 'PREMIUM';
 					}
+				} else if (
+					row.PREMIUMCHANNEL &&
+					row.REASON &&
+					row.REASON === 'AFTERMARKET'
+				) {
+					row.premiumtype = row.REASON;
 				}
 				// override by returned registrar prices and cleanup row data
 				if (Object.prototype.hasOwnProperty.call(row, 'PRICE')) {
