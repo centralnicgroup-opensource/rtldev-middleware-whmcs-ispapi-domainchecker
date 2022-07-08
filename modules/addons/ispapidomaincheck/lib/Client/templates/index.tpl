@@ -144,8 +144,9 @@
         <div class="currencychooser pull-right float-right clearfix margin-bottom">
             <div class="btn-group" role="group">
                 {foreach from=$currencies item=curr}
+                    {assign "country" "{strtolower(substr($curr.code, 0, 2))}"}
                     <button id="curr_{$curr.id}" class="btn btn-default{if $currency eq $curr.id} active{/if}">
-                        <img src="{$BASE_PATH_IMG}/flags/{if $curr.code eq "AUD"}au{elseif $curr.code eq "CAD"}ca{elseif $curr.code eq "EUR"}eu{elseif $curr.code eq "GBP"}gb{elseif $curr.code eq "INR"}in{elseif $curr.code eq "JPY"}jp{elseif $curr.code eq "USD"}us{elseif $curr.code eq "ZAR"}za{else}na{/if}.png" border="0" alt="" />
+                        <div class="iti-flag {$country}" style="display:inline-block"></div>
                         {$curr.code}
                     </button>
                 {/foreach}
