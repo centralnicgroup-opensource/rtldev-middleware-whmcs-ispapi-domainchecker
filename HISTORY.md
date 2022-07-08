@@ -1,3 +1,10 @@
+# [15.2.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.1.2...v15.2.0) (2022-07-08)
+
+
+### Features
+
+* **aftermarket domains:** brought back after having a non-transfer blocking solution identified ([478911f](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/478911f95e1afbf5a6756ebbba9317b12d3f2bcd))
+
 ## [15.1.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.1.1...v15.1.2) (2022-07-08)
 
 
