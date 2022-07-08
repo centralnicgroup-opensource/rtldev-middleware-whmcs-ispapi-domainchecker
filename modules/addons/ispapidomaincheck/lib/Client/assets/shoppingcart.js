@@ -33,7 +33,7 @@ ShoppingCart.prototype.addOrderPremium = function (sr, successmsg, errmsg) {
 	// WHMCS adds premium domain data to session in their standard domain availability check
 	const row = sr.data;
 	$.ajax(
-		`cart.php?a=checkDomain&token=${csrfToken}&domain=${row.IDN}&source&cartAddDomain&type=domain`,
+		`cart.php?a=checkDomain&token=${csrfToken}&domain=${row.IDN}&source&cartAddDomain&type=domain&ispapichecker=true`,
 		{
 			type: 'GET',
 			dataType: 'json',

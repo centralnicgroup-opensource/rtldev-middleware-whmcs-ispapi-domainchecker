@@ -688,7 +688,7 @@ ShoppingCart.prototype.addOrderPremium = function (sr, successmsg, errmsg) {
 	// WHMCS adds premium domain data to session in their standard domain availability check
 	const row = sr.data;
 	$.ajax(
-		`cart.php?a=checkDomain&token=${csrfToken}&domain=${row.IDN}&source&cartAddDomain&type=domain`,
+		`cart.php?a=checkDomain&token=${csrfToken}&domain=${row.IDN}&source&cartAddDomain&type=domain&ispapichecker=true`,
 		{
 			type: 'GET',
 			dataType: 'json',
@@ -2191,6 +2191,12 @@ DomainSearch.prototype.processResults = function (grp, d) {
 					} else {
 						row.premiumtype = 'PREMIUM';
 					}
+				} else if (
+					row.PREMIUMCHANNEL &&
+					row.REASON &&
+					row.REASON === 'AFTERMARKET'
+				) {
+					row.premiumtype = row.REASON;
 				}
 				// override by returned registrar prices and cleanup row data
 				if (Object.prototype.hasOwnProperty.call(row, 'PRICE')) {

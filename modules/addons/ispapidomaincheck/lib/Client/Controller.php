@@ -139,7 +139,37 @@ class Controller
                                     && isset($rs["PRICE"], $rs["CURRENCY"])
                                     && !empty($rs["PRICE"][$idx])
                                 ) {
-                                    $row["status"] = "AFTERMARKET";//STATUS_REGISTERED
+                                    $row["statusText"] = SearchResult::STATUS_NOT_REGISTERED;
+                                    $row["status"] = "AVAILABLE";
+                                    $row["REASON"] = "AFTERMARKET";
+                                    // $row["status"] = "AFTERMARKET";
+                                    $price = $rs["PRICE"][$idx];
+                                    $currency = $rs["CURRENCY"][$idx];
+                                    $currencies = DCHelper::getCurrencies();
+                                    $currencysettings = $currencies[$currency];
+                                    $active_settings = $currencies[$_SESSION["currency"]];
+                                    if ($currencysettings === null) {
+                                        //unsupported currency in WHMCS
+                                        //TODO: we could improve here by just converting currency
+                                        //$row["status"] = "TAKEN";
+                                        //$row["statusText"] = SearchResult::STATUS_REGISTERED;
+                                        unset($rs["PRICE"][$idx], $rs["PRICERENEW"][$idx], $rs["CURRENCY"][$idx]);
+                                    } else {
+                                        $premiumchannel = $rs["PREMIUMCHANNEL"][$idx];
+                                        $class = $rs["CLASS"][$idx];
+                                        $register_price_raw = DCHelper::getPremiumRegistrationPrice(
+                                            $price,
+                                            $currencysettings
+                                        );
+                                        $renew_price_raw = DCHelper::getPremiumRenewPrice(
+                                            $data["registrars"][$idx],
+                                            $class,
+                                            DCHelper::getDomainExtension($idn),
+                                            $currencysettings
+                                        );
+                                        $rs["PRICE"][$idx] = $register_price_raw;
+                                        $rs["PRICERENEW"][$idx] = $renew_price_raw;
+                                    }
                                 } elseif (
                                     !empty($rs["PREMIUMCHANNEL"][$idx]) //exclude already registered ones
                                     && preg_match("/^PREMIUM_/", $rs["CLASS"][$idx])
@@ -206,26 +236,6 @@ class Controller
             }
             $res["errormsg"] = $msg;
         }
-        /*if (!empty($invalids)) {
-            $file = "/var/www/html/invalid.json";
-            if (file_exists($file)) {
-                $current = json_decode(file_get_contents($file), true);
-                $current = array_merge($current, $invalids);
-            } else {
-                $current = $invalids;
-            }
-            file_put_contents($file, json_encode($current, JSON_PRETTY_PRINT));
-        }
-        if (!empty($takens)) {
-            $file = "/var/www/html/taken.json";
-            if (file_exists($file)) {
-                $current = json_decode(file_get_contents($file), true);
-                $current = array_merge($current, $takens);
-            } else {
-                $current = $takens;
-            }
-            file_put_contents($file, json_encode($current, JSON_PRETTY_PRINT));
-        }*/
         ksort($res["results"]);
         $perf["controller"]["end"] = microtime(true);
         $perf["controller"]["rt"] = $perf["controller"]["end"] - $perf["controller"]["start"];
