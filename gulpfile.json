@@ -55,7 +55,6 @@
 		"templates_c",
 		"composer.lock",
 		".phpunit.result.cache",
-		"package-lock.json",
 		"tmp"
 	],
 	"filesForPrettier": [

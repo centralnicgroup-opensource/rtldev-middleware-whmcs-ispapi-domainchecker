@@ -20,7 +20,6 @@ exports.prettierCheck = function () {
 		src(cfg.filesForPrettier)
 			//.pipe(debug())
 			.pipe(prettier.check(prettiercfg))
-			.pipe(dest(file => file.base))
 	);
 };
 
