@@ -1,3 +1,10 @@
+## [15.1.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.1.1...v15.1.2) (2022-07-08)
+
+
+### Bug Fixes
+
+* **country flags:** generic solution that works for most currencies ([cf03949](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/cf039497db535f807cbc35173b18793f4e1b4dbf))
+
 ## [15.1.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.1.0...v15.1.1) (2022-07-07)
 
 
