@@ -73,7 +73,6 @@
 		"xo": "^0.50.0"
 	},
 	"scripts": {
-		"phpCompatibility": "./scripts/phpcompatibility.sh",
 		"jsCheck": "prettier --check .",
 		"jsFix": "prettier --write .",
 		"codeCheck": "phpcs --extensions=php,inc,lib --standard=PSR12 -s -q -n --colors *.php modules",
