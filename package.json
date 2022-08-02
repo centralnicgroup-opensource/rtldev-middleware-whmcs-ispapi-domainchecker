@@ -56,7 +56,7 @@
 	"overrides": {
 		"glob-parent": "^6.0.2",
 		"got": "^11.8.2",
-		"version": "5.14.2"
+		"terser": "5.14.2"
 	},
 	"devDependencies": {
 		"@hexonet/semantic-release-github-whmcs-config": "^3.0.1",
