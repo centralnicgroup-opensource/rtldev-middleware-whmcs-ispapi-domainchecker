@@ -53,9 +53,10 @@
 			"!**/*.@(all|min).js"
 		]
 	},
-	"overrides":{
-		"glob-parent":"^6.0.2",
-		"got": "^11.8.2"
+	"overrides": {
+		"glob-parent": "^6.0.2",
+		"got": "^11.8.2",
+		"version": "5.14.2"
 	},
 	"devDependencies": {
 		"@hexonet/semantic-release-github-whmcs-config": "^3.0.1",
@@ -70,7 +71,7 @@
 		"gulp-zip": "^5.1.0",
 		"prettier-config-xo": "^2.0.0",
 		"semantic-release": "^19.0.3",
-		"xo": "^0.50.0"
+		"xo": "^0.51.0"
 	},
 	"scripts": {
 		"jsCheck": "prettier --check .",
