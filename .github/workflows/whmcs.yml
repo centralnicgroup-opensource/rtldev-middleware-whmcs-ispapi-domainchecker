@@ -29,7 +29,7 @@ jobs:
       - name: Install Dependencies::PHP${{ matrix.php-version }}
         run: |
           echo "$HOME/.composer/vendor/bin" >> $GITHUB_PATH
-          composer global require dealerdirect/phpcodesniffer-composer-installer roave/security-advisories:dev-master squizlabs/php_codesniffer phpcompatibility/php-compatibility
+          composer global require squizlabs/php_codesniffer
       - name: Setup NodeJS LTS
         uses: actions/setup-node@v3
         with:
