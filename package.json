@@ -60,7 +60,7 @@
 		"eslint-scope": "^7.1.1"
 	},
 	"devDependencies": {
-		"@hexonet/semantic-release-github-whmcs-config": "^3.0.1",
+		"@hexonet/semantic-release-github-whmcs-config": "^3.0.2",
 		"gulp": "^4.0.2",
 		"gulp-clean": "^0.4.0",
 		"gulp-concat": "^2.6.1",
