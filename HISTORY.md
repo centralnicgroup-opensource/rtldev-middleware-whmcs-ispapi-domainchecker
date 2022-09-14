@@ -1,3 +1,10 @@
+## [15.2.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.2.0...v15.2.1) (2022-09-14)
+
+
+### Bug Fixes
+
+* **aftermarket domains:** patched issue with incorrectly displaying and handling .us cases ([fcccba5](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/fcccba5e309b34b5db5cd0e2e80f125d73bd433a))
+
 # [15.2.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.1.2...v15.2.0) (2022-07-08)
 
 
