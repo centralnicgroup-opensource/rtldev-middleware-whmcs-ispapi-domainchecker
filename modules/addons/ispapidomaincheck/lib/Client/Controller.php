@@ -141,7 +141,7 @@ class Controller
                                 ) {
                                     $row["statusText"] = SearchResult::STATUS_NOT_REGISTERED;
                                     $row["status"] = "AVAILABLE";
-                                    $row["REASON"] = "AFTERMARKET";
+                                    $rs["REASON"][$idx] = "AFTERMARKET";
                                     $price = $rs["PRICE"][$idx];
                                     $currency = $rs["CURRENCY"][$idx];
                                     $currencies = DCHelper::getCurrencies();
@@ -218,10 +218,6 @@ class Controller
                     }
                     foreach ($keys as &$key) {
                         if (!empty($rs[$key][$idx])) {
-                            // DON'T OVERWRITE THE REASON FOR AFTERMARKET DOMAINS
-                            if ($key === "REASON" && $row[$key] === "AFTERMARKET") {
-                                continue;
-                            }
                             $row[$key] = $rs[$key][$idx];
                         }
                     }
