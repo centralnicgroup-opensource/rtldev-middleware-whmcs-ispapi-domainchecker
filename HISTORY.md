@@ -1,3 +1,10 @@
+## [15.2.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.2.1...v15.2.2) (2022-09-14)
+
+
+### Bug Fixes
+
+* **aftermarket domains:** updated last patch to a better way ([067c8ec](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/067c8ec4f529ae4b93d358ca9ab2b0618c1fa27e))
+
 ## [15.2.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.2.0...v15.2.1) (2022-09-14)
 
 
