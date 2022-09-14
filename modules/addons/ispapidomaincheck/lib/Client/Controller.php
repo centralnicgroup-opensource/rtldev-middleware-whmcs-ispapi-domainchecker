@@ -135,14 +135,13 @@ class Controller
                                 //further handling of specific cases on client-sides
                                 if (
                                     !empty($rs["PREMIUMCHANNEL"][$idx]) //e.g. AFTERNIC, SEDO
-                                    && preg_match("/not available/i", $descr) //taken ones -> aftermarket
+                                    && preg_match("/not available/i", $row["API"]["DESCR"]) //taken ones -> aftermarket
                                     && isset($rs["PRICE"], $rs["CURRENCY"])
                                     && !empty($rs["PRICE"][$idx])
                                 ) {
                                     $row["statusText"] = SearchResult::STATUS_NOT_REGISTERED;
                                     $row["status"] = "AVAILABLE";
                                     $row["REASON"] = "AFTERMARKET";
-                                    // $row["status"] = "AFTERMARKET";
                                     $price = $rs["PRICE"][$idx];
                                     $currency = $rs["CURRENCY"][$idx];
                                     $currencies = DCHelper::getCurrencies();
@@ -219,6 +218,10 @@ class Controller
                     }
                     foreach ($keys as &$key) {
                         if (!empty($rs[$key][$idx])) {
+                            // DON'T OVERWRITE THE REASON FOR AFTERMARKET DOMAINS
+                            if ($key === "REASON" && $row[$key] === "AFTERMARKET") {
+                                continue;
+                            }
                             $row[$key] = $rs[$key][$idx];
                         }
                     }
