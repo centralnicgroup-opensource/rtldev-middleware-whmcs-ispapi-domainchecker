@@ -411,9 +411,14 @@ span.spanelement {
 	color: #00b1df;
 	border: 1px #00b1df solid;
 }
+.label-hx-transfer,
+a.label-hx.pt:hover,
 .label-hx-available {
 	color: #00a850;
 	border: 1px #00a850 solid;
+}
+a.label-hx {
+	text-decoration: none;
 }
 .label-hx-whois,
 .label-hx-taken {

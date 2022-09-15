@@ -1042,9 +1042,6 @@ SearchResult.prototype.generate = function () {
 		case 'RESERVED':
 			this.showReserved();
 			break;
-		case 'AFTERMARKET':
-			this.showAftermarket();
-			break;
 		default:
 			// status 'UNKNOWN' and error cases
 			this.showError();
@@ -1125,19 +1122,6 @@ SearchResult.prototype.showReserved = function () {
 };
 // TODO move the below HTML code into Mustache templates
 // idea: having for every case a complete row covered, easier to read
-SearchResult.prototype.showAftermarket = function () {
-	const row = this.data;
-	row.element
-		.toggleClass('clickable')
-		.find('div.availability')
-		.html(
-			`<span class="label label-hx label-hx-premium" data-toggle="tooltip" title="${translations.label_descr_aftermarket}">${translations.aftermarket}</span>`,
-		);
-	row.element.find('div.col-xs-7').removeClass('search-result-info');
-	row.element
-		.find('div.second-line.registerprice')
-		.html('<span>—</span><br><span><br></span>');
-};
 SearchResult.prototype.showAvailable = function () {
 	const row = this.data;
 	const regenerate = !!row.element.find('.hxdata').length;
@@ -1171,6 +1155,17 @@ SearchResult.prototype.showAvailable = function () {
 		row.element.find('div.second-line.registerprice').empty();
 		if (row.premiumtype) {
 			// premium domain handling
+			if (row.premiumtype === 'AFTERMARKET') {
+				let transferhtml = '';
+				if (ds.d[ds.activeCurrency].domainTransfers) {
+					transferhtml = `<a href="${wr}/cart.php?a=add&domain=transfer&query=${row.IDN}" target="_blank" class="label label-hx label-hx-transfer pt">${translations.domaincheckertransfer}</a>`;
+				}
+				row.element
+					.find('div.availability')
+					.html(
+						`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span>${transferhtml}`,
+					);
+			}
 			row.element
 				.find('div.availability')
 				.append(
@@ -1270,23 +1265,20 @@ SearchResult.prototype.showTaken = function () {
 	//
 	// (3) normal domain (NOT BACKORDERABLE)
 	// to add Added and backorder price
+	let transferhtml = '';
+	if (ds.d[ds.activeCurrency].domainTransfers) {
+		console.log('transfers enabled');
+		transferhtml = `<a href="${wr}/cart.php?a=add&domain=transfer&query=${row.IDN}" target="_blank" class="label label-hx label-hx-transfer pt">${translations.domaincheckertransfer}</a>`;
+	}
 	row.element
 		.find('div.availability')
 		.html(
-			`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}" data-pc="${row.PC}"><i class="fa fa-question-circle"></i> ${translations.whois}</span>`,
+			`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span>${transferhtml}<span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}" data-pc="${row.PC}"><i class="fa fa-question-circle"></i> ${translations.whois}</span>`,
 		);
 	row.element
 		.find('span.domainname.domain-label, span.domainname.tld-zone')
 		.removeClass('added');
-	/*if (row.REASON && row.REASON.length) {
-    // TODO: we could translate REASON by mapping it to translation keys using regular expressions
-    // that would allow us to improve step by step
-    row.element
-      .find('.label-hx-taken')
-      .attr('title', row.REASON)
-      .attr('data-toggle', 'tooltip')
-      .addClass('pt');
-  }*/
+
 	if (row.isBackorderable) {
 		const renprice = this.getPrice('renew', true, 1);
 		const regprice = this.getPrice('backorder', true);
