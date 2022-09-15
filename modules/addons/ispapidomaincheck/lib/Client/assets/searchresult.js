@@ -180,10 +180,14 @@ SearchResult.prototype.showAvailable = function () {
 		if (row.premiumtype) {
 			// premium domain handling
 			if (row.premiumtype === 'AFTERMARKET') {
+				let transferhtml = '';
+				if (ds.d[ds.activeCurrency].domainTransfers) {
+					transferhtml = `<a href="${wr}/cart.php?a=add&domain=transfer&query=${row.IDN}" target="_blank" class="label label-hx label-hx-transfer pt">${translations.domaincheckertransfer}</a>`;
+				}
 				row.element
 					.find('div.availability')
 					.html(
-						`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><a href="${wr}/cart.php?a=add&domain=transfer&query=${row.IDN}" target="_blank" class="label label-hx label-hx-transfer pt">${translations.domaincheckertransfer}</a>`,
+						`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span>${transferhtml}`,
 					);
 			}
 			row.element
@@ -285,10 +289,15 @@ SearchResult.prototype.showTaken = function () {
 	//
 	// (3) normal domain (NOT BACKORDERABLE)
 	// to add Added and backorder price
+	let transferhtml = '';
+	if (ds.d[ds.activeCurrency].domainTransfers) {
+		console.log('transfers enabled');
+		transferhtml = `<a href="${wr}/cart.php?a=add&domain=transfer&query=${row.IDN}" target="_blank" class="label label-hx label-hx-transfer pt">${translations.domaincheckertransfer}</a>`;
+	}
 	row.element
 		.find('div.availability')
 		.html(
-			`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><a href="${wr}/cart.php?a=add&domain=transfer&query=${row.IDN}" target="_blank" class="label label-hx label-hx-transfer pt">${translations.domaincheckertransfer}</a><span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}" data-pc="${row.PC}"><i class="fa fa-question-circle"></i> ${translations.whois}</span>`,
+			`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span>${transferhtml}<span class="label label-hx label-hx-whois pt" data-domain="${row.IDN}" data-pc="${row.PC}"><i class="fa fa-question-circle"></i> ${translations.whois}</span>`,
 		);
 	row.element
 		.find('span.domainname.domain-label, span.domainname.tld-zone')

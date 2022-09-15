@@ -788,6 +788,33 @@ function saveSettingTakenDomains(event, state) {
 }
 
 /**
+ * Save Configuration `Display inline Transfer Button`
+ * @param event the triggered event
+ * @param state the checkbox state (true/false)
+ */
+function saveSettingDomainTransfers(event, state) {
+	const val = state ? 1 : 0;
+	$('#loading').show();
+	$.ajax({
+		url: '?module=ispapidomaincheck&action=savedomaintransfers',
+		type: 'POST',
+		data: {
+			domainTransfers: val,
+		},
+		dataType: 'json',
+	})
+		.done(function (d) {
+			$('#loading').hide();
+			data.domaintransfers = val;
+			infoOut(d, d.msg, 'Action successful!');
+		})
+		.fail(function (d) {
+			$('#loading').hide();
+			infoOut(d, 'Setting update failed.');
+		});
+}
+
+/**
  * Save Configuration `Display Premium Domains`
  * @param event the triggered event
  * @param state the checkbox state (true/false)
@@ -953,6 +980,17 @@ function generateTab1() {
 	// BLOCK #4 (Lookup Provider + Configuration)
 	updateLookupConfigurationHTML();
 	updateLookupRegistrarHTML();
+
+	// BLOCK #5 (Additional Settings)
+	$('#toggle-domaintransfers')
+		.off()
+		.bootstrapSwitch({
+			state: data.domainTransfers === 1,
+			size: 'small',
+			onColor: 'success',
+			offColor: 'default',
+		})
+		.on('switchChange.bootstrapSwitch', saveSettingDomainTransfers);
 
 	// Change Lookup Provider & Configuration Modal - JS listener override
 	// Necessary as we need to know the result of the operation
