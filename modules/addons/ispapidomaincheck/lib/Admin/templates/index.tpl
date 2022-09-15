@@ -55,6 +55,15 @@
           </div>
         </div>
       </div>
+      <h3>Additional Settings</h3>
+      <div>
+        <p>Show Transfer Button in Search Results. Transfer Request Form will be opened in a new Tab.</p>
+        <div class="row">
+          <div class="col col-md-2 text-center">
+            <input id="toggle-domaintransfers" type="checkbox"/>
+          </div>
+        </div>
+      </div>
     </div>    
   </div>
   <div id="tabs-2">

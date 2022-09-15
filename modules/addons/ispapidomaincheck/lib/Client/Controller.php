@@ -424,7 +424,9 @@ class Controller
             //premium domains availability
             "premiumDomains" => (int)\WHMCS\Config\Setting::getValue('PremiumDomains'),
             //taken domains availability
-            "takenDomains" => (int)\WHMCS\Config\Setting::getValue('ispapiDomaincheckTakenDomains')
+            "takenDomains" => (int)\WHMCS\Config\Setting::getValue('ispapiDomaincheckTakenDomains'),
+            //taken domains availability
+            "domainTransfers" => (int)\WHMCS\Config\Setting::getValue('ispapiDomaincheckDomainTransfers')
         ];
         if ($cfg["suggestionsOn"]) {
             //locales for domain name suggestion config

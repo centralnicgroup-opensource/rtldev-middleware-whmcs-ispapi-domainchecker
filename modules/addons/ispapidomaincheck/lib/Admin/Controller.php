@@ -45,6 +45,21 @@ class Controller
     }
 
     /**
+     * action savedomaintransfers.
+     * save configuration value for setting `ispapiDomaincheckTakenDomain`
+     *
+     * @param array $vars Module configuration parameters
+     * @param Smarty $smarty smarty instance
+     * @return array operation result
+     */
+    public function savedomaintransfers($vars, $smary)
+    {
+        $key = "ispapiDomaincheckDomainTransfers";
+        $val = $_REQUEST['domainTransfers'];
+        return DCHelper::saveSetting($key, $val);
+    }
+
+    /**
      * action savepremiumdomains.
      * save configuration value for setting `PremiumDomains`
      *
@@ -147,7 +162,9 @@ class Controller
             //premium domains availability
             "premiumDomains" => (int)\WHMCS\Config\Setting::getValue('PremiumDomains'),
             //taken domains availability
-            "takenDomains" => (int)\WHMCS\Config\Setting::getValue('ispapiDomaincheckTakenDomains')
+            "takenDomains" => (int)\WHMCS\Config\Setting::getValue('ispapiDomaincheckTakenDomains'),
+            //taken domains availability
+            "domainTransfers" => (int)\WHMCS\Config\Setting::getValue('ispapiDomaincheckDomainTransfers')
         ];
     }
 
