@@ -278,21 +278,19 @@ span.spanelement {
 	color: #00b1df;
 	border: 1px #00b1df solid;
 }
+.label-hx-transfer,
+a.label-hx.pt:hover,
 .label-hx-available {
 	color: #00a850;
 	border: 1px #00a850 solid;
 }
+a.label-hx {
+	text-decoration: none;
+}
 .label-hx-whois,
-.label-hx-transfer,
 .label-hx-taken {
 	color: #939598;
 	border: 1px #939598 solid;
-}
-a.label-hx:hover {
-	background-color: #EEE;
-}
-a.label-hx {
-	text-decoration: none;
 }
 .label-hx-taken.pt {
 	cursor: help;
