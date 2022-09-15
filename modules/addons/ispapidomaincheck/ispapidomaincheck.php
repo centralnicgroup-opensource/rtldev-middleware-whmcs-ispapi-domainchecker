@@ -97,7 +97,7 @@ function ispapidomaincheck_clientarea($vars)
         "start" => microtime(true)
     ];
 
-    //forcereload requested (no browser caching of assets)
+    //force reload requested (no browser caching of assets)
     $_SESSION["ispapidomaincheckforcedreload"] = 0;
     if (isset($_REQUEST["forcedreload"]) && (int)$_REQUEST["forcedreload"] === 1) {
         $_SESSION["ispapidomaincheckforcedreload"] = 1;
@@ -164,7 +164,7 @@ HTML;
  */
 function ispapidomaincheck_output($vars)
 {
-    //forcereload requested (no browser caching of assets)
+    //force reload requested (no browser caching of assets)
     $_SESSION["ispapidomaincheckforcedreload"] = 0;
     if (isset($_REQUEST["forcedreload"]) && (int)$_REQUEST["forcedreload"] === 1) {
         $_SESSION["ispapidomaincheckforcedreload"] = 1;
