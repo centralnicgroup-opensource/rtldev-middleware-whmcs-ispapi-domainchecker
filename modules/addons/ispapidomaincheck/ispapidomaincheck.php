@@ -96,9 +96,19 @@ function ispapidomaincheck_clientarea($vars)
     $perf["addon"] = [
         "start" => microtime(true)
     ];
+
+    //forcereload requested (no browser caching of assets)
+    $_SESSION["ispapidomaincheckforcedreload"] = 0;
+    if (isset($_REQUEST["forcedreload"]) && (int)$_REQUEST["forcedreload"] === 1) {
+        $_SESSION["ispapidomaincheckforcedreload"] = 1;
+    }
+
     add_hook('ClientAreaHeadOutput', 1, function ($vars) {
         $cfg = ispapidomaincheck_config();
         $version = $cfg["version"];
+        if (isset($_SESSION["ispapidomaincheckforcedreload"]) && $_SESSION["ispapidomaincheckforcedreload"] === 1) {
+            $version = microtime(true);
+        }
         $wr = $vars["WEB_ROOT"];
         // bootstrap version -> $.fn.tooltip.Constructor.VERSION
         /* {*<-- user-scalable=yes if you want user to allow zoom --> */
@@ -154,25 +164,23 @@ HTML;
  */
 function ispapidomaincheck_output($vars)
 {
+    //forcereload requested (no browser caching of assets)
+    $_SESSION["ispapidomaincheckforcedreload"] = 0;
+    if (isset($_REQUEST["forcedreload"]) && (int)$_REQUEST["forcedreload"] === 1) {
+        $_SESSION["ispapidomaincheckforcedreload"] = 1;
+    }
+
     add_hook('AdminAreaHeadOutput', 1, function ($vars) {
         $cfg = ispapidomaincheck_config();
         $version = $cfg["version"];
+        if (isset($_SESSION["ispapidomaincheckforcedreload"]) && $_SESSION["ispapidomaincheckforcedreload"] === 1) {
+            $version = microtime(true);
+        }
         $wr = $vars['WEB_ROOT'];
         return <<<HTML
         <script>const wr = "{$wr}";</script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/admin.all.min.js?t={$version}"></script>
         <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/admin.all.min.css?t={$version}" rel="stylesheet" type="text/css" />
-        <!--<link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/jquery-ui.min.css?t={$version}"/>
-        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.css?t={$version}"/>
-        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/categories.css?t={$version}"/>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/jquery-ui.min.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/uts46bundle.min.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/web-animations.min.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/muuri.min.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/tplmgr.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/jquery.mustache.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/mustache.min.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/index.js?t={$version}"></script>-->
 HTML;
     });
 
