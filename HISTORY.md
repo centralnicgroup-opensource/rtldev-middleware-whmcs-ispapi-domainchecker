@@ -1,3 +1,10 @@
+## [15.3.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.3.0...v15.3.1) (2022-09-15)
+
+
+### Bug Fixes
+
+* **assets:** missing minified js/css bundle updates ([189fd2b](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/189fd2bc9f17b927696bf40e97c249352720b820))
+
 # [15.3.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.2.2...v15.3.0) (2022-09-15)
 
 
