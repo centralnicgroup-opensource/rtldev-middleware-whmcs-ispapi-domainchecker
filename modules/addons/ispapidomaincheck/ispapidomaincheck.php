@@ -107,21 +107,6 @@ function ispapidomaincheck_clientarea($vars)
         <script>const wr = "{$wr}";</script>
         <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/client.all.min.js?t={$version}"></script>
         <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/client.all.min.css?t={$version}" rel="stylesheet" type="text/css" />
-        <!--<script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/jquery.mustache.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/mustache.min.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.js?t={$version}"></script>
-        <link href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/jquery.growl.css?t={$version}" rel="stylesheet" type="text/css"/>
-        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/index.css?t={$version}"/>
-        <link rel="stylesheet" type="text/css" href="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/categories.css?t={$version}"/>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/proxy.min.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/uts46bundle.min.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/shoppingcart.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Admin/assets/tplmgr.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/searchresult.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/domainsearch.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/category.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/categorymgr.js?t={$version}"></script>
-        <script src="{$wr}/modules/addons/ispapidomaincheck/lib/Client/assets/index.js?t={$version}"></script>-->
 HTML;
     });
 

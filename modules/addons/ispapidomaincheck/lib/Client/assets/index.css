@@ -283,9 +283,16 @@ span.spanelement {
 	border: 1px #00a850 solid;
 }
 .label-hx-whois,
+.label-hx-transfer,
 .label-hx-taken {
 	color: #939598;
 	border: 1px #939598 solid;
+}
+a.label-hx:hover {
+	background-color: #EEE;
+}
+a.label-hx {
+	text-decoration: none;
 }
 .label-hx-taken.pt {
 	cursor: help;

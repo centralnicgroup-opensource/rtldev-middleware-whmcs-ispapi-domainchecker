@@ -22,6 +22,7 @@ $_ADDONLANG['opt_yes'] = "Sim";
 $_ADDONLANG['filter_nopremium'] = "SEM PREMIUM";
 $_ADDONLANG['filter_notaken'] = "DISPONÍVEIS APENAS";
 $_ADDONLANG['domaincheckertaken'] = "OCUPADO";
+$_ADDONLANG['domaincheckertransfer'] = "TRANSFERIR";
 $_ADDONLANG['domaincheckeravailable'] = "DISPONÍVEL";
 $_ADDONLANG['domaincheckererror'] = "ERRO";
 $_ADDONLANG['domaincheckerinvaliddn'] = "DOMÍNIO INVÁLIDO";
