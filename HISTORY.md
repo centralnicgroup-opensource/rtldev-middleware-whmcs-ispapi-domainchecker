@@ -1,3 +1,16 @@
+# [15.3.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.2.2...v15.3.0) (2022-09-15)
+
+
+### Bug Fixes
+
+* **aftermarket domains:** show them as taken (as they are) ([29bed13](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/29bed136a3caf29fdb590444fe3d05acbe0a0cf8))
+
+
+### Features
+
+* **configuration setting:** to show or hide `Transfer` Button in Search Results ([295d99d](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/295d99d176172599987e3ec55d090c83aa853d47))
+* **domain transfer:** can be initiated from search results (activation by configuration setting) ([2051af3](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/2051af3a2797465af9e5167943147144bfd0eaad))
+
 ## [15.2.2](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.2.1...v15.2.2) (2022-09-14)
 
 
