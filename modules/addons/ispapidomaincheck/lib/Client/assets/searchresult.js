@@ -182,8 +182,8 @@ SearchResult.prototype.showAvailable = function () {
 			if (row.premiumtype === 'AFTERMARKET') {
 				row.element
 					.find('div.availability')
-					.append(
-						`<a href="${wr}/cart.php?a=add&domain=transfer&query=${row.IDN}" target="_blank" class="label label-hx label-hx-transfer pt">${translations.domaincheckertransfer}</a>`,
+					.html(
+						`<span class="label label-hx label-hx-taken">${translations.domaincheckertaken}</span><a href="${wr}/cart.php?a=add&domain=transfer&query=${row.IDN}" target="_blank" class="label label-hx label-hx-transfer pt">${translations.domaincheckertransfer}</a>`,
 					);
 			}
 			row.element
