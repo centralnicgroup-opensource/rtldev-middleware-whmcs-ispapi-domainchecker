@@ -22,6 +22,7 @@ $_ADDONLANG['opt_yes'] = "نعم";
 $_ADDONLANG['filter_nopremium'] = "لا PREMIUM";
 $_ADDONLANG['filter_notaken'] = "متوفر فقط";
 $_ADDONLANG['domaincheckertaken'] = "مأخوذ";
+$_ADDONLANG['domaincheckertransfer'] = "نقل المجال";
 $_ADDONLANG['domaincheckeravailable'] = "متوفر";
 $_ADDONLANG['domaincheckererror'] = "خطأ";
 $_ADDONLANG['domaincheckerinvaliddn'] = "اسم النطاق غير صالح.";
