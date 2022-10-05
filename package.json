@@ -72,7 +72,7 @@
 		"gulp-zip": "^5.1.0",
 		"prettier-config-xo": "^2.0.0",
 		"semantic-release": "^19.0.5",
-		"xo": "^0.52.3"
+		"xo": "^0.52.4"
 	},
 	"scripts": {
 		"jsCheck": "prettier --check .",
