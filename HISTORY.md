@@ -1,3 +1,10 @@
+# [15.4.0](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.3.1...v15.4.0) (2022-10-07)
+
+
+### Features
+
+* **translation support:** for TLD Categories ([5febb3c](https://github.com/hexonet/whmcs-ispapi-domainchecker/commit/5febb3c4d533a4ba6e6f73483ca3ded3f9fd6233))
+
 ## [15.3.1](https://github.com/hexonet/whmcs-ispapi-domainchecker/compare/v15.3.0...v15.3.1) (2022-09-15)
 
 
