@@ -242,6 +242,8 @@ class DCHelper extends Helper
      */
     public static function getSearchConfiguration($currencyid, $backorderEngineOn = false, $uid = null)
     {
+        global $_LANG;
+        
         if (!is_null($uid)) {
             $pricing = localApi('GetTLDPricing', [
                 'clientid' => $_SESSION['uid']
@@ -299,6 +301,9 @@ class DCHelper extends Helper
             } else {
                 //ensure correct ordered index (avoid json encode issues)
                 $row["tlds"] = array_values($row["tlds"]);
+            }
+            if (isset($_LANG["domainTldCategory"][$row["name"]])) {
+                $row["name"] = $_LANG["domainTldCategory"][$row["name"]];
             }
         }
         //ensure correct ordered index (avoid json encode issues)
